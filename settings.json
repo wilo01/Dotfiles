@@ -1,0 +1,187 @@
+{
+  "terminal.integrated.shell.linux": "tmux",
+  "todo-tree.tree.showScanModeButton": false,
+  "terminal.integrated.shell.osx": "/bin/zsh",
+  "terminal.external.osxExec": "iTerm2.app",
+  "python.pythonPath": "/usr/local/bin/python3",
+  // "python.pythonPath": "/bin/python3",
+  "python.languageServer": "Pylance",
+  // "python.analysis.extraPaths": [
+  //     "./modules"
+  // ],
+  "editor.rulers": [99],
+  "python.formatting.provider": "black",
+  "python.linting.flake8Enabled": true,
+  "python.showStartPage": false,
+  "terminal.integrated.rendererType": "dom",
+  "workbench.editorAssociations": {
+    "*.ipynb": "jupyter.notebook.ipynb"
+  },
+  "python.analysis.typeCheckingMode": "basic",
+  "terminal.external.linuxExec": "xfce4-terminal",
+  "terminal.integrated.fontFamily": "MesloLGMDZ Nerd Font Mono",
+  "vscode-neovim.highlightGroups.highlights": {
+    "Directory": "vim",
+    "IncSearch": {
+      "backgroundColor": "theme.editor.findMatchBackground",
+      "borderColor": "theme.editor.findMatchBorder"
+    },
+    "Search": {
+      "backgroundColor": "theme.editor.findMatchHighlightBackground",
+      "borderColor": "theme.editor.findMatchHighlightBorder"
+    },
+    "Visual": {
+      "backgroundColor": "theme.editor.selectionBackground"
+    },
+    "Conceal": "vim",
+    "Substitute": "vim"
+  },
+  "vim.neovimPath": "/usr/bin/nvim",
+  "vim.enableNeovim": true,
+  "vim.insertModeKeyBindings": [
+    {
+      "before": ["j", "j"],
+      "after": ["<Esc>"]
+    },
+    {
+      "before": ["k", "k"],
+      "after": ["<Esc>"]
+    },
+    {
+      "before": ["j", "k"],
+      "after": ["<Esc>"]
+    },
+    {
+      "before": ["k", "j"],
+      "after": ["<Esc>"]
+    }
+  ],
+  "vim.handleKeys": {
+    "<C-d>": false,
+    "<C-b>": false
+  },
+  "keyboard.dispatch": "keyCode",
+  "files.associations": {
+    "condition_variable": "cpp"
+  },
+  "todo-tree.highlights.defaultHighlight": {
+    "icon": "alert",
+    "type": "tag",
+    "foreground": "red",
+    "background": "white",
+    "opacity": 50,
+    "iconColour": "blue"
+  },
+  "todo-tree.highlights.customHighlight": {
+    "BUG": {
+      "type": "tag",
+      "icon": "alert",
+      "foreground": "black",
+      "background": "red",
+      "iconColour": "yellow",
+      "gutterIcon": true
+    },
+    "HACK": {
+      "type": "tag",
+      "icon": "beaker",
+      "foreground": "black",
+      "background": "orange",
+      "iconColour": "yellow",
+      "gutterIcon": true
+    },
+    "FIXME": {
+      "type": "tag",
+      "icon": "beaker",
+      "foreground": "black",
+      "background": "red",
+      "iconColour": "red",
+      "gutterIcon": true
+    },
+    "TODO": {
+      "type": "tag",
+      "icon": "check",
+      "foreground": "black",
+      "background": "orange",
+      "iconColour": "orange",
+      "gutterIcon": true
+    },
+    "INFO": {
+      "type": "tag",
+      "icon": "note",
+      "foreground": "black",
+      "background": "yellow",
+      "iconColour": "yellow",
+      "gutterIcon": true
+    },
+    "DONE": {
+      "type": "tag",
+      "icon": "verified",
+      "foreground": "black",
+      "iconColour": "green",
+      "background": "green",
+      "gutterIcon": true
+    },
+    "[]": {
+      "type": "tag",
+      "icon": "check",
+      "foreground": "black",
+      "iconColour": "yellow",
+      "gutterIcon": true
+    },
+    "[x]": {
+      "type": "tag",
+      "icon": "check",
+      "foreground": "black",
+      "iconColour": "yellow",
+      "gutterIcon": true
+    }
+  },
+  "todo-tree.general.tagGroups": {
+    "FIXME": ["FIXME", "FIXIT", "IMPORTANT", "FIX"],
+    "DONE": ["DONE", "COMPLETE", "FIXED"],
+    "TODO": ["WARNING"],
+    "INFO": ["INFO", "NOTE"],
+    "[]": ["[]", "[  ]", "[ ]"],
+    "[x]": ["[x]", "[X]"]
+  },
+  "todo-tree.general.tags": [
+    "BUG",
+    "HACK",
+    "FIXME",
+    "TODO",
+    "INFO",
+    "DONE",
+    "WARNING",
+    "FIXED",
+    "[]",
+    "[x]"
+  ],
+  "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)",
+  "editor.suggestSelection": "first",
+  "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+  "git.autofetch": true,
+  "editor.fontSize": 14,
+  "auto-build.defaultEnv.name": "LPC1768",
+  "editor.fontFamily": "MesloLGS NF",
+  "files.autoSave": "afterDelay",
+  "html.format.enable": false,
+  "json.format.enable": false,
+  "typescript.format.enable": false,
+  "javascript.format.enable": false,
+  "update.mode": "start",
+  "python.defaultInterpreterPath": "/usr/local/bin/python3",
+  "editor.codeLensFontFamily": "MesloLGS NF",
+  "window.zoomLevel": -1,
+  "python.linting.mypyEnabled": true,
+  "python.linting.flake8Args": [
+    "--max-linie-length",
+    "99"
+  ],
+  "python.formatting.blackArgs": [
+    "--line-length",
+    "99",
+    "--skip-string-normalization"
+  ],
+  "git.confirmSync": false,
+  "editor.formatOnSave": true
+}
