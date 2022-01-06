@@ -52,6 +52,11 @@ plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
 4. Install PowerLeve10K theme && Plugins for autosuggestion and syntax highlighting
 
 ```jsx
+brew install romkatv/powerlevel10k/powerlevel10k
+echo "source $(brew --prefix)/opt/powerlevel10k/powerlevel10k.zsh-theme" >>~/.zshrc
+
+OR
+
 git clone https://github.com/romkatv/powerlevel10k.git $ZSH_CUSTOM/themes/powerlevel10k
 &&
 git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
@@ -116,18 +121,6 @@ To install nvim plugins open nvim and type:
 
 Commands Used 💻 Installing ZSH shell for linux distros:
 
-## **Step 6 – Download config**
-
-```jsx
-brew install --cask visual-studio-code
-
-defaults write NSGlobalDomain KeyRepeat -int 0
-defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
-defaults write -g ApplePressAndHoldEnabled -bool false
-
-reboot
-```
-
 ## **Step 7 – Git config with ssh**
 
 [Git Downloads Page](https://git-scm.com/downloads)
@@ -170,5 +163,12 @@ sudo service ssh restart
 ## **Step 8 – Optional install other programs**
 
 ```jsx
-brew install tmux nvim vscode exa
+brew install tmux nvim exa
+brew install --cask visual-studio-code
+
+defaults write NSGlobalDomain KeyRepeat -int 0
+defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
+defaults write -g ApplePressAndHoldEnabled -bool false
+
+reboot
 ```
