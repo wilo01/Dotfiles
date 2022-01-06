@@ -163,7 +163,7 @@ sudo service ssh restart
 ## **Step 8 – Optional install other programs**
 
 ```jsx
-brew install tmux nvim exa
+brew install tmux nvim exa htop
 brew install --cask visual-studio-code
 
 defaults write NSGlobalDomain KeyRepeat -int 0
