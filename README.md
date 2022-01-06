@@ -82,8 +82,8 @@ brew install --cask font-meslo-lg-nerd-font
 [NerdFonts font download link](https://www.nerdfonts.com/font-downloads)
 
 ```jsx
-brew tap homebrew/cask-fonts && brew install --cask font-FiraMono-nerd-font**
-brew tap homebrew/cask-fonts && brew install --cask font-meslo-nerd-font**
+brew tap homebrew/cask-fonts && brew install --cask font-FiraMono-nerd-font
+brew tap homebrew/cask-fonts && brew install --cask font-meslo-nerd-font
 ```
 
 - **:// curl**
