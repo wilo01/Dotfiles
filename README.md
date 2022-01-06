@@ -75,12 +75,15 @@ brew install --cask font-<FONT NAME>-nerd-font
 
 brew tap homebrew/cask-fonts &&
 brew install --cask font-meslo-lg-nerd-font
+```
 
 # Nerd Fonts for your IDE
-# https://www.nerdfonts.com/font-downloads
 
-**brew tap homebrew/cask-fonts && brew install --cask font-FiraMono-nerd-font**
-**brew tap homebrew/cask-fonts && brew install --cask font-meslo-nerd-font**
+[NerdFonts font download link](https://www.nerdfonts.com/font-downloads)
+
+```jsx
+brew tap homebrew/cask-fonts && brew install --cask font-FiraMono-nerd-font**
+brew tap homebrew/cask-fonts && brew install --cask font-meslo-nerd-font**
 ```
 
 - **:// curl**
@@ -127,7 +130,7 @@ reboot
 
 ## **Step 7 – Git config with ssh**
 
-[Downloads](https://git-scm.com/downloads)
+[Git Downloads Page](https://git-scm.com/downloads)
 
 **SSH Github key !**
 
@@ -163,3 +166,9 @@ sudo service ssh restart
 ```
 
 [Connecting to GitHub with SSH](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh)
+
+## **Step 8 – Optional install other programs**
+
+```jsx
+brew install tmux nvim vscode exa
+```
