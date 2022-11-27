@@ -172,3 +172,5 @@ defaults write -g ApplePressAndHoldEnabled -bool false
 
 reboot
 ```
+
+[Multiple line cursor neovim](https://github.com/neoclide/coc.nvim/wiki/Multiple-cursors-support)
