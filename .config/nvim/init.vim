@@ -12,7 +12,7 @@ Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'scrooloose/nerdtree'
 Plug 'tsony-tsonev/nerdtree-git-plugin'
 Plug 'Xuyuanp/nerdtree-git-plugin'
-Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
+"Plug 'tiagofumo/vim-nerdtree-syntax-highlight' - NOT WORKING
 Plug 'ryanoasis/vim-devicons'
 Plug 'airblade/vim-gitgutter'
 Plug 'ctrlpvim/ctrlp.vim' " fuzzy find files
@@ -30,6 +30,9 @@ Plug 'frazrepo/vim-rainbow'
 Plug 'sheerun/vim-polyglot'
 "Plug 'mg979/vim-visual-multi', {'branch': 'master'}
 
+" Initialize plugin system
+call plug#end()
+
 nmap <expr> <silent> <C-d> <SID>select_current_word()
 function! s:select_current_word()
   if !get(b:, 'coc_cursors_activated', 0)
@@ -38,16 +41,18 @@ function! s:select_current_word()
   return "*\<Plug>(coc-cursors-word):nohlsearch\<CR>"
 endfunc
 
-" Initialize plugin system
-call plug#end()
-
 :set mouse=a
 map <silent> <esc> :noh <CR>
 
 inoremap jk <ESC>
 nmap <silent> <C-space> :NERDTreeToggle<CR>
-vmap ++ <plug>NERDCommenterToggle
-nmap ++ <plug>NERDCommenterToggle
+" Comment in MacOS
+"vmap ++ <plug>NERDCommenterToggle
+"nmap ++ <plug>NERDCommenterToggle
+
+" Comment in linux
+nmap <C-_>   <Plug>NERDCommenterToggle
+vmap <C-_>   <Plug>NERDCommenterToggle<CR>gv
 let g:user_emmet_leader_key='<C-c>'
 
 autocmd StdinReadPre * let s:std_in=1
