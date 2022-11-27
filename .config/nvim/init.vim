@@ -1,4 +1,4 @@
-
+"
 "   _ __   ___  _____   _(_)_ __ ___
 "  | '_ \ / _ \/ _ \ \ / / | '_ ` _ \
 "  | | | |  __/ (_) \ V /| | | | | | |
@@ -28,6 +28,15 @@ Plug 'jiangmiao/auto-pairs'
 "Plug 'junegunn/rainbow_parentheses.vim'
 Plug 'frazrepo/vim-rainbow'
 Plug 'sheerun/vim-polyglot'
+"Plug 'mg979/vim-visual-multi', {'branch': 'master'}
+
+nmap <expr> <silent> <C-d> <SID>select_current_word()
+function! s:select_current_word()
+  if !get(b:, 'coc_cursors_activated', 0)
+    return "\<Plug>(coc-cursors-word)"
+  endif
+  return "*\<Plug>(coc-cursors-word):nohlsearch\<CR>"
+endfunc
 
 " Initialize plugin system
 call plug#end()
