@@ -9,19 +9,18 @@ fi
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
-export ZSH="/Users/daro/.oh-my-zsh"
+export ZSH="$HOME/.oh-my-zsh"
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
 
+# Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
 # a theme from this variable instead of looking in $ZSH/themes/
 # If set to an empty array, this variable will have no effect.
 # ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
-ZSH_THEME="powerlevel10k/powerlevel10k"
-POWERLEVEL9K_MODE="nerdfont-complete"
 
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
@@ -30,14 +29,13 @@ POWERLEVEL9K_MODE="nerdfont-complete"
 # Case-sensitive completion must be off. _ and - will be interchangeable.
 # HYPHEN_INSENSITIVE="true"
 
-# Uncomment the following line to disable bi-weekly auto-update checks.
-# DISABLE_AUTO_UPDATE="true"
-
-# Uncomment the following line to automatically update without prompting.
-# DISABLE_UPDATE_PROMPT="true"
+# Uncomment one of the following lines to change the auto-update behavior
+# zstyle ':omz:update' mode disabled  # disable automatic updates
+# zstyle ':omz:update' mode auto      # update automatically without asking
+# zstyle ':omz:update' mode reminder  # just remind me to update when it's time
 
 # Uncomment the following line to change how often to auto-update (in days).
-# export UPDATE_ZSH_DAYS=13
+# zstyle ':omz:update' frequency 13
 
 # Uncomment the following line if pasting URLs and other text is messed up.
 # DISABLE_MAGIC_FUNCTIONS="true"
@@ -49,9 +47,12 @@ POWERLEVEL9K_MODE="nerdfont-complete"
 # DISABLE_AUTO_TITLE="true"
 
 # Uncomment the following line to enable command auto-correction.
-ENABLE_CORRECTION="true"
+# ENABLE_CORRECTION="true"
 
 # Uncomment the following line to display red dots whilst waiting for completion.
+# You can also set it to another string to have that shown instead of the default red dots.
+# e.g. COMPLETION_WAITING_DOTS="%F{yellow}waiting...%f"
+# Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1 (see #5765)
 # COMPLETION_WAITING_DOTS="true"
 
 # Uncomment the following line if you want to disable marking untracked files
@@ -75,12 +76,22 @@ ENABLE_CORRECTION="true"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
+ZSH_THEME="powerlevel10k/powerlevel10k"
+POWERLEVEL9K_MODE="nerdfont-complete"
 plugins=(
-  git
-  #vi-mode
-  zsh-autosuggestions
+  git zsh-autosuggestions
   zsh-syntax-highlighting
-)
+  evalcache
+  git-extras
+  debian
+  tmux
+  screen
+  history
+  extract
+  colorize
+  web-search
+  docker
+  )
 
 source $ZSH/oh-my-zsh.sh
 
@@ -109,7 +120,30 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-source ~/powerlevel10k/powerlevel10k.zsh-theme
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+alias LS="echo la -lha -F --show-control-chars --time-style=locale --color=auto ; la -lha -F --show-control-chars --time-style=locale --color=auto"
+alias ls="echo la -lha -F --show-control-chars --time-style=locale --color=auto ; la -lha -F --show-control-chars --time-style=locale --color=auto"
+alias CD="cd"
+alias sshkey="echo cat ~/.ssh/id_ed25519.pub ; cat ~/.ssh/id_ed25519.pub"
+alias cl="clear"
+alias cds="echo cd ~/branch-opener/app/ ; cd ~/branch-opener/app/"
+alias sqldev="echo ~/SQLDeveloper/opt/sqldeveloper/sqldeveloper.sh ; ~/SQLDeveloper/opt/sqldeveloper/sqldeveloper.sh" 
+alias gnome-terminal='gnome-terminal --full-screen'
+alias br="echo npm start on ; cds ; sleep 5 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
+alias bo="echo npm start on ; cds ; sleep 5 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
+alias BR="echo npm start on ; cds ; sleep 5 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
+alias BO="echo npm start on ; cds ; sleep 5 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
+alias git_lens="git log --graph --oneline --decorate ; echo git log --graph --oneline --decorate"
+alias git_graph="git log --graph --oneline --decorate ; echo git log --graph --oneline --decorate"
+alias git_last="git log -1 --stat ; echo git log -1 --stat"
+alias git_stash="echo git stash -u ; echo Stash with include untracked ; git stash -u"
+alias git_drop="echo git stash clear ; echo Clear all stash container ; git stash clear"
+alias git_clear="echo git stash clear ; echo Clear all stash container ; git stash clear"
+alias git_pop="echo git stash pop ; echo Apply last stash ; git stash pop"
+alias open="echo xdg-open; xdg-open"
+export PATH="/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH"
+
+export PATH="/home/dariusz/bin/Sencha/Cmd:$PATH"
