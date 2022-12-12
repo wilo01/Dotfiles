@@ -1,0 +1,49 @@
+{
+  "terminal.external.osxExec": "iTerm2.app",
+  "editor.rulers": [99],
+  "workbench.editorAssociations": {
+    "*.ipynb": "jupyter.notebook.ipynb"
+  },
+  "terminal.integrated.fontFamily": "MesloLGMDZ Nerd Font Mono",
+  "vim.neovimPath": "/usr/bin/nvim",
+  "vim.enableNeovim": true,
+  "vim.insertModeKeyBindings": [
+    {
+      "before": ["j", "j"],
+      "after": ["<Esc>"]
+    },
+    {
+      "before": ["k", "k"],
+      "after": ["<Esc>"]
+    },
+    {
+      "before": ["j", "k"],
+      "after": ["<Esc>"]
+    },
+    {
+      "before": ["k", "j"],
+      "after": ["<Esc>"]
+    }
+  ],
+  "vim.handleKeys": {
+    "<C-d>": false,
+    "<C-b>": false
+  },
+  "keyboard.dispatch": "keyCode",
+  "files.associations": {
+    "condition_variable": "cpp"
+  },
+  "editor.suggestSelection": "first",
+  "editor.fontSize": 14,
+  "editor.fontFamily": "MesloLGS NF",
+  "files.autoSave": "afterDelay",
+  "html.format.enable": false,
+  "json.format.enable": false,
+  "typescript.format.enable": false,
+  "javascript.format.enable": false,
+  "update.mode": "start",
+  "editor.codeLensFontFamily": "MesloLGS NF",
+  "window.zoomLevel": -1,
+  "editor.formatOnSave": true,
+  "git.autorefresh": true
+}
