@@ -78,7 +78,7 @@ set_from_resource $ws1_key  i3-wm.workspace.01.key 1
 set_from_resource $ws2_key  i3-wm.workspace.02.key 2
 set_from_resource $ws3_key  i3-wm.workspace.03.key 3
 set_from_resource $ws4_key  i3-wm.workspace.04.key 4
-set_from_resource $ws5_key  i3-wm.workspace.05.key 6
+set_from_resource $ws5_key  i3-wm.workspace.05.key 5
 set_from_resource $ws6_key  i3-wm.workspace.06.key 6
 set_from_resource $ws7_key  i3-wm.workspace.07.key 7
 set_from_resource $ws8_key  i3-wm.workspace.08.key 8
@@ -89,15 +89,15 @@ set_from_resource $ws10_key i3-wm.workspace.10.key 0
 # Launcher dialogs
 ###############################################################################
 
-## Launch // Terminal // <> Enter ##
-set_from_resource $i3-wm.binding.terminal i3-wm.binding.terminal Return
+## Launch // Terminal // <><Alt> Enter ##
+set_from_resource $i3-wm.binding.terminal i3-wm.binding.terminal Mod1+Return
 bindsym $mod+$i3-wm.binding.terminal exec /usr/bin/x-terminal-emulator
 
 ## Launch // VSCode // <><Shift> Enter ##
 bindsym $mod+Shift+Return exec code
 
-## Launch // Browser // <><Alt> Enter ##
-set_from_resource $i3-wm.binding.browser i3-wm.binding.browser Mod1+Return
+## Launch // Browser // <> Enter ##
+set_from_resource $i3-wm.binding.browser i3-wm.binding.browser Return
 bindsym $mod+$i3-wm.binding.browser exec gtk-launch $(xdg-settings get default-web-browser)
 
 set_from_resource $rofiTheme rofi.theme /etc/regolith/styles/lascaille/rofi.rasi
