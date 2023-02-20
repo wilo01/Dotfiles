@@ -93,11 +93,11 @@ set_from_resource $ws10_key i3-wm.workspace.10.key 0
 set_from_resource $i3-wm.binding.terminal i3-wm.binding.terminal Mod1+Return
 bindsym $mod+$i3-wm.binding.terminal exec /usr/bin/x-terminal-emulator
 
-## Launch // VSCode // <><Shift> Enter ##
-bindsym $mod+Shift+Return exec code
+## Launch // VSCode // <> Enter ##
+bindsym $mod+Return exec code
 
-## Launch // Browser // <> Enter ##
-set_from_resource $i3-wm.binding.browser i3-wm.binding.browser Return
+## Launch // Browser // <><Shift> Enter ##
+set_from_resource $i3-wm.binding.browser i3-wm.binding.browser Shift+Return
 bindsym $mod+$i3-wm.binding.browser exec gtk-launch $(xdg-settings get default-web-browser)
 
 set_from_resource $rofiTheme rofi.theme /etc/regolith/styles/lascaille/rofi.rasi
