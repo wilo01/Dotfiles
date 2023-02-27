@@ -1,4 +1,4 @@
-# Enable Powerlevel11k instant prompt. Should stay close to the top of ~/.zshrc.
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
@@ -79,22 +79,6 @@ plugins=(git zsh-autosuggestions zsh-syntax-highlighting evalcache git-extras de
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-ZSH_THEME="powerlevel10k/powerlevel10k"
-POWERLEVEL9K_MODE="nerdfont-complete"
-plugins=(
-  git zsh-autosuggestions
-  zsh-syntax-highlighting
-  evalcache
-  git-extras
-  debian
-  tmux
-  screen
-  history
-  extract
-  colorize
-  web-search
-  docker
-  )
 
 source $ZSH/oh-my-zsh.sh
 
@@ -132,21 +116,27 @@ alias ls="echo la -lha -F --show-control-chars --time-style=locale --color=auto 
 alias CD="cd"
 alias sshkey="echo cat ~/.ssh/id_ed25519.pub ; cat ~/.ssh/id_ed25519.pub"
 alias cl="clear"
-alias cds="echo cd ~/branch-opener/app/ ; cd ~/branch-opener/app/"
+alias cds="echo cd ~/Dev/branch-opener/branches/safe ; cd ~/Dev/branch-opener/branches/safe"
+alias cdb="echo cd ~/Dev/branch-opener/app/ ; cd ~/Dev/branch-opener/app/"
+alias cdy="echo cd ~/Dev/branch-opener/branches/safe/test/Cypress ; cd ~/Dev/branch-opener/branches/safe/test/Cypress"
 alias sqldev="echo ~/SQLDeveloper/opt/sqldeveloper/sqldeveloper.sh ; ~/SQLDeveloper/opt/sqldeveloper/sqldeveloper.sh" 
 alias gnome-terminal='gnome-terminal --full-screen'
-alias br="echo npm start on ; cds ; sleep 5 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
-alias bo="echo npm start on ; cds ; sleep 5 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
-alias BR="echo npm start on ; cds ; sleep 5 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
-alias BO="echo npm start on ; cds ; sleep 5 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
+alias br="echo npm start at: ; cdb ; sleep 3 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
+alias bo="echo npm start at: ; cdb ; sleep 3 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
+alias BR="echo npm start at: ; cdb ; sleep 3 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
+alias BO="echo npm start at: ; cdb ; sleep 3 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
+alias cy="echo npx cypress open at: ; cdy ; sleep 3 ; npx cypress open"
 alias git_lens="git log --graph --oneline --decorate ; echo git log --graph --oneline --decorate"
 alias git_graph="git log --graph --oneline --decorate ; echo git log --graph --oneline --decorate"
 alias git_last="git log -1 --stat ; echo git log -1 --stat"
-alias git_stash="echo git stash -u ; echo Stash with include untracked ; git stash -u"
+alias git_stash="echo git stash ; echo Git stash changes; git stash"
+alias git_apply="echo git stash apply ; echo Git stash apply last changes; git stash apply"
 alias git_drop="echo git stash clear ; echo Clear all stash container ; git stash clear"
 alias git_clear="echo git stash clear ; echo Clear all stash container ; git stash clear"
 alias git_pop="echo git stash pop ; echo Apply last stash ; git stash pop"
 alias open="echo xdg-open; xdg-open"
-export PATH="/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH"
+alias liqui_valid="echo cd ~/Dev/branch-opener/branches/safe/source/server/database/ ; echo ./liquibase --defaultsFile=validate.liquibase.properties validate ; cd ~/branch-opener/branches/safe/source/server/database/ ; ./liquibase --defaultsFile=validate.liquibase.properties validate"
+alias zshrc="echo sudo nvim ~/.zshrc ; sudo nvim ~/.zshrc "
 
+export PATH="/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH"
 export PATH="/home/dariusz/bin/Sencha/Cmd:$PATH"
