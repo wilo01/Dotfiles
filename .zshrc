@@ -111,32 +111,51 @@ source $ZSH/oh-my-zsh.sh
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
+# cd & ls movements
 alias LS="echo la -lha -F --show-control-chars --time-style=locale --color=auto ; la -lha -F --show-control-chars --time-style=locale --color=auto"
 alias ls="echo la -lha -F --show-control-chars --time-style=locale --color=auto ; la -lha -F --show-control-chars --time-style=locale --color=auto"
 alias CD="cd"
-alias sshkey="echo cat ~/.ssh/id_ed25519.pub ; cat ~/.ssh/id_ed25519.pub"
 alias cl="clear"
 alias cds="echo cd ~/Dev/branch-opener/branches/safe ; cd ~/Dev/branch-opener/branches/safe"
+alias cdweb="echo cd ~/Dev/branch-opener/branches/visitor-web-app ; cd ~/Dev/branch-opener/branches/visitor-web-app"
+alias cdwapp="echo cd ~/Dev/branch-opener/branches/visitor-web-app ; cd ~/Dev/branch-opener/branches/visitor-web-app"
+alias cdwebapp="echo cd ~/Dev/branch-opener/branches/visitor-web-app ; cd ~/Dev/branch-opener/branches/visitor-web-app"
 alias cdb="echo cd ~/Dev/branch-opener/app/ ; cd ~/Dev/branch-opener/app/"
 alias cdy="echo cd ~/Dev/branch-opener/branches/safe/test/Cypress ; cd ~/Dev/branch-opener/branches/safe/test/Cypress"
+# CODE actions
+alias code_ks="echo code ~/Dev/branch-opener/branches/safe/source/ui-kiosk/app/global/Settings.js ; code ~/Dev/branch-opener/branches/safe/source/ui-kiosk/app/global/Settings.js"
+alias code_ka="echo code ~/Dev/branch-opener/branches/safe/source/ui-kiosk/app/Application.js ; code ~/Dev/branch-opener/branches/safe/source/ui-kiosk/app/Application.js"
+alias code_ksc="echo code ~/Dev/branch-opener/branches/safe/source/ui-kiosk/app/view/settings/SettingsController.js ; code ~/Dev/branch-opener/branches/safe/source/ui-kiosk/app/view/settings/SettingsController.js"
+alias kiosk_settings="echo open kiosk settings at: ; code_ks ; sleep 1 ; code_ka ; sleep 1 ; code_ksc ;"
+alias liqui_valid="echo cd ~/Dev/branch-opener/branches/safe/source/server/database/ ; echo ./liquibase --defaultsFile=validate.liquibase.properties validate ; cd ~/branch-opener/branches/safe/source/server/database/ ; ./liquibase --defaultsFile=validate.liquibase.properties validate"
 alias sqldev="echo ~/SQLDeveloper/opt/sqldeveloper/sqldeveloper.sh ; ~/SQLDeveloper/opt/sqldeveloper/sqldeveloper.sh" 
-alias gnome-terminal='gnome-terminal --full-screen'
-alias br="echo npm start at: ; cdb ; sleep 3 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
-alias bo="echo npm start at: ; cdb ; sleep 3 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
-alias BR="echo npm start at: ; cdb ; sleep 3 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
-alias BO="echo npm start at: ; cdb ; sleep 3 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
-alias cy="echo npx cypress open at: ; cdy ; sleep 3 ; npx cypress open"
+alias br="echo npm start at: ; cdb ; sleep 1 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
+alias bo="echo npm start at: ; cdb ; sleep 1 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
+alias BR="echo npm start at: ; cdb ; sleep 1 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
+alias BO="echo npm start at: ; cdb ; sleep 1 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
+alias cy="echo Cypress open at: ; cdy ; sleep 1 ; echo ./node_modules/cypress/bin/cypress open ; ./node_modules/cypress/bin/cypress open"
+alias cy_all="echo Cypress run all tests at: ; cdy ; sleep 1 ; echo npx cypress run --headless --spec cypress/integration/tdsvisitor/rt/*.js ; npx cypress run --headless --spec cypress/integration/tdsvisitor/rt/*.js"
+# Git
 alias git_lens="git log --graph --oneline --decorate ; echo git log --graph --oneline --decorate"
 alias git_graph="git log --graph --oneline --decorate ; echo git log --graph --oneline --decorate"
 alias git_last="git log -1 --stat ; echo git log -1 --stat"
+alias git_hash="echo Get current branch hash; echo git rev-parse HEAD ; echo ; git rev-parse HEAD"
+alias git_hash_10-2av="echo Get 10.2AV branch hash; echo git rev-parse maintenance/10.2AV ; echo ; git rev-parse maintenance/10.2AV"
+alias git_hash_11av="echo Get 11AV branch hash; echo git rev-parse maintenance/11AV ; echo ; git rev-parse maintenance/11AV"
+alias git_hash_11-1av="echo Get 11.1AV branch hash; echo git rev-parse maintenance/11.1AV ; echo ; git rev-parse maintenance/11.1AV"
+alias git_hash_12av="echo Get 12AV branch hash; echo git rev-parse maintenance/12AV ; echo ; git rev-parse maintenance/12AV"
 alias git_stash="echo git stash ; echo Git stash changes; git stash"
 alias git_apply="echo git stash apply ; echo Git stash apply last changes; git stash apply"
 alias git_drop="echo git stash clear ; echo Clear all stash container ; git stash clear"
-alias git_clear="echo git stash clear ; echo Clear all stash container ; git stash clear"
+alias git_stash_clear="echo git stash clear ; echo Clear all stash container ; git stash clear"
 alias git_pop="echo git stash pop ; echo Apply last stash ; git stash pop"
+alias git_clear="echo git restore . ; echo Git clear changes ; git restore . "
+alias git_clean="echo git restore . ; echo Git clear changes ; git restore . "
+# Ubuntu Setup
+alias sshkey="echo cat ~/.ssh/id_ed25519.pub ; cat ~/.ssh/id_ed25519.pub"
 alias open="echo xdg-open; xdg-open"
-alias liqui_valid="echo cd ~/Dev/branch-opener/branches/safe/source/server/database/ ; echo ./liquibase --defaultsFile=validate.liquibase.properties validate ; cd ~/branch-opener/branches/safe/source/server/database/ ; ./liquibase --defaultsFile=validate.liquibase.properties validate"
+alias gnome-terminal='gnome-terminal --full-screen'
 alias zshrc="echo sudo nvim ~/.zshrc ; sudo nvim ~/.zshrc "
-
+# Other exports
 export PATH="/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH"
 export PATH="/home/dariusz/bin/Sencha/Cmd:$PATH"
