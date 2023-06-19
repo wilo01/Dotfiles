@@ -1,49 +1,172 @@
 {
-  "terminal.external.osxExec": "iTerm2.app",
-  "editor.rulers": [99],
-  "workbench.editorAssociations": {
-    "*.ipynb": "jupyter.notebook.ipynb"
-  },
+  "git.autorefresh": true,
+  "git.ignoreRebaseWarning": true,
+  "git.enableSmartCommit": true,
+  "workbench.colorTheme": "Darcula Theme from IntelliJ",
+  "terminal.integrated.defaultProfile.linux": "tmux",
   "terminal.integrated.fontFamily": "MesloLGMDZ Nerd Font Mono",
-  "vim.neovimPath": "/usr/bin/nvim",
-  "vim.enableNeovim": true,
+  "editor.fontFamily": "MesloLGS NF",
+  "editor.codeLensFontFamily": "MesloLGS NF",
+  "vim.leader": ",",
+  "vim.normalModeKeyBindingsNonRecursive": [
+    {
+      "before": [
+        "<leader>",
+        "h"
+      ],
+      "commands": [
+        "workbench.action.focusFirstEditorGroup"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "l"
+      ],
+      "commands": [
+        "workbench.action.focusSecondEditorGroup"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "t"
+      ],
+      "commands": [
+        "workbench.action.toggleSidebarVisibility"
+      ]
+    },
+    {
+      "before": [
+        "<space>"
+      ],
+      "commands": [
+        "workbench.action.files.save"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "w"
+      ],
+      "commands": [
+        "workbench.action.splitEditor"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "x"
+      ],
+      "commands": [
+        "workbench.action.closeActiveEditor"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "f"
+      ],
+      "commands": [
+        "revealInExplorer"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "r",
+        "e"
+      ],
+      "commands": [
+        "editor.action.rename"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "r",
+        "f"
+      ],
+      "commands": [
+        "fileutils.renameFile"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "o",
+        "g"
+      ],
+      "commands": [
+        "workbench.action.showAllSymbols"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "o",
+        "o"
+      ],
+      "commands": [
+        "workbench.action.showEditorsInActiveGroup"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "o",
+        "p"
+      ],
+      "commands": [
+        "workbench.action.quickOpen"
+      ]
+    }
+  ],
   "vim.insertModeKeyBindings": [
     {
-      "before": ["j", "j"],
-      "after": ["<Esc>"]
+      "before": [
+        "j",
+        "k"
+      ],
+      "after": [
+        "<Esc>"
+      ]
     },
     {
-      "before": ["k", "k"],
-      "after": ["<Esc>"]
-    },
-    {
-      "before": ["j", "k"],
-      "after": ["<Esc>"]
-    },
-    {
-      "before": ["k", "j"],
-      "after": ["<Esc>"]
+      "before": [
+        "k",
+        "j"
+      ],
+      "after": [
+        "<Esc>"
+      ]
     }
   ],
   "vim.handleKeys": {
+    "<C-f>": false,
     "<C-d>": false,
     "<C-b>": false
   },
   "keyboard.dispatch": "keyCode",
-  "files.associations": {
-    "condition_variable": "cpp"
-  },
   "editor.suggestSelection": "first",
-  "editor.fontSize": 14,
-  "editor.fontFamily": "MesloLGS NF",
   "files.autoSave": "afterDelay",
-  "html.format.enable": false,
-  "json.format.enable": false,
-  "typescript.format.enable": false,
-  "javascript.format.enable": false,
   "update.mode": "start",
-  "editor.codeLensFontFamily": "MesloLGS NF",
-  "window.zoomLevel": -1,
-  "editor.formatOnSave": true,
-  "git.autorefresh": true
+  "extensions.autoUpdate": "onlyEnabledExtensions",
+  "diffEditor.ignoreTrimWhitespace": false,
+  "eslint.alwaysShowStatus": true,
+  "eslint.quiet": true,
+  "eslint.run": "onSave",
+  "eslint.codeActionsOnSave.mode": "problems",
+  "editor.snippetSuggestions": "top",
+  "[python]": {
+    "editor.formatOnType": true
+  },
+  "editor.minimap.showSlider": "always",
+  "eslint.onIgnoredFiles": "warn",
+  "editor.minimap.size": "fit",
+  "git.openRepositoryInParentFolders": "always",
+  "kmxcoder.openaiApiKey": "",
+  "kmxcoder.openaiEngineModel": "gpt-4",
+  "workbench.editor.wrapTabs": true,
+  "window.zoomLevel": -1
 }
