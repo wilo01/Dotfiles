@@ -111,28 +111,51 @@ source $ZSH/oh-my-zsh.sh
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
+# nvim swithcer
+alias nvim-prime="NVIM_APPNAME=Prime nvim"
+alias nvim-reddit="NVIM_APPNAME=nvim-reddit nvim"
+
+function nvims() {
+  items=("default" "Prime" "nvim-reddit")
+  config=$(printf "%s\n" "${items[@]}" | fzf --prompt=" Neovim Config  " --height=~50% --layout=reverse --border --exit-0)
+  if [[ -z $config ]]; then
+    echo "Nothing selected"
+    return 0
+  elif [[ $config == "default" ]]; then
+    config=""
+  fi
+  NVIM_APPNAME=$config nvim $@
+}
+
+bindkey -s ^a "nvims\n"
+# end
+
 # cd & ls movements
 alias LS="echo la -lha -F --show-control-chars --time-style=locale --color=auto ; la -lha -F --show-control-chars --time-style=locale --color=auto"
 alias ls="echo la -lha -F --show-control-chars --time-style=locale --color=auto ; la -lha -F --show-control-chars --time-style=locale --color=auto"
+# alias cd="~/bin/.local/scripts/tmux-sessionizer"
+# alias CD="~/bin/.local/scripts/tmux-sessionizer"
 alias CD="cd"
 alias cl="clear"
-alias cds="echo cd ~/Dev/branch-opener/branches/safe ; cd ~/Dev/branch-opener/branches/safe"
-alias cdweb="echo cd ~/Dev/branch-opener/branches/visitor-web-app ; cd ~/Dev/branch-opener/branches/visitor-web-app"
-alias cdwapp="echo cd ~/Dev/branch-opener/branches/visitor-web-app ; cd ~/Dev/branch-opener/branches/visitor-web-app"
-alias cdwebapp="echo cd ~/Dev/branch-opener/branches/visitor-web-app ; cd ~/Dev/branch-opener/branches/visitor-web-app"
-alias cdb="echo cd ~/Dev/branch-opener/app/ ; cd ~/Dev/branch-opener/app/"
-alias cdy="echo cd ~/Dev/branch-opener/branches/safe/test/Cypress ; cd ~/Dev/branch-opener/branches/safe/test/Cypress"
+alias cds="~/bin/.local/scripts/tmux-sessionizer ~/Dev/branch-opener/branches/safe"
+alias cdkio="~/bin/.local/scripts/tmux-sessionizer ~/Dev/branch-opener/branches/kiosk-chrome-app"
+alias cdkiosk="~/bin/.local/scripts/tmux-sessionizer ~/Dev/branch-opener/branches/kiosk-chrome-app"
+alias cdweb="~/bin/.local/scripts/tmux-sessionizer ~/Dev/branch-opener/branches/visitor-web-app"
+alias cdwapp="~/bin/.local/scripts/tmux-sessionizer ~/Dev/branch-opener/branches/visitor-web-app"
+alias cdwebapp="~/bin/.local/scripts/tmux-sessionizer ~/Dev/branch-opener/branches/visitor-web-app"
+alias cdb="~/bin/.local/scripts/tmux-sessionizer ~/Dev/branch-opener/app/"
+alias cdy="~/bin/.local/scripts/tmux-sessionizer ~/Dev/branch-opener/branches/safe/test/Cypress"
 # CODE actions
 alias code_ks="echo code ~/Dev/branch-opener/branches/safe/source/ui-kiosk/app/global/Settings.js ; code ~/Dev/branch-opener/branches/safe/source/ui-kiosk/app/global/Settings.js"
 alias code_ka="echo code ~/Dev/branch-opener/branches/safe/source/ui-kiosk/app/Application.js ; code ~/Dev/branch-opener/branches/safe/source/ui-kiosk/app/Application.js"
 alias code_ksc="echo code ~/Dev/branch-opener/branches/safe/source/ui-kiosk/app/view/settings/SettingsController.js ; code ~/Dev/branch-opener/branches/safe/source/ui-kiosk/app/view/settings/SettingsController.js"
 alias kiosk_settings="echo open kiosk settings at: ; code_ks ; sleep 1 ; code_ka ; sleep 1 ; code_ksc ;"
 alias liqui_valid="echo cd ~/Dev/branch-opener/branches/safe/source/server/database/ ; echo ./liquibase --defaultsFile=validate.liquibase.properties validate ; cd ~/branch-opener/branches/safe/source/server/database/ ; ./liquibase --defaultsFile=validate.liquibase.properties validate"
-alias sqldev="echo ~/SQLDeveloper/opt/sqldeveloper/sqldeveloper.sh ; ~/SQLDeveloper/opt/sqldeveloper/sqldeveloper.sh" 
-alias br="echo npm start at: ; cdb ; sleep 1 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
-alias bo="echo npm start at: ; cdb ; sleep 1 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
-alias BR="echo npm start at: ; cdb ; sleep 1 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
-alias BO="echo npm start at: ; cdb ; sleep 1 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
+alias sqldev="echo ~/SQLDeveloper/opt/sqldeveloper/sqldeveloper.sh ; ~/SQLDeveloper/opt/sqldeveloper/sqldeveloper.sh"
+alias br="echo npm start at: ; echo ~/Dev/branch-opener/app/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
+alias bo="echo npm start at: ; echo ~/Dev/branch-opener/app/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
+alias BR="echo npm start at: ; echo ~/Dev/branch-opener/app/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
+alias BO="echo npm start at: ; echo ~/Dev/branch-opener/app/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
 alias cy="echo Cypress open at: ; cdy ; sleep 1 ; echo ./node_modules/cypress/bin/cypress open ; ./node_modules/cypress/bin/cypress open"
 alias cy_all="echo Cypress run all tests at: ; cdy ; sleep 1 ; echo npx cypress run --headless --spec cypress/integration/tdsvisitor/rt/*.js ; npx cypress run --headless --spec cypress/integration/tdsvisitor/rt/*.js"
 # Git
