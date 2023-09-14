@@ -1,0 +1,16 @@
+# Ignore all files and directories by default
+*
+
+# Allow specific files and directories
+!~/.config/nvim/*
+!~/.config/regolith/*
+!~/bin/.local/scripts/*
+!~/.vim/
+!/etc/regolith/i3/*
+!Dotfiles.code-workspace
+!settings (work copy).json
+!settings.json
+!README.md
+!~/.gitconfig
+!~/.tmux.conf
+!~/.zshrc
