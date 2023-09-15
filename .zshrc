@@ -131,8 +131,8 @@ bindkey -s ^a "nvims\n"
 # end
 
 # cd & ls movements
-alias LS="echo la -lha -F --show-control-chars --time-style=locale --color=auto ; la -lha -F --show-control-chars --time-style=locale --color=auto"
-alias ls="echo la -lha -F --show-control-chars --time-style=locale --color=auto ; la -lha -F --show-control-chars --time-style=locale --color=auto"
+# alias LS="echo la -lha -F --show-control-chars --time-style=locale --color=auto ; la -lha -F --show-control-chars --time-style=locale --color=auto"
+# alias ls="echo la -lha -F --show-control-chars --time-style=locale --color=auto ; la -lha -F --show-control-chars --time-style=locale --color=auto"
 # alias cd="~/bin/.local/scripts/tmux-sessionizer"
 # alias CD="~/bin/.local/scripts/tmux-sessionizer"
 alias CD="cd"
