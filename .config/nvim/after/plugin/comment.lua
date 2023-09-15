@@ -1,3 +1,5 @@
+-- use('b3nj5m1n/kommentary')
+
 require('kommentary.config').use_extended_mappings()
 
 vim.g.kommentary_create_default_mappings = false

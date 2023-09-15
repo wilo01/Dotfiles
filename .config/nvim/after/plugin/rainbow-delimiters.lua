@@ -1,3 +1,5 @@
+-- use({"HiPhish/rainbow-delimiters.nvim"})
+
 local rainbow_delimiters = require 'rainbow-delimiters'
 
 vim.g.rainbow_delimiters = {
