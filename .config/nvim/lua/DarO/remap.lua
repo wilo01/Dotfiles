@@ -35,7 +35,7 @@ vim.keymap.set("i", "<C-c>", "<Esc>")
 
 vim.keymap.set("n", "Q", "<nop>")
 vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>")               -- Switch projects
-vim.keymap.set("n", "<leader>f", vim.lsp.buf.format)
+vim.keymap.set("n", "<leader>f", vim.lsp.buf.format)                                      -- Format with LSP
 
 vim.keymap.set("n", "<C-k>", "<cmd>cnext<CR>zz")                                          -- Quick fix navigation
 vim.keymap.set("n", "<C-j>", "<cmd>cprev<CR>zz")                                          -- Quick fix navigation

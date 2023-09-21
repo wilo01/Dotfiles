@@ -182,3 +182,4 @@ alias zshrc="echo sudo nvim ~/.zshrc ; sudo nvim ~/.zshrc "
 # Other exports
 export PATH="/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH"
 export PATH="/home/dariusz/bin/Sencha/Cmd:$PATH"
+export LC_ALL=C.UTF-8
