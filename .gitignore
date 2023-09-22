@@ -3,6 +3,7 @@
 
 # Allow specific files and directories
 !~/.config/nvim/*
+!~/.config/nvim-vimscript/*
 !~/.config/regolith/*
 !~/bin/.local/scripts/*
 !~/.vim/
