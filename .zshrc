@@ -131,8 +131,8 @@ bindkey -s ^a "nvims\n"
 # end
 
 # cd & ls movements
-# alias LS="echo la -lha -F --show-control-chars --time-style=locale --color=auto ; la -lha -F --show-control-chars --time-style=locale --color=auto"
-# alias ls="echo la -lha -F --show-control-chars --time-style=locale --color=auto ; la -lha -F --show-control-chars --time-style=locale --color=auto"
+alias LS="echo la -lha -F --show-control-chars --time-style=locale --color=auto ; la -lha -F --show-control-chars --time-style=locale --color=auto"
+alias ls="echo la -lha -F --show-control-chars --time-style=locale --color=auto ; la -lha -F --show-control-chars --time-style=locale --color=auto"
 # alias cd="~/bin/.local/scripts/tmux-sessionizer"
 # alias CD="~/bin/.local/scripts/tmux-sessionizer"
 alias CD="cd"
@@ -176,10 +176,9 @@ alias git_clear="echo git restore . ; echo Git clear changes ; git restore . "
 alias git_clean="echo git restore . ; echo Git clear changes ; git restore . "
 # Ubuntu Setup
 alias sshkey="echo cat ~/.ssh/id_ed25519.pub ; cat ~/.ssh/id_ed25519.pub"
-# alias open="echo xdg-open; xdg-open"
+alias open="echo xdg-open; xdg-open"
 alias gnome-terminal='gnome-terminal --full-screen'
 alias zshrc="echo sudo nvim ~/.zshrc ; sudo nvim ~/.zshrc "
 # Other exports
 export PATH="/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH"
 export PATH="/home/dariusz/bin/Sencha/Cmd:$PATH"
-export LC_ALL=C.UTF-8
