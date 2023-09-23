@@ -112,11 +112,11 @@ source $ZSH/oh-my-zsh.sh
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 # nvim swithcer
-alias nvim-prime="NVIM_APPNAME=Prime nvim"
+alias nvim-vimscript="NVIM_APPNAME=nvim-vimscript nvim"
 alias nvim-reddit="NVIM_APPNAME=nvim-reddit nvim"
 
 function nvims() {
-  items=("default" "Prime" "nvim-reddit")
+  items=("default" "nvim-vimscript" "nvim-reddit")
   config=$(printf "%s\n" "${items[@]}" | fzf --prompt=" Neovim Config  " --height=~50% --layout=reverse --border --exit-0)
   if [[ -z $config ]]; then
     echo "Nothing selected"
