@@ -3,3 +3,5 @@
 	email = wilk9496@gmail.com
 [core]
 	editor = nvim
+[safe]
+	directory = /home/dariusz/.local/share/nvim/site/pack/packer/start/packer.nvim
