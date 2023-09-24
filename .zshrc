@@ -4,10 +4,7 @@
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
-
-# If you come from bash you might have to change your $PATH.
-# export PATH=$HOME/bin:/usr/local/bin:$PATH
-
+# If you come from bash you might have to change your $PATH. export PATH=$HOME/bin:/usr/local/bin:$PATH
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
@@ -129,6 +126,15 @@ function nvims() {
 
 # bindkey -s ^a "nvims\n"
 # end
+
+# Attach to a Tmux window by it's name or create new one
+function @ {
+    local window_name="$1"
+    if ! tmux has-session -t "$window_name" 2>/dev/null; then
+        tmux new-session -d -s "$window_name" "$SHELL"
+    fi
+    tmux switch-client -t "$window_name"
+}
 
 # cd & ls movements
 # alias LS="echo la -lha -F --show-control-chars --time-style=locale --color=auto ; la -lha -F --show-control-chars --time-style=locale --color=auto"
