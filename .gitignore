@@ -15,3 +15,4 @@
 !~/.gitconfig
 !~/.tmux.conf
 !~/.zshrc
+!~/helper.py
