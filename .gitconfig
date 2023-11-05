@@ -10,3 +10,5 @@
 	directory = /Users/daro/Dotfiles.git
 	directory = /Users/daro/Dotfiles.git/Linux
 	directory = /Users/daro/Dotfiles.git/MacOS
+[pull]
+	rebase = false

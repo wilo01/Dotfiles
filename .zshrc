@@ -189,3 +189,6 @@ alias zshrc="echo sudo nvim ~/.zshrc ; sudo nvim ~/.zshrc "
 export PATH="/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH"
 export PATH="/home/dariusz/bin/Sencha/Cmd:$PATH"
 export LC_ALL=C.UTF-8
+
+# Load Angular CLI autocompletion.
+source <(ng completion script)
