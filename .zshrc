@@ -152,10 +152,8 @@ alias code_ksc="echo code ~/Dev/branch-opener/branches/safe/source/ui-kiosk/app/
 alias kiosk_settings="echo open kiosk settings at: ; code_ks ; sleep 1 ; code_ka ; sleep 1 ; code_ksc ;"
 alias liqui_valid="echo cd ~/Dev/branch-opener/branches/safe/source/server/database/ ; echo ./liquibase --defaultsFile=validate.liquibase.properties validate ; cd ~/branch-opener/branches/safe/source/server/database/ ; ./liquibase --defaultsFile=validate.liquibase.properties validate"
 alias sqldev="echo ~/SQLDeveloper/opt/sqldeveloper/sqldeveloper.sh ; ~/SQLDeveloper/opt/sqldeveloper/sqldeveloper.sh"
-alias br="echo npm start at: ; echo ~/Dev/branch-opener/app/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
-alias bo="echo npm start at: ; echo ~/Dev/branch-opener/app/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
-alias BR="echo npm start at: ; echo ~/Dev/branch-opener/app/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
-alias BO="echo npm start at: ; echo ~/Dev/branch-opener/app/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
+alias br="echo npm start at: ; echo ~/Dev/branch-opener/app/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; xdg-open http://localhost:3333/static/ ; npm start"
+alias br2="echo npm start at: ; echo ~/Dev/branch-opener2/app/ ; cd ~/Dev/branch-opener2/app/ ; sleep 1 ; xdg-open http://localhost:3334/static/ ; npm start"
 alias cy="echo Cypress open at: ; cdy ; sleep 1 ; echo ./node_modules/cypress/bin/cypress open ; ./node_modules/cypress/bin/cypress open"
 alias cy_all="echo Cypress run all tests at: ; cdy ; sleep 1 ; echo npx cypress run --headless --spec cypress/integration/tdsvisitor/rt/*.js ; npx cypress run --headless --spec cypress/integration/tdsvisitor/rt/*.js"
 # Git
@@ -179,6 +177,7 @@ alias sshkey="echo cat ~/.ssh/id_ed25519.pub ; cat ~/.ssh/id_ed25519.pub"
 alias open="echo xdg-open; xdg-open"
 alias gnome-terminal='gnome-terminal --full-screen'
 alias zshrc="echo sudo nvim ~/.zshrc ; sudo nvim ~/.zshrc "
+alias recat="echo ~/recatest/recatest_run.sh ; ~/recatest/recatest_run.sh"
 # Other exports
 export PATH="/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH"
 export PATH="/home/dariusz/bin/Sencha/Cmd:$PATH"

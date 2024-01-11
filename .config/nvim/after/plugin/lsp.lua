@@ -19,10 +19,6 @@ local cmp_mappings = lsp.defaults.cmp_mappings({
 lsp.set_preferences({
     sign_icons = { }
 })
-   if client.server_capabilities.documentRangeFormattingProvider then
-      local lsp_format_modifications = require "lsp-format-modifications"
-      lsp_format_modifications.attach(client, bufnr, { format_on_save = false })
-   end
 
 lsp.on_attach(function(client, bufnr)
     local opts = {buffer = bufnr, remap = false}
