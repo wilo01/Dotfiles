@@ -40,7 +40,8 @@ use({"lewis6991/gitsigns.nvim"})                         -- Git
 use("theprimeagen/harpoon")
 use({"HiPhish/rainbow-delimiters.nvim"})                 -- Rainbow delimiters
 use {
-   'nvim-telescope/telescope.nvim', tag = '0.1.0',
+   'nvim-telescope/telescope.nvim',
+     branch = 'master',
    -- or                            , branch = '0.1.x',
    requires = { {'nvim-lua/plenary.nvim'} }
 }
