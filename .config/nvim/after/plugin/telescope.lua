@@ -7,6 +7,12 @@ vim.keymap.set('n', '<leader>ps', function()
     builtin.grep_string({ search = vim.fn.input("Grep > ") });
 end)
 
+-- vim.keymap.set('v', '<leader>p1', function()
+--     builtin.grep_string({ search = vim.getVisualSelection() });
+-- end)
+
+-- .grep_string({ })<CR>
+
 -- Preview images [catimg](https://github.com/posva/catimg)
 -- brew install catimg
 require("telescope").setup {
