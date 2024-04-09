@@ -5,3 +5,6 @@
 	editor = nvim
 [safe]
 	directory = /home/dariusz/.local/share/nvim/site/pack/packer/start/packer.nvim
+	directory = ~/Dev/branch-opener/branches/safe
+[maintenance]
+	repo = /home/dariusz/Dev/branch-opener/branches/safe
