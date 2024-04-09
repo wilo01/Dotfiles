@@ -56,6 +56,10 @@ vim.keymap.set("n", "<leader><leader>", function()
     vim.cmd("so")
 end)
 
+vim.keymap.set("n", "<leader>va", "<CMD>Gitsigns preview_hunk_inline<CR>")
+vim.keymap.set("n", "<leader>vs", "<CMD>Gitsigns diffthis<CR>")
+vim.keymap.set("n", "<leader>vt", "<CMD>Gitsigns toggle_deleted<CR>")
+
 --[[ Other keymaps and navigation
 
 # SEARCH & NAVIGATION #
