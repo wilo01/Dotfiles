@@ -4,7 +4,7 @@ if [[ $# -eq 1 ]]; then
     selected=$1
 else
     # selected=$(find ~/work/builds ~/projects ~/ ~/work ~/personal ~/personal/yt -mindepth 1 -maxdepth 1 -type d | fzf)
-    selected=$(find ~/ ~/Dev ~/Dev/branch-opener/branches/ ~/Dev/branch-opener2/branches/ ~/.config/Prime/ ~/Dev/branch-opener/branches/safe/source/server/rt ~/Dev/branch-opener/branches/safe/source/server/rtkiosk/ ~/Dev/branch-opener/branches/safe/source/ ~/Dev/branch-opener/branches/safe/source/ui/ ~/Dev/branch-opener/branches/safe/source/ui-kiosk/ ~/Dev/branch-opener/branches/safe/source/ui-student-portal/ -mindepth 1 -maxdepth 1 -type d | fzf)
+    selected=$(find ~/ ~/Dev ~/Dev/branch-opener/branches/ ~/Dev/branch-opener2/branches/ ~/.config/Prime/ ~/Dev/branch-opener/branches/safe/source/server/rt ~/Dev/branch-opener/branches/safe/source/server/rtkiosk/ ~/Dev/branch-opener/branches/safe/source/ ~/Dev/branch-opener/branches/safe/source/ui/ ~/Dev/branch-opener/branches/safe/source/ui-kiosk/ ~/Dev/branch-opener2/branches/safe/source/ui-student-portal/ -mindepth 1 -maxdepth 1 -type d | fzf)
     # selected=$(find ~/ ~/Dev ~/.config/nvim /bin/.local/scripts -mindepth 1 -maxdepth 1 -type d | fzf)
 fi
 
