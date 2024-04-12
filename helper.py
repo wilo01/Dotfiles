@@ -54,6 +54,12 @@ parser.add_argument("-st", "--STASH",
 parser.add_argument("-rt", "--RT",
                     dest="rt",
                     help="RT")
+parser.add_argument("-po", "--PORT",
+                    dest="port",
+                    help="PORT")
+parser.add_argument("-au", "--AUTH",
+                    dest="auth",
+                    help="AUTH")
 parser.add_argument("-ap", "--APEX",
                     dest="apex",
                     help="APEX")
@@ -100,8 +106,8 @@ elif args.rt is not None:
     temp_dir = create_temp_dir(path_to_temp_dir)
     copy_and_override_files(source_dir1, source_dir2, temp_dir)
     print('\n')
-elif args.apex is not None:
-    apex_upload = f'curl --request POST --url http://127.0.0.1:8090/apex/_/resources.zip --header "Authorization: Basic YWRtaW5saXN0ZW5lcjphZG1pbg==" --form name==file --form "filename=@{args.apex};type=application/zip"'
+elif args.apex and args.port and args.auth is not None:
+    apex_upload = f'curl -v --request POST --url http://127.0.0.1:8090/apex/_/resources.zip --header "Authorization: Basic {args.auth}" --form name==file --form "filename=@{args.apex}.zip;type=application/zip" | > {args.apex}.html'
     pyperclip.copy(apex_upload)
     print('\n' + apex_upload + '\n')
 # else:
