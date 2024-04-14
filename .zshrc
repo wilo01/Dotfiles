@@ -130,6 +130,9 @@ function nvims() {
 bindkey -s ^a "nvims\n"
 # end
 
+bindkey "^[[1;2C" forward-word
+bindkey "^[[1;2D" backward-word
+
 # cd & ls movements
 alias LS="echo la -lha -F --show-control-chars --time-style=locale --color=auto ; la -lha -F --show-control-chars --time-style=locale --color=auto"
 alias ls="echo la -lha -F --show-control-chars --time-style=locale --color=auto ; la -lha -F --show-control-chars --time-style=locale --color=auto"
@@ -182,3 +185,7 @@ alias recat="echo ~/recatest/recatest_run.sh ; ~/recatest/recatest_run.sh"
 # Other exports
 export PATH="/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH"
 export PATH="/home/dariusz/bin/Sencha/Cmd:$PATH"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
