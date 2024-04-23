@@ -1,0 +1,25 @@
+#!/bin/sh
+echo "Global git post-commit run"
+# Get the last commit message
+date=`date +%Y-%m-%d`
+hours=`date +%H:%M`
+commit_msg=$(git log -1 --format=%B)
+commit_hash=$(git rev-parse HEAD)
+current_branch=$(git branch --show-current)
+previous_branch=$(git rev-parse --symbolic-full-name --abbrev-ref=loose @{-1})
+stash_list=$(git stash list --format="%H %gd: %gs")
+changed_files=$(git diff --name-only HEAD^~)
+# stash_list_search=$(git stash list --format="%H %gd: %gs" -S "$current_branch")
+# - Stash list [$stash_list_search]
+
+# Append the commit message to your notes file
+echo "
+# $date $hours
+## $previous_branch
+$commit_msg
+
+## $changed_files
+- Commit branch HASH [$commit_hash]($current_branch)
+" >> ~/Dev/Private/Notes.md
+
+echo "$stash_list" > ~/Dev/Private/Stash_list.md
