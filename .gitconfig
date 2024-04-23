@@ -3,9 +3,15 @@
 	email = dariuszw@timedatasecurity.com
 [core]
 	editor = nvim
+	hooksPath = /home/dariusz/.git-template/hooks
 [safe]
 	directory = /home/dariusz/.local/share/nvim/site/pack/packer/start/packer.nvim
 	directory = ~/Dev/branch-opener/branches/safe
 [maintenance]
 	repo = /home/dariusz/Dev/branch-opener/branches/safe
 	repo = /home/dariusz/Dev/branch-opener2/branches/safe
+[init]
+   templateDir = /home/dariusz/.git-template/
+[git-hooks]
+   append-branch-name = true
+   commit-on-master = false
