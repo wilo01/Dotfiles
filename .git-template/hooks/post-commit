@@ -10,12 +10,12 @@ previous_branch=$(git rev-parse --abbrev-ref @{-1} 2>/dev/null)
 stash_list=$(git stash list --format="%H %gd: %gs")
 changed_files=$(git diff --name-only HEAD^~)
 
-echo "Previous branch: $previous_branch"
-echo "Current branch: $current_branch"
 if [ -z "$previous_branch" ] && [ "$previous_branch" = "@{-1}" ]; then
-   echo "No previous_branch repacing with current_branch"
    previous_branch=$current_branch
+   echo "No previous_branch repacing with current_branch"
+   echo "Current branch: $current_branch"
 fi
+echo "Previous branch: $previous_branch"
 
 # Append the commit message to your notes file
 echo "
