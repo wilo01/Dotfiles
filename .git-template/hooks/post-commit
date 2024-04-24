@@ -10,6 +10,7 @@ previous_branch=$(git rev-parse --abbrev-ref @{-1} 2>/dev/null)
 stash_list=$(git stash list --format="%H %gd: %gs")
 changed_files=$(git diff --name-only HEAD^~)
 
+echo "$previous_branch"
 if [ -z "$previous_branch" = "@{-1}" ]; then
    echo "No previous_branch repacing with current_branch"
    previous_branch=$current_branch
