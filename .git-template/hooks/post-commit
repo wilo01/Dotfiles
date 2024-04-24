@@ -10,6 +10,10 @@ previous_branch=$(git rev-parse --abbrev-ref @{-1})
 stash_list=$(git stash list --format="%H %gd: %gs")
 changed_files=$(git diff --name-only HEAD^~)
 
+if [ -z "$previous_branch" ]; then
+   previous_branch=$current_branch
+fi
+
 # Append the commit message to your notes file
 echo "
 # $date $hours
