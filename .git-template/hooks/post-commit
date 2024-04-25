@@ -2,10 +2,6 @@
 echo "Global git post-commit run"
 
 disable_post_commit=$(git config --local hooks.disablePostCommit)
-
-# Debugging line
-echo "Disable post-commit: $disable_post_commit"
-
 if [ $disable_post_commit = "true" ]; then
     echo "Global git post-commit is disabled via Git config."
     exit 0
