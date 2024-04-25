@@ -1,9 +1,12 @@
 #!/bin/sh
 echo "Global git post-commit run"
 
-# Check if file modifications are disabled
 disable_post_commit=$(git config --local hooks.disablePostCommit)
-if [ "$disable_post_commit" = "true" ]; then
+
+# Debugging line
+echo "Disable post-commit: $disable_post_commit"
+
+if [ $disable_post_commit = "true" ]; then
     echo "Global git post-commit is disabled via Git config."
     exit 0
 fi
