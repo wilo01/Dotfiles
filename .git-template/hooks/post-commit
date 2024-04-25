@@ -1,11 +1,12 @@
 #!/bin/sh
-echo "Global git post-commit run"
 
 disable_post_commit=$(git config --local hooks.disablePostCommit)
 if [ $disable_post_commit = "true" ]; then
     echo "Global git post-commit is disabled via Git config."
     exit 0
 fi
+
+echo "Global git post-commit run"
 
 date=`date +%Y-%m-%d`
 hours=`date +%H:%M`
