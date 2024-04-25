@@ -1,6 +1,12 @@
 #!/bin/sh
 echo "Global git post-commit run"
-# Get the last commit message
+
+# Check if file modifications are disabled
+if [ "$(git config hooks.disablePostCommit)" = "true" ]; then
+    echo "Global git post-commit is disabled via Git config."
+    exit 0
+fi
+
 date=`date +%Y-%m-%d`
 hours=`date +%H:%M`
 commit_msg=$(git log -1 --format=%B)
@@ -8,12 +14,11 @@ commit_hash=$(git rev-parse HEAD)
 current_branch=$(git branch --show-current)
 previous_branch=$(git rev-parse --abbrev-ref @{-1} 2>/dev/null)
 stash_list=$(git stash list --format="%H %gd: %gs")
-changed_files=$(git diff --name-only HEAD^~)
+changed_files=$(git diff --cached --name-only HEAD)
 
 if [ -z "$previous_branch" ] || [ "$previous_branch" = "@{-1}" ]; then
    previous_branch=$current_branch
-   echo "No previous_branch repacing with current_branch"
-   echo "Current branch: $current_branch"
+   echo "No previous_branch replacing with current_branch:\n$current_branch"
 fi
 echo "Previous branch: $previous_branch"
 echo "Commit message:\n\n$commit_msg\n"
@@ -24,7 +29,7 @@ echo "
 ## $previous_branch
 $commit_msg
 
-## $changed_files
+$changed_files
 - Commit branch HASH [$commit_hash]($current_branch)
 " >> ~/Dev/Private/Notes.md
 
