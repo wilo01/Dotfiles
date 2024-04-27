@@ -68,11 +68,9 @@ args = parser.parse_args()
 if args.rfid_badge is not None:
     badge = f'@{args.rfid_badge}#'
     print(f'RFID badge: {badge}')
-    type_string_with_delay(badge)
 elif args.qr_badge is not None:
     badge = f'${args.qr_badge}#'
     print(f'QR badge: {badge}')
-    type_string_with_delay(badge)
 elif args.jira_commits is not None:
     textString = f'{args.jira_commits}'
     jiraBranchName = re.sub(r"[ !+@#$%^&*()'/:;>-]", "-", textString.lower().replace('\n', '-')).replace('suite', 'SUITE')
