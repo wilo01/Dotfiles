@@ -15,7 +15,7 @@ commit_hash=$(git rev-parse HEAD)
 current_branch=$(git branch --show-current)
 previous_branch=$(git rev-parse --abbrev-ref @{-1} 2>/dev/null)
 stash_list=$(git stash list --format="%H %gd: %gs")
-changed_files=$(git diff --cached --name-only HEAD)
+changed_files=$(git diff --cached --name-only HEAD~)
 
 if [ -z "$previous_branch" ] || [ "$previous_branch" = "@{-1}" ]; then
    previous_branch=$current_branch
