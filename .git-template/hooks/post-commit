@@ -1,13 +1,12 @@
 #!/bin/sh
 
-disable_post_commit=$(git config --local hooks.disablePostCommit)
-if [ $disable_post_commit = "true" ]; then
+enable_global_hooks=$(git config --local hooks.enableGlobalHooks)
+if [ "$enable_global_hooks" != true ]; then
     echo "Global git post-commit is disabled via Git config."
     exit 0
 fi
 
 echo "Global git post-commit run"
-
 date=`date +%Y-%m-%d`
 hours=`date +%H:%M`
 commit_msg=$(git log -1 --format=%B)
