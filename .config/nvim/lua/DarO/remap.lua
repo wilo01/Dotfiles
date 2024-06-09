@@ -60,6 +60,8 @@ vim.keymap.set("n", "<leader>va", "<CMD>Gitsigns preview_hunk_inline<CR>") -- Gi
 vim.keymap.set("n", "<leader>vs", "<CMD>Gitsigns diffthis<CR>") -- Git diff
 vim.keymap.set("n", "<leader>vt", "<CMD>Gitsigns toggle_deleted<CR>")
 vim.keymap.set("n", "<leader>vb", "<CMD>Gitsigns blame_line<CR>")
+vim.keymap.set("n", "J", "<CMD>Gitsigns next_hunk<CR>")
+vim.keymap.set("n", "K", "<CMD>Gitsigns prev_hunk<CR>")
 
 --[[ Other keymaps and navigation
 
