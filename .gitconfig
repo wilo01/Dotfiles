@@ -15,3 +15,5 @@
 [git-hooks]
    append-branch-name = true
    commit-on-master = false
+[alias]
+	stauts = status
