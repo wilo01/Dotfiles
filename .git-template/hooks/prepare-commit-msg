@@ -17,16 +17,16 @@ fi
 
 enable_global_hooks=$(git config --local hooks.enableGlobalHooks)
 if [ "$enable_global_hooks" != true ]; then
-    echo "Global git prepare-commit-msg is disabled via Git config."
-    exit 0
+   echo "Global git prepare-commit-msg is disabled via Git config."
+   exit 0
 fi
 
 echo "Global git prepare-commit-msg run"
-branchPath=$(git symbolic-ref --short HEAD) #Somthing like refs/heads/myBranchName
-branchName=${branchPath}      #Get text behind the last / of the branch path
+branchPath=$(git symbolic-ref --short HEAD)
+branchName=${branchPath}
 
-firstLine=$(head -n1 $1)
+firstLine=$(head -n1 "$1")
 
-if [ -z "$firstLine"  ] ;then #Check that this is not an amend by checking that the first line is empty
-    sed -i.bak "1s/^/JIRA: #$branchName\n\nLogs:\n-/" $1
+if [ -z "$firstLine" ]; then
+   sed -i '.bak' "1s/^/JIRA: #$branchName\n\nLogs:\n-/" "$1"
 fi
