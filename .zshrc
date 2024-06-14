@@ -177,6 +177,7 @@ alias git_pop="echo git stash pop ; echo Apply last stash ; git stash pop"
 alias git_clear="echo git restore . ; echo Git clear changes ; git restore . "
 alias git_clean="echo git restore . ; echo Git clear changes ; git restore . "
 alias git_branch="echo git branch --show-current ; echo Git show current branch ; echo ; git branch --show-current ; echo ;"
+alias git_undo="echo git commit --amend ; echo Git undo commit ; git commit --amend"
 # Ubuntu Setup
 alias sshkey="echo cat ~/.ssh/id_ed25519.pub ; cat ~/.ssh/id_ed25519.pub"
 alias open="echo xdg-open; xdg-open"
