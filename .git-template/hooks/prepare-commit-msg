@@ -28,5 +28,5 @@ branchName=${branchPath}
 firstLine=$(head -n1 "$1")
 
 if [ -z "$firstLine" ]; then
-   sed -i '.bak' "1s/^/JIRA: #$branchName\n\nLogs:\n-/" "$1"
+   sed -i.bak "1s/^/JIRA: #$branchName\n\nLogs:\n-/" "$1"
 fi
