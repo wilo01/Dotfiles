@@ -2,7 +2,6 @@ local ls = require "luasnip"
 local fmt = require("luasnip.extras.fmt").fmt
 local rep = require("luasnip.extras").rep
 
--- some shorthands...
 local snip = ls.snippet
 local node = ls.snippet_node
 local text = ls.text_node
@@ -13,9 +12,7 @@ local dynamicn = ls.dynamic_node
 
 ls.config.set_config {
    history = true,
-   -- treesitter-hl has 100, use something higher (default is 200).
    ext_base_prio = 200,
-   -- minimal increase in priority.
    ext_prio_increase = 1,
    enable_autosnippets = false,
    store_selection_keys = "<TAB>",
@@ -58,52 +55,6 @@ local function bash(_, _, command)
    return res
 end
 
-local function get_port_snip(args)
-   if #args < 1 and not args[1][1] then
-      return node(nil, text "hello world")
-   end
-
-   local type = args[1][1]
-   local indent = "      "
-
-   if type == "NodePort" or type == "LoadBalancer" then
-      return node(
-         nil,
-         fmt(
-            box_trim_lines [[
-        - port: {}
-          {}targetPort: {}
-          {}nodePort: {}
-        ]],
-            {
-               insert(1, "30000"),
-               indent,
-               insert(2, "80"),
-               indent,
-               insert(3, "30000"),
-            }
-         )
-      )
-   end
-
-   if type == "ClusterIP" then
-      return node(
-         nil,
-         fmt(
-            [[
-        - port: {}
-        {}targetPort: {}
-        ]],
-            {
-               insert(1, "30000"),
-               indent,
-               insert(2, "80"),
-            }
-         )
-      )
-   end
-end
-
 ls.add_snippets(nil, {
    all = {
       snip({
@@ -142,138 +93,22 @@ ls.add_snippets(nil, {
       ls.parser.parse_snippet("deb", "debugger;${1}"),
    },
    sh = {
-      snip("shebang", {
-         text { "#!/bin/sh", "" },
-         insert(0),
-      }),
+      ls.parser.parse_snippet("shebang", "#!/bin/sh\n${0}"),
    },
    python = {
-      snip("shebang", {
-         text { "#!/usr/bin/env python", "" },
-         insert(0),
-      }),
+      ls.parser.parse_snippet("shebang", "#!/usr/bin/env python3\n\n${0}"),
    },
    lua = {
-      snip("shebang", {
-         text { "#!/usr/bin/lua", "", "" },
-         insert(0),
-      }),
-      snip("req", {
-         text "require('",
-         insert(1, "Module-name"),
-         text "')",
-         insert(0),
-      }),
-      snip("func", {
-         text "function(",
-         insert(1, "Arguments"),
-         text { ")", "\t" },
-         insert(2),
-         text { "", "end", "" },
-         insert(0),
-      }),
-      snip("forp", {
-         text "for ",
-         insert(1, "k"),
-         text ", ",
-         insert(2, "v"),
-         text " in pairs(",
-         insert(3, "table"),
-         text { ") do", "\t" },
-         insert(4),
-         text { "", "end", "" },
-         insert(0),
-      }),
-      snip("fori", {
-         text "for ",
-         insert(1, "k"),
-         text ", ",
-         insert(2, "v"),
-         text " in ipairs(",
-         insert(3, "table"),
-         text { ") do", "\t" },
-         insert(4),
-         text { "", "end", "" },
-         insert(0),
-      }),
-      snip("if", {
-         text "if ",
-         insert(1),
-         text { " then", "\t" },
-         insert(2),
-         text { "", "end", "" },
-         insert(0),
-      }),
-      snip("M", {
-         text { "local M = {}", "", "" },
-         insert(0),
-         text { "", "", "return M" },
-      }),
+      ls.parser.parse_snippet("shebang", "#!/usr/bin/lua\n\n${0}"),
+      ls.parser.parse_snippet("req", "require('${1:Module-name}')\n${0}"),
+      ls.parser.parse_snippet("func", "function(${1:Arguments})\n\t${2}\nend\n${0}"),
+      ls.parser.parse_snippet("forp", "for ${1:k}, ${2:v} in pairs(${3:table}) do\n\t${4}\nend\n${0}"),
+      ls.parser.parse_snippet("fori", "for ${1:k}, ${2:v} in ipairs(${3:table}) do\n\t${4}\nend\n${0}"),
+      ls.parser.parse_snippet("if", "if ${1} then\n\t${2}\nend\n${0}"),
+      ls.parser.parse_snippet("M", "local M = {}\n${0}\nreturn M"),
    },
    markdown = {
-      -- Select link, press C-s, enter link to receive snippet
-      snip({
-         trig = "link",
-         namr = "markdown_link",
-         dscr = "Create markdown link [txt](url)",
-      }, {
-         text "[",
-         insert(1),
-         text "](",
-         func(function(_, snip)
-            return snip.env.TM_SELECTED_TEXT[1] or {}
-         end, {}),
-         text ")",
-         insert(0),
-      }),
-      snip({
-         trig = "codewrap",
-         namr = "markdown_code_wrap",
-         dscr = "Create markdown code block from existing text",
-      }, {
-         text "``` ",
-         insert(1, "Language"),
-         text { "", "" },
-         func(function(_, snip)
-            local tmp = {}
-            tmp = snip.env.TM_SELECTED_TEXT
-            tmp[0] = nil
-            return tmp or {}
-         end, {}),
-         text { "", "```", "" },
-         insert(0),
-      }),
-      snip({
-         trig = "codeempty",
-         namr = "markdown_code_empty",
-         dscr = "Create empty markdown code block",
-      }, {
-         text "``` ",
-         insert(1, "Language"),
-         text { "", "" },
-         insert(2, "Content"),
-         text { "", "```", "" },
-         insert(0),
-      }),
-      snip({
-         trig = "meta",
-         namr = "Metadata",
-         dscr = "Yaml metadata format for markdown",
-      }, {
-         text { "---", "title: " },
-         insert(1, "note_title"),
-         text { "", "author: " },
-         insert(2, "author"),
-         text { "", "date: " },
-         func(date, {}),
-         text { "", "cathegories: [" },
-         insert(3, ""),
-         text { "]", "lastmod: " },
-         func(date, {}),
-         text { "", "tags: [" },
-         insert(4),
-         text { "]", "comments: true", "---", "" },
-         insert(0),
-      }),
+      ls.parser.parse_snippet("codewrap", "``` ${1:Language}\n${2}\n```\n${0}"),
+      ls.parser.parse_snippet("code", "``` ${1:Language}\n${2:Content}\n```\n${0}"),
    }
 })
