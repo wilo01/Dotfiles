@@ -57,6 +57,8 @@ end
 
 ls.add_snippets(nil, {
    all = {
+      ls.parser.parse_snippet("log_dbms", "DBMS_OUTPUT.PUT_LINE('Dwdw ${1}: ' || ${1});${2}"),
+      ls.parser.parse_snippet("log_pak", "ca_log_pak.log_warning('Dwdw', '${1}: ' || ${1});${2}"),
       snip({
          trig = "date",
          namr = "Date",
@@ -80,9 +82,10 @@ ls.add_snippets(nil, {
       })
    },
    javascript = {
+      ls.parser.parse_snippet("clwo", "console.warn({\n\t'${1}': ${1}\n});${2}"),
+      ls.parser.parse_snippet("clw", "console.warn('${1}', ${1})"),
       ls.parser.parse_snippet("clg", "console.log('${1}');${2}"),
       ls.parser.parse_snippet("clo", "console.log('${1}Obj', ${2}Obj);${3}"),
-      ls.parser.parse_snippet("clw", "console.warn(${1});${2}"),
       ls.parser.parse_snippet("ccl", "console.clear();${1}"),
       ls.parser.parse_snippet("cer", "console.error('${1}');${2}"),
       ls.parser.parse_snippet("ctr", "console.trace();${1}"),
@@ -91,6 +94,9 @@ ls.add_snippets(nil, {
       ls.parser.parse_snippet("cco", "console.count('${1}');${2}"),
       ls.parser.parse_snippet("db", "debugger;${1}"),
       ls.parser.parse_snippet("deb", "debugger;${1}"),
+      ls.parser.parse_snippet("if", "if (${1}) {}${2}"),
+      ls.parser.parse_snippet("log_warn", "console.warn('${1}', ${1})"),
+      ls.parser.parse_snippet("log_warn_obj", "console.warn({\n\t'${1}': ${1}\n});${2}")
    },
    sh = {
       ls.parser.parse_snippet("shebang", "#!/bin/sh\n${0}"),
