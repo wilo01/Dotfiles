@@ -26,8 +26,8 @@ vim.keymap.set("x", "<leader>p", [["_dP]]) -- Replace by yanked text
 
 -- next greatest remap ever : asbjornHaland
 vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]]) -- Yank to clipboard
-vim.keymap.set("n", "<leader>Y", [["+Y]])        -- Yank to clipboard
-vim.keymap.set("v", "<C-c>", [["+Y]])            -- Yank to clipboard with Ctrl + C
+vim.keymap.set("n", "<leader>Y", [["+Y]])          -- Yank to clipboard
+vim.keymap.set("v", "<C-c>", [["+Y]])              -- Yank to clipboard with Ctrl + C
 
 vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]]) -- Yank to clipboard
 
@@ -36,7 +36,8 @@ vim.keymap.set("i", "<C-c>", "<Esc>")
 
 vim.keymap.set("n", "Q", "<nop>")
 vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>")              -- Switch projects
-vim.keymap.set("n", "<leader>f", vim.lsp.buf.format)                                     -- Format with LSP
+vim.keymap.set("n", "<leader>f", vim.lsp.buf.format, bufopts)                            -- Format with LSP
+vim.keymap.set("v", "<leader>f", vim.lsp.buf.format, bufopts)                            -- Format with LSP
 
 vim.keymap.set("n", "<C-k>", "<cmd>cnext<CR>zz")                                         -- Quick fix navigation
 vim.keymap.set("n", "<C-j>", "<cmd>cprev<CR>zz")                                         -- Quick fix navigation
