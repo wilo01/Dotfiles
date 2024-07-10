@@ -114,7 +114,7 @@ ls.add_snippets(nil, {
       ls.parser.parse_snippet("M", "local M = {}\n${0}\nreturn M"),
    },
    markdown = {
-      ls.parser.parse_snippet("codewrap", "``` ${1:Language}\n${2}\n```\n${0}"),
-      ls.parser.parse_snippet("code", "``` ${1:Language}\n${2:Content}\n```\n${0}"),
+      ls.parser.parse_snippet("codewrap", "```${1:Language}\n${2}\n```\n${0}"),
+      ls.parser.parse_snippet("code", "```${1:Language}\n${2:Content}\n```\n${0}"),
    }
 })
