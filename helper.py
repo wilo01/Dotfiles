@@ -33,6 +33,12 @@ def copy_and_override_files(source1, source2, temp_dir):
     for file_name in file_names2:
         shutil.copy(os.path.join(source2, file_name), temp_dir)
 
+def type_string_with_delay(string):
+    delay = 2
+    time.sleep(delay)  # Sleep for the amount of seconds generated
+    for character in string:  # Loop over each character in the string
+        keyboard.type(character)  # Type the character
+
 parser.add_argument("-j", "--JIRA",
                     dest="jira_commits",
                     help="Jira commits")
@@ -68,6 +74,7 @@ args = parser.parse_args()
 if args.rfid_badge is not None:
     badge = f'@{args.rfid_badge}#'
     print(f'RFID badge: {badge}')
+    type_string_with_delay(badge)
 elif args.qr_badge is not None:
     badge = f'${args.qr_badge}#'
     print(f'QR badge: {badge}')
