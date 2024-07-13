@@ -1,7 +1,7 @@
 return {
-    "b3nj5m1n/kommentary",
+   "b3nj5m1n/kommentary",
 
-    config = function()
+   config = function()
       require('kommentary.config').use_extended_mappings()
       vim.g.kommentary_create_default_mappings = false
 
@@ -12,6 +12,5 @@ return {
       require('kommentary.config').configure_language("default", {
          prefer_single_line_comments = true,
       })
-    end
+   end
 }
-

@@ -29,11 +29,11 @@ autocmd('TextYankPost', {
    end,
 })
 
--- autocmd({ "BufWritePre" }, {
---    group = DarOGroup,
---    pattern = "*",
---    command = [[%s/\s\+$//e]],
--- })
+autocmd({ "BufWritePre" }, {
+   group = DarOGroup,
+   pattern = "*.lua",
+   command = [[%s/\s\+$//e]],
+})
 
 autocmd('LspAttach', {
    group = DarOGroup,
