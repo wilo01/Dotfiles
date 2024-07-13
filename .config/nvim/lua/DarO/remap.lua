@@ -44,7 +44,7 @@ vim.keymap.set("n", "<C-j>", "<cmd>cprev<CR>zz")                                
 vim.keymap.set("n", "<leader>k", "<cmd>lnext<CR>zz")                                     -- Quick fix navigation
 vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz")                                     -- Quick fix navigation
 
-vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]]) -- Replace all selected text
+vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]]) -- Replace / rename all selected text
 vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true })              -- Make current file executable
 
 vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.dotfiles/nvim/.config/nvim/lua/DarO/packer.lua<CR>");
