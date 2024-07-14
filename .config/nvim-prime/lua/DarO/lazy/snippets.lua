@@ -23,18 +23,6 @@ return {
 
          ls.filetype_extend("javascript", { "jsdoc" })
 
-         --- TODO: What is expand?
-         vim.keymap.set({ "i" }, "<C-s>e", function() ls.expand() end, { silent = true })
-
-         vim.keymap.set({ "i", "s" }, "<C-s>;", function() ls.jump(1) end, { silent = true })
-         vim.keymap.set({ "i", "s" }, "<C-s>,", function() ls.jump(-1) end, { silent = true })
-
-         vim.keymap.set({ "i", "s" }, "<C-E>", function()
-            if ls.choice_active() then
-               ls.change_choice(1)
-            end
-         end, { silent = true })
-
          ls.config.set_config {
             history = true,
             ext_base_prio = 200,
@@ -79,6 +67,18 @@ return {
             end
             return res
          end
+
+         --- TODO: What is expand?
+         vim.keymap.set({ "i" }, "<C-s>e", function() ls.expand() end, { silent = true })
+
+         vim.keymap.set({ "i", "s" }, "<C-s>;", function() ls.jump(1) end, { silent = true })
+         vim.keymap.set({ "i", "s" }, "<C-s>,", function() ls.jump(-1) end, { silent = true })
+
+         vim.keymap.set({ "i", "s" }, "<C-E>", function()
+            if ls.choice_active() then
+               ls.change_choice(1)
+            end
+         end, { silent = true })
 
          ls.add_snippets(nil, {
             all = {
