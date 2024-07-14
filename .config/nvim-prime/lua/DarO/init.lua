@@ -31,7 +31,7 @@ autocmd('TextYankPost', {
 
 autocmd({ "BufWritePre" }, {
    group = DarOGroup,
-   pattern = { "*.lua", "*.js", "*.jsx", "*.ts", "*.rs", "*.go", "*.py" },
+   pattern = { "*.md", "*.lua", "*.js", "*.jsx", "*.ts", "*.rs", "*.go", "*.py" },
    command = [[%s/\s\+$//e]],
 })
 
