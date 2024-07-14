@@ -12,7 +12,6 @@ return {
       "saadparwaiz1/cmp_luasnip",
       "j-hui/fidget.nvim",
    },
-
    config = function()
       local cmp = require('cmp')
       local cmp_lsp = require("cmp_nvim_lsp")
@@ -26,9 +25,9 @@ return {
       require("mason").setup()
       require("mason-lspconfig").setup({
          ensure_installed = {
+            "eslint",
+            "tsserver",
             "lua_ls",
-            "rust_analyzer",
-            "gopls",
          },
          handlers = {
             function(server_name)     -- default handler (optional)
