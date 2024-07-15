@@ -8,7 +8,6 @@ return {
          local luasnip = require('luasnip')
          local select_opts = { behavior = cmp.SelectBehavior.Insert }
 
-         -- See :help cmp-config
          cmp.setup({
             snippet = {
                expand = function(args)
