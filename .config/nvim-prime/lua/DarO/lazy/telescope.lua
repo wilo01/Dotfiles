@@ -4,10 +4,8 @@ return {
    cmd = "Telescope",
    dependencies = {
       "danielfalk/smart-open.nvim",
-      "kkharji/sqlite.lua",
       "nvim-lua/plenary.nvim",
       "nvim-tree/nvim-web-devicons",
-      { "scottmckendry/telescope-resession.nvim", dev = true },
       {
          "nvim-telescope/telescope-fzf-native.nvim",
          build = function()
@@ -20,9 +18,9 @@ return {
       "node_modules"
    },
    config = function()
+      local builtin = require('telescope.builtin')
       local telescope = require("telescope")
       local actions = require("telescope.actions")
-      local utils = require("DarO.utils")
 
       local select_one_or_multi = function(prompt_bufnr)
          local picker = require("telescope.actions.state").get_current_picker(prompt_bufnr)
@@ -105,8 +103,6 @@ return {
             },
          },
       })
-
-      local builtin = require('telescope.builtin')
       vim.keymap.set('n', '<leader>pf', builtin.find_files, {})
       vim.keymap.set('n', '<C-p>', builtin.git_files, {})
       vim.keymap.set('n', '<leader>pws', function()
@@ -123,23 +119,6 @@ return {
       vim.keymap.set('n', '<leader>pc', function()
          builtin.grep_string({ search = vim.fn.input("Grep > ", vim.fn.getreg('+')) });
       end)
-
-      vim.keymap.set('n', '<leader>vh', builtin.help_tags, {})
-      -- vim.keymap.set("n", "<leader>ff", ":Telescope find_files<cr>", { desc = "Fuzzy find files" })
-      -- vim.keymap.set("n", "<leader>fr", ":Telescope oldfiles<cr>", { desc = "Fuzzy find recent files" })
-      -- vim.keymap.set("n", "<leader>fs", ":Telescope live_grep<cr>", { desc = "Find string in CWD" })
-      -- vim.keymap.set("n", "<leader>fc", ":Telescope grep_string<cr>", { desc = "Find string under cursor in CWD" })
-      -- vim.keymap.set("n", "<leader>fb", ":Telescope buffers<cr>", { desc = "Fuzzy find buffers" })
-      -- vim.keymap.set("n", "<leader>ft", ":Telescope<cr>", { desc = "Other pickers..." })
-      -- vim.keymap.set("n", "<leader>fS", ":Telescope resession<cr>", { desc = "Find Session" })
-      vim.keymap.set("n", "<leader><leader>", ":Telescope smart_open<cr>", { desc = "Smart open" })
-      vim.keymap.set("n", "<leader>fh", ":Telescope help_tags<cr>", { desc = "Find help tags" })
-      -- stylua: ignore start
-      vim.keymap.set("n", "<leader>df", function() utils.telescope_diff_file() end,
-         { desc = "Diff file with current buffer" })
-      vim.keymap.set("n", "<leader>dg", function() utils.telescope_diff_from_history() end,
-         { desc = "Diff from git history" })
-      -- stylua: ignore end
 
       require("telescope").load_extension("fzf")
       require("telescope").load_extension("smart_open")
