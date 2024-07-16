@@ -1,6 +1,14 @@
 return {
    {
       'hrsh7th/nvim-cmp',
+      event = "InsertEnter",
+      dependencies = {
+         { 'hrsh7th/cmp-buffer' },
+         { 'hrsh7th/cmp-path' },
+         { 'saadparwaiz1/cmp_luasnip' },
+         -- lsp support
+         { 'hrsh7th/cmp-nvim-lsp' },
+      },
       config = function()
          vim.opt.completeopt = { 'menu', 'menuone', 'noselect' }
 
@@ -91,10 +99,4 @@ return {
          })
       end,
    },
-   { 'hrsh7th/cmp-buffer' },
-   { 'hrsh7th/cmp-path' },
-   { 'saadparwaiz1/cmp_luasnip' },
-   -- lsp support
-   { 'hrsh7th/cmp-nvim-lsp' },
-
 }

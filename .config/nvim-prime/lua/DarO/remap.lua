@@ -54,10 +54,6 @@ vim.keymap.set("n", "<leader>mr", "<cmd>CellularAutomaton make_it_rain<CR>");
 vim.keymap.set("n", "<leader>m", "<CMD>MarkdownPreview<CR>")      -- Markdown preview
 vim.keymap.set("n", "<leader>mn", "<CMD>MarkdownPreviewStop<CR>") -- Markdown preview stop
 
-vim.keymap.set("n", "<leader><leader>", function()
-   vim.cmd("so")
-end)
-
 vim.keymap.set("n", "<leader>va", "<CMD>Gitsigns preview_hunk_inline<CR>") -- Git preview
 vim.keymap.set("n", "<leader>vs", "<CMD>Gitsigns diffthis<CR>")            -- Git diff
 vim.keymap.set("n", "<leader>vt", "<CMD>Gitsigns toggle_deleted<CR>")
