@@ -47,7 +47,7 @@ return {
             },
             javascript = {
                ls.parser.parse_snippet("clwo", "console.warn({\n\t'${1}': ${1}\n});${2}"),
-               ls.parser.parse_snippet("clw", "console.warn('${1}', ${1})"),
+               ls.parser.parse_snippet("clw", "console.warn('${1}', ${1});${2}"),
                ls.parser.parse_snippet("clg", "console.log('${1}');${2}"),
                ls.parser.parse_snippet("clo", "console.log('${1}Obj', ${2}Obj);${3}"),
                ls.parser.parse_snippet("ccl", "console.clear();${1}"),
@@ -59,7 +59,7 @@ return {
                ls.parser.parse_snippet("db", "debugger;${1}"),
                ls.parser.parse_snippet("deb", "debugger;${1}"),
                ls.parser.parse_snippet("if", "if (${1}) {}${2}"),
-               ls.parser.parse_snippet("log_warn", "console.warn('${1}', ${1})"),
+               ls.parser.parse_snippet("log_warn", "console.warn('${1}', ${1});${2}"),
                ls.parser.parse_snippet("log_warn_obj", "console.warn({\n\t'${1}': ${1}\n});${2}")
             },
             sh = {
