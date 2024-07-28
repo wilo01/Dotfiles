@@ -1,7 +1,9 @@
 # NOTES: Git hooks example
+- Command to edit
 ```sh
     git config --local -e
 ```
+- Example
 ```js
     [hooks]
        enableLocalHooks = true
@@ -9,7 +11,6 @@
        hooksLocalPath = ~/Dev/Private
        hooksLocalFilename = Notes
 ```
-
 # 2024-06-14 13:07
 ## TMP
 JIRA: #Linux
@@ -833,3 +834,14 @@ Logs:
 
 SUITE-9274.txt
 - Commit branch HASH [540da32c984e3d8085934831808488a807f2c4b7](master)
+
+# 2024-07-28 14:32
+## TMP
+JIRA: #Linux
+
+Logs:
+- Added new Notes and stashed list
+
+Notes.md
+Stash_list.md
+- Commit branch HASH [48be239b3881150bbb0fd29f37d9f463f7454b70](Linux)
