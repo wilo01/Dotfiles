@@ -845,3 +845,49 @@ Logs:
 Notes.md
 Stash_list.md
 - Commit branch HASH [48be239b3881150bbb0fd29f37d9f463f7454b70](Linux)
+
+# 2024-07-28 14:33
+## TMP
+JIRA: #Linux
+
+Logs:
+- Note update
+
+Notes.md
+Stash_list.md
+- Commit branch HASH [8c77ff916953103a9049f573daf02912cc4197f0](Linux)
+
+# 2024-08-01 16:00
+## master
+JIRA: #master
+
+Logs:
+- Updates in notes
+
+Notes.md
+Stash_Notes.md
+- Commit branch HASH [52b12e35c809ca94483243847a19915c6cb0d653](master)
+
+# 2024-08-01 21:13
+## master
+JIRA: #master
+
+Logs:
+- added custom_default_data.sql
+
+custom_default_data.sql
+- Commit branch HASH [b2cb10bbdadbf7a6d740023e4830123c83a4549b](master)
+
+# 2024-08-02 11:05
+## master
+JIRA: #master
+
+Logs:
+- Added Docker image
+
+Docker/coreaccessbase.tar
+Docker/custom_default_data.sql
+Docker/oracle-instantclient-basic-23.5.0.24.07-1.el9.x86_64.rpm
+Notes.md
+Stash_Notes.md
+- Commit branch HASH [9c366e12189a47c85458bff3e73189b0b21dd994](master)
