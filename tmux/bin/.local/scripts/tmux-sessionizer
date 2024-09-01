@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+if [[ $# -eq 1 ]]; then
+    selected=$1
+else
+    selected=$(find ~/ ~/Dev ~/Dev/branch-opener/branches/ ~/Dev/branch-opener2/branches/ ~/.config/Prime/ ~/Dev/branch-opener/branches/safe/source/server/rt ~/Dev/branch-opener/branches/safe/source/server/rtkiosk/ ~/Dev/branch-opener/branches/safe/source/ ~/Dev/branch-opener/branches/safe/source/ui/ ~/Dev/branch-opener/branches/safe/source/ui-kiosk/ ~/Dev/branch-opener2/branches/safe/source/ ~/Dev/branch-opener/branches/virtual-receptionist/ ~/Dev/branch-opener/branches/virtual-receptionist/frontendv3/ ~/Dev/branch-opener/branches/virtual-receptionist/frontendv3/demos/browser/app/meetingV2/ ~/Dev/TDS/developers-at-home-sg/ ~/Dev/branch-opener/branches/safe/test/Cypress -mindepth 0 -maxdepth 2 -type d | fzf)
+fi
+
+if [[ -z $selected ]]; then
+    exit 0
+fi
+
+selected_name=$(basename "$selected" | tr . _)
+tmux_running=$(pgrep tmux)
+
+if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
+    tmux new-session -s $selected_name -c $selected
+    exit 0
+fi
+
+if ! tmux has-session -t=$selected_name 2> /dev/null; then
+    tmux new-session -ds $selected_name -c $selected
+fi
+
+tmux switch-client -t $selected_name

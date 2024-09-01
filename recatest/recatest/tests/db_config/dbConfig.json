@@ -1,0 +1,18 @@
+{
+    "oracle": {
+        "enabled": true,
+        "configFiles": ["dev.ini"]
+    },
+    "mysql": {
+        "enabled": false,
+        "configFiles": []
+    },
+    "postgres": {
+        "enabled": false,
+        "configFiles": []
+    },
+    "cassandra": {
+        "enabled": false,
+        "configFiles": []
+    }
+}

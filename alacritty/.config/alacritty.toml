@@ -1,0 +1,24 @@
+import = [
+    "~/.config/alacritty/themes/themes/coolnight.toml"
+]
+
+[ env ]
+TERM = "xterm-256color"
+
+[shell]
+program = "tmux"
+
+[window]
+padding.x = 10
+padding.y = 10
+
+decorations = "Buttonless"
+
+[font]
+size = 12
+normal = { family = "Fira Code" }
+bold = { family = "Fira Code", style = "Bold" }
+italic = { family = "Fira Code", style = "Italic" }
+
+# [font]
+# normal.family = "MesloLGS Nerd Font Mono"
