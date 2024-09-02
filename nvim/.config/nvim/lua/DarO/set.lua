@@ -1,5 +1,3 @@
--- vim.opt.guicursor = ""
-
 vim.opt.nu = true
 vim.opt.relativenumber = true
 
@@ -15,7 +13,9 @@ vim.opt.wrap = false
 
 vim.opt.swapfile = false
 vim.opt.backup = false
-vim.opt.undofile = false
+vim.opt.undodir = os.getenv("HOME") .. "/.vim/undodir"
+vim.opt.undofile = true
+-- vim.opt.undofile = false
 
 vim.opt.hlsearch = false
 vim.opt.incsearch = true
@@ -32,3 +32,13 @@ vim.opt.updatetime = 50
 vim.o.cursorline = true
 vim.o.cursorcolumn = true
 -- vim.o.statuscolumn = "%s %l %r"
+
+-- Netrw
+vim.g.netrw_browse_split = 0
+-- vim.g.netrw_banner = 0
+vim.g.netrw_winsize = 25
+vim.g.netrw_browsex_viewer = "xdg-open"
+vim.g.netrw_special_syntax = 3
+vim.g.netrw_liststyle = 3
+vim.g.netrw_altv = 1
+vim.g.netrw_keepdir = 0
