@@ -1,0 +1,27 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">ENV_CODE</Item>
+      <Item class="java.lang.String">NAME</Item>
+      <Item class="java.lang.String">URL</Item>
+      <Item class="java.lang.String">CLIENT_CODE</Item>
+      <Item class="java.lang.String">PASSCODE</Item>
+      <Item class="java.lang.String">CERT</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>0</Item>
+      <Item>0</Item>
+      <Item>79</Item>
+      <Item>157</Item>
+      <Item>301</Item>
+      <Item>133</Item>
+      <Item>81</Item>
+      <Item>53</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item class="java.lang.String">6 asc</Item>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23rddemoSELECT * FROM "SUITE"."CA_CHROMEBOX_ENV"</uniqueName>
+</TableSettings>

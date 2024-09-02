@@ -1,0 +1,29 @@
+<?xml version='1.0'  encoding='UTF-8' ?>
+<history>
+	<historyItem>
+		<sql><![CDATA[select distinct
+   id acode,
+   id || ' - ' || name adescription,
+   type,
+   def_ind
+from
+   ca_badge_layout
+where
+   lower(id || ' ' || name) like lower('%' || :query || '%')
+   and (trim(:unnamed_visitors_ind) is null or unnamed_visitors_ind = trim(:unnamed_visitors_ind))
+   and (trim(:print_type) is null or type = trim(:print_type))
+   and safe_request_permissions_pak.check_permission_sql (
+   :Uidtoken,
+   '(guestDashboard)(visitoractionmenu)(visitorDashboard)',
+   'printBadgeLayouts',
+   'GET'
+   ) = 'Y'
+order by
+   acode]]></sql>
+		<connection><![CDATA[Trunk]]></connection>
+		<timestamp><![CDATA[1723463111029]]></timestamp>
+		<type><![CDATA[SQL]]></type>
+		<executed><![CDATA[7]]></executed>
+		<execTime><![CDATA[0.053]]></execTime>
+	</historyItem>
+</history>

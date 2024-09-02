@@ -1,0 +1,26 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">SETTING_NAME</Item>
+      <Item class="java.lang.String">SETTING_VALUE</Item>
+      <Item class="java.lang.String">SETTING_DEPRICATED_IND</Item>
+      <Item class="java.lang.String">SETTING_VISIBLE_IND</Item>
+      <Item class="java.lang.String">PRODUCT</Item>
+      <Item class="java.lang.String">SETTING_DESCRIPTION</Item>
+      <Item class="java.lang.String">CLONE_IND</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>229</Item>
+      <Item>109</Item>
+      <Item>168</Item>
+      <Item>141</Item>
+      <Item>73</Item>
+      <Item>149</Item>
+      <Item>82</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+Fidelity+LIVEselect * from SAFE_SYSTEM_OPTIONS sso where SETTING_NAME like 'qr_host_search_context_inde%'</uniqueName>
+</TableSettings>

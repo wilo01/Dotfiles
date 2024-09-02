@@ -1,0 +1,177 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">FORENAME</Item>
+      <Item class="java.lang.String">MIDDLE_NAME</Item>
+      <Item class="java.lang.String">SURNAME</Item>
+      <Item class="java.lang.String">EMAIL_ADDRESS</Item>
+      <Item class="java.lang.String">PUBLIC_REFERENCE</Item>
+      <Item class="java.lang.String">BOOKING_REFERENCE</Item>
+      <Item class="java.lang.String">GROUP_ID</Item>
+      <Item class="java.lang.String">VISITOR_TYPE_CODE</Item>
+      <Item class="java.lang.String">HOSTNAME</Item>
+      <Item class="java.lang.String">HOST_FULL_NAME</Item>
+      <Item class="java.lang.String">DUE_DATE_TIME</Item>
+      <Item class="java.lang.String">WATCHLIST_IND</Item>
+      <Item class="java.lang.String">CHECKED_IN_DATE_TIME</Item>
+      <Item class="java.lang.String">VISIT_REASON_CODE</Item>
+      <Item class="java.lang.String">VISIT_REASON_DESCRIPTION</Item>
+      <Item class="java.lang.String">HOST_PERSON_CODE</Item>
+      <Item class="java.lang.String">HOST_PERSON_TYPE</Item>
+      <Item class="java.lang.String">MEAL_CODE</Item>
+      <Item class="java.lang.String">TITLE_CODE</Item>
+      <Item class="java.lang.String">MOBILE_PHONE_NUMBER</Item>
+      <Item class="java.lang.String">NATIONALITY_CODE</Item>
+      <Item class="java.lang.String">COUNTRY_CODE</Item>
+      <Item class="java.lang.String">VEHICLE_REG</Item>
+      <Item class="java.lang.String">DATE_OF_BIRTH</Item>
+      <Item class="java.lang.String">COMPANY_CODE</Item>
+      <Item class="java.lang.String">LANGUAGE_CODE</Item>
+      <Item class="java.lang.String">CONF_TEXT_1</Item>
+      <Item class="java.lang.String">CONF_COMBO_1</Item>
+      <Item class="java.lang.String">CONF_TEXT_2</Item>
+      <Item class="java.lang.String">CONF_COMBO_2</Item>
+      <Item class="java.lang.String">CONF_TEXT_3</Item>
+      <Item class="java.lang.String">CONF_COMBO_3</Item>
+      <Item class="java.lang.String">CONF_TEXT_4</Item>
+      <Item class="java.lang.String">CONF_COMBO_4</Item>
+      <Item class="java.lang.String">CONF_TEXT_5</Item>
+      <Item class="java.lang.String">CONF_COMBO_5</Item>
+      <Item class="java.lang.String">PRIORITY</Item>
+      <Item class="java.lang.String">ID_CHECK_DATE_TIME</Item>
+      <Item class="java.lang.String">EVENT_IND</Item>
+      <Item class="java.lang.String">EVENT_ID</Item>
+      <Item class="java.lang.String">ZONE_CODE</Item>
+      <Item class="java.lang.String">MAXIMUM</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>103</Item>
+      <Item>97</Item>
+      <Item>103</Item>
+      <Item>166</Item>
+      <Item>129</Item>
+      <Item>142</Item>
+      <Item>76</Item>
+      <Item>135</Item>
+      <Item>82</Item>
+      <Item>120</Item>
+      <Item>145</Item>
+      <Item>107</Item>
+      <Item>156</Item>
+      <Item>137</Item>
+      <Item>180</Item>
+      <Item>141</Item>
+      <Item>137</Item>
+      <Item>86</Item>
+      <Item>87</Item>
+      <Item>159</Item>
+      <Item>129</Item>
+      <Item>111</Item>
+      <Item>94</Item>
+      <Item>108</Item>
+      <Item>112</Item>
+      <Item>118</Item>
+      <Item>97</Item>
+      <Item>112</Item>
+      <Item>97</Item>
+      <Item>112</Item>
+      <Item>97</Item>
+      <Item>112</Item>
+      <Item>97</Item>
+      <Item>112</Item>
+      <Item>97</Item>
+      <Item>112</Item>
+      <Item>69</Item>
+      <Item>141</Item>
+      <Item>80</Item>
+      <Item>72</Item>
+      <Item>90</Item>
+      <Item>71</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+test.tds.ie+Visitor-safe%2C+Trunkselect * from (
+   select qq.*,max(qq.priority) over () maximum from (
+      select
+         b.forename forename,
+         b.middle_name middle_name,
+         b.surname surname,
+         b.email_address,
+         safe_get_encoded_reference(b.booking_reference) public_reference,
+         b.booking_reference,
+         b.group_id,
+         b.visitor_type_code,
+         decode(sso.setting_value, 'Y', nvl(p.known_as, p.forename ||' '|| p.surname), 'N', p.forename ||' '|| p.surname) hostname,
+         p.forename ||' '|| p.surname host_full_name,
+         ca_utility_pak.date_to_iso_zulu_string(b.due_date_time) due_date_time,
+         b.watchlist_ind,
+         b.checked_in_date_time,
+         b.reason_code visit_reason_code,
+         vr.visit_reason_description,
+         p.person_code host_person_code,
+         p.person_type host_person_type,
+         b.meal_code,
+         b.title title_code,
+         b.mobile_phone_number,
+         b.nationality_code,
+         b.country_code,
+         b.vehicle_reg,
+         b.date_of_birth,
+         b.company_code,
+         b.language_code,
+         b.conf_text_1,
+         b.conf_combo_1,
+         b.conf_text_2,
+         b.conf_combo_2,
+         b.conf_text_3,
+         b.conf_combo_3,
+         b.conf_text_4,
+         b.conf_combo_4,
+         b.conf_text_5,
+         b.conf_combo_5,
+         utl_match.jaro_winkler_similarity (lower(trim(b.forename || b.middle_name || b.surname)), lower(trim(:forename || trim(:md_name) || :surname))) + decode(b.visitor_type_code, :vt_type, 5, 0) priority,
+         b.id_check_date_time,
+         vr.event_ind,
+         se.event_id,
+         c.zone_code
+      from 
+         ca_booked_person b
+      join 
+         ca_host h on b.booking_reference = h.booking_reference and h.primary_ind = 'Y'
+      join 
+         ca_person_interface p on h.host_person_code = p.person_code and h.host_person_type = p.person_type
+      join 
+         ca_collection_point c on b.collection_point_code = c.collection_point_code
+      join 
+         safe_system_options sso on sso.setting_name = 'use_knownas_in_visitor'
+      join 
+         ca_visit_reason vr on vr.visit_reason_code = b.reason_code
+      left join
+         safe_event se on se.event_id = b.event_id
+      where 
+         b.checked_out_date_time is null
+--         and b.visitor_type_code = ''
+        and (c.collection_point_type = :cp_type and event_ind = :evnt_ind) or (c.collection_point_type = :cp_type and event_ind = :evnt_ind)
+--         and ((event_ind = :evnt_ind and b.event_id is not null) or (event_ind = :evnt_ind and b.event_id is null))
+         and b.rejected_date_time is null
+         and b.approved_date_time is not null
+         and b.cancellation_date_time is null
+         and(b.watchlist_ind = 'N' or b.watchlist_ind is null)
+         and b.due_date_time 
+            between ( svms_pak.now_to_ss_date(:collection_point) - decode(sign(:purgehours - 12), -1, decode(sign(:purgehours), -1, 0, :purgehours), 12) / 24)
+            and ( svms_pak.now_to_ss_date(:collection_point) + decode(sign(:futurehours - 12), -1, decode(sign(:futurehours), -1, 0, :futurehours), 12) / 24)
+         and b.collection_point_code = c.collection_point_code
+         and c.zone_code = (
+         select distinct cc.zone_code from
+            ca_collection_point cc
+            where cc.collection_point_code = :collection_point
+         )
+         and vr.visit_reason_code = b.reason_code
+         and utl_match.jaro_winkler_similarity (lower(trim(b.forename || b.middle_name|| b.surname)), lower(trim(:forename || trim(:md_name) || :surname))) > 87
+   ) qq
+)
+where priority >= decode(maximum, 105, 100, 87)
+order by priority desc</uniqueName>
+</TableSettings>

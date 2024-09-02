@@ -1,0 +1,11 @@
+<?xml version='1.0'  encoding='UTF-8' ?>
+<history>
+	<historyItem>
+		<sql><![CDATA[select trim(:q || nvl(:other_names, '%')) from dual]]></sql>
+		<connection><![CDATA[Dev]]></connection>
+		<timestamp><![CDATA[1716811805346]]></timestamp>
+		<type><![CDATA[SQL]]></type>
+		<executed><![CDATA[1]]></executed>
+		<execTime><![CDATA[0.041]]></execTime>
+	</historyItem>
+</history>

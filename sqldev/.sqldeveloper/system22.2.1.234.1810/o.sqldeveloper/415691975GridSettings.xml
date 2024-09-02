@@ -1,0 +1,44 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">COLUMN_NAME</Item>
+      <Item class="java.lang.String">DATA_TYPE</Item>
+      <Item class="java.lang.String">NULLABLE</Item>
+      <Item class="java.lang.String">DATA_DEFAULT</Item>
+      <Item class="java.lang.String">COLUMN_ID</Item>
+      <Item class="java.lang.String">COMMENTS</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>201</Item>
+      <Item>222</Item>
+      <Item>75</Item>
+      <Item>779</Item>
+      <Item>84</Item>
+      <Item>84</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+test.tds.ie+Visitor-dev%2C+Trunkselect c.column_name,  case when data_type = 'CHAR'     then      data_type||'('||c.char_length||decode(char_used,'B',' BYTE','C',' CHAR',null)||')'    
+    							when data_type = 'VARCHAR'  then      data_type||'('||c.char_length||decode(char_used,'B',' BYTE','C',' CHAR',null)||')'    
+    							when data_type = 'VARCHAR2' then      data_type||'('||c.char_length||decode(char_used,'B',' BYTE','C',' CHAR',null)||')'    
+    							when data_type = 'NCHAR'    then      data_type||'('||c.char_length||decode(char_used,'B',' BYTE','C',' CHAR',null)||')'    
+    							when data_type = 'NUMBER' then      
+								    	case when c.data_precision is null and c.data_scale is null then          'NUMBER' 
+								    	when c.data_precision is null and c.data_scale is not null then          'NUMBER(38,'||c.data_scale||')' 
+									    else           data_type||'('||c.data_precision||','||c.data_SCALE||')'      end    
+    							when data_type = 'NVARCHAR' then      data_type||'('||c.char_length||decode(char_used,'B',' BYTE','C',' CHAR',null)||')'    
+    							when data_type = 'NVARCHAR2' then     data_type||'('||c.char_length||decode(char_used,'B',' BYTE','C',' CHAR',null)||')'    
+    							else      data_type    end data_type,
+      decode(nullable,'Y','Yes','No') nullable,  
+    c.DATA_DEFAULT,column_id,   com.comments	     
+      from sys.Dba_tab_Columns c, 
+           sys.Dba_col_comments com
+      where c.owner      = :OBJECT_OWNER  
+      and  c.table_name =  :OBJECT_NAME   
+      and c.table_name = com.table_name
+      and c.owner = com.owner
+      and c.column_name = com.column_name	              
+      order by column_id</uniqueName>
+</TableSettings>

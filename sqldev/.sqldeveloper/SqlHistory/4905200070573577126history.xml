@@ -1,0 +1,11 @@
+<?xml version='1.0'  encoding='UTF-8' ?>
+<history>
+	<historyItem>
+		<sql><![CDATA[select id_verification_status, id_verification_date_time, ID_VERIFICATION_TRIES, cvd.* from ca_visitor_detail cvd where booking_reference in ('174843', '174843');]]></sql>
+		<connection><![CDATA[Trunk]]></connection>
+		<timestamp><![CDATA[1721897661151]]></timestamp>
+		<type><![CDATA[SQL]]></type>
+		<executed><![CDATA[1]]></executed>
+		<execTime><![CDATA[0.19]]></execTime>
+	</historyItem>
+</history>

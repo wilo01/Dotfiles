@@ -1,0 +1,11 @@
+<?xml version='1.0'  encoding='UTF-8' ?>
+<history>
+	<historyItem>
+		<sql><![CDATA[select * from ca_message_template_location where message_template_code in( '3370')]]></sql>
+		<connection><![CDATA[DB sapuat LIVE]]></connection>
+		<timestamp><![CDATA[1717511724676]]></timestamp>
+		<type><![CDATA[SQL]]></type>
+		<executed><![CDATA[1]]></executed>
+		<execTime><![CDATA[0.093]]></execTime>
+	</historyItem>
+</history>

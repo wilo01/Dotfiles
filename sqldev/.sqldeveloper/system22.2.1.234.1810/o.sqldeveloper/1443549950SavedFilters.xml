@@ -1,0 +1,7 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Filters class="java.util.ArrayList" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-filters">
+   <Item class="java.lang.String">setting_name like 'use_domain%'</Item>
+   <Item class="java.lang.String">setting_name = 'allow_multiple_valid_badges'</Item>
+   <Item class="java.lang.String">setting_name = 'person_type_control'</Item>
+   <Item class="java.lang.String">setting_name = 'person_type_control';</Item>
+</Filters>

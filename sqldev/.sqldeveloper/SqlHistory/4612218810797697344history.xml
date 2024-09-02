@@ -1,0 +1,11 @@
+<?xml version='1.0'  encoding='UTF-8' ?>
+<history>
+	<historyItem>
+		<sql><![CDATA[select * from safe_user]]></sql>
+		<connection><![CDATA[12.1AV]]></connection>
+		<timestamp><![CDATA[1716901544275]]></timestamp>
+		<type><![CDATA[SQL]]></type>
+		<executed><![CDATA[1]]></executed>
+		<execTime><![CDATA[0.046]]></execTime>
+	</historyItem>
+</history>

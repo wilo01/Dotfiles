@@ -1,0 +1,35 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">SITE_CODE</Item>
+      <Item class="java.lang.String">LANGUAGE_CODE</Item>
+      <Item class="java.lang.String">LANGUAGE_DESCRIPTION</Item>
+      <Item class="java.lang.String">ARCHIVED</Item>
+      <Item class="java.lang.String">FLAG_CODE</Item>
+      <Item class="java.lang.String">SITE_CODE_1</Item>
+      <Item class="java.lang.String">SITE_DESCRIPTION</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>82</Item>
+      <Item>118</Item>
+      <Item>161</Item>
+      <Item>74</Item>
+      <Item>85</Item>
+      <Item>95</Item>
+      <Item>125</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item class="java.lang.String">4 asc</Item>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+test.tds.ie+Visitor-dev%2C+Trunkselect  
+   skl.*,
+   cs.site_code,
+   cs.site_description
+from 
+   safe_kiosk_languages skl
+inner join 
+   ca_site cs
+   on cs.site_code = skl.site_code</uniqueName>
+</TableSettings>

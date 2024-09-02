@@ -1,0 +1,21 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">ACODE</Item>
+      <Item class="java.lang.String">ADESCRIPTION</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>58</Item>
+      <Item>243</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+test.tds.ie+Visitor-dev%2C+Trunkselect 
+   distinct(mtc.id) as acode,
+   mtc.category_name as adescription
+from safe_mt_category mtc
+inner join safe_mt_cat_type_rec_template mtl
+on mtc.id = mtl.category_id</uniqueName>
+</TableSettings>

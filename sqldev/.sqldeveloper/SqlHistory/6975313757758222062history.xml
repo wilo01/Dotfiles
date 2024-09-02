@@ -1,0 +1,11 @@
+<?xml version='1.0'  encoding='UTF-8' ?>
+<history>
+	<historyItem>
+		<sql><![CDATA[select * from safe_user]]></sql>
+		<connection><![CDATA[Docker]]></connection>
+		<timestamp><![CDATA[1725006800902]]></timestamp>
+		<type><![CDATA[SQL]]></type>
+		<executed><![CDATA[48]]></executed>
+		<execTime><![CDATA[0.019]]></execTime>
+	</historyItem>
+</history>

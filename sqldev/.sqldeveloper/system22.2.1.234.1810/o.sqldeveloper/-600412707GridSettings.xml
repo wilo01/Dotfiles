@@ -1,0 +1,47 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">POPUP_CONTENT</Item>
+      <Item class="java.lang.String">POPUP_TYPE</Item>
+      <Item class="java.lang.String">POPUP_CODE</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>605</Item>
+      <Item>91</Item>
+      <Item>95</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%2311.1AVwith popups as (
+   select 
+      cknp.ROWID as myrowid,
+      cknp.popup_content,
+      cknp.popup_type,
+      cknp.popup_code,
+      case 
+         when cknp.collection_point_code = :collection_point_code then decode(cknp.language_code, 'EN', 1.5, 1)
+         when cknp.zone_code = z.zone_code and cknp.collection_point_code is null then decode(cknp.language_code, 'EN', 2.5, 2)
+         when cknp.site_code = z.site_code and cknp.zone_code is null and cknp.collection_point_code is null then decode(cknp.language_code, 'EN', 3.5, 3)
+         when cknp.site_code is null and cknp.zone_code is null and cknp.collection_point_code is null then decode(cknp.language_code, 'EN', 4.5, 4)
+      end as priority
+   from ca_kiosk_nda_popup cknp,
+      ca_collection_point cp,
+      ca_zone z
+   where cknp.language_code in (:language_code, 'EN') 
+      and nvl(cknp.end_date, sysdate) >= sysdate
+      and cknp.start_date &lt; sysdate
+      and cp.collection_point_code = :collection_point_code
+      and cp.zone_code = z.zone_code
+      and cknp.popup_type like :type
+   order by priority
+)
+select popup_content, popup_type, popup_code 
+from popups 
+where priority is not null 
+   and myrowid IN ( 
+      select min(myrowid) keep (dense_rank first order by priority asc nulls last) 
+      from popups group by popup_type 
+   )</uniqueName>
+</TableSettings>

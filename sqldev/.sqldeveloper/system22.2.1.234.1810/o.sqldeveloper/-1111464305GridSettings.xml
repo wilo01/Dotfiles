@@ -1,0 +1,36 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">SETTING_NAME</Item>
+      <Item class="java.lang.String">SETTING_VALUE</Item>
+      <Item class="java.lang.String">SETTING_VALUE_CAPITAL</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>229</Item>
+      <Item>1195</Item>
+      <Item>1195</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+test.tds.ie+Visitor-safe%2C+Trunkwith encrypted_values as (
+  select setting_name, safe_enc_toolkit.decrypt(setting_value) setting_value
+  from safe_qr_configurations
+  where setting_name in ('google_spreadsheet_developer_key', 'google_spreadsheet_client_id', 'google_spreadsheet_app_id')
+)
+select
+  trim(lower(sqc.setting_name)) as setting_name,
+  trim(nvl2(ev.setting_name, ev.setting_value, sqc.setting_value)) as setting_value,
+  nvl2(ev.setting_name, ev.setting_value, sqc.setting_value) as setting_value_capital
+from safe_qr_configurations sqc
+left join encrypted_values ev
+  on ev.setting_name = sqc.setting_name
+where sqc.setting_value is not null 
+and safe_request_permissions_pak.check_permission_sql (
+  :Uidtoken, 
+  '(quickregistermenu)(visitorviewmenu)(guestDashboard)(visitoractionmenu)',
+  'qrConfigurations', 
+  'GET' 
+) = 'Y'</uniqueName>
+</TableSettings>

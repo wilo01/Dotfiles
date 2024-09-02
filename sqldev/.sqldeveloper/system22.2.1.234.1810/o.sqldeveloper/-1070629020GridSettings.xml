@@ -1,0 +1,44 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">PERSON_TYPE</Item>
+      <Item class="java.lang.String">PERSON_TYPE_DESCRIPTION</Item>
+      <Item class="java.lang.String">BADGE_TYPE</Item>
+      <Item class="java.lang.String">COMPANY_IND</Item>
+      <Item class="java.lang.String">COMPANY_EXPIRY_DATE_IND</Item>
+      <Item class="java.lang.String">DEFAULT_ACCESS_LEVEL_CODE</Item>
+      <Item class="java.lang.String">TAX_COMPLIANCE_IND</Item>
+      <Item class="java.lang.String">GLOBAL_ACCESS_GROUP_CODE</Item>
+      <Item class="java.lang.String">DEFAULT_EXPORT_TO_CASHLESS_IND</Item>
+      <Item class="java.lang.String">DEFAULT_CASHLESS_EXPORT_CODE</Item>
+      <Item class="java.lang.String">SIP_DISPLAY_PRIORITY</Item>
+      <Item class="java.lang.String">BADGE_EXPIRY_DATE</Item>
+      <Item class="java.lang.String">BADGE_EXPIRY_DAYS</Item>
+      <Item class="java.lang.String">BADGE_EXPIRY_YEARS</Item>
+      <Item class="java.lang.String">BADGE_EXPIRY_TIME</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>99</Item>
+      <Item>180</Item>
+      <Item>92</Item>
+      <Item>99</Item>
+      <Item>178</Item>
+      <Item>197</Item>
+      <Item>143</Item>
+      <Item>200</Item>
+      <Item>231</Item>
+      <Item>222</Item>
+      <Item>145</Item>
+      <Item>145</Item>
+      <Item>138</Item>
+      <Item>144</Item>
+      <Item>145</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+test12av.tds.ieselect *
+      from 
+         ca_person_type_control</uniqueName>
+</TableSettings>

@@ -1,0 +1,15 @@
+<?xml version='1.0'  encoding='UTF-8' ?>
+<history>
+	<historyItem>
+		<sql><![CDATA[select bp.collection_point_code, vd.id_verification_status
+--         into v_cp_code, v_id_verification_status
+         from ca_booked_person bp 
+         join ca_visitor_detail vd on vd.booking_reference = bp.booking_reference
+         where bp.booking_reference = :v_booking_reference;]]></sql>
+		<connection><![CDATA[Trunk]]></connection>
+		<timestamp><![CDATA[1721050369793]]></timestamp>
+		<type><![CDATA[SQL]]></type>
+		<executed><![CDATA[2]]></executed>
+		<execTime><![CDATA[0.043]]></execTime>
+	</historyItem>
+</history>

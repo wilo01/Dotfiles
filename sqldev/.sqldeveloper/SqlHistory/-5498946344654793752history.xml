@@ -1,0 +1,14 @@
+<?xml version='1.0'  encoding='UTF-8' ?>
+<history>
+	<historyItem>
+		<sql><![CDATA[select cvd.id_verification_status, cvd.*, cbp.* from ca_visitor_detail cvd 
+left join ca_booked_person cbp on cvd.booking_reference = cbp.booking_reference
+--where id_verification_status is not null 
+where cbp.group_id in ('175778', '175779', '175780', '175781', '175784', '175785', '175793')]]></sql>
+		<connection><![CDATA[Trunk]]></connection>
+		<timestamp><![CDATA[1721032101980]]></timestamp>
+		<type><![CDATA[SQL]]></type>
+		<executed><![CDATA[2]]></executed>
+		<execTime><![CDATA[0.407]]></execTime>
+	</historyItem>
+</history>

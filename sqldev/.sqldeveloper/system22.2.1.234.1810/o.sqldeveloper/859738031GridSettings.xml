@@ -1,0 +1,24 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">BOOKING_REFERENCE</Item>
+      <Item class="java.lang.String">NDA_VERSION</Item>
+      <Item class="java.lang.String">NDA_ACCEPTED_DATE_TIME</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>142</Item>
+      <Item>97</Item>
+      <Item>174</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+test.tds.ie+Visitor-safe%2C+Trunkselect
+         cbp.booking_reference,
+         cbp.nda_version,
+         cbp.nda_accepted_date_time
+      from ca_booked_person cbp
+      where cbp.email_address = :email_address
+         and cbp.nda_version = :nda_version</uniqueName>
+</TableSettings>

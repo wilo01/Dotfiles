@@ -1,0 +1,78 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">BADGE_NUMBER</Item>
+      <Item class="java.lang.String">VERSION_NUMBER</Item>
+      <Item class="java.lang.String">ISSUE_NUMBER</Item>
+      <Item class="java.lang.String">STATUS_IND</Item>
+      <Item class="java.lang.String">PERSON_CODE</Item>
+      <Item class="java.lang.String">PERSON_TYPE</Item>
+      <Item class="java.lang.String">ASSIGN_DATE_TIME</Item>
+      <Item class="java.lang.String">ACTIVE_DATE_TIME</Item>
+      <Item class="java.lang.String">RECLAIM_DATE_TIME</Item>
+      <Item class="java.lang.String">EXPIRY_DATE_TIME</Item>
+      <Item class="java.lang.String">PRINTED_DATE_TIME</Item>
+      <Item class="java.lang.String">BADGE_TYPE</Item>
+      <Item class="java.lang.String">BADGE_TYPE_CODE</Item>
+      <Item class="java.lang.String">BIOMETRIC_ENCODED_IND</Item>
+      <Item class="java.lang.String">MAG_STRIPE_TRACK1_ENCODING</Item>
+      <Item class="java.lang.String">MAG_STRIPE_TRACK2_ENCODING</Item>
+      <Item class="java.lang.String">MAG_STRIPE_TRACK3_ENCODING</Item>
+      <Item class="java.lang.String">BARCODE_ENCODING</Item>
+      <Item class="java.lang.String">USERNAME</Item>
+      <Item class="java.lang.String">LAST_CHANGED_DATE_TIME</Item>
+      <Item class="java.lang.String">AUTHORISED_BY</Item>
+      <Item class="java.lang.String">COMMENTS</Item>
+      <Item class="java.lang.String">MIFARE_UID</Item>
+      <Item class="java.lang.String">NARRATIVE</Item>
+      <Item class="java.lang.String">WATERMARK_NUMBER</Item>
+      <Item class="java.lang.String">PVM_BADGE_IND</Item>
+      <Item class="java.lang.String">RECEIPT</Item>
+      <Item class="java.lang.String">RECIEPT</Item>
+      <Item class="java.lang.String">LEGIC_UID</Item>
+      <Item class="java.lang.String">CARDLINK_UPDATE_DATE_TIME</Item>
+      <Item class="java.lang.String">CARDLINK_VALIDATION_DATE_TIME</Item>
+      <Item class="java.lang.String">BEACON_UID</Item>
+      <Item class="java.lang.String">TEMP_BADGE_IND</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>111</Item>
+      <Item>121</Item>
+      <Item>106</Item>
+      <Item>89</Item>
+      <Item>103</Item>
+      <Item>99</Item>
+      <Item>145</Item>
+      <Item>145</Item>
+      <Item>145</Item>
+      <Item>145</Item>
+      <Item>145</Item>
+      <Item>92</Item>
+      <Item>130</Item>
+      <Item>166</Item>
+      <Item>204</Item>
+      <Item>204</Item>
+      <Item>204</Item>
+      <Item>139</Item>
+      <Item>80</Item>
+      <Item>175</Item>
+      <Item>112</Item>
+      <Item>84</Item>
+      <Item>145</Item>
+      <Item>79</Item>
+      <Item>139</Item>
+      <Item>112</Item>
+      <Item>65</Item>
+      <Item>65</Item>
+      <Item>77</Item>
+      <Item>190</Item>
+      <Item>211</Item>
+      <Item>91</Item>
+      <Item>119</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+test.tds.ie+Visitor-safe%2C+Trunkselect * from ca_badge</uniqueName>
+</TableSettings>

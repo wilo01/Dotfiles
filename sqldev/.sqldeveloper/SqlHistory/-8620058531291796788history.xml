@@ -1,0 +1,12 @@
+<?xml version='1.0'  encoding='UTF-8' ?>
+<history>
+	<historyItem>
+		<sql><![CDATA[INSERT INTO CA_CHROMEBOX_MAPPING (CHROMEBOX_ID, CLIENT_CODE, FORCE_DEFAULT_SETTINGS_IND, DEFAULT_SETTINGS, TWAPPER_SETTINGS, BADGE_SETTINGS)
+                           VALUES('8f26bb39-eebd-4498-9571-462f90dac030', 'Dariusz', NULL, NULL, NULL, NULL);]]></sql>
+		<connection><![CDATA[rddemo]]></connection>
+		<timestamp><![CDATA[1724057824230]]></timestamp>
+		<type><![CDATA[SQL]]></type>
+		<executed><![CDATA[1]]></executed>
+		<execTime><![CDATA[0.086]]></execTime>
+	</historyItem>
+</history>

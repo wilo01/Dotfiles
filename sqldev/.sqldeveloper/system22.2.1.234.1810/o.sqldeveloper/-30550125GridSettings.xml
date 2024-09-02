@@ -1,0 +1,43 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">INDEX_OWNER</Item>
+      <Item class="java.lang.String">INDEX_NAME</Item>
+      <Item class="java.lang.String">TABLE_OWNER</Item>
+      <Item class="java.lang.String">TABLE_NAME</Item>
+      <Item class="java.lang.String">COLUMN_NAME</Item>
+      <Item class="java.lang.String">COLUMN_POSITION</Item>
+      <Item class="java.lang.String">COLUMN_LENGTH</Item>
+      <Item class="java.lang.String">CHAR_LENGTH</Item>
+      <Item class="java.lang.String">DESCEND</Item>
+      <Item class="java.lang.String">COLLATED_COLUMN_ID</Item>
+      <Item class="java.lang.String">COLUMN_EXPRESSION</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>98</Item>
+      <Item>89</Item>
+      <Item>100</Item>
+      <Item>196</Item>
+      <Item>255</Item>
+      <Item>127</Item>
+      <Item>118</Item>
+      <Item>100</Item>
+      <Item>73</Item>
+      <Item>148</Item>
+      <Item>132</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23Trunkselect ind.*, ie.column_expression 
+                             from Dba_ind_columns ind,
+                                  Dba_ind_expressions ie
+                             where ind.index_name = :INDEX_NAME
+                               and ind.table_name = :OBJECT_NAME
+                               and ind.index_owner = :OBJECT_OWNER
+                               and ind.index_name = ie.index_name(+)
+                               and ind.table_owner = ie.table_owner(+)
+                               and ind.index_owner = ie.index_owner(+)
+                               and ind.column_position = ie.column_position(+)</uniqueName>
+</TableSettings>

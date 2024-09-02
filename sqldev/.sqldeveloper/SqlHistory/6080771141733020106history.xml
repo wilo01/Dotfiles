@@ -1,0 +1,55 @@
+<?xml version='1.0'  encoding='UTF-8' ?>
+<history>
+	<historyItem>
+		<sql><![CDATA[select 
+         iq.*
+      from (
+         select
+            image_id,
+            image_title,
+            image_description,
+            subset,
+            case when lower(theme) = 'deepmind' then 'Vivid' else theme end theme,
+            last_changed_date_time
+         from 
+            safe_kiosk_images
+         where
+            theme = :theme
+      ) iq
+      where  
+         (trim(:subset) is null or trim(:subset) is not null and lower(iq.subset) = lower(trim(:subset)))
+         and lower(
+            iq.image_id  || ' ' ||
+            iq.image_title || ' ' ||
+            iq.image_description || ' ' ||
+            iq.subset  || ' ' ||
+            iq.theme || ' ' ||
+            iq.last_changed_date_time 
+         ) 
+         like lower('%' || :query || '%')
+      order by
+         case when lower(:dir) = 'asc' then
+         decode( :sort ,
+            'image_id',                lower(iq.image_id),
+            'image_title',             lower(iq.image_title),
+            'image_description',       lower(iq.image_description),
+            'subset',                  lower(iq.subset),
+            'theme',                   lower(iq.theme),
+            'last_changed_date_time',  caup.get_sort_date(iq.last_changed_date_time)
+         )end asc,
+         case when lower(:dir) = 'desc' then
+         decode( :sort , 
+            'image_id',                lower(iq.image_id),
+            'image_title',             lower(iq.image_title),
+            'image_description',       lower(iq.image_description),
+            'subset',                  lower(iq.subset),
+            'theme',                   lower(iq.theme),
+            'last_changed_date_time',  caup.get_sort_date(iq.last_changed_date_time)
+         )end desc]]></sql>
+		<connection><![CDATA[Trunk]]></connection>
+		<timestamp><![CDATA[1717755504055]]></timestamp>
+		<type><![CDATA[SQL]]></type>
+		<executed><![CDATA[2]]></executed>
+		<execTime><![CDATA[0.052]]></execTime>
+	</historyItem>
+</history>

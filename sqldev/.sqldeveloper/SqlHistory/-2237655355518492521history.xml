@@ -1,0 +1,40 @@
+<?xml version='1.0'  encoding='UTF-8' ?>
+<history>
+	<historyItem>
+		<sql><![CDATA[declare
+    v_is_background number;
+    v_doc_file_exist number;
+    v_default_val varchar(1) := 'N';
+    v_is_background2 varchar(1) := 'Y';
+begin
+    select count(*) into v_is_background from user_tab_cols where lower(table_name) = 'ca_badge_layout_items' and lower(column_name) = 'is_background2';
+        DBMS_OUTPUT.PUT_LINE('Dwdw v_is_background: ' || v_is_background || v_default_val);
+
+    if v_is_background < 1 then
+        execute immediate 'alter table ca_badge_layout_items add is_background2 varchar2(1) default ''' || v_default_val || ''' ';
+        DBMS_OUTPUT.PUT_LINE('Dwdw v_is_background IF: ' || v_is_background || v_default_val);
+    end if;
+
+    select count(*) into v_doc_file_exist from user_tab_cols where lower(table_name) = 'ca_badge_layout_items' and lower(column_name) = 'doc_file2';
+
+    DBMS_OUTPUT.PUT_LINE('Dwdw v_doc_file_exist: ' || v_doc_file_exist);
+
+    if v_doc_file_exist > 0 then
+        DBMS_OUTPUT.PUT_LINE('Dwdw v_doc_file_exist IF: ' || v_doc_file_exist);
+--        update ca_badge_layout_items set image = doc_file2, is_background2 = 'Y' where doc_file2 is not null;
+        execute immediate 'update ca_badge_layout_items set image = doc_file2, is_background2 =  ''' || v_is_background2 || ''' where doc_file2 is not null';
+        execute immediate 'alter table ca_badge_layout_items drop column doc_file2';
+    end if;
+
+--    update ca_badge_layout_items set image = doc_file, is_background = 'Y' where doc_file is not null;
+    commit;
+--   exception when no_data_found then
+--      null;
+end;/]]></sql>
+		<connection><![CDATA[Dev]]></connection>
+		<timestamp><![CDATA[1720427501413]]></timestamp>
+		<type><![CDATA[SQL]]></type>
+		<executed><![CDATA[6]]></executed>
+		<execTime><![CDATA[0.222]]></execTime>
+	</historyItem>
+</history>

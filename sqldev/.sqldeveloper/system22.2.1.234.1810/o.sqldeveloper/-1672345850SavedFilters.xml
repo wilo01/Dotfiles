@@ -1,0 +1,9 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Filters class="java.util.ArrayList" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-filters">
+   <Item class="java.lang.String">lower(forename) like 'abhishek'</Item>
+   <Item class="java.lang.String">lower(forename) = 'abhishek'</Item>
+   <Item class="java.lang.String">zone_code = '09' and lower(forename) = 'abhishek'</Item>
+   <Item class="java.lang.String">zone_code = '09'</Item>
+   <Item class="java.lang.String">zone_code = '0'</Item>
+   <Item class="java.lang.String">collection_point_code = '35'</Item>
+</Filters>

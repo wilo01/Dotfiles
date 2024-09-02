@@ -1,0 +1,11 @@
+<?xml version='1.0'  encoding='UTF-8' ?>
+<history>
+	<historyItem>
+		<sql><![CDATA[select * from ca_printer_dimension where printer_code = 'star']]></sql>
+		<connection><![CDATA[Docker]]></connection>
+		<timestamp><![CDATA[1725006841790]]></timestamp>
+		<type><![CDATA[SQL]]></type>
+		<executed><![CDATA[1]]></executed>
+		<execTime><![CDATA[0.067]]></execTime>
+	</historyItem>
+</history>

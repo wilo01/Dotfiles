@@ -1,0 +1,16 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Filters class="java.util.ArrayList" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-filters">
+   <Item class="java.lang.String">GROUP_ID like '64330'</Item>
+   <Item class="java.lang.String">GROUP_ID like '64329'</Item>
+   <Item class="java.lang.String">GROUP_ID like '64331'</Item>
+   <Item class="java.lang.String">BOOKING_REFERENCE like '60521'</Item>
+   <Item class="java.lang.String">BOOKING_REFERENCE like '6051%'</Item>
+   <Item class="java.lang.String">BOOKING_REFERENCE like '60513'</Item>
+   <Item class="java.lang.String">GROUP_ID like '643%'</Item>
+   <Item class="java.lang.String">GROUP_ID like '64323'</Item>
+   <Item class="java.lang.String">GROUP_ID like '6432%'</Item>
+   <Item class="java.lang.String">GROUP_ID = '64322'</Item>
+   <Item class="java.lang.String">group_id like 64312</Item>
+   <Item class="java.lang.String">group_id = '64%'</Item>
+   <Item class="java.lang.String">group_id = '64312'</Item>
+</Filters>

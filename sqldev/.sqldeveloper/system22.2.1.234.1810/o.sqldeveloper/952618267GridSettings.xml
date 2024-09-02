@@ -1,0 +1,136 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">INDEX_NAME</Item>
+      <Item class="java.lang.String">INDEX_TYPE</Item>
+      <Item class="java.lang.String">TABLE_OWNER</Item>
+      <Item class="java.lang.String">TABLE_NAME</Item>
+      <Item class="java.lang.String">TABLE_TYPE</Item>
+      <Item class="java.lang.String">UNIQUENESS</Item>
+      <Item class="java.lang.String">COMPRESSION</Item>
+      <Item class="java.lang.String">PREFIX_LENGTH</Item>
+      <Item class="java.lang.String">TABLESPACE_NAME</Item>
+      <Item class="java.lang.String">INI_TRANS</Item>
+      <Item class="java.lang.String">MAX_TRANS</Item>
+      <Item class="java.lang.String">INITIAL_EXTENT</Item>
+      <Item class="java.lang.String">NEXT_EXTENT</Item>
+      <Item class="java.lang.String">MIN_EXTENTS</Item>
+      <Item class="java.lang.String">MAX_EXTENTS</Item>
+      <Item class="java.lang.String">PCT_INCREASE</Item>
+      <Item class="java.lang.String">PCT_THRESHOLD</Item>
+      <Item class="java.lang.String">INCLUDE_COLUMN</Item>
+      <Item class="java.lang.String">FREELISTS</Item>
+      <Item class="java.lang.String">FREELIST_GROUPS</Item>
+      <Item class="java.lang.String">PCT_FREE</Item>
+      <Item class="java.lang.String">LOGGING</Item>
+      <Item class="java.lang.String">BLEVEL</Item>
+      <Item class="java.lang.String">LEAF_BLOCKS</Item>
+      <Item class="java.lang.String">DISTINCT_KEYS</Item>
+      <Item class="java.lang.String">AVG_LEAF_BLOCKS_PER_KEY</Item>
+      <Item class="java.lang.String">AVG_DATA_BLOCKS_PER_KEY</Item>
+      <Item class="java.lang.String">CLUSTERING_FACTOR</Item>
+      <Item class="java.lang.String">STATUS</Item>
+      <Item class="java.lang.String">NUM_ROWS</Item>
+      <Item class="java.lang.String">SAMPLE_SIZE</Item>
+      <Item class="java.lang.String">LAST_ANALYZED</Item>
+      <Item class="java.lang.String">DEGREE</Item>
+      <Item class="java.lang.String">INSTANCES</Item>
+      <Item class="java.lang.String">PARTITIONED</Item>
+      <Item class="java.lang.String">TEMPORARY</Item>
+      <Item class="java.lang.String">GENERATED</Item>
+      <Item class="java.lang.String">SECONDARY</Item>
+      <Item class="java.lang.String">BUFFER_POOL</Item>
+      <Item class="java.lang.String">FLASH_CACHE</Item>
+      <Item class="java.lang.String">CELL_FLASH_CACHE</Item>
+      <Item class="java.lang.String">USER_STATS</Item>
+      <Item class="java.lang.String">DURATION</Item>
+      <Item class="java.lang.String">PCT_DIRECT_ACCESS</Item>
+      <Item class="java.lang.String">ITYP_OWNER</Item>
+      <Item class="java.lang.String">ITYP_NAME</Item>
+      <Item class="java.lang.String">PARAMETERS</Item>
+      <Item class="java.lang.String">GLOBAL_STATS</Item>
+      <Item class="java.lang.String">DOMIDX_STATUS</Item>
+      <Item class="java.lang.String">DOMIDX_OPSTATUS</Item>
+      <Item class="java.lang.String">FUNCIDX_STATUS</Item>
+      <Item class="java.lang.String">JOIN_INDEX</Item>
+      <Item class="java.lang.String">IOT_REDUNDANT_PKEY_ELIM</Item>
+      <Item class="java.lang.String">DROPPED</Item>
+      <Item class="java.lang.String">VISIBILITY</Item>
+      <Item class="java.lang.String">DOMIDX_MANAGEMENT</Item>
+      <Item class="java.lang.String">SEGMENT_CREATED</Item>
+      <Item class="java.lang.String">ORPHANED_ENTRIES</Item>
+      <Item class="java.lang.String">INDEXING</Item>
+      <Item class="java.lang.String">AUTO</Item>
+      <Item class="java.lang.String">CONSTRAINT_INDEX</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>351</Item>
+      <Item>86</Item>
+      <Item>100</Item>
+      <Item>322</Item>
+      <Item>88</Item>
+      <Item>93</Item>
+      <Item>102</Item>
+      <Item>107</Item>
+      <Item>128</Item>
+      <Item>76</Item>
+      <Item>85</Item>
+      <Item>105</Item>
+      <Item>97</Item>
+      <Item>96</Item>
+      <Item>99</Item>
+      <Item>102</Item>
+      <Item>115</Item>
+      <Item>121</Item>
+      <Item>78</Item>
+      <Item>124</Item>
+      <Item>74</Item>
+      <Item>72</Item>
+      <Item>60</Item>
+      <Item>97</Item>
+      <Item>106</Item>
+      <Item>180</Item>
+      <Item>183</Item>
+      <Item>140</Item>
+      <Item>64</Item>
+      <Item>83</Item>
+      <Item>96</Item>
+      <Item>165</Item>
+      <Item>64</Item>
+      <Item>83</Item>
+      <Item>92</Item>
+      <Item>86</Item>
+      <Item>86</Item>
+      <Item>88</Item>
+      <Item>98</Item>
+      <Item>98</Item>
+      <Item>131</Item>
+      <Item>92</Item>
+      <Item>76</Item>
+      <Item>139</Item>
+      <Item>89</Item>
+      <Item>80</Item>
+      <Item>92</Item>
+      <Item>107</Item>
+      <Item>114</Item>
+      <Item>130</Item>
+      <Item>118</Item>
+      <Item>81</Item>
+      <Item>177</Item>
+      <Item>72</Item>
+      <Item>74</Item>
+      <Item>147</Item>
+      <Item>131</Item>
+      <Item>133</Item>
+      <Item>72</Item>
+      <Item>50</Item>
+      <Item>130</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23TrunkSELECT *
+FROM user_indexes
+WHERE table_name = 'CA_ACTIVE_HOST_LOCATION_PERSON'</uniqueName>
+</TableSettings>

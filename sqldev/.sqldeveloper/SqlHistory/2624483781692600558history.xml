@@ -1,0 +1,57 @@
+<?xml version='1.0'  encoding='UTF-8' ?>
+<history>
+	<historyItem>
+		<sql><![CDATA[with find_collection_point AS (
+   select  nvl(content_type,'image/png') content_type, to_blob(image) image, image_id from (
+      select  nvl(content_type,'image/png') content_type, image, image_id, 4 priority
+      from safe_kiosk_images_location
+      where collection_point_code = :cp
+      union all(
+      select  nvl(content_type,'image/png') content_type, image, image_id, 3 priority
+      from safe_kiosk_images_location
+      where zone_code in ( select zone_code from ca_collection_point where collection_point_code = :cp)
+      ) union all(
+      select  nvl(content_type,'image/png') content_type, image, image_id, 2 priority
+      from safe_kiosk_images_location
+      where site_code in ( select site_code from safe_cp_location_view where collection_point_code = :cp)
+      ) union all(
+      select  nvl(content_type,'image/png') content_type, image, image_id, 1 priority
+      from safe_kiosk_images_location
+      where cluster_name in ( select cluster_name from safe_cluster_cp_view where collection_point_code = :cp)
+      )
+   )
+   order by priority desc
+)
+select 
+   *
+
+from (
+   select  
+      sws.image_id, 
+      case 
+         when fcp.image is not null then
+            fcp.image
+         else
+            sws.image
+         end image,
+      case 
+         when fcp.content_type is not null then
+            fcp.content_type
+         when sws.content_type is not null then
+            sws.content_type
+         else
+            'image/png'
+         end content_type
+   from 
+      safe_kiosk_images sws
+   left join find_collection_point fcp on  sws.image_id = fcp.image_id
+) iq
+where
+   iq.image_id = :image_id]]></sql>
+		<connection><![CDATA[Dev]]></connection>
+		<timestamp><![CDATA[1717668054998]]></timestamp>
+		<type><![CDATA[SQL]]></type>
+		<executed><![CDATA[1]]></executed>
+		<execTime><![CDATA[0.127]]></execTime>
+	</historyItem>
+</history>

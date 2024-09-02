@@ -1,0 +1,20 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">USERNAME</Item>
+      <Item class="java.lang.String">USER_ROLE_NAME</Item>
+      <Item class="java.lang.String">ASSIGNED_BY</Item>
+      <Item class="java.lang.String">ASSIGNMENT_DATE</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>80</Item>
+      <Item>138</Item>
+      <Item>98</Item>
+      <Item>145</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23sunderlanduat.cbzwztcxfluc.eu-west-1.rds.amazonaws.comselect * from safe_user_role_assignment</uniqueName>
+</TableSettings>

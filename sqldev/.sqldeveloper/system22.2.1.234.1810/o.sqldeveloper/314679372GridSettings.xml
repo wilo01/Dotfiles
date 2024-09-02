@@ -1,0 +1,218 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">PERSON_CODE</Item>
+      <Item class="java.lang.String">PERSON_TYPE</Item>
+      <Item class="java.lang.String">PERSON_CATEGORY_CODE</Item>
+      <Item class="java.lang.String">ACTIVE_IND</Item>
+      <Item class="java.lang.String">TITLE</Item>
+      <Item class="java.lang.String">FORENAME</Item>
+      <Item class="java.lang.String">MIDDLE_NAME</Item>
+      <Item class="java.lang.String">SURNAME</Item>
+      <Item class="java.lang.String">MAIDEN_NAME</Item>
+      <Item class="java.lang.String">INITIALS</Item>
+      <Item class="java.lang.String">KNOWN_AS</Item>
+      <Item class="java.lang.String">ADDRESS_1</Item>
+      <Item class="java.lang.String">ADDRESS_2</Item>
+      <Item class="java.lang.String">ADDRESS_3</Item>
+      <Item class="java.lang.String">ADDRESS_4</Item>
+      <Item class="java.lang.String">ADDRESS_5</Item>
+      <Item class="java.lang.String">ADDRESS_6</Item>
+      <Item class="java.lang.String">ADDRESS_7</Item>
+      <Item class="java.lang.String">ADDRESS_8</Item>
+      <Item class="java.lang.String">POST_CODE</Item>
+      <Item class="java.lang.String">COUNTRY_CODE</Item>
+      <Item class="java.lang.String">HOME_PHONE_NUMBER</Item>
+      <Item class="java.lang.String">WORK_PHONE_NUMBER</Item>
+      <Item class="java.lang.String">MOBILE_PHONE_NUMBER</Item>
+      <Item class="java.lang.String">FAX_PHONE_NUMBER</Item>
+      <Item class="java.lang.String">EMAIL_ADDRESS</Item>
+      <Item class="java.lang.String">SPONSOR_PERSON_CODE</Item>
+      <Item class="java.lang.String">SPONSOR_PERSON_TYPE</Item>
+      <Item class="java.lang.String">ZONE_CODE</Item>
+      <Item class="java.lang.String">ACCESS_MODE_IND</Item>
+      <Item class="java.lang.String">ASSEMBLY_POINT_CODE</Item>
+      <Item class="java.lang.String">DEPARTMENT_CODE</Item>
+      <Item class="java.lang.String">LOCATION_CODE</Item>
+      <Item class="java.lang.String">COST_CENTRE_CODE</Item>
+      <Item class="java.lang.String">EXPENSE_CODE</Item>
+      <Item class="java.lang.String">EMERGENCY_ROLE_CODE</Item>
+      <Item class="java.lang.String">COMPANY_CODE</Item>
+      <Item class="java.lang.String">COLLECTION_POINT_CODE</Item>
+      <Item class="java.lang.String">ACCESS_REASON_CODE</Item>
+      <Item class="java.lang.String">VISIT_TYPE_CODE</Item>
+      <Item class="java.lang.String">PIN</Item>
+      <Item class="java.lang.String">FREQUENT_IND</Item>
+      <Item class="java.lang.String">START_DATE</Item>
+      <Item class="java.lang.String">LEAVE_DATE</Item>
+      <Item class="java.lang.String">ALLOWED_VISITOR_IND</Item>
+      <Item class="java.lang.String">WEB_IND</Item>
+      <Item class="java.lang.String">COMMENTS</Item>
+      <Item class="java.lang.String">ZONE_COUNT_EXEMPTION_IND</Item>
+      <Item class="java.lang.String">EXTENDED_DOOR_OPEN_IND</Item>
+      <Item class="java.lang.String">HR_CODE</Item>
+      <Item class="java.lang.String">HRIS_NUMBER</Item>
+      <Item class="java.lang.String">DATE_OF_BIRTH</Item>
+      <Item class="java.lang.String">JOB_TITLE_CODE</Item>
+      <Item class="java.lang.String">VEHICLE_PASS_CODE</Item>
+      <Item class="java.lang.String">POST_CONDITIONAL_TNA_IND</Item>
+      <Item class="java.lang.String">LOCKDOWN_AUTHORISATION_IND</Item>
+      <Item class="java.lang.String">BOOKING_REFERENCE</Item>
+      <Item class="java.lang.String">BIOMETRIC_THRESHOLD</Item>
+      <Item class="java.lang.String">SUPPRESS_IN_OUT_CHECK_IND</Item>
+      <Item class="java.lang.String">BIRTHPLACE</Item>
+      <Item class="java.lang.String">EXTERNAL_LOGIN_NAME</Item>
+      <Item class="java.lang.String">GENDER</Item>
+      <Item class="java.lang.String">GUID</Item>
+      <Item class="java.lang.String">ID_CHECK_CODE</Item>
+      <Item class="java.lang.String">ID_CHECK_NUMBER</Item>
+      <Item class="java.lang.String">INVOKE_LOCKDOWN_IND</Item>
+      <Item class="java.lang.String">LANGUAGE_CODE</Item>
+      <Item class="java.lang.String">LAST_CHANGED_DATE_TIME</Item>
+      <Item class="java.lang.String">LAST_CHANGED_USERNAME</Item>
+      <Item class="java.lang.String">MAXIMUM_STAFF_NUMBER</Item>
+      <Item class="java.lang.String">NATIONAL_SECURITY_NUMBER</Item>
+      <Item class="java.lang.String">NATIONALITY_CODE</Item>
+      <Item class="java.lang.String">RELAX_ACCESS_01_IND</Item>
+      <Item class="java.lang.String">RELAX_ACCESS_02_IND</Item>
+      <Item class="java.lang.String">CASHLESS_EXPORT_CODE</Item>
+      <Item class="java.lang.String">EXPORT_TO_CASHLESS_IND</Item>
+      <Item class="java.lang.String">SPONSOR_IND</Item>
+      <Item class="java.lang.String">SPOUSE_PERSON_CODE</Item>
+      <Item class="java.lang.String">SPOUSE_PERSON_TYPE</Item>
+      <Item class="java.lang.String">SUB_COMPANY_CODE</Item>
+      <Item class="java.lang.String">SUB_DEPARTMENT_CODE</Item>
+      <Item class="java.lang.String">TAX_COMPLIANCE_IND</Item>
+      <Item class="java.lang.String">PCO_CURRENCY_CODE</Item>
+      <Item class="java.lang.String">PCO_PIN</Item>
+      <Item class="java.lang.String">BYPASS_BIO_AUTH_IND</Item>
+      <Item class="java.lang.String">SECURITY_CLEARANCE_SENT_DATE</Item>
+      <Item class="java.lang.String">FOREIGN_CLEARANCE_REQUIRED_IND</Item>
+      <Item class="java.lang.String">NOTIFICATION_USERNAME</Item>
+      <Item class="java.lang.String">EMAIL_ADDRESSES_EXTRA</Item>
+      <Item class="java.lang.String">ALLOWED_VIP_IND</Item>
+      <Item class="java.lang.String">CARDLINK_ALLOWED_IND</Item>
+      <Item class="java.lang.String">ALLOW_VIEW_RESTRICT_DOC_IND</Item>
+      <Item class="java.lang.String">ID1_DIRTY_IND</Item>
+      <Item class="java.lang.String">TOOL_PERMISSION_CODE</Item>
+      <Item class="java.lang.String">INSERTED_DATE_TIME</Item>
+      <Item class="java.lang.String">ID1_NEW_IND</Item>
+      <Item class="java.lang.String">DATA_SOURCE</Item>
+      <Item class="java.lang.String">NEW_APPLICATION_IND</Item>
+      <Item class="java.lang.String">PVM_PERSON_IND</Item>
+      <Item class="java.lang.String">PVM_SEQUENCE_NUMBER</Item>
+      <Item class="java.lang.String">NOTIFICATION_SMS_IND</Item>
+      <Item class="java.lang.String">NOTIFICATION_EMAIL_IND</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>103</Item>
+      <Item>99</Item>
+      <Item>170</Item>
+      <Item>83</Item>
+      <Item>49</Item>
+      <Item>79</Item>
+      <Item>97</Item>
+      <Item>124</Item>
+      <Item>98</Item>
+      <Item>64</Item>
+      <Item>110</Item>
+      <Item>85</Item>
+      <Item>85</Item>
+      <Item>85</Item>
+      <Item>85</Item>
+      <Item>85</Item>
+      <Item>85</Item>
+      <Item>85</Item>
+      <Item>85</Item>
+      <Item>88</Item>
+      <Item>111</Item>
+      <Item>150</Item>
+      <Item>149</Item>
+      <Item>159</Item>
+      <Item>137</Item>
+      <Item>208</Item>
+      <Item>165</Item>
+      <Item>161</Item>
+      <Item>90</Item>
+      <Item>129</Item>
+      <Item>157</Item>
+      <Item>131</Item>
+      <Item>114</Item>
+      <Item>139</Item>
+      <Item>108</Item>
+      <Item>161</Item>
+      <Item>112</Item>
+      <Item>168</Item>
+      <Item>155</Item>
+      <Item>119</Item>
+      <Item>47</Item>
+      <Item>103</Item>
+      <Item>145</Item>
+      <Item>145</Item>
+      <Item>146</Item>
+      <Item>68</Item>
+      <Item>124</Item>
+      <Item>193</Item>
+      <Item>179</Item>
+      <Item>72</Item>
+      <Item>98</Item>
+      <Item>145</Item>
+      <Item>113</Item>
+      <Item>139</Item>
+      <Item>185</Item>
+      <Item>205</Item>
+      <Item>142</Item>
+      <Item>154</Item>
+      <Item>195</Item>
+      <Item>87</Item>
+      <Item>153</Item>
+      <Item>65</Item>
+      <Item>47</Item>
+      <Item>112</Item>
+      <Item>127</Item>
+      <Item>155</Item>
+      <Item>118</Item>
+      <Item>175</Item>
+      <Item>175</Item>
+      <Item>164</Item>
+      <Item>188</Item>
+      <Item>129</Item>
+      <Item>150</Item>
+      <Item>150</Item>
+      <Item>167</Item>
+      <Item>176</Item>
+      <Item>100</Item>
+      <Item>156</Item>
+      <Item>152</Item>
+      <Item>142</Item>
+      <Item>161</Item>
+      <Item>143</Item>
+      <Item>147</Item>
+      <Item>67</Item>
+      <Item>151</Item>
+      <Item>216</Item>
+      <Item>226</Item>
+      <Item>164</Item>
+      <Item>166</Item>
+      <Item>119</Item>
+      <Item>156</Item>
+      <Item>204</Item>
+      <Item>100</Item>
+      <Item>163</Item>
+      <Item>145</Item>
+      <Item>92</Item>
+      <Item>101</Item>
+      <Item>146</Item>
+      <Item>119</Item>
+      <Item>163</Item>
+      <Item>153</Item>
+      <Item>160</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+test12av.tds.ieselect *
+      from 
+         ca_person_interface pi</uniqueName>
+</TableSettings>

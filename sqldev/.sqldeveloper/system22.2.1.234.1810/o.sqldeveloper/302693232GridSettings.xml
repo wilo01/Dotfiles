@@ -1,0 +1,54 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">PERSON_CODE</Item>
+      <Item class="java.lang.String">PERSON_TYPE</Item>
+      <Item class="java.lang.String">PERSON_TYPE_DESCRIPTION</Item>
+      <Item class="java.lang.String">TITLE</Item>
+      <Item class="java.lang.String">FORENAME</Item>
+      <Item class="java.lang.String">SURNAME</Item>
+      <Item class="java.lang.String">KNOWN_AS</Item>
+      <Item class="java.lang.String">BADGE_NUMBER</Item>
+      <Item class="java.lang.String">EMAIL_ADDRESS</Item>
+      <Item class="java.lang.String">DEPARTMENT_DESCRIPTION</Item>
+      <Item class="java.lang.String">HOSTNAME</Item>
+      <Item class="java.lang.String">DISPLAY_NAME</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>103</Item>
+      <Item>99</Item>
+      <Item>180</Item>
+      <Item>49</Item>
+      <Item>79</Item>
+      <Item>124</Item>
+      <Item>110</Item>
+      <Item>111</Item>
+      <Item>208</Item>
+      <Item>236</Item>
+      <Item>180</Item>
+      <Item>180</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+test12av.tds.ieselect 
+   p.person_code, 
+   p.person_type, 
+   t.person_type_description,
+   p.title,
+   p.forename, 
+   p.surname, 
+   p.known_as,
+   b.badge_number, 
+   p.email_address,
+   d.department_description,
+   decode(safe_get_setting_or_null('use_knownas_in_visitor'), 'Y', nvl(p.known_as,  p.forename ||' '||  p.surname), 'N',  p.forename ||' '||  p.surname) hostname,
+   nvl(p.known_as, p.forename ||' '|| p.surname) display_name
+from ca_person_interface p
+   left join ca_badge b on b.person_code = p.person_code and b.person_type = p.person_type
+   left join safe_user u on p.person_code = u.person_code and p.person_type = u.person_type 
+   left join ca_kiosk_pin kp on p.person_code = kp.person_code and p.person_type = kp.person_type
+   join ca_person_type_control t on p.person_type = t.person_type
+   left join ca_department d on p.department_code = d.department_code</uniqueName>
+</TableSettings>

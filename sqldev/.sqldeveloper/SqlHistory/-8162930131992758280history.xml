@@ -1,0 +1,235 @@
+<?xml version='1.0'  encoding='UTF-8' ?>
+<history>
+	<historyItem>
+		<sql><![CDATA[set echo off
+set termout on
+set feedback on
+set heading off
+set pagesize 1000
+set serveroutput on
+
+spool ca_basic_data.log
+
+accept v_client_name default 'Default' prompt 'enter company name: ';
+accept v_username default 'dariuszw' prompt 'enter your username: ';
+accept v_email_address default ('&v_username'||'@timedatasecurity.com') prompt 'enter your email: ';
+accept v_forename default 'Frank' prompt 'enter your forename: ';
+accept v_surname default 'Hart' prompt 'enter your surname: ';
+accept v_badge_number default '330451' prompt 'enter your badge number: ';
+
+accept v_person_code default '000001' prompt 'enter person_code: ';
+accept v_corporation_code default '1' prompt 'enter corporation code: ';
+accept v_site_code default '01' prompt 'enter site code: ';
+accept v_zone_code default '101001' prompt 'enter zone code: ';
+accept v_cp_code default '2' prompt 'enter collection point code: ';
+accept v_access_level_code default '1' prompt 'enter access level code: ';
+accept v_access_reason_code default '1' prompt 'enter access reason code: ';
+accept v_visit_type_code default '1' prompt 'enter visit type code: ';
+accept v_department_code default '1' prompt 'enter department code: ';
+accept v_access_group_code default '1' prompt 'enter access group code: ';
+
+
+
+
+
+set echo on
+
+-- Access Area Structure (Simple)
+insert into ca_reference_character8 ( reference_type, reference_code, reference_description )
+values ( 'CN', '&v_corporation_code', '&v_client_name');
+
+insert into ca_reference_character8 ( reference_type, reference_code, reference_description, parent_code )
+values ( 'SE', '&v_site_code', '&v_client_name Site', '&v_corporation_code' );
+
+insert into ca_reference_character8 ( reference_type, reference_code, reference_description, parent_code )
+values ( 'ZE', '&v_zone_code', '&v_client_name Zone', '&v_site_code' );
+
+
+-- Visitor Label (Standard)
+insert into ca_visitor_label ( visitor_label_name, visitor_label_short_name, priority_number )
+values ( 'CAR041.rep', 'Label', 1 );
+
+
+-- Access Level
+insert into ca_access_level ( access_level_code, access_level_description )
+values ( '&v_access_level_code', '&v_client_name Access Level' );
+
+
+-- Access Reason
+insert into ca_reference_character8 ( reference_type, reference_code, reference_description )
+values ( 'ASRN', '&v_access_reason_code', 'General Site Access' );
+
+
+-- Visit Type
+insert into ca_reference_character8 ( reference_type, reference_code, reference_description )
+values ( 'VTTE', '&v_visit_type_code', 'Standard Visit' );
+
+-- Location Zone -- if no rows inserted - doesn't matter
+delete from ca_location_zone;
+
+insert into ca_location_zone ( location_code, zone_code )
+select location, '&v_zone_code'
+from hr_location;
+
+
+-- System Details
+update ca_system
+set licensee = '&v_client_name',
+    visitor_badge_expiry_days = 1,
+    visitor_badge_expiry_time = trunc(sysdate) + 17/24;
+
+
+-- User Defaults
+insert into ca_user_data (
+   username,
+   corporation_code,
+   maintain_employee_ind,
+   query_employee_ind,
+   maintain_contractor_ind,
+   query_contractor_ind,
+   maintain_visitor_ind,
+   query_visitor_ind,
+   maintain_student_ind,
+   query_student_ind,
+   access_type_ind
+)
+values (
+   user,
+   '&v_corporation_code',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'B'
+);
+
+delete from ca_user_control
+where username = user;
+
+insert into ca_user_control (
+   username,
+   site_code,
+   zone_code,
+   access_level_code,
+   maintain_badge_ind, 
+   maintain_access_profile_ind,
+   maintain_photo_ind,
+   maintain_address_ind,
+   maintain_emergency_ind,
+   maintain_induction_ind,
+   maintain_user_fields_ind,
+   maintain_new_company_ind,
+   maintain_contact_ind,
+   maintain_next_of_kin_ind,
+   maintain_person_status_ind,
+   maintain_driver_ind,
+   maintain_ledger_ind,
+   maintain_profile_override_ind,
+   view_access_log_ind,
+   department_code,
+   access_group_code
+)
+values (
+   user,
+   '&v_site_code',
+   '&v_zone_code',
+   '&v_access_level_code',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   '&v_department_code',
+   '&v_access_group_code'
+);
+
+insert into ca_user_department (
+   username,
+   department_code
+)
+select 
+   user,
+   department_code
+from ca_department;
+
+insert into ca_user_access_group (
+   username,
+   access_group_code
+)
+select 
+   user,
+   access_group_code
+from ca_access_group;
+
+insert into ca_user_access_time (
+   username,
+   access_time_code
+)
+select 
+   user,
+   access_time_code
+from ca_access_time;
+
+spool off;
+
+delete from safe_user_role_assignment where username = '&v_username';
+insert into safe_user_role_assignment (username, user_role_name) values ('&v_username', 'all');
+
+
+insert into ca_reference_character8(reference_type, reference_code, reference_description, parent_code, ind_01, description_01, description_05, ind_03, ind_05, ind_08) values ('CNPT', '&v_cp_code', 'Default CP','&v_zone_code', 'Y', 'K', 'Europe/Dublin', 'Y', 'N', 'N');
+insert into safe_kiosk_monitor
+         (
+            terminal_code,
+            status,
+            needs_update_ind,
+            printer_status,
+            reader_status,
+            time_zone_offset,
+            hostname,
+            ip_address,
+            mac_address,
+            timezone
+         )
+         values
+         (
+            '&v_cp_code',
+            'A',
+            'N',
+            'Not available',
+            'Not available',
+            null,
+            'Not available',
+            'Not available',
+            'Not available',
+            null
+         );
+         
+         
+insert into ca_reference_character8 (reference_type, reference_code, reference_description, ind_01, ind_02, ind_03, ind_04) values ('VTRN', '1', 'Bussiness', 'N', 'N', 'N', 'N');
+insert into ca_reference_character8 (reference_type, reference_code, reference_description, ind_01, ind_02, ind_03, ind_04) values ('VTRN', '2', 'Event', 'N', 'N', 'Y', 'N');
+
+
+
+insert into ca_person_detail (person_code, person_type, forename, surname, access_mode_ind, active_ind, zone_code, department_code, start_date, allowed_visitor_ind, post_conditional_tna_ind, export_to_cashless_ind, sponsor_ind, notification_sms_ind, notification_email_ind, email_address) values('&v_person_code','E','&v_forename','&v_surname','Y','Y','&v_zone_code','&v_department_code',sysdate,'Y','Y','Y','Y','Y','Y', '&v_email_address');
+insert into ca_badge (badge_number, version_number, issue_number, status_ind, person_code, person_type, assign_date_time, active_date_time) values ('&v_badge_number', 1, 1, 'V', '&v_person_code', 'E', sysdate, sysdate)]]></sql>
+		<connection><![CDATA[Docker]]></connection>
+		<timestamp><![CDATA[1720375157603]]></timestamp>
+		<type><![CDATA[Script]]></type>
+		<executed><![CDATA[2]]></executed>
+		<execTime><![CDATA[8.134]]></execTime>
+	</historyItem>
+</history>

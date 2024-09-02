@@ -1,0 +1,11 @@
+<?xml version='1.0'  encoding='UTF-8' ?>
+<history>
+	<historyItem>
+		<sql><![CDATA[select * from user_tab_cols where lower(table_name) = 'ca_badge_layout_items' and lower(column_name) = 'doc_file2';]]></sql>
+		<connection><![CDATA[Dev]]></connection>
+		<timestamp><![CDATA[1720427020244]]></timestamp>
+		<type><![CDATA[SQL]]></type>
+		<executed><![CDATA[8]]></executed>
+		<execTime><![CDATA[0.253]]></execTime>
+	</historyItem>
+</history>

@@ -1,0 +1,11 @@
+<?xml version='1.0'  encoding='UTF-8' ?>
+<history>
+	<historyItem>
+		<sql><![CDATA[alter table ca_badge_layout_items add is_background2 varchar2(1) default 'N';]]></sql>
+		<connection><![CDATA[Dev]]></connection>
+		<timestamp><![CDATA[1720423966635]]></timestamp>
+		<type><![CDATA[SQL]]></type>
+		<executed><![CDATA[1]]></executed>
+		<execTime><![CDATA[0.02]]></execTime>
+	</historyItem>
+</history>

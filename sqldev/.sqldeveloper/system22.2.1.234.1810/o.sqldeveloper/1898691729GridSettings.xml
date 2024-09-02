@@ -1,0 +1,87 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">IMAGE_ID</Item>
+      <Item class="java.lang.String">IMAGE_TITLE</Item>
+      <Item class="java.lang.String">IMAGE_DESCRIPTION</Item>
+      <Item class="java.lang.String">SUBSET</Item>
+      <Item class="java.lang.String">THEME</Item>
+      <Item class="java.lang.String">LAST_CHANGED_DATE_TIME</Item>
+      <Item class="java.lang.String">RNUM</Item>
+      <Item class="java.lang.String">BEGIN</Item>
+      <Item class="java.lang.String">END</Item>
+      <Item class="java.lang.String">TOTAL</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>189</Item>
+      <Item>221</Item>
+      <Item>661</Item>
+      <Item>65</Item>
+      <Item>111</Item>
+      <Item>175</Item>
+      <Item>51</Item>
+      <Item>54</Item>
+      <Item>42</Item>
+      <Item>55</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23Devselect * from (
+   select 
+      iqq.*,
+      rownum rnum,
+      :st begin,
+      :lim end,
+      count(*) over () total   
+   from (
+      select 
+         iq.*
+      from (
+         select
+            image_id,
+            image_title,
+            image_description,
+            subset,
+            case when lower(theme) = 'deepmind' then 'Vivid' else theme end theme,
+            last_changed_date_time
+         from 
+            safe_kiosk_images
+         where
+            theme = :theme
+      ) iq
+      where  
+         (trim(:subset) is null or trim(:subset) is not null and lower(iq.subset) = lower(trim(:subset)))
+         and lower(
+            iq.image_id  || ' ' ||
+            iq.image_title || ' ' ||
+            iq.image_description || ' ' ||
+            iq.subset  || ' ' ||
+            iq.theme || ' ' ||
+            iq.last_changed_date_time 
+         ) 
+         like lower('%' || :query || '%')
+      order by
+         case when lower(:dir) = 'asc' then
+         decode( :sort ,
+            'image_id',                lower(iq.image_id),
+            'image_title',             lower(iq.image_title),
+            'image_description',       lower(iq.image_description),
+            'subset',                  lower(iq.subset),
+            'theme',                   lower(iq.theme),
+            'last_changed_date_time',  caup.get_sort_date(iq.last_changed_date_time)
+         )end asc,
+         case when lower(:dir) = 'desc' then
+         decode( :sort , 
+            'image_id',                lower(iq.image_id),
+            'image_title',             lower(iq.image_title),
+            'image_description',       lower(iq.image_description),
+            'subset',                  lower(iq.subset),
+            'theme',                   lower(iq.theme),
+            'last_changed_date_time',  caup.get_sort_date(iq.last_changed_date_time)
+         )end desc
+   ) iqq
+)
+where rnum > :st and rownum &lt;= :lim</uniqueName>
+</TableSettings>

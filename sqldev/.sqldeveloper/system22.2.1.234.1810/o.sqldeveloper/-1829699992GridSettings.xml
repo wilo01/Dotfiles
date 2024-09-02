@@ -1,0 +1,26 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">TEMPLATE_PLACEHOLDER_CODE</Item>
+      <Item class="java.lang.String">TEMPLATE_PLACEHOLDER_DESC</Item>
+      <Item class="java.lang.String">IS_HTML</Item>
+      <Item class="java.lang.String">PRODUCT</Item>
+      <Item class="java.lang.String">TEMPLATE_CATEGORY_CODE</Item>
+      <Item class="java.lang.String">TEMPLATE_CATEGORY_TYPE</Item>
+      <Item class="java.lang.String">TEMPLATE_PLACEHOLDER_GROUP</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>200</Item>
+      <Item>642</Item>
+      <Item>66</Item>
+      <Item>73</Item>
+      <Item>181</Item>
+      <Item>177</Item>
+      <Item>208</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+test.tds.ie+Visitor-dev%2C+TrunkSELECT * FROM "SAFE"."SAFE_TEMPLATE_PLACEHOLDER"</uniqueName>
+</TableSettings>

@@ -1,0 +1,37 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">SETTING_NAME</Item>
+      <Item class="java.lang.String">SETTING_VALUE</Item>
+      <Item class="java.lang.String">SETTING_DEPRICATED_IND</Item>
+      <Item class="java.lang.String">SETTING_VISIBLE_IND</Item>
+      <Item class="java.lang.String">SETTING_DESCRIPTION</Item>
+      <Item class="java.lang.String">PRODUCT</Item>
+      <Item class="java.lang.String">CLONE_IND</Item>
+      <Item class="java.lang.String">INTERNAL_IND</Item>
+      <Item class="java.lang.String">ALLOWED_EMPTY</Item>
+      <Item class="java.lang.String">VALIDATOR_ID</Item>
+      <Item class="java.lang.String">DEFAULT_VALUE</Item>
+      <Item class="java.lang.String">METADATA</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>213</Item>
+      <Item>109</Item>
+      <Item>168</Item>
+      <Item>141</Item>
+      <Item>533</Item>
+      <Item>73</Item>
+      <Item>82</Item>
+      <Item>97</Item>
+      <Item>114</Item>
+      <Item>97</Item>
+      <Item>109</Item>
+      <Item>66</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23Trunkselect * from SAFE_SYSTEM_OPTIONS where
+setting_name like 'use_domain%'</uniqueName>
+</TableSettings>

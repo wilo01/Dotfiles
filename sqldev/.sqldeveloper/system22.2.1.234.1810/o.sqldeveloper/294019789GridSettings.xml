@@ -1,0 +1,177 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">TEMPLATE_CODE</Item>
+      <Item class="java.lang.String">TEMPLATE_DESCRIPTION</Item>
+      <Item class="java.lang.String">TEMPLATE_PRODUCTS</Item>
+      <Item class="java.lang.String">TEMPLATE_TYPE_CODE</Item>
+      <Item class="java.lang.String">TEMPLATE_FROM</Item>
+      <Item class="java.lang.String">TEMPLATE_SUBJECT</Item>
+      <Item class="java.lang.String">TEMPLATE_CATEGORY_CODE</Item>
+      <Item class="java.lang.String">TEMPLATE_BODY</Item>
+      <Item class="java.lang.String">AREA_TYPE</Item>
+      <Item class="java.lang.String">AREA_CODE</Item>
+      <Item class="java.lang.String">DIVISION_TYPE</Item>
+      <Item class="java.lang.String">DIVISION_CODE</Item>
+      <Item class="java.lang.String">DELETABLE_IND</Item>
+      <Item class="java.lang.String">EDITABLE_IND</Item>
+      <Item class="java.lang.String">EMAIL_CC</Item>
+      <Item class="java.lang.String">TEMPLATE_FROM_NUMBER</Item>
+      <Item class="java.lang.String">REPLY_TO</Item>
+      <Item class="java.lang.String">TEMPLATE_SEVERITY_LEVEL</Item>
+      <Item class="java.lang.String">ICS_SUMMARY</Item>
+      <Item class="java.lang.String">HIDE_IND</Item>
+      <Item class="java.lang.String">VISIT_REASON_CODE</Item>
+      <Item class="java.lang.String">VISITOR_TYPE_CODE</Item>
+      <Item class="java.lang.String">ICS_DESCRIPTION</Item>
+      <Item class="java.lang.String">LANG_CODE</Item>
+      <Item class="java.lang.String">DEFAULT_IND</Item>
+      <Item class="java.lang.String">ACTION_CODE</Item>
+      <Item class="java.lang.String">RECIPIENT_ID</Item>
+      <Item class="java.lang.String">TEMPLATE_USER_DESCRIPTION</Item>
+      <Item class="java.lang.String">TEMPLATE_USER_NAME</Item>
+      <Item class="java.lang.String">WYSIWYG_IND</Item>
+      <Item class="java.lang.String">TEMPLATE_TYPE_CODE_1</Item>
+      <Item class="java.lang.String">TEMPLATE_TYPE_DESCRIPTION</Item>
+      <Item class="java.lang.String">ALLOW_HTML_PLACEHOLDER</Item>
+      <Item class="java.lang.String">ALLOW_SUBJECT</Item>
+      <Item class="java.lang.String">MAX_BODY_LENGTH</Item>
+      <Item class="java.lang.String">ID</Item>
+      <Item class="java.lang.String">TEMPLATE_SLUG</Item>
+      <Item class="java.lang.String">ID_1</Item>
+      <Item class="java.lang.String">CATEGORY_ID</Item>
+      <Item class="java.lang.String">TYPE_ID</Item>
+      <Item class="java.lang.String">RECIPIENT_ID_1</Item>
+      <Item class="java.lang.String">TEMPLATE_ID</Item>
+      <Item class="java.lang.String">ID_2</Item>
+      <Item class="java.lang.String">CATEGORY_NAME</Item>
+      <Item class="java.lang.String">ID_3</Item>
+      <Item class="java.lang.String">RECIPIENT_NAME</Item>
+      <Item class="java.lang.String">VISIT_REASON_CODE_1</Item>
+      <Item class="java.lang.String">VISIT_REASON_DESCRIPTION</Item>
+      <Item class="java.lang.String">COMPANY_HOST_IND</Item>
+      <Item class="java.lang.String">SECONDARY_CHECK_IND</Item>
+      <Item class="java.lang.String">DEFAULT_VISITOR_LABEL</Item>
+      <Item class="java.lang.String">EVENT_IND</Item>
+      <Item class="java.lang.String">PERSON_TYPE_EXCLUDED</Item>
+      <Item class="java.lang.String">HIDE_IND_1</Item>
+      <Item class="java.lang.String">VISITOR_TYPE_CODE_1</Item>
+      <Item class="java.lang.String">VISITOR_TYPE_DESCRIPTION</Item>
+      <Item class="java.lang.String">VISITOR_TYPE_WORKFLOW</Item>
+      <Item class="java.lang.String">PRINT_ON_CHECKIN</Item>
+      <Item class="java.lang.String">LABEL_CODE</Item>
+      <Item class="java.lang.String">EMAIL_CHECKIN_PROMPT</Item>
+      <Item class="java.lang.String">VIDEO_REFERENCE</Item>
+      <Item class="java.lang.String">HOST_SCAN_CHECKOUT_PROMPT</Item>
+      <Item class="java.lang.String">ENABLE_DEFAULT_HOST</Item>
+      <Item class="java.lang.String">ENABLE_CHECKOUT_EMAIL</Item>
+      <Item class="java.lang.String">HOST_HEALTH_SURVEY</Item>
+      <Item class="java.lang.String">UNNAMED_VISITORS</Item>
+      <Item class="java.lang.String">UNNAMED_VISITORS_LABEL_CODE</Item>
+      <Item class="java.lang.String">ENABLE_CHECKIN_EMAIL</Item>
+      <Item class="java.lang.String">WORKFLOW_ORDER</Item>
+      <Item class="java.lang.String">EVENT_IND_1</Item>
+      <Item class="java.lang.String">EMPLOYEE_VERIFICATION_IND</Item>
+      <Item class="java.lang.String">GUEST_LIST_IND</Item>
+      <Item class="java.lang.String">LANGUAGE_CODE</Item>
+      <Item class="java.lang.String">LANGUAGE_DESCRIPTION</Item>
+      <Item class="java.lang.String">ARCHIVED</Item>
+      <Item class="java.lang.String">SEVERITY_LEVEL_CODE</Item>
+      <Item class="java.lang.String">SEVERITY_LEVEL_DESCRIPTION</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>114</Item>
+      <Item>278</Item>
+      <Item>144</Item>
+      <Item>148</Item>
+      <Item>278</Item>
+      <Item>621</Item>
+      <Item>181</Item>
+      <Item>530</Item>
+      <Item>81</Item>
+      <Item>85</Item>
+      <Item>102</Item>
+      <Item>106</Item>
+      <Item>107</Item>
+      <Item>97</Item>
+      <Item>73</Item>
+      <Item>166</Item>
+      <Item>75</Item>
+      <Item>174</Item>
+      <Item>99</Item>
+      <Item>70</Item>
+      <Item>137</Item>
+      <Item>135</Item>
+      <Item>107</Item>
+      <Item>87</Item>
+      <Item>93</Item>
+      <Item>99</Item>
+      <Item>93</Item>
+      <Item>460</Item>
+      <Item>278</Item>
+      <Item>96</Item>
+      <Item>161</Item>
+      <Item>191</Item>
+      <Item>178</Item>
+      <Item>111</Item>
+      <Item>131</Item>
+      <Item>47</Item>
+      <Item>278</Item>
+      <Item>47</Item>
+      <Item>97</Item>
+      <Item>64</Item>
+      <Item>106</Item>
+      <Item>93</Item>
+      <Item>47</Item>
+      <Item>243</Item>
+      <Item>47</Item>
+      <Item>113</Item>
+      <Item>150</Item>
+      <Item>180</Item>
+      <Item>137</Item>
+      <Item>157</Item>
+      <Item>158</Item>
+      <Item>80</Item>
+      <Item>164</Item>
+      <Item>83</Item>
+      <Item>148</Item>
+      <Item>178</Item>
+      <Item>153</Item>
+      <Item>129</Item>
+      <Item>91</Item>
+      <Item>158</Item>
+      <Item>123</Item>
+      <Item>208</Item>
+      <Item>155</Item>
+      <Item>168</Item>
+      <Item>150</Item>
+      <Item>132</Item>
+      <Item>210</Item>
+      <Item>155</Item>
+      <Item>125</Item>
+      <Item>93</Item>
+      <Item>184</Item>
+      <Item>113</Item>
+      <Item>118</Item>
+      <Item>161</Item>
+      <Item>74</Item>
+      <Item>149</Item>
+      <Item>192</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item class="java.lang.String">2 asc</Item>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+test.tds.ie+Visitor-safe%2C+Trunkselect * from safe_message_template smt
+         left join safe_template_type stt on smt.template_type_code = stt.template_type_code
+         left join safe_mt smtn on smtn.template_slug = smt.template_description  
+         left join safe_mt_cat_type_rec_template smtl on smtl.template_id = smtn.id
+         left join safe_mt_category stc on stc.id = smtl.category_id
+         left join safe_mt_recipient str on str.id = smtl.recipient_id
+         left join ca_visit_reason cvr on smt.visit_reason_code = cvr.visit_reason_code
+         left join safe_kiosk_workflow skw on smt.visitor_type_code = skw.visitor_type_code
+         left join safe_kiosk_languages_view skl on skl.language_code = smt.lang_code
+         left join safe_severity_level ssl on ssl.severity_level_code = smt.template_severity_level
+         where default_ind = 'Y'</uniqueName>
+</TableSettings>

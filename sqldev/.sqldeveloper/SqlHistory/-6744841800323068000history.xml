@@ -1,0 +1,29 @@
+<?xml version='1.0'  encoding='UTF-8' ?>
+<history>
+	<historyItem>
+		<sql><![CDATA[DECLARE
+  p_sender VARCHAR2(200);
+  p_substring VARCHAR2(200);
+        v_name varchar2(255);
+BEGIN
+
+  p_sender := 'TDS';
+
+    v_name := trim(substr(p_sender, 0, instr(p_sender, '<') - 1));
+    if v_name is null then
+         v_name := substr(p_sender, instr(p_sender, '>') + 1);
+      end if;
+      if v_name is not null then
+         v_name := '""' || trim(replace(v_name, '"')) || '""';
+      end if;
+  dbms_output.put_line('The substring is: '|| p_sender);
+    dbms_output.put_line('The substring is: '|| v_name);
+
+END;/]]></sql>
+		<connection><![CDATA[Trunk]]></connection>
+		<timestamp><![CDATA[1722433113999]]></timestamp>
+		<type><![CDATA[SQL]]></type>
+		<executed><![CDATA[1]]></executed>
+		<execTime><![CDATA[0.157]]></execTime>
+	</historyItem>
+</history>

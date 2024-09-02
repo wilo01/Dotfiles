@@ -1,0 +1,67 @@
+<?xml version='1.0'  encoding='UTF-8' ?>
+<history>
+	<historyItem>
+		<sql><![CDATA[select * from (  
+   select
+      p.person_code,
+      p.person_type,
+      p.title,
+      p.forename,
+      p.surname,
+      p.known_as,
+      b.badge_number,
+      b.issue_number,
+      p.email_address,
+      d.department_description,
+      decode(safe_get_setting_or_null('use_knownas_in_visitor'), 'Y', nvl(p.known_as, p.forename ||' '|| p.surname), 'N', p.forename ||' '|| p.surname) hostname,
+      nvl(p.known_as, p.forename ||' '|| p.surname) display_name
+   from safe_user u,
+      ca_person_interface p,
+      ca_badge b,
+      ca_department d
+   where
+      u.username = :username
+      and u.person_code = p.person_code
+      and u.person_type = p.person_type
+      and b.person_code = p.person_code
+      and b.person_type = p.person_type
+      and p.active_ind = 'Y'
+      and instr(replace(nvl(safe_get_setting_or_null('badge_status_coexist_with_valid'),'(B)(I)'),'I', 'V'), b.status_ind) > 0
+      and p.person_type != 'IV'
+      and p.allowed_visitor_ind = 'Y'
+      and p.department_code = d.department_code (+)
+   union all
+      select
+         p.person_code,
+         p.person_type,
+         p.title,
+         p.forename,
+         p.surname,
+         p.known_as,
+         b.badge_number,
+         b.issue_number,
+         p.email_address,
+         d.department_description,
+         decode(safe_get_setting_or_null('use_knownas_in_visitor'), 'Y', nvl(p.known_as, p.forename ||' '|| p.surname), 'N', p.forename ||' '|| p.surname) hostname,
+         nvl(p.known_as, p.forename ||' '|| p.surname) display_name
+     from ca_person_interface p,
+        ca_badge b,
+        ca_department d
+     where
+        lower('*'||p.email_address) like lower('*'||:username||'@%')
+        and  p.person_type != 'V'
+        and b.person_code = p.person_code
+        and b.person_type = p.person_type
+        and p.active_ind = 'Y'
+        and instr(replace(nvl(safe_get_setting_or_null('badge_status_coexist_with_valid'),'(B)(I)'),'I', 'V'), b.status_ind) > 0
+        and p.person_type != 'IV'
+        and p.allowed_visitor_ind = 'Y'
+        and p.department_code = d.department_code (+)
+) where rownum = 1]]></sql>
+		<connection><![CDATA[DB sapuat UAT]]></connection>
+		<timestamp><![CDATA[1718809930530]]></timestamp>
+		<type><![CDATA[SQL]]></type>
+		<executed><![CDATA[6]]></executed>
+		<execTime><![CDATA[0.033]]></execTime>
+	</historyItem>
+</history>

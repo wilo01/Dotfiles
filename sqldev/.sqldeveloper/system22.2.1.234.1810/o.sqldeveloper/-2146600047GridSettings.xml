@@ -1,0 +1,24 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">FORENAME</Item>
+      <Item class="java.lang.String">SURNAME</Item>
+      <Item class="java.lang.String">COLLECTION_POINT_CODE</Item>
+      <Item class="java.lang.String">WATCHLIST_IND</Item>
+      <Item class="java.lang.String">WATCHLIST_ID</Item>
+      <Item class="java.lang.String">PICTURE_THUMB</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>79</Item>
+      <Item>89</Item>
+      <Item>168</Item>
+      <Item>107</Item>
+      <Item>99</Item>
+      <Item>100</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23test111av.tds.ieSELECT forename, surname, collection_point_code, watchlist_ind,watchlist_id, picture_thumb FROM ca_booked_person</uniqueName>
+</TableSettings>

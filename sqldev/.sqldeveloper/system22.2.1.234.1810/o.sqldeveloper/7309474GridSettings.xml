@@ -1,0 +1,292 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">TEMPLATE_CODE</Item>
+      <Item class="java.lang.String">TEMPLATE_DESCRIPTION</Item>
+      <Item class="java.lang.String">TEMPLATE_PRODUCTS</Item>
+      <Item class="java.lang.String">TEMPLATE_SUBJECT</Item>
+      <Item class="java.lang.String">TEMPLATE_BODY</Item>
+      <Item class="java.lang.String">TEMPLATE_FROM</Item>
+      <Item class="java.lang.String">TEMPLATE_TYPE_CODE</Item>
+      <Item class="java.lang.String">TEMPLATE_TYPE_DESCRIPTION</Item>
+      <Item class="java.lang.String">TEMPLATE_CATEGORY_CODE</Item>
+      <Item class="java.lang.String">EMAIL_CC</Item>
+      <Item class="java.lang.String">ICS_SUMMARY</Item>
+      <Item class="java.lang.String">ICS_DESCRIPTION</Item>
+      <Item class="java.lang.String">AREA_TYPE_CODE</Item>
+      <Item class="java.lang.String">AREA_TYPE_DESCRIPTION</Item>
+      <Item class="java.lang.String">AREA_CODE</Item>
+      <Item class="java.lang.String">AREA_DESCRIPTION</Item>
+      <Item class="java.lang.String">TEMPLATE_FROM_NUMBER</Item>
+      <Item class="java.lang.String">REPLY_TO</Item>
+      <Item class="java.lang.String">TEMPLATE_SEVERITY_CODE</Item>
+      <Item class="java.lang.String">TEMPLATE_SEVERITY_LEVEL</Item>
+      <Item class="java.lang.String">VISIT_REASON_CODE</Item>
+      <Item class="java.lang.String">VISIT_REASON_DESCRIPTION</Item>
+      <Item class="java.lang.String">VISITOR_TYPE_CODE</Item>
+      <Item class="java.lang.String">VISITOR_TYPE_DESCRIPTION</Item>
+      <Item class="java.lang.String">TEMPLATE_TYPE</Item>
+      <Item class="java.lang.String">LANG_CODE</Item>
+      <Item class="java.lang.String">LANGUAGE_DESCRIPTION</Item>
+      <Item class="java.lang.String">DEFAULT_IND</Item>
+      <Item class="java.lang.String">TEMPLATE_RECIPIENT_CODE</Item>
+      <Item class="java.lang.String">TEMPLATE_RECIPIENT_DESCRIPTION</Item>
+      <Item class="java.lang.String">TEMPLATE_ACTION_CODE</Item>
+      <Item class="java.lang.String">TEMPLATE_ACTION_DESCRIPTION</Item>
+      <Item class="java.lang.String">USER_DEFINED_DESCRIPTION</Item>
+      <Item class="java.lang.String">USER_DEFINED_NAME</Item>
+      <Item class="java.lang.String">RNUM</Item>
+      <Item class="java.lang.String">BEGIN</Item>
+      <Item class="java.lang.String">END</Item>
+      <Item class="java.lang.String">TOTAL</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>114</Item>
+      <Item>278</Item>
+      <Item>144</Item>
+      <Item>621</Item>
+      <Item>530</Item>
+      <Item>278</Item>
+      <Item>148</Item>
+      <Item>191</Item>
+      <Item>181</Item>
+      <Item>131</Item>
+      <Item>99</Item>
+      <Item>107</Item>
+      <Item>119</Item>
+      <Item>162</Item>
+      <Item>85</Item>
+      <Item>128</Item>
+      <Item>166</Item>
+      <Item>236</Item>
+      <Item>173</Item>
+      <Item>174</Item>
+      <Item>137</Item>
+      <Item>180</Item>
+      <Item>135</Item>
+      <Item>178</Item>
+      <Item>110</Item>
+      <Item>87</Item>
+      <Item>161</Item>
+      <Item>93</Item>
+      <Item>177</Item>
+      <Item>220</Item>
+      <Item>162</Item>
+      <Item>243</Item>
+      <Item>516</Item>
+      <Item>278</Item>
+      <Item>51</Item>
+      <Item>54</Item>
+      <Item>42</Item>
+      <Item>55</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item class="java.lang.String">2 asc</Item>
+      <Item/>
+      <Item class="java.lang.String">30 asc</Item>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+test.tds.ie+Visitor-safe%2C+Trunkselect *
+from
+(  select
+      iq.*,
+      rownum rnum,
+      :st begin,
+      :lim end,
+      count(*) over () total
+   from
+   (  
+      select 
+         smt.template_code,
+         smt.template_description,
+         smt.template_products,
+         smt.template_subject,
+         smt.template_body,
+         smt.template_from,
+         smt.template_type_code,
+         stt.template_type_description,
+         smt.template_category_code,
+         smt.email_cc,
+         smt.ics_summary,
+         smt.ics_description,
+         smt.area_type area_type_code,
+         decode(smt.area_type, 'site', 'Site', 'zone', 'Zone', 'cnpt', 'Collection Point', 'cluster', 'Cluster') area_type_description,
+         smt.area_code,
+         (
+            select site_description from ca_site where site_code = smt.area_code and smt.area_type = 'site'
+            union
+            select zone_description from ca_zone where zone_code = smt.area_code and smt.area_type = 'zone'
+            union
+            select collection_point_description from ca_collection_point where collection_point_code = smt.area_code and smt.area_type = 'cnpt'
+            union
+            select cluster_name from safe_cluster_info where cluster_name = smt.area_code and smt.area_type = 'cluster'
+         ) area_description,
+         smt.template_from_number,
+         smt.reply_to,
+         ssl.severity_level_code template_severity_code,
+         ssl.severity_level_description template_severity_level,
+         cvr.visit_reason_code,
+         cvr.visit_reason_description,
+         skw.visitor_type_code,
+         skw.visitor_type_description,
+         stt.template_type_description template_type,
+         smt.lang_code,
+         skl.language_description,
+         smt.default_ind,
+         str.id template_recipient_code,
+         str.recipient_name template_recipient_description, 
+         stc.id template_action_code,
+         stc.category_name template_action_description,
+         smt.template_user_description user_defined_description,
+         smt.template_user_name user_defined_name
+      from 
+         safe_message_template smt
+         left join safe_template_type stt on smt.template_type_code = stt.template_type_code
+         left join safe_mt smtn on smtn.template_slug = smt.template_description  
+         left join safe_mt_cat_type_rec_template smtl on smtl.template_id = smtn.id
+         left join safe_mt_category stc on stc.id = smtl.category_id
+         left join safe_mt_recipient str on str.id = smtl.recipient_id
+         left join ca_visit_reason cvr on smt.visit_reason_code = cvr.visit_reason_code
+         left join safe_kiosk_workflow skw on smt.visitor_type_code = skw.visitor_type_code
+         left join safe_kiosk_languages_view skl on skl.language_code = smt.lang_code
+         left join safe_severity_level ssl on ssl.severity_level_code = smt.template_severity_level
+            where (
+                  (
+                        trim(:cl) is null
+                        or smt.template_code in (select message_template_code
+                                                 from ca_message_template_location
+                                                 where cluster_name = trim(:cl))
+                        or smt.template_code in (select message_template_code
+                                                 from ca_message_template_location
+                                                 where zone_code in (select zone_code
+                                                                     from safe_cluster_cp_view
+                                                                     where cluster_name = :cl))
+                        or smt.template_code in (select message_template_code
+                                                 from ca_message_template_location
+                                                 where site_code in (select site_code
+                                                                     from safe_cluster_cp_view
+                                                                     where cluster_name = :cl))
+                        or smt.template_code in (select message_template_code
+                                                 from ca_message_template_location
+                                                 where collection_point_code in (select collection_point_code
+                                                                                 from safe_cluster_cp_view
+                                                                                 where cluster_name = :cl))
+                     )
+                  and (trim(:l) is null
+                  or smt.template_code in (select message_template_code
+                                           from ca_message_template_location
+                                           where site_code = trim(:l))
+                  or smt.template_code in (select message_template_code
+                                           from ca_message_template_location
+                                           where zone_code in (select zone_code
+                                                               from safe_cluster_cp_view
+                                                               where site_code = :l))
+                  or smt.template_code in (select message_template_code
+                                           from ca_message_template_location
+                                           where collection_point_code in (select collection_point_code
+                                                                           from safe_cluster_cp_view
+                                                                           where site_code = :l))
+                     )
+                  and (trim(:b) is null
+                  or smt.template_code in (select message_template_code
+                                           from ca_message_template_location
+                                           where zone_code = trim(:b))
+                  or smt.template_code in (select message_template_code
+                                           from ca_message_template_location
+                                           where collection_point_code in (select collection_point_code
+                                                                           from safe_cluster_cp_view
+                                                                           where zone_code = :b))
+                     )
+                  and (trim(:cp) is null
+                  or smt.template_code in (select message_template_code
+                                           from ca_message_template_location
+                                           where collection_point_code = trim(:cp))
+                     )
+               )
+         and (trim(:tt) is null or smt.template_type_code = trim(:tt) )
+         and (trim(:lang_code) is null or smt.lang_code = trim(:lang_code) )
+         and (trim(:default_ind) is null or smt.default_ind = trim(:default_ind) )
+         and ( trim(:vt) is null or smt.visitor_type_code = trim(:vt))
+         and ( trim(:vr) is null or smt.visit_reason_code = trim(:vr))
+         and (trim(:p) is null or smt.template_products like '%(' || trim(:p) || ')%' )
+         and lower (
+            smt.template_code          || ' ' ||
+            smt.template_description   || ' ' ||
+            smt.template_products      || ' ' ||
+            smt.template_subject       || ' ' ||
+            smt.template_body          || ' ' ||
+            smt.template_from          || ' ' ||
+            stt.template_type_description || ' ' ||
+            smt.ics_summary      || ' ' ||
+            smt.ics_description      || ' ' ||
+            smt.email_cc || ' ' ||
+            cvr.visit_reason_description || ' ' ||
+            skl.language_description || ' ' ||
+            ssl.severity_level_description || ' ' ||
+            smt.reply_to || ' ' ||
+            smt.lang_code || ' ' ||
+            skw.visitor_type_description || ' ' ||
+            str.recipient_name || ' ' ||
+            smt.template_user_description || ' ' ||
+            smt.template_user_name
+         ) like lower('%' || nvl(trim(:q),'%') || '%')
+      order by
+         case when lower(:sort) = 'template_code' and lower(:dir) = 'asc' then to_number(smt.template_code) end asc,
+         case when lower(:dir) = 'asc' then
+            decode( :sort, 
+               'template_description', lower(smt.template_description),
+               'template_products',    lower(smt.template_products),
+               'template_subject',     lower(smt.template_subject),
+               'template_from',        lower(smt.template_from),
+               'template_type_description',  lower(stt.template_type_description),
+               'email_cc',           lower(smt.email_cc),
+               'area_type_description', lower(area_type_description),
+               'area_description',     lower(area_description),
+               'template_from_number', lower(lpad(smt.template_from_number, 20, 0)),
+               'template_severity_level', lower(ssl.severity_level_description),
+               'ics_summary', lower(smt.ics_summary),
+               'ics_description', lower(smt.ics_description),
+               'visit_reason_description', lower(cvr.visit_reason_description),
+               'visitor_type_description', lower(skw.visitor_type_description),
+               'language_description', lower(skl.language_description),
+               'user_defined_name', lower(smt.template_user_name),
+               'user_defined_description', lower(smt.template_user_description),
+               'template_action_description', lower(stc.category_name),
+               'template_recipient_description', lower(str.recipient_name),
+               'default_ind', lower(smt.default_ind)
+            ) end asc,
+         case when lower(:sort) = 'template_code' and lower(:dir) = 'desc' then to_number(smt.template_code) end desc,
+         case when lower(:dir) = 'desc' then
+            decode( :sort, 
+               'template_description', lower(smt.template_description),
+               'template_products',    lower(smt.template_products),
+               'template_subject',     lower(smt.template_subject),
+               'template_from',        lower(smt.template_from),
+               'template_type_description',  lower(stt.template_type_description),
+               'email_cc',           lower(smt.email_cc),
+               'area_type_description', lower(area_type_description),
+               'area_description',     lower(area_description),
+               'template_from_number', lower(lpad(smt.template_from_number, 20, 0)),
+               'template_severity_level', lower(ssl.severity_level_description),
+               'ics_summary', lower(smt.ics_summary),
+               'ics_description', lower(smt.ics_description),
+               'visit_reason_description', lower(cvr.visit_reason_description),
+               'visitor_type_description', lower(skw.visitor_type_description),
+               'language_description', lower(skl.language_description),
+               'user_defined_name', lower(smt.template_user_name),
+               'user_defined_description', lower(smt.template_user_description),
+               'template_action_description', lower(stc.category_name),
+               'template_recipient_description', lower(str.recipient_name),
+               'default_ind', lower(smt.default_ind)
+            ) end desc
+   ) iq
+)
+where
+   rnum > begin AND rownum &lt;= end
+   and safe_request_permissions_pak.check_permission_sql (
+      :Uidtoken, 
+      '(messagetemplatemenu)', 
+      'messageTemplateGrid', 
+      'GET' 
+) = 'Y'</uniqueName>
+</TableSettings>

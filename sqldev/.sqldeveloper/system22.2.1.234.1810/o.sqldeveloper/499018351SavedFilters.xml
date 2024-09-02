@@ -1,0 +1,7 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Filters class="java.util.ArrayList" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-filters">
+   <Item class="java.lang.String">chromebox_id like '8f26bb39-eebd-4498-9571-462f90dac030'</Item>
+   <Item class="java.lang.String">chromebox_id = 'noid'</Item>
+   <Item class="java.lang.String">chromebox_id = '8f26bb39-eebd-4498-9571-462f90dac030'</Item>
+   <Item class="java.lang.String">chromebox_id like '8f26bb39%'</Item>
+</Filters>

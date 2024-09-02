@@ -1,0 +1,19 @@
+<?xml version='1.0'  encoding='UTF-8' ?>
+<history>
+	<historyItem>
+		<sql><![CDATA[select 
+     id,
+     name
+   from 
+      ca_badge_layout cbl
+   where
+      (trim(:q) is null or lower(id || ' ' || name) like lower('%' || trim(:q) || '%' ))
+      and cbl.type = 'image'
+      order by lower(id)]]></sql>
+		<connection><![CDATA[Trunk]]></connection>
+		<timestamp><![CDATA[1722419025339]]></timestamp>
+		<type><![CDATA[SQL]]></type>
+		<executed><![CDATA[1]]></executed>
+		<execTime><![CDATA[0.049]]></execTime>
+	</historyItem>
+</history>

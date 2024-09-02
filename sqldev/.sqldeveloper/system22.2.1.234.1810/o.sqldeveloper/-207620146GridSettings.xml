@@ -1,0 +1,91 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">ACODE</Item>
+      <Item class="java.lang.String">ADESCRIPTION</Item>
+      <Item class="java.lang.String">ADESCRIPTION2</Item>
+      <Item class="java.lang.String">TITLE</Item>
+      <Item class="java.lang.String">FORENAME</Item>
+      <Item class="java.lang.String">SURNAME</Item>
+      <Item class="java.lang.String">ASSEMBLY_POINT_CODE</Item>
+      <Item class="java.lang.String">DEPARTMENT</Item>
+      <Item class="java.lang.String">LOCATION</Item>
+      <Item class="java.lang.String">EMAIL</Item>
+      <Item class="java.lang.String">LDAP</Item>
+      <Item class="java.lang.String">KNOWNAS</Item>
+      <Item class="java.lang.String">HASPHOTO</Item>
+      <Item class="java.lang.String">NOTIFICATION_EMAIL_IND</Item>
+      <Item class="java.lang.String">NOTIFICATION_SMS_IND</Item>
+      <Item class="java.lang.String">SCORE</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>69</Item>
+      <Item>245</Item>
+      <Item>245</Item>
+      <Item>53</Item>
+      <Item>181</Item>
+      <Item>109</Item>
+      <Item>157</Item>
+      <Item>93</Item>
+      <Item>117</Item>
+      <Item>349</Item>
+      <Item>229</Item>
+      <Item>245</Item>
+      <Item>82</Item>
+      <Item>160</Item>
+      <Item>153</Item>
+      <Item>58</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+mastercardselect
+            pi.aCode,
+            pi.adescription,
+            pi.adescription2,
+            pi.title,
+            pi.forename,
+            pi.surname,
+            pi.assembly_point_code,
+            pi.department,
+            pi.zone_description location,
+            pi.email,
+            pi.ldap,
+            pi.knownas,
+            pi.hasphoto,
+            pi.notification_email_ind,
+            pi.notification_sms_ind,
+            nvl((select 100 from dual where regexp_like(pi.email_address, '^' || :forename || '@[a-zA-Z0-9._%-]+\.[a-zA-Z]{2,10}$', 'i')), 30) score
+         from
+             ca_active_host_location_facade pi
+         where
+            ((pi.person_type in(
+               select surrpt.reference_code
+               from ca_user_role_permission surrpt
+               where surrpt.reference_type = 'PNTP'
+                 and surrpt.user_role_name = safe_get_user_role(:Uidtoken)
+            )
+               and pi.zone_code in
+                   (
+                      select surrz.reference_code
+                      from ca_user_role_permission surrz
+                      where surrz.reference_type = 'ZE'
+                        and surrz.user_role_name = safe_get_user_role(:Uidtoken)
+                   )
+               and pi.department_code in
+                   (
+                      select surrd.reference_code
+                      from ca_user_role_permission surrd
+                      where surrd.reference_type = 'DT'
+                        and surrd.user_role_name = safe_get_user_role(:Uidtoken)
+                   ) and safe_get_setting_or_null('qr_host_permission_check') = 'Y')or safe_get_setting_or_null('qr_host_permission_check') = 'N')
+           and pi.email_lower like lower(  '%'||nvl(:forename, '%') || '%@%')
+           or pi.email_lower like lower(  '%'||nvl(:surname, '%') || '%@%')
+           and safe_request_permissions_pak.check_permission_sql (
+                     :Uidtoken,
+                     '(quickregistermenu)(guestDashboard)(visitoractionmenu)',
+                     'quickHostCtx',
+                     'GET'
+                  ) = 'Y'</uniqueName>
+</TableSettings>

@@ -1,0 +1,26 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">MESSAGE_TEMPLATE_CODE</Item>
+      <Item class="java.lang.String">CLUSTER_NAME</Item>
+      <Item class="java.lang.String">SITE_CODE</Item>
+      <Item class="java.lang.String">ZONE_CODE</Item>
+      <Item class="java.lang.String">COLLECTION_POINT_CODE</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>0</Item>
+      <Item>0</Item>
+      <Item>397</Item>
+      <Item>149</Item>
+      <Item>82</Item>
+      <Item>90</Item>
+      <Item>168</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item class="java.lang.String">3 desc</Item>
+      <Item class="java.lang.String">3 asc</Item>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+sapuat+UATSELECT * FROM "COREACCESS"."CA_MESSAGE_TEMPLATE_LOCATION"</uniqueName>
+</TableSettings>

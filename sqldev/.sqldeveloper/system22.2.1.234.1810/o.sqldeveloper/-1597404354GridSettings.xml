@@ -1,0 +1,36 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">IMAGE_ID</Item>
+      <Item class="java.lang.String">IMAGE</Item>
+      <Item class="java.lang.String">CONTENT_TYPE</Item>
+      <Item class="java.lang.String">IMAGE_TITLE</Item>
+      <Item class="java.lang.String">IMAGE_DESCRIPTION</Item>
+      <Item class="java.lang.String">THEME</Item>
+      <Item class="java.lang.String">SUBSET</Item>
+      <Item class="java.lang.String">LAST_CHANGED_DATE_TIME</Item>
+      <Item class="java.lang.String">SITE_CODE</Item>
+      <Item class="java.lang.String">ZONE_CODE</Item>
+      <Item class="java.lang.String">COLLECTION_POINT_CODE</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>0</Item>
+      <Item>0</Item>
+      <Item>189</Item>
+      <Item>53</Item>
+      <Item>107</Item>
+      <Item>309</Item>
+      <Item>869</Item>
+      <Item>69</Item>
+      <Item>65</Item>
+      <Item>175</Item>
+      <Item>82</Item>
+      <Item>90</Item>
+      <Item>168</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23TrunkSELECT * FROM "SAFE"."SAFE_KIOSK_IMAGES"</uniqueName>
+</TableSettings>

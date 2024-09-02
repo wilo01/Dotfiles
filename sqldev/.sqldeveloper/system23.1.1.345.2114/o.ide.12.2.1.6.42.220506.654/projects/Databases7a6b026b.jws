@@ -1,0 +1,11 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<jws:workspace xmlns:jws="http://xmlns.oracle.com/ide/project">
+   <hash n="working-sets">
+      <value n=".current" v="(All Files)"/>
+      <hash n="(All Files)">
+         <list n="pattern-filters">
+            <string v="+**"/>
+         </list>
+      </hash>
+   </hash>
+</jws:workspace>

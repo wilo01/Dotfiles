@@ -1,0 +1,199 @@
+<?xml version='1.0'  encoding='UTF-8' ?>
+<history>
+	<historyItem>
+		<sql><![CDATA[declare
+   l_count integer;
+   v_hr_integration integer;
+begin
+   select count(*) into l_count from user_mviews where lower(mview_name) = 'ca_active_host_location_person';
+
+   if l_count > 0 then
+      execute immediate 'drop materialized view ca_active_host_location_person';
+   end if;
+
+   execute immediate 'create materialized view ca_active_host_location_person
+      nologging
+      build immediate
+      refresh fast on commit
+      as
+      select distinct
+         cpi.person_code,
+         cpi.person_type,
+         cpi.forename,
+         cpi.surname,
+         cpi.known_as,
+         lower(cpi.surname || '' '' || cpi.forename || '' '' || cpi.surname || '' '' || cpi.known_as || '' '' || cpi.hr_code) search_name,
+         cpi.title,
+         lower(cpi.email_address) email_address_lower,
+         cpi.assembly_point_code,
+         cpi.allowed_vip_ind,
+         cpi.notification_email_ind,
+         cpi.notification_sms_ind,
+         cpi.zone_code,
+         cpi.department_code,
+         cpi.hr_code,
+         d.department_description,
+         z.zone_description,
+         length(cp.picture) hasphoto,
+         cpi.rowid cpi_rowid,
+         d.rowid ca_department_rowid,
+         z.rowid ca_zone_rowid,
+         cp.rowid ca_person_photo_rowid
+      from
+         ca_person_detail cpi,
+         ca_department d,
+         ca_zone z,
+         ca_person_photo cp
+      where cpi.allowed_visitor_ind = ''Y''
+        and cpi.active_ind = ''Y''
+        and cpi.person_type != ''V''
+        and cpi.department_code = d.department_code(+)
+        and cpi.zone_code = z.zone_code(+)
+        and cp.person_type(+) = cpi.person_type
+        and cp.person_code(+) = cpi.person_code
+        and cp.active_ind(+) = ''Y'' ';
+
+   execute immediate 'create index ca_active_host_location_person_mv1 on ca_active_host_location_person(cpi_rowid)';
+   execute immediate 'create index ca_active_host_location_person_mv2 on ca_active_host_location_person(ca_department_rowid)';
+   execute immediate 'create index ca_active_host_location_person_mv3 on ca_active_host_location_person(ca_zone_rowid)';
+   execute immediate 'create index ca_active_host_location_person_mv4 on ca_active_host_location_person(ca_person_photo_rowid)';
+   execute immediate 'create index ca_active_host_location_person_mv5 on ca_active_host_location_person(person_code, person_type)';
+   execute immediate 'create index ca_active_host_location_person_mv6 on ca_active_host_location_person(department_code)';
+   execute immediate 'create index ca_active_host_location_person_mv7 on ca_active_host_location_person(zone_code)';
+   execute immediate 'create index ca_active_host_location_person_mv8 on ca_active_host_location_person(email_address_lower)';
+   execute immediate 'create index ca_active_host_location_person_mv9 on ca_active_host_location_person(search_name)';
+   execute immediate 'create index ca_active_host_location_person_mv10 on ca_active_host_location_person(convert(lower(known_as), ''US7ASCII''))';
+   execute immediate 'create index ca_active_host_location_person_mv11 on ca_active_host_location_person(convert(lower(forename || '' '' || surname), ''US7ASCII''))';
+
+   begin
+      ctx_ddl.drop_preference ( 'ca_active_host_1_datastore');
+      exception when others then null;
+   end;
+
+   begin
+      ctx_ddl.create_preference('ca_active_host_1_datastore', 'MULTI_COLUMN_DATASTORE');
+      ctx_ddl.set_attribute('ca_active_host_1_datastore',  'COLUMNS',   'known_as, forename,  surname');
+      exception when others then null;
+   end;
+
+   execute immediate 'create index ca_active_host_location_person_mv12 on ca_active_host_location_person(forename) indextype is ctxsys.context parameters(''datastore ca_active_host_1_datastore stoplist ctxsys.empty_stoplist lexer unaccent_lexer section group forename_person_detail_group sync ( on commit)'')';
+
+   begin
+      ctx_ddl.drop_preference ( 'ca_active_host_1_storage');
+      exception when others then null;
+   end;
+
+   begin
+      ctx_ddl.create_preference('ca_active_host_1_storage', 'BASIC_STORAGE');
+      ctx_ddl.set_attribute('ca_active_host_1_storage', 'STAGE_ITAB', 'YES');
+      exception when others then null;
+   end;
+   execute immediate 'alter index ca_active_host_location_person_mv12 rebuild parameters(''replace storage ca_active_host_1_storage'')';
+
+
+
+   select count(*) into v_hr_integration from ca_system where upper(hr_package_ind) = 'C' and rownum = 1;
+
+   if v_hr_integration = 0 then
+
+      execute immediate 'create or replace view ca_active_host_location_facade as select * from ca_active_host_location_person';
+
+   else
+
+      select count(*) into l_count from user_mviews where lower(mview_name) = 'ca_active_host_location_hr';
+
+      if l_count > 0 then
+         execute immediate 'drop materialized view ca_active_host_location_hr';
+      end if;
+
+      execute immediate 'create materialized view ca_active_host_location_hr
+        nologging
+         build immediate
+         refresh fast on commit
+         as
+         select
+            cpi.person_code,
+            cpi.person_type,
+            cpi.forename,
+            cpi.surname,
+            cpi.known_as,
+            lower(cpi.surname || '' '' || cpi.forename || '' '' || cpi.surname || '' '' || cpi.known_as || '' '' || cpi.hr_code) search_name,
+            cpi.title,
+            lower(cpi.email_address) email_address_lower,
+            cpi.assembly_point_code,
+            cpi.allowed_vip_ind,
+            cpi.notification_email_ind,
+            cpi.notification_sms_ind,
+            cpi.zone_code,
+            cpi.department_code,
+            cpi.hr_code,
+            d.department_description,
+            z.zone_description,
+            length(cp.picture) hasphoto,
+            cpi.rowid cpi_rowid,
+            d.rowid ca_department_rowid,
+            z.rowid ca_zone_rowid,
+            cp.rowid ca_person_photo_rowid
+         from
+            ca_hr_person cpi,
+            ca_department d,
+            ca_zone z,
+            ca_person_photo cp
+         where cpi.allowed_visitor_ind = ''Y''
+           and cpi.active_ind = ''Y''
+           and cpi.person_type != ''V''
+           and cpi.department_code = d.department_code(+)
+           and cpi.zone_code = z.zone_code(+)
+           and cp.person_type(+) = cpi.person_type
+           and cp.person_code(+) = cpi.person_code
+           and cp.active_ind(+) = ''Y'' ';
+
+      execute immediate 'create index ca_active_host_location_hr_mv1 on ca_active_host_location_hr(cpi_rowid)';
+      execute immediate 'create index ca_active_host_location_hr_mv2 on ca_active_host_location_hr(ca_department_rowid)';
+      execute immediate 'create index ca_active_host_location_hr_mv3 on ca_active_host_location_hr(ca_zone_rowid)';
+      execute immediate 'create index ca_active_host_location_hr_mv4 on ca_active_host_location_hr(ca_person_photo_rowid)';
+      execute immediate 'create index ca_active_host_location_hr_mv5 on ca_active_host_location_hr(person_code, person_type)';
+      execute immediate 'create index ca_active_host_location_hr_mv6 on ca_active_host_location_hr(department_code)';
+      execute immediate 'create index ca_active_host_location_hr_mv7 on ca_active_host_location_hr(zone_code)';
+      execute immediate 'create index ca_active_host_location_hr_mv8 on ca_active_host_location_hr(email_address_lower)';
+      execute immediate 'create index ca_active_host_location_hr_mv9 on ca_active_host_location_hr(search_name)';
+      execute immediate 'create index ca_active_host_location_hr_mv10 on ca_active_host_location_hr(convert(lower(known_as), ''US7ASCII''))';
+      execute immediate 'create index ca_active_host_location_hr_mv11 on ca_active_host_location_hr(convert(lower(forename || '' '' || surname), ''US7ASCII''))';
+
+
+      begin
+         ctx_ddl.drop_preference ( 'ca_active_hr_1_datastore');
+         exception when others then null;
+      end;
+
+      begin
+         ctx_ddl.create_preference('ca_active_hr_1_datastore', 'MULTI_COLUMN_DATASTORE');
+         ctx_ddl.set_attribute('ca_active_hr_1_datastore',  'COLUMNS',   'known_as, forename,  surname');
+         exception when others then null;
+      end;
+
+      execute immediate 'create index ca_active_host_location_hr_mv12 on ca_active_host_location_hr(forename) indextype is ctxsys.context parameters(''datastore ca_active_hr_1_datastore stoplist ctxsys.empty_stoplist lexer unaccent_lexer section group forename_person_detail_group sync ( on commit)'')';
+
+      begin
+         ctx_ddl.drop_preference ( 'ca_active_hr_1_storage');
+         exception when others then null;
+      end;
+
+      begin
+         ctx_ddl.create_preference('ca_active_hr_1_storage', 'BASIC_STORAGE');
+         ctx_ddl.set_attribute('ca_active_hr_1_storage', 'STAGE_ITAB', 'YES');
+         exception when others then null;
+      end;
+      execute immediate 'alter index ca_active_host_location_hr_mv12 rebuild parameters(''replace storage ca_active_hr_1_storage'')';
+
+      execute immediate 'create view ca_active_host_location_facade as select * from ca_active_host_location_person union select * from ca_active_host_location_hr';
+   end if;
+
+end;]]></sql>
+		<connection><![CDATA[Dev]]></connection>
+		<timestamp><![CDATA[1722585914214]]></timestamp>
+		<type><![CDATA[SQL]]></type>
+		<executed><![CDATA[1]]></executed>
+		<execTime><![CDATA[5.266]]></execTime>
+	</historyItem>
+</history>

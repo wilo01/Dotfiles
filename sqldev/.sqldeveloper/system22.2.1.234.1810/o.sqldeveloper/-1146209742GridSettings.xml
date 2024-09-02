@@ -1,0 +1,65 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">USE_DOCUSIGN</Item>
+      <Item class="java.lang.String">DOCUSIGN_IND</Item>
+      <Item class="java.lang.String">CONTENT_PDF_EXISTS</Item>
+      <Item class="java.lang.String">NDA_CODE</Item>
+      <Item class="java.lang.String">NDA_VERSION</Item>
+      <Item class="java.lang.String">CONTENT_CSS</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>109</Item>
+      <Item>105</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+test.tds.ie+Visitor-dev%2C+Trunkwith docusign as (
+   select setting_value from safe_system_options where setting_name = 'use_docusign'
+)
+select use_docusign, docusign_ind, content_pdf_exists, nda_code, nda_version, content_css from (
+   select docusign_ind, doc.setting_value use_docusign, knc.nda_code, knv.nda_version, knc.content_css,
+   case 
+      when knc.visit_reason_code = :vrc and knc.visitor_type_code = :vtc and knc.collection_point_code = :collection_point_code then 1
+      when knc.visit_reason_code = :vrc and knc.visitor_type_code = :vtc and knc.collection_point_code is null and knc.zone_code = z.zone_code then 2
+      when knc.visit_reason_code = :vrc and knc.visitor_type_code = :vtc and knc.collection_point_code is null and knc.zone_code is null and knc.site_code = z.site_code then 3
+      when knc.visit_reason_code = :vrc and knc.visitor_type_code = :vtc and knc.collection_point_code is null and knc.zone_code is null and knc.site_code is null then 4
+      when knc.visit_reason_code = :vrc and knc.visitor_type_code is null and knc.collection_point_code = :collection_point_code then 5
+      when knc.visit_reason_code = :vrc and knc.visitor_type_code is null and knc.collection_point_code is null and knc.zone_code = z.zone_code then 6
+      when knc.visit_reason_code = :vrc and knc.visitor_type_code is null and knc.collection_point_code is null and knc.zone_code is null and knc.site_code = z.site_code then 7
+      when knc.visit_reason_code = :vrc and knc.visitor_type_code is null and knc.collection_point_code is null and knc.zone_code is null and knc.site_code is null then 8
+      when knc.visit_reason_code is null and knc.visitor_type_code = :vtc and knc.collection_point_code = :collection_point_code then 9
+      when knc.visit_reason_code is null and knc.visitor_type_code = :vtc and knc.visit_reason_code is null and knc.collection_point_code is null and knc.zone_code = z.zone_code then 10
+      when knc.visit_reason_code is null and knc.visitor_type_code = :vtc and knc.visit_reason_code is null and knc.collection_point_code is null and knc.zone_code is null and knc.site_code = z.site_code then 11
+      when knc.visit_reason_code is null and knc.visitor_type_code = :vtc and knc.visit_reason_code is null and knc.collection_point_code is null and knc.zone_code is null and knc.site_code is null and knc.content is not null then 12
+      when knc.visit_reason_code is null and knc.visitor_type_code is null and knc.collection_point_code = :collection_point_code then 13
+      when knc.visit_reason_code is null and knc.visitor_type_code is null and knc.collection_point_code is null and knc.zone_code = z.zone_code then 14
+      when knc.visit_reason_code is null and knc.visitor_type_code is null and knc.collection_point_code is null and knc.zone_code is null and knc.site_code = z.site_code then 15
+      when knc.visit_reason_code is null and knc.visitor_type_code is null and knc.collection_point_code is null and knc.zone_code is null and knc.site_code is null then 16
+      end as priority,
+   case
+      when content_pdf is not null then 1
+      when content_pdf is null then 0
+   end as content_pdf_exists
+   from safe_kiosk_nda_content knc,
+      ca_collection_point cp,
+      ca_zone z,
+      ca_kiosk_nda_version knv,
+      docusign doc
+      where knc.language_code = :language_code  
+         and cp.collection_point_code = :collection_point_code
+         and cp.zone_code = z.zone_code
+         and ((docusign_ind = 'Y' and doc.setting_value = 'Y') or (docusign_ind = 'N'))
+         and knv.nda_code = knc.nda_code
+         and knv.nda_version = (select max(knv2.nda_version) from ca_kiosk_nda_version knv2 where knv2.nda_code = knc.nda_code )
+         order by priority
+)
+where rownum = 1  
+and priority is not null</uniqueName>
+</TableSettings>

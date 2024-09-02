@@ -1,0 +1,11 @@
+<?xml version='1.0'  encoding='UTF-8' ?>
+<history>
+	<historyItem>
+		<sql><![CDATA[select count(*) from user_tab_cols where lower(table_name) ='ca_badge_layout_items' and lower(column_name) = 'is_background']]></sql>
+		<connection><![CDATA[Dev]]></connection>
+		<timestamp><![CDATA[1720181511564]]></timestamp>
+		<type><![CDATA[SQL]]></type>
+		<executed><![CDATA[3]]></executed>
+		<execTime><![CDATA[0.053]]></execTime>
+	</historyItem>
+</history>

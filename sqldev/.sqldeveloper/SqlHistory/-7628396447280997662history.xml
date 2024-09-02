@@ -1,0 +1,11 @@
+<?xml version='1.0'  encoding='UTF-8' ?>
+<history>
+	<historyItem>
+		<sql><![CDATA[alter table ca_badge_layout_items drop column doc_file;]]></sql>
+		<connection><![CDATA[Dev]]></connection>
+		<timestamp><![CDATA[1720189774313]]></timestamp>
+		<type><![CDATA[SQL]]></type>
+		<executed><![CDATA[1]]></executed>
+		<execTime><![CDATA[0.203]]></execTime>
+	</historyItem>
+</history>

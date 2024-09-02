@@ -1,0 +1,176 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">ACODE</Item>
+      <Item class="java.lang.String">ADESCRIPTION</Item>
+      <Item class="java.lang.String">REFERENCE_TABLE</Item>
+      <Item class="java.lang.String">VIEWABLE</Item>
+      <Item class="java.lang.String">ADDABLE</Item>
+      <Item class="java.lang.String">EDITABLE</Item>
+      <Item class="java.lang.String">DELETABLE</Item>
+      <Item class="java.lang.String">AUTO_CODE</Item>
+      <Item class="java.lang.String">CODE_01</Item>
+      <Item class="java.lang.String">DATE_01</Item>
+      <Item class="java.lang.String">DESCRIPTION_01</Item>
+      <Item class="java.lang.String">DESCRIPTION_02</Item>
+      <Item class="java.lang.String">DESCRIPTION_03</Item>
+      <Item class="java.lang.String">DESCRIPTION_04</Item>
+      <Item class="java.lang.String">DESCRIPTION_05</Item>
+      <Item class="java.lang.String">DESCRIPTION_06</Item>
+      <Item class="java.lang.String">DESCRIPTION_07</Item>
+      <Item class="java.lang.String">DESCRIPTION_08</Item>
+      <Item class="java.lang.String">DESCRIPTION_09</Item>
+      <Item class="java.lang.String">DESCRIPTION_10</Item>
+      <Item class="java.lang.String">DESCRIPTION_11</Item>
+      <Item class="java.lang.String">DESCRIPTION_12</Item>
+      <Item class="java.lang.String">DESCRIPTION_13</Item>
+      <Item class="java.lang.String">DESCRIPTION_14</Item>
+      <Item class="java.lang.String">DESCRIPTION_15</Item>
+      <Item class="java.lang.String">DESCRIPTION_16</Item>
+      <Item class="java.lang.String">DESCRIPTION_17</Item>
+      <Item class="java.lang.String">DESCRIPTION_18</Item>
+      <Item class="java.lang.String">IND_01</Item>
+      <Item class="java.lang.String">IND_02</Item>
+      <Item class="java.lang.String">IND_03</Item>
+      <Item class="java.lang.String">IND_04</Item>
+      <Item class="java.lang.String">NUMBER_01</Item>
+      <Item class="java.lang.String">NUMBER_02</Item>
+      <Item class="java.lang.String">NUMBER_03</Item>
+      <Item class="java.lang.String">NUMBER_04</Item>
+      <Item class="java.lang.String">PARENT_CODE</Item>
+      <Item class="java.lang.String">PARENT_COMBO</Item>
+      <Item class="java.lang.String">PARENT_REFERENCE_TYPE</Item>
+      <Item class="java.lang.String">FORM_OPTIONS</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>58</Item>
+      <Item>187</Item>
+      <Item>124</Item>
+      <Item>73</Item>
+      <Item>70</Item>
+      <Item>72</Item>
+      <Item>82</Item>
+      <Item>88</Item>
+      <Item>89</Item>
+      <Item>68</Item>
+      <Item>114</Item>
+      <Item>114</Item>
+      <Item>114</Item>
+      <Item>114</Item>
+      <Item>114</Item>
+      <Item>117</Item>
+      <Item>114</Item>
+      <Item>114</Item>
+      <Item>114</Item>
+      <Item>114</Item>
+      <Item>114</Item>
+      <Item>114</Item>
+      <Item>114</Item>
+      <Item>114</Item>
+      <Item>114</Item>
+      <Item>114</Item>
+      <Item>117</Item>
+      <Item>194</Item>
+      <Item>166</Item>
+      <Item>159</Item>
+      <Item>187</Item>
+      <Item>58</Item>
+      <Item>103</Item>
+      <Item>86</Item>
+      <Item>86</Item>
+      <Item>86</Item>
+      <Item>166</Item>
+      <Item>131</Item>
+      <Item>166</Item>
+      <Item>2826</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+QALIVE+12AVwith ca_reference_description as
+(  
+   select
+      reference_code,
+      reference_description,
+      '8' reference_table
+   from ca_reference_character8 
+   where 'RETE' = reference_type
+      and ((:irt = '%') or (','|| :irt || ',') like ('%,'|| reference_code || ',%'))
+      and ((:ert = '%') or (','|| :ert || ',') not like ('%,'|| reference_code || ',%'))
+   union all
+   select 
+      reference_code,
+      reference_description,
+      '20' reference_table
+   from ca_reference_character20 
+   where 'RETE' = reference_type
+      and ((:irt = '%') or (','|| :irt || ',') like ('%,'|| reference_code || ',%'))
+      and ((:ert = '%') or (','|| :ert || ',') not like ('%,'|| reference_code || ',%'))
+),
+ca_reference_description_p as (
+   select rd.*
+   from ca_reference_description rd 
+      inner join safe_user_role_reference urr
+         on rd.reference_code = urr.reference_type
+--   where (select user_role_name from safe_user_role_assignment where lower(username) = lower(:Uidtoken))  = urr.user_role_name
+--      and urr.show_ind = 'Y'
+)
+
+select distinct
+   crd.reference_code acode,
+   crd.reference_description adescription,
+   crd.reference_table,
+   nvl(crdo.viewable, 'Y') viewable,
+   nvl(crdo.addable, 'Y') addable,
+   nvl(crdo.editable, 'Y') editable,
+   nvl(crdo.deletable, 'Y') deletable,
+   crdo.auto_code,
+   crdo.code_01,
+   crdo.date_01,
+   crdo.description_01,
+   crdo.description_02,
+   crdo.description_03,
+   crdo.description_04,
+   crdo.description_05,
+   crdo.description_06,
+   crdo.description_07,
+   crdo.description_08,
+   crdo.description_09,
+   crdo.description_10,
+   crdo.description_11,
+   crdo.description_12,
+   crdo.description_13,
+   crdo.description_14,
+   crdo.description_15,
+   crdo.description_16,
+   crdo.description_17,
+   crdo.description_18,
+   crdo.ind_01,
+   crdo.ind_02,
+   crdo.ind_03,
+   crdo.ind_04,
+   crdo.number_01,
+   crdo.number_02,
+   crdo.number_03,
+   crdo.number_04,
+   crdo.parent_code,
+   crdo.parent_combo,
+   crdo.parent_reference_type,
+   crdo.form_options
+from 
+   ca_reference_description_p crd
+   left outer join ca_reference_data_options crdo
+      on crd.reference_code = crdo.reference_type
+where 
+   lower(crd.reference_code  || ' ' || crd.reference_description) like lower('%' || nvl(:q, '%') || '%')
+   and nvl(crdo.viewable, 'Y') = 'Y'
+   and safe_request_permissions_pak.check_permission_sql (
+      :Uidtoken, 
+      '(referencedatamenu)', 
+      'referenceDataCombo', 
+      'GET' 
+   ) = 'Y'
+order by 
+   lower(crd.reference_description)</uniqueName>
+</TableSettings>

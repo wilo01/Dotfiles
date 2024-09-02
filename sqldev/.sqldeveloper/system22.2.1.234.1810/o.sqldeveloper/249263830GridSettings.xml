@@ -1,0 +1,65 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">SETTING_NAME</Item>
+      <Item class="java.lang.String">SETTING_VALUE</Item>
+      <Item class="java.lang.String">SETTING_DEPRICATED_IND</Item>
+      <Item class="java.lang.String">SETTING_DESCRIPTION</Item>
+      <Item class="java.lang.String">SETTING_VISIBLE_IND</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>257</Item>
+      <Item>838</Item>
+      <Item>168</Item>
+      <Item>1489</Item>
+      <Item>141</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+test.tds.ie+Visitor-dev%2C+Trunkselect * from (
+  select setting_name,
+     setting_value,
+     setting_depricated_ind,
+     setting_description,
+     setting_visible_ind
+  from safe_system_options
+  where setting_visible_ind = 'Y'
+  union all
+  select
+     'person_type_' || person_type setting_name,
+     person_type_description setting_value,
+     'N' setting_depricated_ind,
+     '' setting_description,
+     'Y' setting_visible_ind
+  from ca_person_type_control
+  union all
+  select
+     setting_name,
+     setting_value,
+     setting_depricated_ind,
+     setting_description,
+     setting_visible_ind
+  from ca_system_portability
+  where not setting_name in (select setting_name from safe_system_options)
+  union all
+  select
+     sau.name setting_name,
+     sau.information setting_value,
+     null setting_depricated_ind,
+     '' setting_description,
+     'Y' setting_visible_ind
+  from safe_about_us sau
+  where name = 'version'
+  union all
+   select
+      'dbtimezoneoffset' setting_name,
+      to_char(SYSTIMESTAMP, 'tzr') setting_value,
+      'N' setting_depricated_ind,
+      'Database Offset' setting_description,
+      'Y' setting_visible_ind
+      from dual
+)
+where safe_request_permissions_pak.check_permission_sql (:Uidtoken,  '()', 'systemSettings', 'GET')='Y'</uniqueName>
+</TableSettings>

@@ -1,0 +1,5 @@
+select * from safe_user
+
+select
+         caup.leftstr(:person_data, '-'),caup.rightstr(:person_data, '-') into  v_person_code,v_person_type 
+      from dual;

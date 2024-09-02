@@ -1,0 +1,390 @@
+SQL> 
+SQL> -- Access Area Structure (Simple)
+SQL> insert into ca_reference_character8 ( reference_type, reference_code, reference_description )
+  2  values ( 'CN', '&v_corporation_code', '&v_client_name');
+old:insert into ca_reference_character8 ( reference_type, reference_code, reference_description )
+values ( 'CN', '&v_corporation_code', '&v_client_name')
+new:insert into ca_reference_character8 ( reference_type, reference_code, reference_description )
+values ( 'CN', '1', 'ACRE')
+
+1 row inserted.
+
+SQL> 
+SQL> insert into ca_reference_character8 ( reference_type, reference_code, reference_description, parent_code )
+  2  values ( 'SE', '&v_site_code', '&v_client_name Site', '&v_corporation_code' );
+old:insert into ca_reference_character8 ( reference_type, reference_code, reference_description, parent_code )
+values ( 'SE', '&v_site_code', '&v_client_name Site', '&v_corporation_code' )
+new:insert into ca_reference_character8 ( reference_type, reference_code, reference_description, parent_code )
+values ( 'SE', '01', 'ACRE Site', '1' )
+
+1 row inserted.
+
+SQL> 
+SQL> insert into ca_reference_character8 ( reference_type, reference_code, reference_description, parent_code )
+  2  values ( 'ZE', '&v_zone_code', '&v_client_name Zone', '&v_site_code' );
+old:insert into ca_reference_character8 ( reference_type, reference_code, reference_description, parent_code )
+values ( 'ZE', '&v_zone_code', '&v_client_name Zone', '&v_site_code' )
+new:insert into ca_reference_character8 ( reference_type, reference_code, reference_description, parent_code )
+values ( 'ZE', '101001', 'ACRE Zone', '01' )
+
+1 row inserted.
+
+SQL> 
+SQL> 
+SQL> -- Visitor Label (Standard)
+SQL> insert into ca_visitor_label ( visitor_label_name, visitor_label_short_name, priority_number )
+  2  values ( 'CAR041.rep', 'Label', 1 );
+
+1 row inserted.
+
+SQL> 
+SQL> 
+SQL> -- Access Level
+SQL> insert into ca_access_level ( access_level_code, access_level_description )
+  2  values ( '&v_access_level_code', '&v_client_name Access Level' );
+old:insert into ca_access_level ( access_level_code, access_level_description )
+values ( '&v_access_level_code', '&v_client_name Access Level' )
+new:insert into ca_access_level ( access_level_code, access_level_description )
+values ( '1', 'ACRE Access Level' )
+
+1 row inserted.
+
+SQL> 
+SQL> 
+SQL> -- Access Reason
+SQL> insert into ca_reference_character8 ( reference_type, reference_code, reference_description )
+  2  values ( 'ASRN', '&v_access_reason_code', 'General Site Access' );
+old:insert into ca_reference_character8 ( reference_type, reference_code, reference_description )
+values ( 'ASRN', '&v_access_reason_code', 'General Site Access' )
+new:insert into ca_reference_character8 ( reference_type, reference_code, reference_description )
+values ( 'ASRN', '1', 'General Site Access' )
+
+1 row inserted.
+
+SQL> 
+SQL> 
+SQL> -- Visit Type
+SQL> insert into ca_reference_character8 ( reference_type, reference_code, reference_description )
+  2  values ( 'VTTE', '&v_visit_type_code', 'Standard Visit' );
+old:insert into ca_reference_character8 ( reference_type, reference_code, reference_description )
+values ( 'VTTE', '&v_visit_type_code', 'Standard Visit' )
+new:insert into ca_reference_character8 ( reference_type, reference_code, reference_description )
+values ( 'VTTE', '1', 'Standard Visit' )
+
+1 row inserted.
+
+SQL> 
+SQL> -- Location Zone -- if no rows inserted - doesn't matter
+SQL> delete from ca_location_zone;
+
+0 rows deleted.
+
+SQL> 
+SQL> insert into ca_location_zone ( location_code, zone_code )
+  2  select location, '&v_zone_code'
+  3  from hr_location;
+old:insert into ca_location_zone ( location_code, zone_code )
+select location, '&v_zone_code'
+from hr_location
+new:insert into ca_location_zone ( location_code, zone_code )
+select location, '101001'
+from hr_location
+
+Error starting at line : 68 in command -
+insert into ca_location_zone ( location_code, zone_code )
+select location, '101001'
+from hr_location
+Error at Command Line : 70 Column : 6
+Error report -
+SQL Error: ORA-00942: table or view does not exist
+00942. 00000 -  "table or view does not exist"
+*Cause:    
+*Action:
+SQL> 
+SQL> 
+SQL> -- System Details
+SQL> update ca_system
+  2  set licensee = '&v_client_name',
+  3      visitor_badge_expiry_days = 1,
+  4      visitor_badge_expiry_time = trunc(sysdate) + 17/24;
+old:update ca_system
+set licensee = '&v_client_name',
+    visitor_badge_expiry_days = 1,
+    visitor_badge_expiry_time = trunc(sysdate) + 17/24
+new:update ca_system
+set licensee = 'ACRE',
+    visitor_badge_expiry_days = 1,
+    visitor_badge_expiry_time = trunc(sysdate) + 17/24
+
+1 row updated.
+
+SQL> 
+SQL> 
+SQL> -- User Defaults
+SQL> insert into ca_user_data (
+  2     username,
+  3     corporation_code,
+  4     maintain_employee_ind,
+  5     query_employee_ind,
+  6     maintain_contractor_ind,
+  7     query_contractor_ind,
+  8     maintain_visitor_ind,
+  9     query_visitor_ind,
+ 10     maintain_student_ind,
+ 11     query_student_ind,
+ 12     access_type_ind
+ 13  )
+ 14  values (
+ 15     user,
+ 16     '&v_corporation_code',
+ 17     'Y',
+ 18     'Y',
+ 19     'Y',
+ 20     'Y',
+ 21     'Y',
+ 22     'Y',
+ 23     'Y',
+ 24     'Y',
+ 25     'B'
+ 26  );
+old:insert into ca_user_data (
+   username,
+   corporation_code,
+   maintain_employee_ind,
+   query_employee_ind,
+   maintain_contractor_ind,
+   query_contractor_ind,
+   maintain_visitor_ind,
+   query_visitor_ind,
+   maintain_student_ind,
+   query_student_ind,
+   access_type_ind
+)
+values (
+   user,
+   '&v_corporation_code',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'B'
+)
+new:insert into ca_user_data (
+   username,
+   corporation_code,
+   maintain_employee_ind,
+   query_employee_ind,
+   maintain_contractor_ind,
+   query_contractor_ind,
+   maintain_visitor_ind,
+   query_visitor_ind,
+   maintain_student_ind,
+   query_student_ind,
+   access_type_ind
+)
+values (
+   user,
+   '1',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'B'
+)
+
+1 row inserted.
+
+SQL> 
+SQL> delete from ca_user_control
+  2  where username = user;
+
+0 rows deleted.
+
+SQL> 
+SQL> insert into ca_user_control (
+  2     username,
+  3     site_code,
+  4     zone_code,
+  5     access_level_code,
+  6     maintain_badge_ind, 
+  7     maintain_access_profile_ind,
+  8     maintain_photo_ind,
+  9     maintain_address_ind,
+ 10     maintain_emergency_ind,
+ 11     maintain_induction_ind,
+ 12     maintain_user_fields_ind,
+ 13     maintain_new_company_ind,
+ 14     maintain_contact_ind,
+ 15     maintain_next_of_kin_ind,
+ 16     maintain_person_status_ind,
+ 17     maintain_driver_ind,
+ 18     maintain_ledger_ind,
+ 19     maintain_profile_override_ind,
+ 20     view_access_log_ind,
+ 21     department_code,
+ 22     access_group_code
+ 23  )
+ 24  values (
+ 25     user,
+ 26     '&v_site_code',
+ 27     '&v_zone_code',
+ 28     '&v_access_level_code',
+ 29     'Y',
+ 30     'Y',
+ 31     'Y',
+ 32     'Y',
+ 33     'Y',
+ 34     'Y',
+ 35     'Y',
+ 36     'Y',
+ 37     'Y',
+ 38     'Y',
+ 39     'Y',
+ 40     'Y',
+ 41     'Y',
+ 42     'Y',
+ 43     'Y',
+ 44     '&v_department_code',
+ 45     '&v_access_group_code'
+ 46  );
+old:insert into ca_user_control (
+   username,
+   site_code,
+   zone_code,
+   access_level_code,
+   maintain_badge_ind, 
+   maintain_access_profile_ind,
+   maintain_photo_ind,
+   maintain_address_ind,
+   maintain_emergency_ind,
+   maintain_induction_ind,
+   maintain_user_fields_ind,
+   maintain_new_company_ind,
+   maintain_contact_ind,
+   maintain_next_of_kin_ind,
+   maintain_person_status_ind,
+   maintain_driver_ind,
+   maintain_ledger_ind,
+   maintain_profile_override_ind,
+   view_access_log_ind,
+   department_code,
+   access_group_code
+)
+values (
+   user,
+   '&v_site_code',
+   '&v_zone_code',
+   '&v_access_level_code',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   '&v_department_code',
+   '&v_access_group_code'
+)
+new:insert into ca_user_control (
+   username,
+   site_code,
+   zone_code,
+   access_level_code,
+   maintain_badge_ind, 
+   maintain_access_profile_ind,
+   maintain_photo_ind,
+   maintain_address_ind,
+   maintain_emergency_ind,
+   maintain_induction_ind,
+   maintain_user_fields_ind,
+   maintain_new_company_ind,
+   maintain_contact_ind,
+   maintain_next_of_kin_ind,
+   maintain_person_status_ind,
+   maintain_driver_ind,
+   maintain_ledger_ind,
+   maintain_profile_override_ind,
+   view_access_log_ind,
+   department_code,
+   access_group_code
+)
+values (
+   user,
+   '01',
+   '101001',
+   '1',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   'Y',
+   '1',
+   '1'
+)
+
+1 row inserted.
+
+SQL> 
+SQL> insert into ca_user_department (
+  2     username,
+  3     department_code
+  4  )
+  5  select 
+  6     user,
+  7     department_code
+  8  from ca_department;
+
+0 rows inserted.
+
+SQL> 
+SQL> insert into ca_user_access_group (
+  2     username,
+  3     access_group_code
+  4  )
+  5  select 
+  6     user,
+  7     access_group_code
+  8  from ca_access_group;
+
+0 rows inserted.
+
+SQL> 
+SQL> insert into ca_user_access_time (
+  2     username,
+  3     access_time_code
+  4  )
+  5  select 
+  6     user,
+  7     access_time_code
+  8  from ca_access_time;
+
+0 rows inserted.
+
+SQL> 
+SQL> spool off;
