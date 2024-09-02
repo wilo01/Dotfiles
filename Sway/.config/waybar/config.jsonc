@@ -17,8 +17,8 @@
     "modules-right": [
         // "idle_inhibitor",
         "tray",
-        "pulseaudio",
         "network",
+        "pulseaudio",
         "power-profiles-daemon",
         "cpu",
         "memory",
@@ -111,7 +111,7 @@
         "tooltip": true
     },
     "memory": {
-        "format": "{}% "
+        "format": "{used} GiB "
     },
     "temperature": {
         // "thermal-zone": 2,
