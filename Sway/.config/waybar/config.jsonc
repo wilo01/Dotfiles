@@ -35,10 +35,10 @@
          "warp-on-scroll": false,
          "format": "{name} {icon} |",
          "format-icons": {
-             "1": "",
-             "2": "",
-             "3": "",
-             "20": "",
+             // "1": "",
+             // "2": "",
+             // "3": "",
+             // "20": "",
              "urgent": "",
              "focused": "",
              "default": ""
