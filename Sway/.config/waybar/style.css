@@ -230,6 +230,8 @@ label:focus {
     background-color: #f0932b;
 }
 
+#cpu.critical
+#memory.critical
 #temperature.critical {
     background-color: #eb4d4b;
 }

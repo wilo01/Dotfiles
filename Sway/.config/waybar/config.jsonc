@@ -109,10 +109,12 @@
     "cpu": {
         "format": "{usage}% ",
         "tooltip": true,
+        "critical-threshold": 80,
         "interval": 3
     },
     "memory": {
         "interval": 10,
+        "critical-threshold": 80,
         "format": "{used}G "
 	// "format": "{used:0.1f}G/{total:0.1f}G "
     },
