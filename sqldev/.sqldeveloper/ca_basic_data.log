@@ -360,7 +360,7 @@ SQL> insert into ca_user_department (
   7     department_code
   8  from ca_department;
 
-0 rows inserted.
+1 row inserted.
 
 SQL> 
 SQL> insert into ca_user_access_group (
@@ -372,7 +372,7 @@ SQL> insert into ca_user_access_group (
   7     access_group_code
   8  from ca_access_group;
 
-0 rows inserted.
+1 row inserted.
 
 SQL> 
 SQL> insert into ca_user_access_time (

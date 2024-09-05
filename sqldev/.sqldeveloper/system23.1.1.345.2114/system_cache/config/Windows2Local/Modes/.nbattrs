@@ -55,9 +55,6 @@
     <fileobject name="anonymousMode_26">
         <attr name="WinSys-TCRef-Order" stringvalue="NBDC_DBMS_OUTPUT_DOCKABLE_VIEW_TYPE.DBMS_OUTPUT_DOCKABLE_VIEW_ID"/>
     </fileobject>
-    <fileobject name="anonymousMode_29">
-        <attr name="WinSys-TCRef-Order" stringvalue="EditorContainer_1"/>
-    </fileobject>
     <fileobject name="anonymousMode_3">
         <attr name="WinSys-TCRef-Order" stringvalue="NBDC_DatabaseNavigatorWindow.Default/NBDC_SchemaBrowser.0/NBDC_DataMinerNavigator.Connection"/>
     </fileobject>

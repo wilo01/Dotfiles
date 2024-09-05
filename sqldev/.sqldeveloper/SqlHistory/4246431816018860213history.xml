@@ -237,9 +237,9 @@ insert into ca_reference_character8 (reference_type, reference_code, reference_d
 insert into ca_person_detail (person_code, person_type, forename, surname, access_mode_ind, active_ind, zone_code, department_code, start_date, allowed_visitor_ind, post_conditional_tna_ind, export_to_cashless_ind, sponsor_ind, notification_sms_ind, notification_email_ind, email_address) values('&v_person_code','E','&v_forename','&v_surname','Y','Y','&v_zone_code','&v_department_code',sysdate,'Y','Y','Y','Y','Y','Y', '&v_email_address');
 insert into ca_badge (badge_number, version_number, issue_number, status_ind, person_code, person_type, assign_date_time, active_date_time) values ('&v_badge_number', 1, 1, 'V', '&v_person_code', 'E', sysdate, sysdate)]]></sql>
 		<connection><![CDATA[Docker]]></connection>
-		<timestamp><![CDATA[1725006636029]]></timestamp>
+		<timestamp><![CDATA[1725380116760]]></timestamp>
 		<type><![CDATA[Script]]></type>
-		<executed><![CDATA[1]]></executed>
-		<execTime><![CDATA[2.421]]></execTime>
+		<executed><![CDATA[2]]></executed>
+		<execTime><![CDATA[2.793]]></execTime>
 	</historyItem>
 </history>

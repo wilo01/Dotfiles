@@ -38,11 +38,9 @@
   </constraints>
   <bounds x="844" y="345" width="1075" height="633" />
     </editor-area>
-    <screen width="4480" height="1440"/>
-    <active-mode name="anonymousMode_29"/>
+    <screen width="1920" height="1080"/>
     <toolbar configuration="Standard" preferred-icon-size="24"/>
     <tc-list>
-  <tc-id id="EditorContainer_1"/>
   <tc-id id="NBDC_DatabaseNavigatorWindow.Default"/>
   <tc-id id="NBDC_LogWindow.Log"/>
   <tc-id id="NBDC_SQLHISTORY_VIEW_TYPE.SQLHISTORY_VIEW_ID"/>
