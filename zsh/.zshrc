@@ -204,5 +204,8 @@ export PATH=$PATH:/usr/local/go/bin
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-eval "$(/bin/brew shellenv)"
+ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-11.0.24.0.8-2.fc40.x86_64
+# eval "$(/bin/brew shellenv)"
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+export LD_LIBRARY_PATH=/opt/oracle/instantclient_21_14:$LD_LIBRARY_PATH
+export PATH=$LD_LIBRARY_PATH:$PATH
