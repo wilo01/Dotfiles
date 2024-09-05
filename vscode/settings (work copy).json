@@ -1,0 +1,172 @@
+{
+  "git.autorefresh": true,
+  "git.ignoreRebaseWarning": true,
+  "git.enableSmartCommit": true,
+  "workbench.colorTheme": "Darcula Theme from IntelliJ",
+  "terminal.integrated.defaultProfile.linux": "tmux",
+  "terminal.integrated.fontFamily": "MesloLGMDZ Nerd Font Mono",
+  "editor.fontFamily": "MesloLGS NF",
+  "editor.codeLensFontFamily": "MesloLGS NF",
+  "vim.leader": ",",
+  "vim.normalModeKeyBindingsNonRecursive": [
+    {
+      "before": [
+        "<leader>",
+        "h"
+      ],
+      "commands": [
+        "workbench.action.focusFirstEditorGroup"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "l"
+      ],
+      "commands": [
+        "workbench.action.focusSecondEditorGroup"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "t"
+      ],
+      "commands": [
+        "workbench.action.toggleSidebarVisibility"
+      ]
+    },
+    {
+      "before": [
+        "<space>"
+      ],
+      "commands": [
+        "workbench.action.files.save"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "w"
+      ],
+      "commands": [
+        "workbench.action.splitEditor"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "x"
+      ],
+      "commands": [
+        "workbench.action.closeActiveEditor"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "f"
+      ],
+      "commands": [
+        "revealInExplorer"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "r",
+        "e"
+      ],
+      "commands": [
+        "editor.action.rename"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "r",
+        "f"
+      ],
+      "commands": [
+        "fileutils.renameFile"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "o",
+        "g"
+      ],
+      "commands": [
+        "workbench.action.showAllSymbols"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "o",
+        "o"
+      ],
+      "commands": [
+        "workbench.action.showEditorsInActiveGroup"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "o",
+        "p"
+      ],
+      "commands": [
+        "workbench.action.quickOpen"
+      ]
+    }
+  ],
+  "vim.insertModeKeyBindings": [
+    {
+      "before": [
+        "j",
+        "k"
+      ],
+      "after": [
+        "<Esc>"
+      ]
+    },
+    {
+      "before": [
+        "k",
+        "j"
+      ],
+      "after": [
+        "<Esc>"
+      ]
+    }
+  ],
+  "vim.handleKeys": {
+    "<C-f>": false,
+    "<C-d>": false,
+    "<C-b>": false
+  },
+  "keyboard.dispatch": "keyCode",
+  "editor.suggestSelection": "first",
+  "files.autoSave": "afterDelay",
+  "update.mode": "start",
+  "extensions.autoUpdate": "onlyEnabledExtensions",
+  "diffEditor.ignoreTrimWhitespace": false,
+  "eslint.alwaysShowStatus": true,
+  "eslint.quiet": true,
+  "eslint.run": "onSave",
+  "eslint.codeActionsOnSave.mode": "problems",
+  "editor.snippetSuggestions": "top",
+  "[python]": {
+    "editor.formatOnType": true
+  },
+  "editor.minimap.showSlider": "always",
+  "eslint.onIgnoredFiles": "warn",
+  "editor.minimap.size": "fit",
+  "git.openRepositoryInParentFolders": "always",
+  "kmxcoder.openaiApiKey": "",
+  "kmxcoder.openaiEngineModel": "gpt-4",
+  "workbench.editor.wrapTabs": true,
+  "window.zoomLevel": -1
+}
