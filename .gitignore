@@ -17,3 +17,5 @@
 !~/.zshrc
 !~/helper.py
 !~/recatest/*
+!sqldev/.sqldeveloper/system23*
+!sqldev/.sqldeveloper/SqlHistory/*
