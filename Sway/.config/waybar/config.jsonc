@@ -11,9 +11,10 @@
         "sway/mode",
         "sway/scratchpad"
     ],
-//    "modules-center": [
-//        "sway/window"
-//    ],
+   // "modules-center": [
+   //    "sway/window"
+   //    "custom/media"
+   // ],
     "modules-right": [
         // "idle_inhibitor",
         "tray",
@@ -27,6 +28,7 @@
         // "sway/language",
         "battery",
         "clock"
+        // "custom/power" // TODO
     ],
     // Modules configuration
      "sway/workspaces": {
@@ -106,35 +108,77 @@
 	"format": "{:%d.%m.%y %H:%M %p}"
         //"format-alt": "{:%Y-%m-%d}"
     },
-    "cpu": {
-        "format": "{usage}% ",
+   "cpu": {
+       "interval": 2,
         "tooltip": true,
-        "critical-threshold": 80,
-        "interval": 3
-    },
-    "memory": {
-        "interval": 10,
-        "critical-threshold": 80,
-        "format": "{used}G "
-	// "format": "{used:0.1f}G/{total:0.1f}G "
-    },
+       "critical-threshold": 80,
+       "format": "{usage}% {icon}",
+       "format-icons": [
+           "<span color='#a8ff60'></span>",  // 0-20%
+           "<span color='#94f272'></span>",  // 21-40%
+           "<span color='#ffe28c'></span>",  // 41-60%
+           "<span color='#ffba55'></span>",  // 61-80%
+           "<span color='#ff5233'></span>"   // 81-100%
+       ]
+   },
+   "memory": {
+    "interval": 5,
+    "critical-threshold": 80,
+    "format": "{used}G {icon}",
+    "format-icons": [
+        "<span color='#a8ff60'></span>",   // 0-20%
+        "<span color='#94f272'></span>",   // 21-40%
+        "<span color='#ffe28c'></span>",   // 41-60%
+        "<span color='#ffba55'></span>",   // 61-80%
+        "<span color='#ff5233'></span>"    // 81-100%
+       ]
+   },
     "temperature": {
         // "thermal-zone": 2,
         // "hwmon-path": "/sys/class/hwmon/hwmon2/temp1_input",
         // "format-critical": "{temperatureC}°C {icon}",
-        "interval": 10,
-        "critical-threshold": 75,
+        "interval": 2,
+        "critical-threshold": 80,
         "format": "{temperatureC}°C {icon}",
         // "format-icons": ["", "", ""]
         "format-icons": [
-               "<span color='#69ff94'><span>", // green
-               "<span color='#2aa9ff'><span>", // blue
-               "<span color='#2aa9ff'><span>", // blue
-               "<span color='#ffffa5'><span>", // yellow
-               "<span color='#ffffa5'><span>", // yellow
-               "<span color='#ff9977'></span>", // orange
-               "<span color='#ff9977'></span>", // orange
-               "<span color='#dd532e'></span>"  // red
+            "<span color='#69ff94'></span>",
+            "<span color='#5fff97'></span>",
+            "<span color='#4dff9d'></span>",
+            "<span color='#45f9a0'></span>",
+            "<span color='#3ef5a2'></span>",
+            "<span color='#33e6b2'></span>",
+            "<span color='#2ec7d8'></span>",
+            "<span color='#29badd'></span>",
+            "<span color='#2ab9e8'></span>",
+            "<span color='#29a9ff'></span>",
+            "<span color='#1e90ff'></span>",
+            "<span color='#1b85f2'></span>",
+            "<span color='#1572d4'></span>",
+            "<span color='#0073e6'></span>",
+            "<span color='#0065c2'></span>",
+            "<span color='#005fb8'></span>",
+            "<span color='#80faff'></span>",
+            "<span color='#73e8ff'></span>",
+            "<span color='#6adfff'></span>",
+            "<span color='#ffffa5'></span>",
+            "<span color='#ffe28c'></span>",
+            "<span color='#ffd177'></span>",
+            "<span color='#ffcd60'></span>",
+            "<span color='#ffba55'></span>",
+            "<span color='#ffa95e'></span>",
+            "<span color='#ff9966'></span>",
+            "<span color='#ff8972'></span>",
+            "<span color='#ff7a59'></span>",
+            "<span color='#ff6644'></span>",
+            "<span color='#ff5233'></span>",
+            "<span color='#ff3d23'></span>",
+            "<span color='#dd532e'></span>",
+            "<span color='#d93d23'></span>",
+            "<span color='#c32b14'></span>",
+            "<span color='#b5220b'></span>",
+            "<span color='#a81a05'></span>",
+            "<span color='#910700'></span>"
         ]
     },
     "backlight": {
@@ -142,20 +186,23 @@
         "format": "{percent}% {icon}",
         "format-icons": ["🌑", "🌘", "🌗", "🌖", "🌕"]
     },
-    "battery": {
-        "states": {
-            // "good": 95,
-            "warning": 30,
-            "critical": 15
-        },
-        "format": "{capacity}% {icon}",
-        "format-full": "{capacity}% {icon}",
-        "format-charging": "{capacity}% ",
-        "format-plugged": "{capacity}% ",
-        "format-alt": "{time} {icon}",
-        // "format-good": "", // An empty format will hide the module
-        // "format-full": "",
-        "format-icons": ["", "", "", "", ""]
+   "battery": {
+       "states": {
+           "good": 95,
+           "warning": 30,
+           "critical": 15
+       },
+       "format": "{capacity}% {icon}",
+       "format-full": "{capacity}% {icon}",
+       "format-charging": "{capacity}% <span color='#a8ff60'></span>",
+       "format-plugged": "{capacity}% <span color='#a8ff60'></span>",
+       "format-icons": [
+           "<span color='#ff5233'></span>",  // 0-19%
+           "<span color='#ffba55'></span>",  // 20-39%
+           "<span color='#ffe28c'></span>",  // 40-59%
+           "<span color='#94f272'></span>",  // 60-79%
+           "<span color='#a8ff60'></span>"   // 80-100%
+       ]
     },
     "battery#bat2": {
         "bat": "BAT2"
@@ -172,30 +219,41 @@
       }
     },
     "network": {
-        // "interface": "wlp2*", // (Optional) To force the use of this interface
-        "format-wifi": "{essid} ({signalStrength}%) ",
-        "format-ethernet": "",
-        "tooltip-format": "{ifname} {ipaddr} ",
-        "format-linked": "{ifname} (No IP) ",
-        "format-disconnected": "Disconnected ⚠",
-        "format-alt": "{ifname}: {ipaddr}/{cidr}"
+       // "interface": "wlp2*", // (Optional) To force the use of this interface
+       "format-wifi": "{essid} ({signalStrength}%) {icon}",
+       "format-icons": [
+           "<span color='#ff5233'></span>",  // 0-19%
+           "<span color='#ffba55'></span>",  // 20-39%
+           "<span color='#ffe28c'></span>",  // 40-59%
+           "<span color='#94f272'></span>",  // 60-79%
+           "<span color='#a8ff60'></span>"   // 80-100%
+       ],
+       "format-ethernet": "",
+       "tooltip-format": "{ifname} {ipaddr} ",
+       "format-linked": "{ifname} (No IP) ",
+       "format-disconnected": "Disconnected ⚠",
+       "format-alt": "{ifname}: {ipaddr}/{cidr}"
     },
     "pulseaudio": {
-        "scroll-step": 1, // %, can be a float
+        "scroll-step": 1,
         "format": "{volume}% {icon} {format_source}",
-        "format-bluetooth": "{volume}% {icon} {format_source}",
-        "format-bluetooth-muted": " {icon} {format_source}",
-        "format-muted": " {format_source}",
-        "format-source": "{volume}% ",
-        "format-source-muted": "",
+        "format-bluetooth": "{volume}% {icon}<span color='#2aa9ff'></span> {format_source}",
+        "format-bluetooth-muted": "<span color='#ff5233'></span> {icon}<span color='#ff5233'></span> {format_source}",
+        "format-muted": "{format_source}",
+        "format-source": "{volume}% <span color='#a8ff60'></span>",
+        "format-source-muted": "<span color='#ff5233'></span>",
         "format-icons": {
-            "headphone": "",
-            "hands-free": "",
-            "headset": "",
-            "phone": "",
-            "portable": "",
-            "car": "",
-            "default": ["", "", ""]
+             "headphone": "<span color='#a8ff60'></span>",
+             "hands-free": "<span color='#94f272'></span>",
+             "headset": "<span color='#94f272'></span>",
+             "phone": "<span color='#ffd177'></span>",
+             "portable": "<span color='#ffd177'></span>",
+             "car": "<span color='#ffba55'></span>",
+             "default": [
+                 "<span color='#a8ff60'></span>",
+                 "<span color='#ffe28c'></span>",
+                 "<span color='#ff5233'></span>"
+             ]
         },
         "on-click": "pavucontrol"
     },
