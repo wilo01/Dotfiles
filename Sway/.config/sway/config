@@ -89,10 +89,10 @@ exec swayidle -w \
 
 #Programs
 
-bindsym $mod+Shift+Return exec google-chrome
-bindsym $mod+Shift+f exec thunar
-bindsym $mod+Return exec code
-bindsym $mod+$alt+Return exec $term
+   bindsym $mod+Shift+Return exec google-chrome
+   bindsym $mod+Ctrl+Return exec thunar
+   bindsym $mod+Return exec code
+   bindsym $mod+$alt+Return exec $term
 
 ### Key bindings
 #
@@ -217,7 +217,7 @@ bindsym $mod+$alt+Return exec $term
     bindsym $mod+v splitv
 
     # Switch the current container between different layout styles
-    bindsym $mod+s layout stacking
+    # bindsym $mod+s layout stacking
     bindsym $mod+w layout tabbed
     bindsym $mod+e layout toggle split
 
@@ -225,16 +225,20 @@ bindsym $mod+$alt+Return exec $term
     bindsym $mod+f fullscreen
 
     # Toggle the current focus between tiling and floating mode
-    bindsym $mod+Shift+space floating toggle
+    bindsym $mod+Shift+f floating toggle
 
     # Swap focus between the tiling area and the floating area
-    bindsym $mod+t focus mode_toggle
+    bindsym $mod+Shift+t focus mode_toggle
+
+    # Toggle layout modes tabbed, vertial or horizontal split
+    bindsym $mod+t layout toggle tabbed splith splitv
 
     # Move focus to the parent container
     bindsym $mod+a focus parent
+    bindsym $mod+z focus child
 
     #Floating Apps
-    for_window [app_id="thunar"] floating enable, resize set 800 500
+    for_window [app_id="thunar"] floating enable, resize set 1200 800
 #
 # Scratchpad:
 #
@@ -242,11 +246,11 @@ bindsym $mod+$alt+Return exec $term
     # You can send windows there and get them back later.
 
     # Move the currently focused window to the scratchpad
-    bindsym $mod+Shift+minus move scratchpad
+    bindsym $mod+Ctrl+m move scratchpad
 
     # Show the next scratchpad window or hide the focused scratchpad window.
     # If there are multiple scratchpad windows, this command cycles through them.
-    bindsym $mod+minus scratchpad show
+    bindsym $mod+Ctrl+a scratchpad show
 
 #
 # Title bar
