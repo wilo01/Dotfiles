@@ -123,9 +123,19 @@
         // "hwmon-path": "/sys/class/hwmon/hwmon2/temp1_input",
         // "format-critical": "{temperatureC}°C {icon}",
         "interval": 10,
-        "critical-threshold": 80,
+        "critical-threshold": 75,
         "format": "{temperatureC}°C {icon}",
-        "format-icons": ["", "", ""]
+        // "format-icons": ["", "", ""]
+        "format-icons": [
+               "<span color='#69ff94'><span>", // green
+               "<span color='#2aa9ff'><span>", // blue
+               "<span color='#2aa9ff'><span>", // blue
+               "<span color='#ffffa5'><span>", // yellow
+               "<span color='#ffffa5'><span>", // yellow
+               "<span color='#ff9977'></span>", // orange
+               "<span color='#ff9977'></span>", // orange
+               "<span color='#dd532e'></span>"  // red
+        ]
     },
     "backlight": {
         // "device": "acpi_video1",
