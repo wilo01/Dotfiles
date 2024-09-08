@@ -367,3 +367,10 @@ label:focus {
 #custom-weather.default {
     color: #dbd9d8;
 }
+
+#custom-spotify {
+    padding: 0 10px;
+    margin: 0 4px;
+    color: white;
+    /* background-color: #1DB954; */
+}
