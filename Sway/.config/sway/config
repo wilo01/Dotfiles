@@ -94,6 +94,8 @@ input "type:touchpad" {
 
 # Apps / Applications / Programs 
 
+   exec swaync
+   bindsym $mod+Shift+n exec swaync-client -t -sw
    bindsym $mod+Shift+Return exec google-chrome
    bindsym $mod+Ctrl+Return exec thunar
    bindsym $mod+Return exec code

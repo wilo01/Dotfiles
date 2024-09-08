@@ -334,6 +334,11 @@ label:focus {
     /* background-color: #0069d4; */
 }
 
+/* Custom Notifications */
+#custom-notification {
+  font-family: "NotoSansMono Nerd Font";
+}
+
 /* Custom Weather */
 #custom-weather.severe {
     color: #eb937d;
