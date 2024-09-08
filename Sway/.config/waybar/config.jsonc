@@ -4,7 +4,7 @@
     "position": "top", // Waybar position (top|bottom|left|right)
     "height": 30, // Waybar height (to be removed for auto height)
     // "width": 1280, // Waybar width
-    "spacing": 4, // Gaps between modules (4px)
+    "spacing": 1, // Gaps between modules (4px)
     // Choose the order of the modules
     "modules-left": [
         "custom/power",
@@ -123,9 +123,9 @@
         }
       }
     },
-   "cpu": {
+    "cpu": {
        "interval": 2,
-        "tooltip": true,
+       "tooltip": true,
        "critical-threshold": 80,
        "format": "{usage}% {icon}",
        "format-icons": [
@@ -135,18 +135,18 @@
            "<span color='#ffba55'></span>",  // 61-80%
            "<span color='#ff5233'></span>"   // 81-100%
        ]
-   },
-   "memory": {
-    "interval": 5,
-    "critical-threshold": 80,
-    "format": "{used}G {icon}",
-    "format-icons": [
-        "<span color='#a8ff60'></span>",   // 0-20%
-        "<span color='#94f272'></span>",   // 21-40%
-        "<span color='#ffe28c'></span>",   // 41-60%
-        "<span color='#ffba55'></span>",   // 61-80%
-        "<span color='#ff5233'></span>"    // 81-100%
-       ]
+    },
+    "memory": {
+       "interval": 5,
+       "critical-threshold": 80,
+       "format": "{used}G {icon}",
+       "format-icons": [
+           "<span color='#a8ff60'></span>",   // 0-20%
+           "<span color='#94f272'></span>",   // 21-40%
+           "<span color='#ffe28c'></span>",   // 41-60%
+           "<span color='#ffba55'></span>",   // 61-80%
+           "<span color='#ff5233'></span>"    // 81-100%
+          ]
    },
     "temperature": {
         // "thermal-zone": 2,
@@ -295,6 +295,7 @@
     },
     "custom/power": {
         "format": "",
+        "tooltip": false,
         "on-click": "[ -z $(pgrep swaynag) ] && swaynag -t warning -m 'Power Menu Options' -B 'Logout' 'swaymsg exit' -B 'Restart' 'shutdown -r now' -b 'Shutdown' 'shutdown -h now'"
     },
     "custom/weather": {
