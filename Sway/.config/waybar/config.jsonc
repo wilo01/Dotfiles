@@ -7,6 +7,7 @@
     "spacing": 4, // Gaps between modules (4px)
     // Choose the order of the modules
     "modules-left": [
+        "custom/power",
         "sway/workspaces",
         "sway/mode",
         "sway/scratchpad"
@@ -30,7 +31,6 @@
         // "sway/language",
         "battery",
         "clock"
-        // "custom/power" // TODO
     ],
     // Modules configuration
      "sway/workspaces": {
@@ -294,16 +294,8 @@
         // "exec": "$HOME/.config/waybar/mediaplayer.py --player spotify 2> /dev/null" // Filter player based on name
     },
     "custom/power": {
-        "format" : "⏻ ",
-		"tooltip": false,
-		"menu": "on-click",
-		"menu-file": "$HOME/.config/waybar/power_menu.xml", // Menu file in resources folder
-		"menu-actions": {
-			"shutdown": "shutdown",
-			"reboot": "reboot",
-			"suspend": "systemctl suspend",
-			"hibernate": "systemctl hibernate"
-		}
+        "format": "",
+        "on-click": "[ -z $(pgrep swaynag) ] && swaynag -t warning -m 'Power Menu Options' -B 'Logout' 'swaymsg exit' -B 'Restart' 'shutdown -r now' -b 'Shutdown' 'shutdown -h now'"
     },
     "custom/weather": {
        "format": "{}",

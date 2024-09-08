@@ -120,7 +120,7 @@ input "type:touchpad" {
 
     # Exit sway (logs you out of your Wayland session)
     # bindsym --no-repeat $mod+Shift+Escape exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
-    bindsym $mod+Shift+Escape exec "[ -z $(pgrep swaynag) ] && swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'"
+    bindsym $mod+Shift+Escape exec "[ -z $(pgrep swaynag) ] && swaynag -t warning -m 'Power Menu Options' -B 'Logout' 'swaymsg exit' -B 'Restart' 'shutdown -r now' -b 'Shutdown' 'shutdown -h now'"
 
     # Reload the configuration file
     bindsym $mod+Shift+c reload
