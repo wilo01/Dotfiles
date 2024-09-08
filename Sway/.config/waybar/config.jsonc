@@ -17,7 +17,9 @@
    // ],
     "modules-right": [
         // "idle_inhibitor",
+        "custom/weather",
         "tray",
+        "custom/public_ip",
         "network",
         "pulseaudio",
         "power-profiles-daemon",
@@ -104,9 +106,22 @@
     },
     "clock": {
         "timezone": "Europe/Dublin",
-        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
-	"format": "{:%d.%m.%y %H:%M %p}"
-        //"format-alt": "{:%Y-%m-%d}"
+        "tooltip-format": "<tt><big>{calendar}</big></tt>",
+        "format": "{:%d.%m.%y %H:%M %p}",
+        "calendar": {
+        // "mode-mon-col"  : 3,
+        // "weeks-pos"     : "right",
+        "mode"          : "month",
+        "on-scroll"     : 1,
+        "on-click-right": "mode",
+        "format": {
+            "months":     "<span color='#ffead3'><b>{}</b></span>",
+            "days":       "<span color='#ecc6d9'><b>{}</b></span>",
+            "weeks":      "<span color='#99ffdd'><b>W{}</b></span>",
+            "weekdays":   "<span color='#ffcc66'><b>{}</b></span>",
+            "today":      "<span color='#ff6699'><b><u>{}</u></b></span>"
+        }
+      }
     },
    "cpu": {
        "interval": 2,
@@ -229,10 +244,19 @@
            "<span color='#a8ff60'></span>"   // 80-100%
        ],
        "format-ethernet": "",
-       "tooltip-format": "{ifname} {ipaddr} ",
+       "tooltip-format": "{ifname}\t{ipaddr}/{cidr} \ngateway\t{gwaddr}\n\n{icon}  ⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
        "format-linked": "{ifname} (No IP) ",
        "format-disconnected": "Disconnected ⚠",
        "format-alt": "{ifname}: {ipaddr}/{cidr}"
+    },
+    "custom/public_ip": {
+       "exec": "curl -s https://ifconfig.me",
+       "interval": 600,
+       "tooltip": true,
+       "format": "🌐",
+       "format-alt": "🌐 Public IP: {}",
+       "tooltip-format": "🌐 Public IP: {}",
+       "on-click": "curl -s https://ifconfig.me | wl-copy"
     },
     "pulseaudio": {
         "scroll-step": 1,
@@ -280,5 +304,20 @@
 			"suspend": "systemctl suspend",
 			"hibernate": "systemctl hibernate"
 		}
+    },
+    "custom/weather": {
+       "format": "{}",
+       "tooltip": true,
+       "interval": 3600,
+       "return-type": "json",
+       "exec": "python ~/.config/waybar/scripts/waybar-wttr.py",
+       "on-click": "xdg-open https://en.wttr.in/"
     }
+    // "custom/weather": {
+    //    "restart-interval": 300,
+    //    "return-type": "json",
+    //    "format-alt": "{alt}",
+    //    "exec": "python ~/.config/waybar/scripts/weather.py",
+    //    "on-click": "xdg-open https://weather.com/en-IN/weather/today/l/c30c030abf9ed22f44f266f185c46bf3576a32df6097d04973dd39e8d93628ae"
+    // },
 }
