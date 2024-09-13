@@ -239,9 +239,8 @@ input "type:touchpad" {
     # Swap focus between the tiling area and the floating area
     bindsym $mod+Shift+t focus mode_toggle
 
-    # Change tabbed window right (for some reason left breaks)
-    # bindsym $mod+Ctrl+Tab focus left
-    bindsym $mod+Alt+Tab focus right
+    # Change tabbed window right (using right only)
+    bindsym $mod+grave focus right
 
     # Toggle layout modes tabbed, vertial or horizontal split
     bindsym $mod+t layout toggle tabbed splith splitv
