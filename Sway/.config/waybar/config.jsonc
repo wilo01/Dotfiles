@@ -41,10 +41,16 @@
          "warp-on-scroll": false,
          "format": "{name} {icon} |",
          "format-icons": {
-             // "1": "",
+             "1": "",
              // "2": "",
-             // "3": "",
-             // "20": "",
+             "2": "",
+             "3": "",
+             "4": "",
+             "5": "",
+             "10": "",
+             "11": "",
+             "19": "",
+             "20": "",
              "urgent": "",
              "focused": "",
              "default": ""
@@ -249,7 +255,8 @@
        "tooltip-format": "{ifname}\t{ipaddr}/{cidr} \ngateway\t{gwaddr}\n\n{icon}  ⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
        "format-linked": "{ifname} (No IP) ",
        "format-disconnected": "Disconnected ⚠",
-       "format-alt": "{ifname}: {ipaddr}/{cidr}"
+       "format-alt": "{ifname}: {ipaddr}/{cidr}",
+       "on-click-middle": "nmcli networking | grep -q 'enabled' && nmcli networking off || nmcli networking on"
     },
     "custom/public_ip": {
        "exec": "curl -s https://ifconfig.me",
