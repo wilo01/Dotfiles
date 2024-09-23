@@ -7,16 +7,8 @@ return {
 
    config = function()
       local ls = require("luasnip")
-      local fmt = require("luasnip.extras.fmt").fmt
-      local rep = require("luasnip.extras").rep
-
       local snip = ls.snippet
-      local node = ls.snippet_node
-      local text = ls.text_node
-      local insert = ls.insert_node
       local func = ls.function_node
-      local choice = ls.choice_node
-      local dynamicn = ls.dynamic_node
 
       ls.filetype_extend("javascript", { "jsdoc" })
 
@@ -27,25 +19,6 @@ return {
          enable_autosnippets = true,
          store_selection_keys = "<TAB>",
       }
-
-      local function get_line_iter(str)
-         if str:sub(-1) ~= "\n" then
-            str = str .. "\n"
-         end
-
-         return str:gmatch "(.-)\n"
-      end
-      local function box_trim_lines(str)
-         local new_str = ""
-
-         for line in get_line_iter(str) do
-            line = line:gsub("^%s+", "")
-            line = string.gsub(line, "%s+$", "")
-            new_str = new_str .. "\n" .. line
-         end
-
-         return new_str
-      end
 
       local date = function()
          return { os.date "%d.%m.%Y" }
