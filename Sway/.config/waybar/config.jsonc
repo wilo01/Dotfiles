@@ -23,7 +23,8 @@
         "tray",
         "custom/public_ip",
         "network",
-        "pulseaudio",
+        "pulseaudio#input",
+        "pulseaudio#output",
         "power-profiles-daemon",
         "cpu",
         "memory",
@@ -267,28 +268,49 @@
        "tooltip-format": "🌐 Public IP: {}",
        "on-click": "curl -s https://ifconfig.me | wl-copy"
     },
-    "pulseaudio": {
-        "scroll-step": 1,
-        "format": "{volume}% {icon} {format_source}",
-        "format-bluetooth": "{volume}% {icon}<span color='#2aa9ff'></span> {format_source}",
-        "format-bluetooth-muted": "<span color='#ff5233'></span> {icon}<span color='#ff5233'></span> {format_source}",
-        "format-muted": "{format_source}",
-        "format-source": "{volume}% <span color='#a8ff60'></span>",
-        "format-source-muted": "<span color='#ff5233'></span>",
-        "format-icons": {
-             "headphone": "<span color='#a8ff60'></span>",
-             "hands-free": "<span color='#94f272'></span>",
-             "headset": "<span color='#94f272'></span>",
-             "phone": "<span color='#ffd177'></span>",
-             "portable": "<span color='#ffd177'></span>",
-             "car": "<span color='#ffba55'></span>",
-             "default": [
-                 "<span color='#a8ff60'></span>",
-                 "<span color='#ffe28c'></span>",
-                 "<span color='#ff5233'></span>"
-             ]
-        },
-        "on-click": "pavucontrol"
+    "pulseaudio#input": {
+       "format": "{format_source}",
+       "format-source": "{volume}% <span color='#a8ff60'></span>",
+       "format-source-muted": "OFF <span color='#ff5233'></span>",
+       "format-icons": {
+           "default": [
+              "<span color='#a8ff60'></span>",
+              "<span color='#ffe28c'></span>",
+              "<span color='#ff5233'></span>"
+           ]
+       },
+       "scroll-step": 2,
+       "smooth-scrolling-threshold": 1,
+       "max-volume": 100,
+       "on-click": "pavucontrol",
+       "on-click-middle": "pactl set-source-mute @DEFAULT_SOURCE@ toggle",
+       "on-scroll-up": "pactl set-source-volume @DEFAULT_SOURCE@ +1%",
+       "on-scroll-down": "pactl set-source-volume @DEFAULT_SOURCE@ -1%",
+    },
+    "pulseaudio#output": {
+       "format": "{volume}% {icon}",
+       "format-muted": "OFF <span color='#ff5233'></span>",
+       "format-bluetooth": "{volume}% {icon}<span color='#2aa9ff'></span>",
+       "format-bluetooth-muted": "{volume}% <span color='#ff5233'></span><span color='#2aa9ff'></span>",
+       "format-icons": {
+           "headphone": [
+              "<span color='#a8ff60'></span>",
+              "<span color='#ffe28c'></span>",
+              "<span color='#ff5233'></span>"
+           ],
+           "default": [
+              "<span color='#a8ff60'></span>",
+              "<span color='#ffe28c'></span>",
+              "<span color='#ff5233'></span>"
+           ]
+       },
+       "scroll-step": 2,
+       "smooth-scrolling-threshold": 1,
+       "max-volume": 100,
+       "on-click": "pavucontrol",
+       "on-click-middle": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+       "on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +1%",
+       "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -1%",
     },
     "custom/media": {
         "format": "{icon} {}",
