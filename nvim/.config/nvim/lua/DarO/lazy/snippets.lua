@@ -109,6 +109,10 @@ return {
             ls.parser.parse_snippet("M", "local M = {}\n${0}\nreturn M"),
          },
          markdown = {
+            ls.parser.parse_snippet("img", "![${1:alt text}](${2:image_url})\n${0}"),
+            ls.parser.parse_snippet("image", "![${1:alt text}](${2:image_url})\n${0}"),
+            ls.parser.parse_snippet("link", "[${1:link text}](${2:url})\n${0}"),
+            ls.parser.parse_snippet("url", "[${1:link text}](${2:url})\n${0}"),
             ls.parser.parse_snippet("codewrap", "```${1:Language}\n${2}\n```\n${0}"),
             ls.parser.parse_snippet("code", "```${1:Language}\n${2:Content}\n```\n${0}"),
          }
