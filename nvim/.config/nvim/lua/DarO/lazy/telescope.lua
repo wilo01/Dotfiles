@@ -28,6 +28,7 @@ return {
          builtin.grep_string({ search = vim.fn.input("Grep > ", vim.fn.getreg('+')) });
       end)
       vim.keymap.set('v', '<leader>c', function()
+         vim.cmd('normal! "+y')
          builtin.grep_string({ search = vim.fn.input("Grep > ", vim.fn.getreg('+')) });
       end)
 
