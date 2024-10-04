@@ -102,7 +102,7 @@ input "type:touchpad" {
    bindsym $mod+$alt+Return exec $term
    bindsym $mod+Shift+b exec blueman-manager 
    bindsym $mod+Shift+s exec pavucontrol
-   bindsym $mod+e exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
+   bindsym $mod+d exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
 
 ### Key bindings
 #
