@@ -102,6 +102,7 @@ input "type:touchpad" {
    bindsym $mod+$alt+Return exec $term
    bindsym $mod+Shift+b exec blueman-manager 
    bindsym $mod+Shift+s exec pavucontrol
+   bindsym $mod+e exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
 
 ### Key bindings
 #
@@ -233,8 +234,8 @@ input "type:touchpad" {
 
     # Switch the current container between different layout styles
     # bindsym $mod+s layout stacking
-    bindsym $mod+w layout tabbed
-    bindsym $mod+e layout toggle split
+    # bindsym $mod+w layout tabbed
+    # bindsym $mod+e layout toggle split
 
     # Make the current focus fullscreen
     bindsym $mod+f fullscreen
