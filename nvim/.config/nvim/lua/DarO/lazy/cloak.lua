@@ -22,5 +22,6 @@ return {
             },
          },
       })
+      vim.api.nvim_set_keymap("n", "<leader>e", ":CloakToggle<CR>", { noremap = true, silent = true })
    end
 }
