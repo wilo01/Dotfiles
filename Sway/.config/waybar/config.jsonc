@@ -231,7 +231,17 @@
              "<span color='#73ff60'></span>",   // 71-80%
              "<span color='#a8ff60'></span>",   // 81-90%
              "<span color='#b8ff80'></span>"    // 91-100%
-       ]
+       ],
+       "states": {
+          "10": {
+               "tooltip": "Battery critically low! Please charge now!",
+               "format": "{capacity}% "  // Critical icon and message at 0-10%
+          },
+          "20": {
+               "tooltip": "Battery low! Please consider charging soon.",
+               "format": "{capacity}% "  // Warning icon and message at 11-20%
+          }
+       }
     },
     "battery#bat2": {
         "bat": "BAT2"
