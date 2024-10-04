@@ -1,5 +1,5 @@
 return {
-   "laytan/cloak.nvim",
+   "laytan/cloak.nvim", -- .env protect passowrds
    config = function()
       require("cloak").setup({
          enabled = true,
