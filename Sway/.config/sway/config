@@ -115,8 +115,7 @@ input "type:touchpad" {
     # Kill focused window
     bindsym $mod+q kill
     # Force Kill focused window
-    bindsym $mod+Shift+q kill -9
-    # bindsym $mod+Shift+q exec "kill -9 $(swaymsg -t get_tree | jq -r '.. | select(.focused? == true).pid')"
+    bindsym $mod+Shift+q exec "kill -9 $(swaymsg -t get_tree | jq '.. | select(.type?) | select(.focused==true) | .pid')"
 
     #Power Menu
     bindsym $mod+c exec wlogout
