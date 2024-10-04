@@ -245,18 +245,19 @@
     "network": {
        // "interface": "wlp2*", // (Optional) To force the use of this interface
        "format-wifi": "{signalStrength}% {icon}",
-       "format-icons": [
-           "<span color='#ff5233'></span>",  // 0-19%
-           "<span color='#ffba55'></span>",  // 20-39%
-           "<span color='#ffe28c'></span>",  // 40-59%
-           "<span color='#94f272'></span>",  // 60-79%
-           "<span color='#a8ff60'></span>"   // 80-100%
-       ],
+       "tooltip-format": "{essid}\n{ifname}\t{ipaddr}/{cidr} \ngateway\t{gwaddr}\n\n{icon} ⇣{bandwidthDownBytes} ⇡{bandwidthUpBytes}",
+       "format-alt": "{essid} {signalStrength}% {icon}",
        "format-ethernet": "",
-       "tooltip-format": "{essid}\n{ifname}\t{ipaddr}/{cidr} \ngateway\t{gwaddr}\n\n{icon}  ⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
        "format-linked": "{ifname} (No IP) ",
        "format-disconnected": "Disconnected ⚠",
-       "format-alt": "{ifname}: {ipaddr}/{cidr}",
+       "interval": 30,
+       "format-icons": [
+         "<span color='#ff5233'></span>",  // 0-19%
+         "<span color='#ffba55'></span>",  // 20-39%
+         "<span color='#ffe28c'></span>",  // 40-59%
+         "<span color='#94f272'></span>",  // 60-79%
+         "<span color='#a8ff60'></span>"   // 80-100%
+       ],
        "on-click-middle": "nmcli networking | grep -q 'enabled' && nmcli networking off || nmcli networking on"
     },
     "custom/public_ip": {
