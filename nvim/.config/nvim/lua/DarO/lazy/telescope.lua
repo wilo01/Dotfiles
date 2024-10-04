@@ -27,6 +27,9 @@ return {
       vim.keymap.set('n', '<leader>c', function()
          builtin.grep_string({ search = vim.fn.input("Grep > ", vim.fn.getreg('+')) });
       end)
+      vim.keymap.set('v', '<leader>c', function()
+         builtin.grep_string({ search = vim.fn.input("Grep > ", vim.fn.getreg('+')) });
+      end)
 
       vim.keymap.set('n', '<leader>vh', builtin.help_tags, {})
    end
