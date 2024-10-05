@@ -31,7 +31,14 @@ return {
          vim.cmd('normal! "+y')
          builtin.grep_string({ search = vim.fn.input("Grep > ", vim.fn.getreg('+')) });
       end)
-
+      vim.keymap.set('n', '<leader>r', function()
+         builtin.buffers({
+            sort_mru = true,
+            sort_lastused = true,
+            initial_mode = "insert",
+            theme = "ivy"
+         })
+      end)
       vim.keymap.set('n', '<leader>vh', builtin.help_tags, {})
    end
 }
