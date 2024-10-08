@@ -11,22 +11,30 @@ return {
       "L3MON4D3/LuaSnip",
       "saadparwaiz1/cmp_luasnip",
       "j-hui/fidget.nvim",
+      "jose-elias-alvarez/null-ls.nvim",
+      "jay-babu/mason-null-ls.nvim",
    },
    config = function()
       local cmp = require('cmp')
       local cmp_lsp = require("cmp_nvim_lsp")
+      local null_ls = require("null-ls")
+
       local capabilities = vim.tbl_deep_extend(
          "force",
          {},
          vim.lsp.protocol.make_client_capabilities(),
-         cmp_lsp.default_capabilities())
+         cmp_lsp.default_capabilities()
+      )
 
-      require("fidget").setup({})
       require("mason").setup()
+      require("mason-null-ls").setup({
+         ensure_installed = { "gofmt" },
+      })
       require("mason-lspconfig").setup({
          ensure_installed = {
             "eslint",
             "lua_ls",
+            "gopls",
          },
          handlers = {
             function(server_name) -- default handler (optional)
@@ -50,6 +58,7 @@ return {
                vim.g.zig_fmt_parse_errors = 0
                vim.g.zig_fmt_autosave = 0
             end,
+
             ["lua_ls"] = function()
                local lspconfig = require("lspconfig")
                lspconfig.lua_ls.setup {
@@ -64,11 +73,40 @@ return {
                   }
                }
             end,
+
+            ["gopls"] = function()
+               local lspconfig = require("lspconfig")
+               lspconfig.gopls.setup({
+                  capabilities = capabilities,
+                  settings = {
+                     gopls = {
+                        analyses = {
+                           unusedparams = true,
+                        },
+                        staticcheck = true,
+                     },
+                  },
+               })
+            end,
          }
       })
 
-      local cmp_select = { behavior = cmp.SelectBehavior.Select }
+      null_ls.setup({
+         sources = {
+            null_ls.builtins.formatting.gofmt, -- Use `gofmt` as the formatter
+            -- Can be used `goimports` or `golines` as alternatives:
+            -- null_ls.builtins.formatting.goimports,
+            -- null_ls.builtins.formatting.golines,
+         },
+         on_attach = function(client, bufnr)
+            if client.supports_method("textDocument/formatting") then
+               vim.api.nvim_buf_set_option(bufnr, "formatexpr", "v:lua.vim.lsp.formatexpr()")
+               vim.api.nvim_command [[autocmd BufWritePre <buffer> lua vim.lsp.buf.format()]] -- Format on save
+            end
+         end,
+      })
 
+      local cmp_select = { behavior = cmp.SelectBehavior.Select }
       cmp.setup({
          snippet = {
             expand = function(args)
@@ -90,7 +128,6 @@ return {
       })
 
       vim.diagnostic.config({
-         -- update_in_insert = true,
          float = {
             focusable = false,
             style = "minimal",
