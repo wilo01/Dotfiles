@@ -69,6 +69,9 @@ vim.keymap.set("n", "<leader>fh", ":Telescope help_tags<cr>", { desc = "Find hel
 -- stylua: ignore start
 vim.keymap.set("n", "<leader>df", function() utils.telescope_diff_file() end, { desc = "Diff file with current buffer" })
 vim.keymap.set("n", "<leader>dg", function() utils.telescope_diff_from_history() end, { desc = "Diff from git history" })
+
+-- Usefull aditional remap for going back from go to definition
+vim.keymap.set("n", "gb", "<C-o>")
 -- stylua: ignore end
 
 -- New un used yet
