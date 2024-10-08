@@ -38,7 +38,10 @@ set $menu $rofi_cmd -show combi -combi-modes drun#run -modes combi
 set $default_bg /usr/share/backgrounds/default-dark.png
 
 output * bg $default_bg fill
+# Output DP-1 'Samsung M8'
 output DP-1 mode 2560x1440@59.951Hz
+# Output DP-4 'Iiyama North America PL2792Q 1152104402964'
+output DP-4 mode 2560x1440@59.951Hz
 #
 # Example configuration:
 #
@@ -107,7 +110,7 @@ input "type:touchpad" {
    bindsym $mod+Alt+k exec keepassxc
 
    # Apps on specific workspaces
-   for_window [class="Code"] move to workspace 1; move workspace to output DP-1; workspace 1
+   for_window [class="Code"] move to workspace 1; move workspace to output DP-4; workspace 1
    for_window [app_id="keepassxc"] move to workspace 19; move workspace to output eDP-1; workspace 19
    for_window [class="Spotify"] move to workspace 20; move workspace to output eDP-1; workspace 20
 
