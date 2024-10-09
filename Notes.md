@@ -1,3 +1,17 @@
+# NOTES: TODO formatting whitespaces
+```lua
+    local augroup = vim.api.nvim_create_augroup
+    local TheDaroGroup = augroup('TheDarO', {})
+    local autocmd = vim.api.nvim_create_autocmd
+    Remove white spaces at the end
+    autocmd({"BufWritePre"}, {
+        group = TheDaroGroup,
+        pattern = "*",
+        command = [[%s/\s\+$//e]],
+    })
+```
+
+
 # NOTES: Git hooks example
 - Command to edit
 ```sh
