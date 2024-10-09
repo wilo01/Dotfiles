@@ -4,6 +4,7 @@ return {
    dependencies = { "nvim-lua/plenary.nvim" },
    config = function()
       local harpoon = require("harpoon")
+      local harpoon_auto_add_enabled = false
       local list = harpoon:list()
       harpoon:setup()
 
@@ -24,11 +25,28 @@ return {
          vim.notify("File: " .. file_name .. " added to Harpoon", vim.log.levels.INFO)
       end
 
-      -- vim.cmd [[
-      --   augroup HarpoonAutoAdd
-      --     autocmd!
-      --     autocmd BufWritePost * lua add_file_and_notify()
-      --   augroup END
-      -- ]]
+      -- Function to toggle the autocmd
+      function _G.toggle_harpoon_auto_add()
+         if harpoon_auto_add_enabled then
+            vim.cmd [[
+              augroup HarpoonAutoAdd
+                autocmd!
+              augroup END
+            ]]
+            vim.notify("Harpoon auto-add disabled", vim.log.levels.INFO)
+         else
+            vim.cmd [[
+              augroup HarpoonAutoAdd
+                autocmd!
+                autocmd BufWritePost * lua add_file_and_notify()
+              augroup END
+            ]]
+            vim.notify("Harpoon auto-add enabled", vim.log.levels.INFO)
+         end
+         harpoon_auto_add_enabled = not harpoon_auto_add_enabled
+      end
+
+      -- Command to toggle the autocmd
+      vim.api.nvim_create_user_command("HarpoonAutoAdd", toggle_harpoon_auto_add, {})
    end
 }
