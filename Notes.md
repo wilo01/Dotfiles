@@ -3,7 +3,7 @@
     local augroup = vim.api.nvim_create_augroup
     local TheDaroGroup = augroup('TheDarO', {})
     local autocmd = vim.api.nvim_create_autocmd
-    Remove white spaces at the end
+    -- Remove white spaces at the end
     autocmd({"BufWritePre"}, {
         group = TheDaroGroup,
         pattern = "*",
