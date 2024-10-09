@@ -3,8 +3,8 @@ local utils = require("DarO.utils")
 vim.g.mapleader = " "
 vim.keymap.set("n", "<leader>v", vim.cmd.Ex) -- Opens netrw
 
-vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")  -- Select visual and move DOWN
-vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")  -- Select visual and move DOWN
+vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv") -- Select visual and move DOWN
+vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv") -- Select visual and move DOWN
 
 vim.keymap.set("i", "jk", "<Esc>")
 vim.keymap.set("i", "hl", "<Esc>")
