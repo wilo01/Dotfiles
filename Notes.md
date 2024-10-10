@@ -1,3 +1,5 @@
+# NOTES: TODO case insensitive
+- [ ] Fix issue with case sensitive search
 # NOTES: TODO Easy rename file
 - [ ] Implement easy rename of the files
 - [ ] Use current rename ? Drop it ?
