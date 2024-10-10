@@ -1,4 +1,12 @@
-# NOTES: TODO formatting whitespaces
+# NOTES: TODO add file name path for easy copy - DONE [ ]
+- [How can I see the full path of the current file?](https://vi.stackexchange.com/questions/104/how-can-i-see-the-full-path-of-the-current-file)
+```lua
+    :!echo %
+    :!echo %:t
+    :!echo %:p
+    :!echo %:p:h
+```
+# NOTES: TODO formatting whitespaces - DONE [X]
 ```lua
     local augroup = vim.api.nvim_create_augroup
     local TheDaroGroup = augroup('TheDarO', {})
