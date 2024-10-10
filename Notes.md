@@ -1,3 +1,6 @@
+# NOTES: TODO Easy rename file
+- [ ] Implement easy rename of the files
+- [ ] Use current rename ? Drop it ?
 # NOTES: TODO add file name path for easy copy
 - [How can I see the full path of the current file?](https://vi.stackexchange.com/questions/104/how-can-i-see-the-full-path-of-the-current-file)
 - [ ] Implement easy path copy
