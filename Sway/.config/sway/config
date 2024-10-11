@@ -38,8 +38,9 @@ set $menu $rofi_cmd -show combi -combi-modes drun#run -modes combi
 set $default_bg /usr/share/backgrounds/default-dark.png
 
 output * bg $default_bg fill
-# Output DP-1 'Samsung M8'
+# Output DP-1 'Samsung Electric Company Smart M80C H1AK500000'
 output DP-1 mode 2560x1440@59.951Hz
+# output DP-1 mode 3840x2160@60.000Hz
 # Output DP-4 'Iiyama North America PL2792Q 1152104402964'
 output DP-4 mode 2560x1440@59.951Hz
 #
