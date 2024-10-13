@@ -2,13 +2,16 @@ return {
    "nvim-telescope/telescope.nvim",
    tag = "0.1.5",
    dependencies = {
-      "nvim-lua/plenary.nvim"
+      "nvim-lua/plenary.nvim",
+      { "nvim-telescope/telescope-file-browser.nvim" }
    },
    file_ignore_patterns = {
       "node_modules"
    },
    config = function()
-      require('telescope').setup({})
+      local telescope = require('telescope')
+      telescope.setup({})
+      telescope.load_extension('file_browser')
 
       local builtin = require('telescope.builtin')
       local grep_opts = {
@@ -59,6 +62,16 @@ return {
             theme = "ivy"
          })
       end)
-      vim.keymap.set('n', '<leader>vh', builtin.help_tags, {})
+
+      vim.keymap.set('n', '<leader>ht', builtin.help_tags, {})
+
+      vim.keymap.set('n', '<leader>pb', function()
+         telescope.extensions.file_browser.file_browser({
+            layout_config = { width = 0.8, height = 0.89 },
+            initial_mode = "normal",
+            hidden = true,
+            no_ignore = true
+         })
+      end)
    end
 }
