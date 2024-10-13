@@ -5,6 +5,8 @@ vim.opt.tabstop = 3
 vim.opt.softtabstop = 3
 vim.opt.shiftwidth = 3
 vim.opt.expandtab = true
+vim.o.list = true
+vim.o.listchars = "tab:>-,trail:~,extends:>,precedes:<,space:·"
 
 vim.opt.smartindent = true
 vim.opt.ignorecase = true
@@ -42,5 +44,5 @@ vim.g.netrw_special_syntax = 3
 vim.g.netrw_liststyle = 3
 vim.g.netrw_altv = 1
 vim.g.netrw_keepdir = 0
-vim.o.list = true
-vim.o.listchars = "tab:>-,trail:~,extends:>,precedes:<,space:·"
+vim.g.netrw_liststyle = 3
+

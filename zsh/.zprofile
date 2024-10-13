@@ -10,3 +10,5 @@ then
     PATH="$HOME/.local/bin:$PATH"
 fi
 export PATH
+
+source "$HOME/.go/env"

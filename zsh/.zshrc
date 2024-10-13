@@ -217,3 +217,6 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 # pnpm end
+export GOTOOLCHAIN=auto
+export PATH=$PATH:$(go env GOPATH)/bin
+eval "$(direnv hook zsh)"
