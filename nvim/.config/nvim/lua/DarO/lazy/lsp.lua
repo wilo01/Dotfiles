@@ -28,13 +28,15 @@ return {
 
       require("mason").setup()
       require("mason-null-ls").setup({
-         ensure_installed = { "gofmt" },
+         ensure_installed = { "gofmt", "prettierd" },
       })
       require("mason-lspconfig").setup({
          ensure_installed = {
             "eslint",
             "lua_ls",
             "gopls",
+            "dockerls",
+            "yamlls",
          },
          handlers = {
             function(server_name) -- default handler (optional)
@@ -88,15 +90,32 @@ return {
                   },
                })
             end,
+
+            ["dockerls"] = function()
+               require("lspconfig").dockerls.setup({
+                  capabilities = capabilities,
+               })
+            end,
+
+            ["yamlls"] = function()
+               require("lspconfig").yamlls.setup({
+                  capabilities = capabilities,
+                  settings = {
+                     yaml = {
+                        schemas = {
+                           ["https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json"] = "/docker-compose.yml"
+                        }
+                     }
+                  }
+               })
+            end,
          }
       })
 
       null_ls.setup({
          sources = {
-            null_ls.builtins.formatting.gofmt, -- Use `gofmt` as the formatter
-            -- Can be used `goimports` or `golines` as alternatives:
-            -- null_ls.builtins.formatting.goimports,
-            -- null_ls.builtins.formatting.golines,
+            null_ls.builtins.formatting.gofmt,
+            null_ls.builtins.formatting.prettierd.with({ filetypes = { "yaml" } }),
          },
          on_attach = function(client, bufnr)
             if client.supports_method("textDocument/formatting") then

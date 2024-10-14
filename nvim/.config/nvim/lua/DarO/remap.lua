@@ -72,6 +72,18 @@ vim.keymap.set("n", "<leader>dg", function() utils.telescope_diff_from_history()
 
 -- Usefull aditional remap for going back from go to definition
 vim.keymap.set("n", "gb", "<C-o>")
+
+-- Keybinds on selection
+vim.keymap.set("v", "<leader>cl", function()
+    vim.cmd('normal! "+y')
+    local selected_text = vim.fn.getreg('+')
+    local snippet = {
+        "console.warn({",
+        string.format("\t'%s': %s", selected_text, selected_text),
+        "});"
+    }
+    vim.api.nvim_put(snippet, 'l', true, true)
+end)
 -- stylua: ignore end
 
 -- New un used yet
