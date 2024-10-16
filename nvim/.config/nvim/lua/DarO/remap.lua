@@ -37,9 +37,16 @@ vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]]) -- Yank to clipboard
 vim.keymap.set("i", "<C-c>", "<Esc>")
 
 vim.keymap.set("n", "Q", "<nop>")
-vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>")              -- Switch projects
-vim.keymap.set("n", "<leader>f", vim.lsp.buf.format, bufopts)                            -- Format with LSP
-vim.keymap.set("v", "<leader>f", vim.lsp.buf.format, bufopts)                            -- Format with LSP
+vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>") -- Switch projects
+-- Format with LSP and save
+vim.keymap.set("n", "<leader>f", function()
+   vim.lsp.buf.format()
+   vim.cmd("write")
+end, bufopts)
+vim.keymap.set("v", "<leader>f", function()
+   vim.lsp.buf.format()
+   vim.cmd("write")
+end, bufopts)
 
 vim.keymap.set("n", "<C-k>", "<cmd>cnext<CR>zz")                                         -- Quick fix navigation
 vim.keymap.set("n", "<C-j>", "<cmd>cprev<CR>zz")                                         -- Quick fix navigation
@@ -47,6 +54,7 @@ vim.keymap.set("n", "<leader>k", "<cmd>lnext<CR>zz")                            
 vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz")                                     -- Quick fix navigation
 
 vim.keymap.set("n", "<leader>R", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]]) -- Replace / rename all selected text
+vim.keymap.set("v", "<leader>R", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]]) -- Replace / rename all selected text
 vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true })              -- Make current file executable
 
 vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.dotfiles/nvim/.config/nvim/lua/DarO/packer.lua<CR>");
@@ -75,14 +83,14 @@ vim.keymap.set("n", "gb", "<C-o>")
 
 -- Keybinds on selection
 vim.keymap.set("v", "<leader>cl", function()
-    vim.cmd('normal! "+y')
-    local selected_text = vim.fn.getreg('+')
-    local snippet = {
-        "console.warn({",
-        string.format("\t'%s': %s", selected_text, selected_text),
-        "});"
-    }
-    vim.api.nvim_put(snippet, 'l', true, true)
+   vim.cmd('normal! "+y')
+   local selected_text = vim.fn.getreg('+')
+   local snippet = {
+      "console.warn({",
+      string.format("\t'%s': %s", selected_text, selected_text),
+      "});"
+   }
+   vim.api.nvim_put(snippet, 'l', true, true)
 end)
 -- stylua: ignore end
 
