@@ -25,8 +25,6 @@
         command = [[%s/\s\+$//e]],
     })
 ```
-
-
 # NOTES: Git hooks example
 - Command to edit
 ```sh
