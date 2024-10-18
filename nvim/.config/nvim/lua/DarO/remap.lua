@@ -66,9 +66,15 @@ vim.keymap.set("v", "<leader>R", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><
 
 -- File Operations
 vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { desc = "Make file executable", silent = true })
-vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.dotfiles/nvim/.config/nvim/lua/DarO/packer.lua<CR>",
-   { desc = "Edit Packer configuration" })
 vim.keymap.set("n", "<leader>mr", "<cmd>CellularAutomaton make_it_rain<CR>", { desc = "Make it rain animation" })
+vim.keymap.set('n', '<leader>fp', function()
+   local filepath = vim.fn.expand('%:p')
+   local home_dir = vim.fn.getenv('HOME')
+   local relative_path = filepath:gsub('^' .. home_dir, '~')
+
+   vim.fn.setreg('+', relative_path)
+   vim.notify('Copied path: ' .. relative_path)
+end, { desc = 'Copy current file path to clipboard' })
 
 -- Markdown Preview
 vim.keymap.set("n", "<leader>m", "<CMD>MarkdownPreview<CR>", { desc = "Start Markdown preview" })
