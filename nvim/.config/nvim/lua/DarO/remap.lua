@@ -83,10 +83,11 @@ vim.keymap.set("n", "J", "<CMD>Gitsigns next_hunk<CR>", { desc = "Go to next Git
 vim.keymap.set("n", "K", "<CMD>Gitsigns prev_hunk<CR>", { desc = "Go to previous Git hunk" })
 
 -- Telescope Integrations
-vim.keymap.set("n", "<leader><leader>", ":Telescope smart_open<cr>", { desc = "Smart open with Telescope" })
-vim.keymap.set("n", "<leader>fh", ":Telescope help_tags<cr>", { desc = "Find help tags" })
+vim.keymap.set("n", "<leader><leader>", ":Telescope smart_open<CR>", { desc = "Smart open with Telescope" })
+vim.keymap.set("n", "<leader>fh", ":Telescope help_tags<CR>", { desc = "Find help tags" })
 vim.keymap.set("n", "<leader>df", function() utils.telescope_diff_file() end, { desc = "Diff file with current buffer" })
 vim.keymap.set("n", "<leader>dg", function() utils.telescope_diff_from_history() end, { desc = "Diff from Git history" })
+vim.keymap.set("n", "<leader>km", ":Telescope keymaps<CR>", { desc = "Show keymaps" })
 
 -- Navigation
 vim.keymap.set("n", "gb", "<C-o>", { desc = "Go back" })

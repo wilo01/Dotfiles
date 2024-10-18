@@ -8,19 +8,38 @@ return {
       local list = harpoon:list()
       harpoon:setup()
 
-      vim.keymap.set("n", "<C-e>", function() harpoon.ui:toggle_quick_menu(list) end)
+      vim.keymap.set("n", "<C-e>", function()
+         harpoon.ui:toggle_quick_menu(list)
+      end, { desc = "Toggle Harpoon quick menu" })
+
       vim.keymap.set("n", "<leader>a", function()
          list:add()
          add_file_and_notify()
-      end)
+      end, { desc = "Add file to Harpoon list and notify" })
 
-      vim.keymap.set("n", "<C-1>", function() list:select(1) end)
-      vim.keymap.set("n", "<C-2>", function() list:select(2) end)
-      vim.keymap.set("n", "<C-3>", function() list:select(3) end)
-      vim.keymap.set("n", "<C-4>", function() list:select(4) end)
+      vim.keymap.set("n", "<C-1>", function()
+         list:select(1)
+      end, { desc = "Select first item in Harpoon list" })
 
-      vim.keymap.set("n", "<C-h>", function() list:prev() end)
-      vim.keymap.set("n", "<C-l>", function() list:next() end)
+      vim.keymap.set("n", "<C-2>", function()
+         list:select(2)
+      end, { desc = "Select second item in Harpoon list" })
+
+      vim.keymap.set("n", "<C-3>", function()
+         list:select(3)
+      end, { desc = "Select third item in Harpoon list" })
+
+      vim.keymap.set("n", "<C-4>", function()
+         list:select(4)
+      end, { desc = "Select fourth item in Harpoon list" })
+
+      vim.keymap.set("n", "<C-h>", function()
+         list:prev()
+      end, { desc = "Go to previous item in Harpoon list" })
+
+      vim.keymap.set("n", "<C-l>", function()
+         list:next()
+      end, { desc = "Go to next item in Harpoon list" })
 
       function _G.add_file_and_notify()
          local file_name = vim.fn.expand('%:t')

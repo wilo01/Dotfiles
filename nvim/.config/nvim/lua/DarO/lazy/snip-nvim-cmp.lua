@@ -20,14 +20,14 @@ return {
             snippet = {
                expand = function(args)
                   luasnip.lsp_expand(args.body)
-               end
+               end,
             },
             sources = {
                { name = 'path' },
                { name = 'nvim_lsp', keyword_length = 3 },
-               -- {name = 'nvim_lsp_signature_help'},
-               { name = 'buffer',   keyword_length = 3 },
-               { name = 'luasnip',  keyword_length = 2 },
+               -- { name = 'nvim_lsp_signature_help' },
+               { name = 'buffer', keyword_length = 3 },
+               { name = 'luasnip', keyword_length = 2 },
             },
             window = {
                documentation = cmp.config.window.bordered()
@@ -48,17 +48,17 @@ return {
             },
             -- See :help cmp-mapping
             mapping = {
-               ['<Up>'] = cmp.mapping.select_prev_item(select_opts),
-               ['<Down>'] = cmp.mapping.select_next_item(select_opts),
+               ['<Up>'] = cmp.mapping.select_prev_item(select_opts, { desc = "Select previous item" }),
+               ['<Down>'] = cmp.mapping.select_next_item(select_opts, { desc = "Select next item" }),
 
-               ['<C-k>'] = cmp.mapping.select_prev_item(select_opts),
-               ['<C-j>'] = cmp.mapping.select_next_item(select_opts),
+               ['<C-k>'] = cmp.mapping.select_prev_item(select_opts, { desc = "Select previous item" }),
+               ['<C-j>'] = cmp.mapping.select_next_item(select_opts, { desc = "Select next item" }),
 
-               ['<C-u>'] = cmp.mapping.scroll_docs(-4),
-               ['<C-f>'] = cmp.mapping.scroll_docs(4),
+               ['<C-u>'] = cmp.mapping.scroll_docs(-4, { desc = "Scroll documentation up" }),
+               ['<C-f>'] = cmp.mapping.scroll_docs(4, { desc = "Scroll documentation down" }),
 
-               ['<C-e>'] = cmp.mapping.abort(),
-               ['<CR>'] = cmp.mapping.confirm({ select = false }),
+               ['<C-e>'] = cmp.mapping.abort({ desc = "Abort completion" }),
+               ['<CR>'] = cmp.mapping.confirm({ select = false, desc = "Confirm selection" }),
 
                ['<C-d>'] = cmp.mapping(function(fallback)
                   if luasnip.jumpable(1) then
@@ -66,7 +66,7 @@ return {
                   else
                      fallback()
                   end
-               end, { 'i', 's' }),
+               end, { 'i', 's', desc = "Jump forward in snippet" }),
 
                ['<C-b>'] = cmp.mapping(function(fallback)
                   if luasnip.jumpable(-1) then
@@ -74,7 +74,7 @@ return {
                   else
                      fallback()
                   end
-               end, { 'i', 's' }),
+               end, { 'i', 's', desc = "Jump backward in snippet" }),
 
                ['<Tab>'] = cmp.mapping(function(fallback)
                   local col = vim.fn.col('.') - 1
@@ -86,7 +86,7 @@ return {
                   else
                      cmp.complete()
                   end
-               end, { 'i', 's' }),
+               end, { 'i', 's', desc = "Select next item or trigger completion" }),
 
                ['<S-Tab>'] = cmp.mapping(function(fallback)
                   if cmp.visible() then
@@ -94,7 +94,7 @@ return {
                   else
                      fallback()
                   end
-               end, { 'i', 's' }),
+               end, { 'i', 's', desc = "Select previous item" }),
             },
          })
       end,

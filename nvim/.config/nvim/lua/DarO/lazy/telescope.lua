@@ -21,39 +21,39 @@ return {
          grep_open_files = true
       }
 
-      vim.keymap.set('n', '<leader>pf', builtin.find_files, {})
-      vim.keymap.set('n', '<C-p>', builtin.git_files, {})
+      vim.keymap.set('n', '<leader>pf', builtin.find_files, { desc = "Find files" })
+      vim.keymap.set('n', '<C-p>', builtin.git_files, { desc = "Find Git files" })
 
       vim.keymap.set('n', '<leader>ws', function()
          builtin.grep_string(vim.tbl_extend("force", grep_opts, {
             search = vim.fn.expand("<cword>")
          }))
-      end)
+      end, { desc = "Grep current word" })
 
       vim.keymap.set('n', '<leader>Ws', function()
          builtin.grep_string(vim.tbl_extend("force", grep_opts, {
             search = vim.fn.expand("<cWORD>")
          }))
-      end)
+      end, { desc = "Grep current WORD" })
 
       vim.keymap.set('n', '<leader>s', function()
          builtin.grep_string(vim.tbl_extend("force", grep_opts, {
             search = vim.fn.input("Grep > ")
          }))
-      end)
+      end, { desc = "Grep for input" })
 
       vim.keymap.set('n', '<leader>c', function()
          builtin.grep_string(vim.tbl_extend("force", grep_opts, {
             search = vim.fn.input("Grep > ", vim.fn.getreg('+'))
          }))
-      end)
+      end, { desc = "Grep for clipboard content" })
 
       vim.keymap.set('v', '<leader>c', function()
          vim.cmd('normal! "+y')
          builtin.grep_string(vim.tbl_extend("force", grep_opts, {
             search = vim.fn.input("Grep > ", vim.fn.getreg('+'))
          }))
-      end)
+      end, { desc = "Grep for visually selected text" })
 
       vim.keymap.set('n', '<leader>r', function()
          builtin.buffers({
@@ -62,9 +62,9 @@ return {
             initial_mode = "insert",
             theme = "ivy"
          })
-      end)
+      end, { desc = "List buffers" })
 
-      vim.keymap.set('n', '<leader>ht', builtin.help_tags, {})
+      vim.keymap.set('n', '<leader>ht', builtin.help_tags, { desc = "Find help tags" })
 
       vim.keymap.set('n', '<leader>pb', function()
          telescope.extensions.file_browser.file_browser({
@@ -73,6 +73,6 @@ return {
             hidden = true,
             no_ignore = true
          })
-      end)
+      end, { desc = "Open file browser" })
    end
 }
