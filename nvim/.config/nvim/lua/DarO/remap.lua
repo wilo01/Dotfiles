@@ -1,87 +1,97 @@
 local utils = require("DarO.utils")
 
 vim.g.mapleader = " "
-vim.keymap.set("n", "<leader>v", vim.cmd.Ex) -- Opens netrw
 
-vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv") -- Select visual and move DOWN
-vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv") -- Select visual and move DOWN
+-- File Navigation
+vim.keymap.set("n", "<leader>v", vim.cmd.Ex, { desc = "Open Netrw" })
 
-vim.keymap.set("i", "jk", "<Esc>")
-vim.keymap.set("i", "hl", "<Esc>")
-vim.keymap.set("v", "hl", "<Esc>")
+-- Visual Mode Text Movement
+vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selected text down" })
+vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selected text up" })
 
--- vim.keymap.set("n", "J", "}")
--- vim.keymap.set("n", "K", "{")
--- vim.keymap.set("n", "J", "mzJ`z")
-vim.keymap.set("n", "<C-d>", "<C-d>zz") -- Code jumping
-vim.keymap.set("n", "<C-u>", "<C-u>zz") -- Code jumping
--- vim.keymap.set("n", "J", "<C-d>zz")
--- vim.keymap.set("n", "K", "<C-u>zz")
-vim.keymap.set("n", "n", "nzzzv")         -- Helps with navigation and search
-vim.keymap.set("n", "N", "Nzzzv")         -- Helps with navigation and search
-vim.keymap.set("n", "x", '"_x')           -- Removes character without yank
-vim.keymap.set("n", "<leader>+", '<C-a>') -- Increment number
-vim.keymap.set("n", "<leader>-", '<C-x>') -- Decrement number
+-- Insert and Visual Mode Escape
+vim.keymap.set("i", "jk", "<Esc>", { desc = "Escape insert mode with 'jk'" })
+vim.keymap.set("i", "hl", "<Esc>", { desc = "Escape insert mode with 'hl'" })
+vim.keymap.set("v", "hl", "<Esc>", { desc = "Escape visual mode with 'hl'" })
 
--- greatest remap ever
-vim.keymap.set("x", "<leader>p", [["_dP]]) -- Replace by yanked text
+-- Navigation Enhancements
+vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Scroll down and center" })
+vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Scroll up and center" })
+vim.keymap.set("n", "n", "nzzzv", { desc = "Center cursor on next search result" })
+vim.keymap.set("n", "N", "Nzzzv", { desc = "Center cursor on previous search result" })
 
--- next greatest remap ever : asbjornHaland
-vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]]) -- Yank to clipboard
-vim.keymap.set("n", "<leader>Y", [["+Y]])          -- Yank to clipboard
-vim.keymap.set("v", "<C-c>", [["+Y]])              -- Yank to clipboard with Ctrl + C
+-- Editing Utilities
+vim.keymap.set("n", "x", '"_x', { desc = "Delete character without yanking" })
+vim.keymap.set("n", "<leader>+", '<C-a>', { desc = "Increment number" })
+vim.keymap.set("n", "<leader>-", '<C-x>', { desc = "Decrement number" })
 
-vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]]) -- Yank to clipboard
+-- Clipboard Operations
+vim.keymap.set("x", "<leader>p", [["_dP]], { desc = "Replace with yanked text" })
+vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "Yank to clipboard" })
+vim.keymap.set("n", "<leader>Y", [["+Y]], { desc = "Yank line to clipboard" })
+vim.keymap.set("v", "<C-c>", [["+Y]], { desc = "Yank selection to clipboard with Ctrl+C" })
+vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]], { desc = "Delete without yanking" })
 
--- This is going to get me cancelled
-vim.keymap.set("i", "<C-c>", "<Esc>")
+-- Escape Key Remapping
+vim.keymap.set("i", "<C-c>", "<Esc>", { desc = "Escape insert mode with Ctrl+C" })
 
-vim.keymap.set("n", "Q", "<nop>")
-vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>") -- Switch projects
--- Format with LSP and save
+-- Disabling Default Mappings
+vim.keymap.set("n", "Q", "<nop>", { desc = "Disable 'Q'" })
+
+-- Tmux Integration
+vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>",
+   { desc = "Switch projects using tmux-sessionizer" })
+
+-- LSP Formatting
 vim.keymap.set("n", "<leader>f", function()
    vim.lsp.buf.format()
    vim.cmd("write")
-end, bufopts)
+end, { desc = "Format and save with LSP" })
 vim.keymap.set("v", "<leader>f", function()
    vim.lsp.buf.format()
    vim.cmd("write")
-end, bufopts)
+end, { desc = "Format selection and save with LSP" })
 
-vim.keymap.set("n", "<C-k>", "<cmd>cnext<CR>zz")                                         -- Quick fix navigation
-vim.keymap.set("n", "<C-j>", "<cmd>cprev<CR>zz")                                         -- Quick fix navigation
-vim.keymap.set("n", "<leader>k", "<cmd>lnext<CR>zz")                                     -- Quick fix navigation
-vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz")                                     -- Quick fix navigation
+-- Quickfix and Location List Navigation
+vim.keymap.set("n", "<C-k>", "<cmd>cnext<CR>zz", { desc = "Next quickfix item" })
+vim.keymap.set("n", "<C-j>", "<cmd>cprev<CR>zz", { desc = "Previous quickfix item" })
+vim.keymap.set("n", "<leader>k", "<cmd>lnext<CR>zz", { desc = "Next location list item" })
+vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz", { desc = "Previous location list item" })
 
-vim.keymap.set("n", "<leader>R", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]]) -- Replace / rename all selected text
-vim.keymap.set("v", "<leader>R", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]]) -- Replace / rename all selected text
-vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true })              -- Make current file executable
+-- Text Replacement
+vim.keymap.set("n", "<leader>R", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
+   { desc = "Replace all occurrences of the word under cursor" })
+vim.keymap.set("v", "<leader>R", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
+   { desc = "Replace all occurrences in selection" })
 
-vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.dotfiles/nvim/.config/nvim/lua/DarO/packer.lua<CR>");
-vim.keymap.set("n", "<leader>mr", "<cmd>CellularAutomaton make_it_rain<CR>");
+-- File Operations
+vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { desc = "Make file executable", silent = true })
+vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.dotfiles/nvim/.config/nvim/lua/DarO/packer.lua<CR>",
+   { desc = "Edit Packer configuration" })
+vim.keymap.set("n", "<leader>mr", "<cmd>CellularAutomaton make_it_rain<CR>", { desc = "Make it rain animation" })
 
 -- Markdown Preview
-vim.keymap.set("n", "<leader>m", "<CMD>MarkdownPreview<CR>")               -- Markdown preview
-vim.keymap.set("n", "<leader>mn", "<CMD>MarkdownPreviewStop<CR>")          -- Markdown preview stop
+vim.keymap.set("n", "<leader>m", "<CMD>MarkdownPreview<CR>", { desc = "Start Markdown preview" })
+vim.keymap.set("n", "<leader>mn", "<CMD>MarkdownPreviewStop<CR>", { desc = "Stop Markdown preview" })
 
-vim.keymap.set("n", "<leader>va", "<CMD>Gitsigns preview_hunk_inline<CR>") -- Git preview
-vim.keymap.set("n", "<leader>vs", "<CMD>Gitsigns diffthis<CR>")            -- Git diff
-vim.keymap.set("n", "<leader>vt", "<CMD>Gitsigns toggle_deleted<CR>")
-vim.keymap.set("n", "<leader>vb", "<CMD>Gitsigns blame_line<CR>")
-vim.keymap.set("n", "J", "<CMD>Gitsigns next_hunk<CR>")
-vim.keymap.set("n", "K", "<CMD>Gitsigns prev_hunk<CR>")
+-- Gitsigns Integration
+vim.keymap.set("n", "<leader>va", "<CMD>Gitsigns preview_hunk_inline<CR>", { desc = "Preview Git hunk" })
+vim.keymap.set("n", "<leader>vs", "<CMD>Gitsigns diffthis<CR>", { desc = "Diff current buffer" })
+vim.keymap.set("n", "<leader>vt", "<CMD>Gitsigns toggle_deleted<CR>", { desc = "Toggle deleted lines" })
+vim.keymap.set("n", "<leader>vb", "<CMD>Gitsigns blame_line<CR>", { desc = "Blame current line" })
+vim.keymap.set("n", "J", "<CMD>Gitsigns next_hunk<CR>", { desc = "Go to next Git hunk" })
+vim.keymap.set("n", "K", "<CMD>Gitsigns prev_hunk<CR>", { desc = "Go to previous Git hunk" })
 
--- Telescope
-vim.keymap.set("n", "<leader><leader>", ":Telescope smart_open<cr>", { desc = "Smart open" })
+-- Telescope Integrations
+vim.keymap.set("n", "<leader><leader>", ":Telescope smart_open<cr>", { desc = "Smart open with Telescope" })
 vim.keymap.set("n", "<leader>fh", ":Telescope help_tags<cr>", { desc = "Find help tags" })
--- stylua: ignore start
 vim.keymap.set("n", "<leader>df", function() utils.telescope_diff_file() end, { desc = "Diff file with current buffer" })
-vim.keymap.set("n", "<leader>dg", function() utils.telescope_diff_from_history() end, { desc = "Diff from git history" })
+vim.keymap.set("n", "<leader>dg", function() utils.telescope_diff_from_history() end, { desc = "Diff from Git history" })
 
--- Usefull aditional remap for going back from go to definition
-vim.keymap.set("n", "gb", "<C-o>")
+-- Navigation
+vim.keymap.set("n", "gb", "<C-o>", { desc = "Go back" })
 
--- Keybinds on selection
+-- Insert Console Snippet
 vim.keymap.set("v", "<leader>cl", function()
    vim.cmd('normal! "+y')
    local selected_text = vim.fn.getreg('+')
@@ -91,74 +101,4 @@ vim.keymap.set("v", "<leader>cl", function()
       "});"
    }
    vim.api.nvim_put(snippet, 'l', true, true)
-end)
--- stylua: ignore end
-
--- New un used yet
--- vim.keymap.set("n", "<leader>vwm", function()
---     require("vim-with-me").StartVimWithMe()
--- end)
--- vim.keymap.set("n", "<leader>svwm", function()
---     require("vim-with-me").StopVimWithMe()
--- end)
-
--- vim.keymap.set("x", "<leader>p", [["_dP]])
--- vim.keymap.set(
---     "n",
---     "<leader>ee",
---     "oif err != nil {<CR>}<Esc>Oreturn err<Esc>"
--- )
-
--- vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.dotfiles/nvim/.config/nvim/lua/theprimeagen/packer.lua<CR>");
--- vim.keymap.set("n", "<leader>mr", "<cmd>CellularAutomaton make_it_rain<CR>");
-
---[[ Other keymaps and navigation
-
-# SEARCH & NAVIGATION #
-## harpoon keymaps
-<leader>a                           -- Add file to harpoon menu
-<C-e>                               -- Toggle quick menu
-<C-h>                               -- Navigate to file left
-<C-l>                               -- Navigate to file right
-<leader>pf                          -- Find files
-<C-p>                               -- Find git files
-<leader>s                           -- Find by grep word
-<leader>v                           -- File navigation with netrw
-<leader>pf                          -- File navigation with fzf search
-%                                   -- Jump beetween prentesies NVIM
-
-# TEXT MANIPULATION
-<leader>x                           -- Make file executable
-<leader>p                           -- Replace by yanked text
-<leader>y                           -- Ynak to clipboard
-<leader>Y                           -- Ynak to clipboard
-<leader>d                           -- Ynak to clipboard
-
-## tmux keymaps
-<leader>s                           -- Jump between tmux sesnions
-<C-f>f                              -- Search with tmux-sessionizer
-
-## Git mappings
-<leader>gs                          -- Git actions
-
-## LSP mappings
-<C-p>                               -- Select previous LSP item
-<C-n>                               -- Select next LSP item
-<C-y>                               -- Confirm LSP
-<C-Space>                           -- Mapping complete
-
-lsp.on_attach(function(client, bufnr)
-    local opts = {buffer = bufnr, remap = false}
-    vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, opts)
-    vim.keymap.set("n", "<leader>k", function() vim.lsp.buf.hover() end, opts)
-    vim.keymap.set("n", "<leader>vws", function() vim.lsp.buf.workspace_symbol() end, opts)
-    vim.keymap.set('n', "<leader>vd", function() vim.diagnostic.open_float() end, opts)      -- ESlint or other lsp error / warnings
-    vim.keymap.set("n", "[d", function() vim.lsp.buf.goto_next() end, opts)
-    vim.keymap.set("n", "]d", function() vim.lsp.buf.goto_prev() end, opts)
-    vim.keymap.set("n", "<leader>vca", function() vim.lsp.buf.code_action() end, opts)
-    vim.keymap.set("n", "<leader>vrr", function() vim.lsp.buf.references() end, opts)
-    vim.keymap.set("n", "<leadervca>vrn", function() vim.lsp.buf.rename() end, opts)
-    vim.keymap.set("n", "<C-i>", function() vim.lsp.buf.signature_help() end, opts)
-end)
-
-END ]] --
+end, { desc = "Insert console.warn snippet with selection" })
