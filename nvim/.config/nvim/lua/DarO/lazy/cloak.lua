@@ -22,6 +22,7 @@ return {
             },
          },
       })
-      vim.api.nvim_set_keymap("n", "<leader>e", ":CloakToggle<CR>", { noremap = true, silent = true })
+      vim.api.nvim_set_keymap("n", "<leader>e", ":CloakToggle<CR>",
+         { noremap = true, silent = true, desc = "Toggle Cloak for sensitive text in env files" })
    end
 }

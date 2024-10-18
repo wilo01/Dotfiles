@@ -12,7 +12,7 @@ autocmd("BufEnter", {
       vim.opt.formatoptions:remove({ "c", "r", "o" })
    end,
    group = general,
-   desc = "Disable New Line Comment",
+   desc = "Autocmds Disable New Line Comment",
 })
 
 autocmd("BufEnter", {
@@ -22,7 +22,7 @@ autocmd("BufEnter", {
       end
    end,
    group = general,
-   desc = "Set Bicep Comment String",
+   desc = "Autocmds Set Bicep Comment String",
 })
 
 autocmd("BufEnter", {
@@ -31,7 +31,7 @@ autocmd("BufEnter", {
       vim.opt_local.spell = true
    end,
    group = general,
-   desc = "Enable spell checking on specific filetypes",
+   desc = "Autocmds Enable spell checking on specific filetypes",
 })
 
 autocmd("BufWinEnter", {
@@ -39,7 +39,7 @@ autocmd("BufWinEnter", {
       utils.open_help(data.buf)
    end,
    group = general,
-   desc = "Redirect help to floating window",
+   desc = "Autocmds Redirect help to floating window",
 })
 
 function R(name)
@@ -75,42 +75,42 @@ autocmd('LspAttach', {
       local opts = { buffer = e.buf }
       vim.keymap.set("n", "gd", function()
          vim.lsp.buf.definition()
-      end, { desc = "Go to definition", unpack(opts) })
+      end, { desc = "Autocmds Go to definition", unpack(opts) })
 
       vim.keymap.set("n", "<leader>K", function()
          vim.lsp.buf.hover()
-      end, { desc = "Show hover information", unpack(opts) })
+      end, { desc = "Autocmds Show hover information", unpack(opts) })
 
       vim.keymap.set("n", "<leader>vws", function()
          vim.lsp.buf.workspace_symbol()
-      end, { desc = "Search workspace symbols", unpack(opts) })
+      end, { desc = "Autocmds Search workspace symbols", unpack(opts) })
 
       vim.keymap.set("n", "<leader>vd", function()
          vim.diagnostic.open_float()
-      end, { desc = "Show diagnostics in a floating window", unpack(opts) })
+      end, { desc = "Autocmds Show diagnostics in a floating window", unpack(opts) })
 
       vim.keymap.set("n", "<leader>vca", function()
          vim.lsp.buf.code_action()
-      end, { desc = "Show code actions", unpack(opts) })
+      end, { desc = "Autocmds Show code actions", unpack(opts) })
 
       vim.keymap.set("n", "<leader>vrr", function()
          vim.lsp.buf.references()
-      end, { desc = "Show references", unpack(opts) })
+      end, { desc = "Autocmds Show references", unpack(opts) })
 
       vim.keymap.set("n", "<leader>vrn", function()
          vim.lsp.buf.rename()
-      end, { desc = "Rename symbol", unpack(opts) })
+      end, { desc = "Autocmds Rename symbol", unpack(opts) })
 
       vim.keymap.set("i", "<C-h>", function()
          vim.lsp.buf.signature_help()
-      end, { desc = "Show signature help", unpack(opts) })
+      end, { desc = "Autocmds Show signature help", unpack(opts) })
 
       vim.keymap.set("n", "[d", function()
          vim.diagnostic.goto_next()
-      end, { desc = "Go to next diagnostic", unpack(opts) })
+      end, { desc = "Autocmds Go to next diagnostic", unpack(opts) })
 
       vim.keymap.set("n", "]d", function()
          vim.diagnostic.goto_prev()
-      end, { desc = "Go to previous diagnostic", unpack(opts) })
+      end, { desc = "Autocmds Go to previous diagnostic", unpack(opts) })
    end
 })
