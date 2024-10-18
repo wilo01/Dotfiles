@@ -11,6 +11,17 @@ vim.o.listchars = "tab:>-,trail:~,extends:>,precedes:<,space:·"
 vim.opt.smartindent = true
 vim.opt.ignorecase = true
 
+-- Spelling
+vim.opt.spelllang = 'en_gb'
+vim.opt.spell = true
+vim.cmd("set spell syntax=off")
+vim.api.nvim_create_user_command('Spellcolor', function()
+   vim.cmd([[
+      highlight SpellBad cterm=underline,bold ctermfg=Red guifg=#ff0000 guibg=NONE gui=underline,bold
+   ]])
+end, {})
+
+
 vim.opt.wrap = false
 
 vim.opt.swapfile = false
