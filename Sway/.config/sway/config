@@ -1,4 +1,4 @@
-# Default config for sway
+# Default config for swayconfig
 #
 # Copy this to ~/.config/sway/config and edit it to your liking.
 #
@@ -68,15 +68,12 @@ input "type:touchpad" {
 #
 # Example configuration:
 #
+for_window [class=".*"] inhibit_idle fullscreen
+for_window [app_id=".*"] inhibit_idle fullscreen
 # exec swayidle -w \
 #          timeout 300 'swaylock -i $default_bg -f' \
 #          timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
 #          before-sleep 'swaylock -i $default_bg -f'
-   exec swayidle -w \
-      timeout 300 'swaylock -i $default_bg -f' \
-      timeout 600 'swaymsg "output * power off"' \
-      resume 'swaymsg "output * power on"; swaybg -i $default_bg -m fill' \
-      before-sleep 'swaylock -i $default_bg -f'
 #
 # This will lock your screen after 300 seconds of inactivity, then turn off
 # your displays after another 300 seconds, and turn your screens back on when

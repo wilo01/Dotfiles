@@ -1,3 +1,9 @@
+# NOTES: FIX for pavucontrol
+pavucontrol a gtk application? Try these two commands:
+```bash
+    gsettings set org.gnome.desktop.interface color-scheme prefer-dark
+    gsettings set org.gnome.desktop.interface gtk-theme Adwaita-dark
+```
 # NOTES: TODO case insensitive
 - [ ] Fix issue with case sensitive search
 # NOTES: TODO Easy rename file
