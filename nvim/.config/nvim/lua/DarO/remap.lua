@@ -74,7 +74,7 @@ vim.keymap.set('n', '<leader>fp', function()
 
    vim.fn.setreg('+', relative_path)
    vim.notify('Copied path: ' .. relative_path)
-end, { desc = 'Copy current file path to clipboard' })
+end, { desc = 'Copy current file path to clipboard (pwd)' })
 
 -- Markdown Preview
 vim.keymap.set("n", "<leader>m", "<CMD>MarkdownPreview<CR>", { desc = "Start Markdown preview" })
