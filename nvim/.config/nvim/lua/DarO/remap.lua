@@ -98,7 +98,7 @@ vim.keymap.set("n", "<leader>km", ":Telescope keymaps<CR>", { desc = "Show keyma
 -- Navigation
 vim.keymap.set("n", "gb", "<C-o>", { desc = "Go back" })
 
--- Insert Console Snippet
+-- Insert Console Snippets
 vim.keymap.set("v", "<leader>cl", function()
    vim.cmd('normal! "+y')
    local selected_text = vim.fn.getreg('+')
@@ -108,4 +108,32 @@ vim.keymap.set("v", "<leader>cl", function()
       "});"
    }
    vim.api.nvim_put(snippet, 'l', true, true)
-end, { desc = "Insert console.warn snippet with selection" })
+end, { desc = "Insert object console.warn snippet with selection" })
+
+vim.keymap.set("v", "<leader>ck", function()
+   vim.cmd('normal! "+y')
+   local selected_text = vim.fn.getreg('+')
+   local snippet = {
+      "if (" .. selected_text .. ") {",
+      "}"
+   }
+   vim.api.nvim_put(snippet, 'l', true, true)
+end, { desc = "Insert if statement snippet with clipboard content" })
+
+vim.keymap.set("v", "<leader>cj", function()
+   vim.cmd('normal! "+y')
+   local clipboard_content = vim.fn.getreg('+')
+   local snippet = {
+      "ca_log_pak.log_warning('Dwdw', '" .. clipboard_content .. ": ' || " .. clipboard_content .. ");"
+   }
+   vim.api.nvim_put(snippet, 'l', true, true)
+end, { desc = "Insert ca_log_pak.log_warning snippet with clipboard content" })
+
+vim.keymap.set("v", "<leader>ch", function()
+   vim.cmd('normal! "+y')
+   local clipboard_content = vim.fn.getreg('+')
+   local snippet = {
+      "DBMS_OUTPUT.PUT_LINE('Dwdw " .. clipboard_content .. ": ' || " .. clipboard_content .. ");"
+   }
+   vim.api.nvim_put(snippet, 'l', true, true)
+end, { desc = "Insert DBMS_OUTPUT snippet with clipboard content" })

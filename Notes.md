@@ -1,3 +1,8 @@
+# NOTES: Check if remap is already been used
+- Inside neovim type this command
+```bash
+    :map <keybind>
+```
 # NOTES: FIX for pavucontrol
 pavucontrol a gtk application? Try these two commands:
 ```bash
