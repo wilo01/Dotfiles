@@ -104,7 +104,7 @@ vim.keymap.set("v", "<leader>cl", function()
    local selected_text = vim.fn.getreg('+')
    local snippet = {
       "console.warn({",
-      string.format("\t'%s': %s", selected_text, selected_text),
+      string.format("\t'%s': %s,", selected_text, selected_text),
       "});"
    }
    vim.api.nvim_put(snippet, 'l', true, true)
