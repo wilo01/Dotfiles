@@ -24,6 +24,10 @@ return {
       vim.keymap.set('n', '<leader>pf', builtin.find_files, { desc = "Telescope Find files" })
       vim.keymap.set('n', '<C-p>', builtin.git_files, { desc = "Telescope Find Git files" })
 
+      vim.keymap.set('n', '<leader>l', function()
+         builtin.live_grep(grep_opts)
+      end, { desc = "Telescope Live Grep" })
+
       vim.keymap.set('n', '<leader>ws', function()
          builtin.grep_string(vim.tbl_extend("force", grep_opts, {
             search = vim.fn.expand("<cword>")
