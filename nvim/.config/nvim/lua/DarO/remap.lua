@@ -108,7 +108,7 @@ vim.keymap.set("v", "<leader>cl", function()
       "});"
    }
    vim.api.nvim_put(snippet, 'l', true, true)
-end, { desc = "Insert object console.warn snippet with selection" })
+end, { desc = "Insert object console.warn snippet with selection (log, debugger)" })
 
 vim.keymap.set("v", "<leader>ck", function()
    vim.cmd('normal! "+y')
@@ -118,7 +118,7 @@ vim.keymap.set("v", "<leader>ck", function()
       "}"
    }
    vim.api.nvim_put(snippet, 'l', true, true)
-end, { desc = "Insert if statement snippet with clipboard content" })
+end, { desc = "Insert if statement snippet with clipboard content (log, debugger)" })
 
 vim.keymap.set("v", "<leader>cj", function()
    vim.cmd('normal! "+y')
@@ -127,7 +127,7 @@ vim.keymap.set("v", "<leader>cj", function()
       "ca_log_pak.log_warning('Dwdw', '" .. clipboard_content .. ": ' || " .. clipboard_content .. ");"
    }
    vim.api.nvim_put(snippet, 'l', true, true)
-end, { desc = "Insert ca_log_pak.log_warning snippet with clipboard content" })
+end, { desc = "Insert ca_log_pak.log_warning snippet with clipboard content (log, debugger)" })
 
 vim.keymap.set("v", "<leader>ch", function()
    vim.cmd('normal! "+y')
@@ -136,4 +136,4 @@ vim.keymap.set("v", "<leader>ch", function()
       "DBMS_OUTPUT.PUT_LINE('Dwdw " .. clipboard_content .. ": ' || " .. clipboard_content .. ");"
    }
    vim.api.nvim_put(snippet, 'l', true, true)
-end, { desc = "Insert DBMS_OUTPUT snippet with clipboard content" })
+end, { desc = "Insert DBMS_OUTPUT snippet with clipboard content (log, debugger)" })
