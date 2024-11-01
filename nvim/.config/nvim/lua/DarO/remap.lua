@@ -5,9 +5,10 @@ vim.g.mapleader = " "
 -- File Navigation
 vim.keymap.set("n", "<leader>v", vim.cmd.Ex, { desc = "Open Netrw" })
 
--- Visual Mode Text Movement
+-- Normal / Visual Mode Text Movement
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selected text down" })
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selected text up" })
+vim.keymap.set("n", "H", "mzJ`z", { desc = "Move text lines without moving cursor" })
 
 -- Insert and Visual Mode Escape
 vim.keymap.set("i", "jk", "<Esc>", { desc = "Escape insert mode with 'jk'" })
@@ -26,11 +27,11 @@ vim.keymap.set("n", "<leader>+", '<C-a>', { desc = "Increment number" })
 vim.keymap.set("n", "<leader>-", '<C-x>', { desc = "Decrement number" })
 
 -- Clipboard Operations
-vim.keymap.set("x", "<leader>p", [["_dP]], { desc = "Replace with yanked text" })
-vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "Yank to clipboard" })
-vim.keymap.set("n", "<leader>Y", [["+Y]], { desc = "Yank line to clipboard" })
-vim.keymap.set("v", "<C-c>", [["+Y]], { desc = "Yank selection to clipboard with Ctrl+C" })
-vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]], { desc = "Delete without yanking" })
+vim.keymap.set("x", "<leader>p", "\"_dP", { desc = "Replace with yanked text" })
+vim.keymap.set({ "n", "v" }, "<leader>y", "\"+y", { desc = "Yank to clipboard" })
+vim.keymap.set("n", "<leader>Y", "\"+Y", { desc = "Yank line to clipboard" })
+vim.keymap.set("v", "<C-c>", "\"+y", { desc = "Yank selection to clipboard with Ctrl+C" })
+vim.keymap.set({ "n", "v" }, "<leader>d", "\"_d", { desc = "Delete without yanking" })
 
 -- Escape Key Remapping
 vim.keymap.set("i", "<C-c>", "<Esc>", { desc = "Escape insert mode with Ctrl+C" })
@@ -38,7 +39,7 @@ vim.keymap.set("i", "<C-c>", "<Esc>", { desc = "Escape insert mode with Ctrl+C" 
 -- Disabling Default Mappings
 vim.keymap.set("n", "Q", "<nop>", { desc = "Disable 'Q'" })
 
--- Tmux Integration
+-- Tmux Integration (Needs tmux-sessionizer export in shell rc)
 vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>",
    { desc = "Switch projects using tmux-sessionizer" })
 
