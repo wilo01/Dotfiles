@@ -116,7 +116,7 @@
     "clock": {
         "timezone": "Europe/Dublin",
         "tooltip-format": "<tt><big>{calendar}</big></tt>",
-        "format": "{:%d.%m.%y %H:%M %p}",
+        "format": "{:%d.%m.%y %I:%M %p}",
         "calendar": {
         // "mode-mon-col"  : 3,
         // "weeks-pos"     : "right",
