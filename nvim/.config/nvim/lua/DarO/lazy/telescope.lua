@@ -24,14 +24,6 @@ return {
       vim.keymap.set('n', '<leader>pf', builtin.find_files, { desc = "Telescope Find files" })
       vim.keymap.set('n', '<C-p>', builtin.git_files, { desc = "Telescope Find Git files" })
 
-      vim.keymap.set('n', '<leader>bm', function()
-         builtin.buffers({
-            sort_mru = true,
-            sort_lastused = true,
-            show_all_buffers = true,
-         })
-      end, { desc = "Telescope List Buffers" })
-
       vim.keymap.set('n', '<leader>l', function()
          builtin.live_grep(grep_opts)
       end, { desc = "Telescope Live Grep" })
@@ -42,7 +34,7 @@ return {
          }))
       end, { desc = "Telescope Grep current word" })
 
-      vim.keymap.set('n', '<leader>Ws', function()
+      vim.keymap.set('n', '<leader>S', function()
          builtin.grep_string(vim.tbl_extend("force", grep_opts, {
             search = vim.fn.expand("<cWORD>")
          }))
@@ -68,15 +60,12 @@ return {
       end, { desc = "Telescope Grep for visually selected text" })
 
       vim.keymap.set('n', '<leader>r', function()
-         builtin.buffers({
-            sort_mru = true,
-            sort_lastused = true,
-            initial_mode = "insert",
-            theme = "ivy"
-         })
-      end, { desc = "Telescope List buffers" })
+         builtin.registers()
+      end, { desc = "Telescope Search Registers" })
 
-      vim.keymap.set('n', '<leader>ht', builtin.help_tags, { desc = "Telescope Find help tags" })
+      vim.keymap.set('n', '<leader>ht', function()
+         builtin.help_tags()
+      end, { desc = "Telescope Find help tags" })
 
       vim.keymap.set('n', '<leader>pb', function()
          telescope.extensions.file_browser.file_browser({
