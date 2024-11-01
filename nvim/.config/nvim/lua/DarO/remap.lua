@@ -2,18 +2,17 @@ local utils = require("DarO.utils")
 
 vim.g.mapleader = " "
 
--- File Navigation
-vim.keymap.set("n", "<leader>v", vim.cmd.Ex, { desc = "Open Netrw" })
-
--- Normal / Visual Mode Text Movement
+-- Text Actions
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selected text down" })
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selected text up" })
 vim.keymap.set("n", "H", "mzJ`z", { desc = "Move text lines without moving cursor" })
+vim.keymap.set("n", "<leader>R", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
+   { desc = "Replace text occurrences of the word under cursor" })
 
--- Insert and Visual Mode Escape
+-- Escape Mode
 vim.keymap.set("i", "jk", "<Esc>", { desc = "Escape insert mode with 'jk'" })
 vim.keymap.set("i", "hl", "<Esc>", { desc = "Escape insert mode with 'hl'" })
-vim.keymap.set("v", "hl", "<Esc>", { desc = "Escape visual mode with 'hl'" })
+vim.keymap.set("i", "<C-c>", "<Esc>", { desc = "Escape insert mode with Ctrl+C" })
 
 -- Navigation Enhancements
 vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Scroll down and center" })
@@ -27,14 +26,12 @@ vim.keymap.set("n", "<leader>+", '<C-a>', { desc = "Increment number" })
 vim.keymap.set("n", "<leader>-", '<C-x>', { desc = "Decrement number" })
 
 -- Clipboard Operations
-vim.keymap.set("x", "<leader>p", "\"_dP", { desc = "Replace with yanked text" })
+vim.keymap.set("x", "p", "\"_dP", { desc = "Replace with yanked text, and keep yanked" })
+vim.keymap.set("x", "<leader>p", "p", { desc = "Replace with yanked text, and new yanked text" })
 vim.keymap.set({ "n", "v" }, "<leader>y", "\"+y", { desc = "Yank to clipboard" })
 vim.keymap.set("n", "<leader>Y", "\"+Y", { desc = "Yank line to clipboard" })
 vim.keymap.set("v", "<C-c>", "\"+y", { desc = "Yank selection to clipboard with Ctrl+C" })
 vim.keymap.set({ "n", "v" }, "<leader>d", "\"_d", { desc = "Delete without yanking" })
-
--- Escape Key Remapping
-vim.keymap.set("i", "<C-c>", "<Esc>", { desc = "Escape insert mode with Ctrl+C" })
 
 -- Disabling Default Mappings
 vim.keymap.set("n", "Q", "<nop>", { desc = "Disable 'Q'" })
@@ -59,13 +56,9 @@ vim.keymap.set("n", "<C-j>", "<cmd>cprev<CR>zz", { desc = "Previous quickfix ite
 vim.keymap.set("n", "<leader>k", "<cmd>lnext<CR>zz", { desc = "Next location list item" })
 vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz", { desc = "Previous location list item" })
 
--- Text Replacement
-vim.keymap.set("n", "<leader>R", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
-   { desc = "Replace all occurrences of the word under cursor" })
-vim.keymap.set("v", "<leader>R", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
-   { desc = "Replace all occurrences in selection" })
-
--- File Operations
+-- File Operations / File Navigation
+vim.keymap.set("n", "<leader>v", vim.cmd.Ex, { desc = "Open Netrw" })
+vim.keymap.set("n", "gb", "<C-o>", { desc = "Go back" })
 vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { desc = "Make file executable", silent = true })
 vim.keymap.set("n", "<leader>mr", "<cmd>CellularAutomaton make_it_rain<CR>", { desc = "Make it rain animation" })
 vim.keymap.set('n', '<leader>fp', function()
@@ -95,9 +88,6 @@ vim.keymap.set("n", "<leader>fh", ":Telescope help_tags<CR>", { desc = "Find hel
 vim.keymap.set("n", "<leader>df", function() utils.telescope_diff_file() end, { desc = "Diff file with current buffer" })
 vim.keymap.set("n", "<leader>dg", function() utils.telescope_diff_from_history() end, { desc = "Diff from Git history" })
 vim.keymap.set("n", "<leader>km", ":Telescope keymaps<CR>", { desc = "Show keymaps" })
-
--- Navigation
-vim.keymap.set("n", "gb", "<C-o>", { desc = "Go back" })
 
 -- Insert Console Snippets
 vim.keymap.set("v", "<leader>cl", function()
