@@ -128,3 +128,18 @@ vim.keymap.set("v", "<leader>ch", function()
    }
    vim.api.nvim_put(snippet, 'l', true, true)
 end, { desc = "Insert DBMS_OUTPUT snippet with clipboard content (log, debugger)" })
+
+-- Other useful actions with description
+vim.keymap.set("n", "z=", "z=", { desc = "Spelling suggestions" })
+vim.keymap.set("n", "zg", "zg", { desc = "Spelling add word to spellfile as good word" })
+vim.keymap.set("n", "zG", "zG", { desc = "Spelling add word to internal word list as good word" })
+vim.keymap.set("n", "zw", "zw", { desc = "Spelling mark word as wrong (bad) in spellfile" })
+vim.keymap.set("n", "zW", "zW", { desc = "Spelling mark word as wrong (bad) in internal word list" })
+vim.keymap.set("n", "zug", "zug", { desc = "Spelling remove word from spellfile as good/bad" })
+vim.keymap.set("n", "zuG", "zuG", { desc = "Spelling remove word from internal word list as good/bad" })
+vim.keymap.set("n", "]s", "]s", { desc = "Spelling Next misspelled word" })
+vim.keymap.set("n", "[s", "[s", { desc = "Spelling Previous misspelled word" })
+vim.keymap.set("n", "]S", "]S", { desc = "Spelling Next bad word only" })
+vim.keymap.set("n", "[S", "[S", { desc = "Spelling Previous bad word only" })
+vim.keymap.set("n", "]r", "]r", { desc = "Spelling Next rare word" })
+vim.keymap.set("n", "[r", "[r", { desc = "Spelling Previous rare word" })
