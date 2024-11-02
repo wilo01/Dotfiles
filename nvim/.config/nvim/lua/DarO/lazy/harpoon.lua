@@ -8,6 +8,27 @@ return {
       local list = harpoon:list()
       harpoon:setup()
 
+      local conf = require("telescope.config").values
+      local function toggle_telescope(harpoon_files)
+         local file_paths = {}
+         for _, item in ipairs(harpoon_files.items) do
+            table.insert(file_paths, item.value)
+         end
+
+         require("telescope.pickers").new({}, {
+            prompt_title = "Harpoon",
+            finder = require("telescope.finders").new_table({
+               results = file_paths,
+            }),
+            previewer = conf.file_previewer({}),
+            sorter = conf.generic_sorter({}),
+         }):find()
+      end
+
+      vim.keymap.set("n", "<C-t>", function()
+         toggle_telescope(harpoon:list())
+      end, { desc = "Open harpoon window with telescope" })
+
       vim.keymap.set("n", "<C-e>", function()
          harpoon.ui:toggle_quick_menu(list)
       end, { desc = "Toggle Harpoon quick menu" })
@@ -17,21 +38,11 @@ return {
          add_file_and_notify()
       end, { desc = "Add file to Harpoon list and notify" })
 
-      vim.keymap.set("n", "<C-1>", function()
-         list:select(1)
-      end, { desc = "Select first item in Harpoon list" })
-
-      vim.keymap.set("n", "<C-2>", function()
-         list:select(2)
-      end, { desc = "Select second item in Harpoon list" })
-
-      vim.keymap.set("n", "<C-3>", function()
-         list:select(3)
-      end, { desc = "Select third item in Harpoon list" })
-
-      vim.keymap.set("n", "<C-4>", function()
-         list:select(4)
-      end, { desc = "Select fourth item in Harpoon list" })
+      for i = 1, 10 do
+         vim.keymap.set("n", "<leader>" .. (i % 10), function()
+            list:select(i)
+         end, { desc = "Select " .. i .. " item in Harpoon list" })
+      end
 
       vim.keymap.set("n", "<C-h>", function()
          list:prev()
