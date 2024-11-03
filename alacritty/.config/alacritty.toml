@@ -17,6 +17,3 @@ size = 12
 normal = { family = "MesloLGS NF" }
 bold = { family = "MesloLGS NF", style = "Bold" }
 italic = { family = "MesloLGS NF", style = "Italic" }
-
-# [font]
-# normal.family = "MesloLGS Nerd Font Mono"
