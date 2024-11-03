@@ -116,3 +116,7 @@ chomebox
 urls
 async
 messageApp
+tmux-sessionizer
+tmux
+conf
+netrw
