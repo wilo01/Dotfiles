@@ -22,8 +22,13 @@ return {
          grep_open_files = true
       }
 
-      vim.keymap.set('n', '<leader>pf', builtin.find_files, { desc = "Telescope Find files" })
-      vim.keymap.set('n', '<C-p>', builtin.git_files, { desc = "Telescope Find Git files" })
+      vim.keymap.set('n', '<leader>pf', function()
+         builtin.find_files()
+      end, { desc = "Telescope Find files" })
+
+      vim.keymap.set('n', '<C-p>', function()
+         builtin.git_files()
+      end, { desc = "Telescope Find Git files" })
 
       vim.keymap.set('n', '<leader>l', function()
          builtin.live_grep(grep_opts)
@@ -81,6 +86,10 @@ return {
          builtin.help_tags()
       end, { desc = "Telescope find help tags" })
 
+      vim.keymap.set("n", "<leader>km", function()
+         builtin.keymaps()
+      end, { desc = "Telescope show keymaps" })
+
       vim.keymap.set("n", "<leader>df", function()
          utils.telescope_diff_file()
       end, { desc = "Telescope diff file with current buffer" })
@@ -88,9 +97,5 @@ return {
       vim.keymap.set("n", "<leader>dg", function()
          utils.telescope_diff_from_history()
       end, { desc = "Telescope diff from Git history" })
-
-      vim.keymap.set("n", "<leader>km", function()
-         builtin.keymaps()
-      end, { desc = "Telescope show keymaps" })
    end
 }
