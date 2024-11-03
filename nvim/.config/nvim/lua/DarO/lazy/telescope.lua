@@ -10,11 +10,12 @@ return {
       "node_modules"
    },
    config = function()
+      local utils = require("DarO.utils")
       local telescope = require('telescope')
+      local builtin = require('telescope.builtin')
       telescope.setup({})
       telescope.load_extension('file_browser')
 
-      local builtin = require('telescope.builtin')
       local grep_opts = {
          auto_depth = true,
          follow_symlinks = true,
@@ -74,6 +75,22 @@ return {
             hidden = true,
             no_ignore = true
          })
-      end, { desc = "Telescope Open file browser" })
+      end, { desc = "Telescope open file browser" })
+
+      vim.keymap.set("n", "<leader>fh", function()
+         builtin.help_tags()
+      end, { desc = "Telescope find help tags" })
+
+      vim.keymap.set("n", "<leader>df", function()
+         utils.telescope_diff_file()
+      end, { desc = "Telescope diff file with current buffer" })
+
+      vim.keymap.set("n", "<leader>dg", function()
+         utils.telescope_diff_from_history()
+      end, { desc = "Telescope diff from Git history" })
+
+      vim.keymap.set("n", "<leader>km", function()
+         builtin.keymaps()
+      end, { desc = "Telescope show keymaps" })
    end
 }

@@ -1,5 +1,3 @@
-local utils = require("DarO.utils")
-
 vim.g.mapleader = " "
 
 -- Text Actions
@@ -81,13 +79,6 @@ vim.keymap.set("n", "<leader>vt", "<CMD>Gitsigns toggle_deleted<CR>", { desc = "
 vim.keymap.set("n", "<leader>vb", "<CMD>Gitsigns blame_line<CR>", { desc = "Blame current line" })
 vim.keymap.set("n", "J", "<CMD>Gitsigns next_hunk<CR>", { desc = "Go to next Git hunk" })
 vim.keymap.set("n", "K", "<CMD>Gitsigns prev_hunk<CR>", { desc = "Go to previous Git hunk" })
-
--- Telescope Integrations
-vim.keymap.set("n", "<leader><leader>", ":Telescope smart_open<CR>", { desc = "Smart open with Telescope" })
-vim.keymap.set("n", "<leader>fh", ":Telescope help_tags<CR>", { desc = "Find help tags" })
-vim.keymap.set("n", "<leader>df", function() utils.telescope_diff_file() end, { desc = "Diff file with current buffer" })
-vim.keymap.set("n", "<leader>dg", function() utils.telescope_diff_from_history() end, { desc = "Diff from Git history" })
-vim.keymap.set("n", "<leader>km", ":Telescope keymaps<CR>", { desc = "Show keymaps" })
 
 -- Insert Console Snippets
 vim.keymap.set("v", "<leader>cl", function()
