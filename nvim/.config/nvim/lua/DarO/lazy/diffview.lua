@@ -10,7 +10,7 @@ return {
          enhanced_diff_hl = true,
       })
       vim.keymap.set("n", "<leader>dv", ":DiffviewOpen<CR>", { desc = "Open Diffview" })
-      vim.keymap.set("n", "<leader>dc", ":DiffviewClose<CR>", { desc = "Close Diffview" })
+      vim.keymap.set("n", "<leader>q", ":DiffviewClose<CR>", { desc = "Close Diffview" })
       vim.keymap.set("n", "<leader>dh", ":DiffviewFileHistory %<CR>", { desc = "Show file history in Diffview" })
    end,
 }
