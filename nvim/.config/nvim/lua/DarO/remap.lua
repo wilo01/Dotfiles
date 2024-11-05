@@ -21,7 +21,10 @@ vim.keymap.set("n", "N", "Nzzzv", { desc = "Center cursor on previous search res
 -- Editing Utilities
 vim.keymap.set("n", "x", '"_x', { desc = "Delete character without yanking" })
 vim.keymap.set("n", "<leader>+", '<C-a>', { desc = "Increment number" })
+vim.keymap.set("n", "<leader>=", "<C-a>", { desc = "Increment number" })
+vim.keymap.set("x", "<leader>=", "g<C-a>", { desc = "Increment numbers across selection" })
 vim.keymap.set("n", "<leader>-", '<C-x>', { desc = "Decrement number" })
+vim.keymap.set("x", "<leader>-", 'g<C-x>', { desc = "Decrement numbers across selection" })
 
 -- Clipboard Operations
 vim.keymap.set("x", "p", "\"_dP", { desc = "Replace with yanked text, and keep yanked" })
