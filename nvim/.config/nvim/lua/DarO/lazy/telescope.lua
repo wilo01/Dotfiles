@@ -69,9 +69,18 @@ return {
          builtin.registers()
       end, { desc = "Telescope Search Registers" })
 
+      vim.keymap.set('n', '<leader>b', function()
+         builtin.buffers({
+            sort_mru = true,
+            sort_lastused = true,
+            initial_mode = "insert",
+            theme = "ivy"
+         })
+      end, { desc = "Telescope list buffers (buffer jumper, file jumps, last used files)" })
+
       vim.keymap.set('n', '<leader>ht', function()
          builtin.help_tags()
-      end, { desc = "Telescope Find help tags" })
+      end, { desc = "Telescope find help tags" })
 
       vim.keymap.set('n', '<leader>pb', function()
          telescope.extensions.file_browser.file_browser({
@@ -81,10 +90,6 @@ return {
             no_ignore = true
          })
       end, { desc = "Telescope open file browser" })
-
-      vim.keymap.set("n", "<leader>fh", function()
-         builtin.help_tags()
-      end, { desc = "Telescope find help tags" })
 
       vim.keymap.set("n", "<leader>km", function()
          builtin.keymaps()
