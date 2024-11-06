@@ -4,6 +4,7 @@ vim.g.mapleader = " "
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selected text down" })
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selected text up" })
 vim.keymap.set("n", "H", "mzJ`z", { desc = "Move text lines without moving cursor" })
+vim.keymap.set('n', '<leader>/', '/<C-r>+<CR>', { desc = "Search with clipboard text" })
 vim.keymap.set("n", "<leader>R", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
    { desc = "Replace text occurrences of the word under cursor" })
 
