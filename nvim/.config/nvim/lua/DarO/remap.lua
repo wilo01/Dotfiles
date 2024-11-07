@@ -82,8 +82,8 @@ vim.keymap.set("n", "<leader>vs", "<CMD>Gitsigns diffthis<CR>", { desc = "Gitsig
 vim.keymap.set("n", "<leader>bl", "<CMD>Gitsigns blame<CR>", { desc = "Gitsigns Blame current file" })
 vim.keymap.set("n", "<leader>vt", "<CMD>Gitsigns toggle_deleted<CR>", { desc = "Gitsigns Toggle deleted lines" })
 vim.keymap.set("n", "<leader>vb", "<CMD>Gitsigns blame_line<CR>", { desc = "Gitsigns Blame current line" })
-vim.keymap.set("n", "J", "<CMD>Gitsigns next_hunk<CR>", { desc = "Gitsigns Go to next Git hunk" })
-vim.keymap.set("n", "K", "<CMD>Gitsigns prev_hunk<CR>", { desc = "Gitsigns Go to previous Git hunk" })
+vim.keymap.set("n", "J", "<CMD>Gitsigns next_hunk<CR>zz", { desc = "Gitsigns go to next Git hunk and jump to center" })
+vim.keymap.set("n", "K", "<CMD>Gitsigns prev_hunk<CR>zz", { desc = "Gitsigns go to previous Git hunk and jump to center" })
 
 -- Insert Console Snippets
 vim.keymap.set("v", "<leader>cl", function()

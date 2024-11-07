@@ -13,7 +13,14 @@ return {
       local utils = require("DarO.utils")
       local telescope = require('telescope')
       local builtin = require('telescope.builtin')
-      telescope.setup({})
+      telescope.setup({
+         defaults = {
+            file_ignore_patterns = { "node_modules" },
+            preview = {
+               timeout = 2000,
+            },
+         },
+      })
       telescope.load_extension('file_browser')
 
       local grep_opts = {
