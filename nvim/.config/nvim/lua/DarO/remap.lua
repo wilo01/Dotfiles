@@ -60,7 +60,7 @@ vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz", { desc = "Previous location
 
 -- File Operations / File Navigation
 vim.keymap.set("n", "<leader>v", vim.cmd.Ex, { desc = "Open Netrw" })
-vim.keymap.set("n", "gb", "<C-o>", { desc = "Go back" })
+vim.keymap.set("n", "gb", "<C-o>zz", { desc = "Go back, and center" })
 vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { desc = "Make file executable", silent = true })
 vim.keymap.set("n", "<leader>mr", "<cmd>CellularAutomaton make_it_rain<CR>", { desc = "Make it rain animation" })
 vim.keymap.set('n', '<leader>fp', function()
@@ -83,7 +83,8 @@ vim.keymap.set("n", "<leader>bl", "<CMD>Gitsigns blame<CR>", { desc = "Gitsigns 
 vim.keymap.set("n", "<leader>vt", "<CMD>Gitsigns toggle_deleted<CR>", { desc = "Gitsigns Toggle deleted lines" })
 vim.keymap.set("n", "<leader>vb", "<CMD>Gitsigns blame_line<CR>", { desc = "Gitsigns Blame current line" })
 vim.keymap.set("n", "J", "<CMD>Gitsigns next_hunk<CR>zz", { desc = "Gitsigns go to next Git hunk and jump to center" })
-vim.keymap.set("n", "K", "<CMD>Gitsigns prev_hunk<CR>zz", { desc = "Gitsigns go to previous Git hunk and jump to center" })
+vim.keymap.set("n", "K", "<CMD>Gitsigns prev_hunk<CR>zz",
+   { desc = "Gitsigns go to previous Git hunk and jump to center" })
 
 -- Insert Console Snippets
 vim.keymap.set("v", "<leader>cl", function()
