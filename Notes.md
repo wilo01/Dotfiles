@@ -1,3 +1,5 @@
+# NOTES: TODO nvim inactivity save
+- [ ] Add autosave on neovim inactivity
 # NOTES: Check if remap is already been used
 - Inside neovim type this command
 ```bash
@@ -10,7 +12,7 @@ pavucontrol a gtk application? Try these two commands:
     gsettings set org.gnome.desktop.interface gtk-theme Adwaita-dark
 ```
 # NOTES: TODO case insensitive
-- [ ] Fix issue with case sensitive search
+- [X] Fix issue with case sensitive search
 # NOTES: TODO Easy rename file
 - [X] Implement easy rename of the files
 - [X] Use current rename ? Drop it ? -> Use <leader>pb -> R - for rename

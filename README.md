@@ -176,4 +176,4 @@ reboot
 [Multiple line cursor neovim](https://github.com/neoclide/coc.nvim/wiki/Multiple-cursors-support)
 
 ## **Path to regolith config**
- ~/.config/regolith/Xresources  
+ ~/.config/regolith/Xresources
