@@ -1,5 +1,6 @@
-# NOTES: TODO nvim inactivity save
+# NOTES: TODOs
 - [ ] Add autosave on neovim inactivity
+- [ ] Show current branch in tmux / neovim for example maintenance/12.1AV
 # NOTES: Check if remap is already been used
 - Inside neovim type this command
 ```bash
@@ -25,8 +26,8 @@ pavucontrol a gtk application? Try these two commands:
     :!echo %:p
     :!echo %:p:h
 ```
-# NOTES: TODO formatting whitespaces
-- [X] Implement whtiespaces formatting
+# NOTES: TODO formatting white spaces
+- [X] Implement white spaces formatting
 ```lua
     local augroup = vim.api.nvim_create_augroup
     local TheDaroGroup = augroup('TheDarO', {})
@@ -130,7 +131,7 @@ JIRA: #master
 
 Logs:
 - Fixing typo in db table name
-- Specify what db to be used to get into Clinets env
+- Specify what db to be used to get into Clients env
 
 Notes.md
 - Commit branch HASH [bfc7166e640efdddb7f8e717fa19f522295c4888](master)
@@ -334,12 +335,12 @@ Pictures/VIS-321.png
 JIRA: #master
 
 Logs:
-- NOTES: liqulibase remove only once example based on ca_badge_layout_items
+- NOTES: Liquibase remove only once example based on ca_badge_layout_items
 - Removing items does not require "--precondition-sql-check expectedResult"
 - You just need to be aware that this item will be removed when image is null
 - This needs validation on frontend just to work correctly
 - so there is no point to do the check when you still going to delete it anyway
-- also you can't predict how many records there will be in the databse
+- also you can't predict how many records there will be in the database
 
 Notes.md
 - Commit branch HASH [78ec64ac3e90f80ae1d8c9e2ceb589686ff08e2d](master)
@@ -382,7 +383,7 @@ Notes.md
 JIRA: #master
 
 Logs:
-- Update notes about the liqulibase
+- Update notes about the liquibase
 
 Notes.md
 Stash_Notes.md
@@ -403,7 +404,7 @@ Notes.md
 JIRA: #Linux
 
 Logs:
-- Added startup time on boot
+- Added start-up time on boot
 
 .config/nvim/init.lua
 - Commit branch HASH [55eb241bd83d59a3bf2a231e8266eff0bd16135b](Linux)
@@ -413,7 +414,7 @@ Logs:
 JIRA: #Linux
 
 Logs:
-- Fixed one keymap
+- Fixed one remap
 
 .config/nvim/after/plugin/lsp.lua
 .config/nvim/plugin/packer_compiled.lua
@@ -455,7 +456,7 @@ Logs:
 JIRA: #master
 
 Logs:
-- Updated precognition for liqulibase scrip
+- Updated precognition for liquibase scrip
 - Commit for VIS-236
 
 Notes.md
@@ -467,7 +468,7 @@ Stash_Notes.md
 JIRA: #Linux
 
 Logs:
-- Updated code for startup printing
+- Updated code for start-up printing
 
 .config/nvim/init.lua
 - Commit branch HASH [d9e0a8d11bfd8bb3143174e8d062f3ee132cd07c](Linux)
@@ -660,7 +661,7 @@ JIRA: #Linux
 
 Logs:
 - Updated snippets
-- Added filetypes to include for whitespace formatting
+- Added file types to include for white space formatting
 
 .config/nvim-prime/lua/DarO/init.lua
 .config/nvim-prime/lua/DarO/lazy/snippets.lua
@@ -725,7 +726,7 @@ Logs:
 JIRA: #Linux
 
 Logs:
-- Added .md file to whitespace formatting
+- Added .md file to white space formatting
 - Fixed message printing on boot
 
 .config/nvim-prime/init.lua
