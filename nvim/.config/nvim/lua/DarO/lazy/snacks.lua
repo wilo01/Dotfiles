@@ -5,7 +5,36 @@ return {
    ---@type snacks.Config
    opts = {
       bigfile = { enabled = true },
-      dashboard = { enabled = true },
+      dashboard = {
+         sections = {
+            { section = "header" },
+            { section = "startup", padding = 1 },
+            { icon = " ", title = "Keymaps", section = "keys", indent = 3 },
+            {
+               icon = " ",
+               desc = "Browse Repo",
+               key = "b",
+               action = function()
+                  Snacks.gitbrowse()
+               end,
+               indent = 3,
+            },
+            { icon = " ", title = "Recent Files", section = "recent_files", indent = 3, padding = 1, pane = 2 },
+            {
+               icon = " ",
+               title = "Git Status",
+               section = "terminal",
+               enabled = function()
+                  return Snacks.git.get_root() ~= nil
+               end,
+               cmd = "hub --no-pager diff --stat -B -M -C",
+               ttl = 5 * 60,
+               indent = 3,
+               padding = 1,
+               pane = 2
+            },
+         },
+      },
       notifier = {
          enabled = true,
          timeout = 3000,
