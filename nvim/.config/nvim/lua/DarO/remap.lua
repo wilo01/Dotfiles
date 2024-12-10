@@ -146,19 +146,20 @@ vim.keymap.set("n", "[r", "[r", { desc = "Spelling Previous rare word" })
 -- Gitlab Integration
 local function open_in_gitlab()
    local gitlab_url = "https://gitlab.tds.ie"
-   local repo_name = "general/safe"
-   local branch = "master"
+   local remote_url = vim.fn.system("git config --get remote.origin.url"):gsub("\n", "")
+   local repo_path = remote_url:match("git@[^:]+:(.+)%.git") or remote_url:match("https://[^/]+/(.+)%.git")
+   local branch = vim.fn.system("git branch --show-current"):gsub("\n", "")
    local file_path = vim.fn.expand("%:p")
    local git_root = vim.fn.system("git rev-parse --show-toplevel"):gsub("\n", "")
 
-   if git_root == "" then
-      print("Error: Not a Git repository!")
+   if not repo_path or git_root == "" then
+      print("Error: Not a Git repository or remote not configured!")
       return
    end
 
    local relative_path = file_path:sub(#git_root + 2)
    local cursor_line = vim.fn.line(".")
-   local url = string.format("%s/%s/-/blob/%s/%s#L%s", gitlab_url, repo_name, branch, relative_path, cursor_line)
+   local url = string.format("%s/%s/-/blob/%s/%s#L%s", gitlab_url, repo_path, branch, relative_path, cursor_line)
 
    vim.fn.system(string.format("xdg-open '%s'", url))
    print("Opening: " .. url)
