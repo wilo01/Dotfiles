@@ -12,6 +12,7 @@ vim.keymap.set("n", "<leader>R", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><
 vim.keymap.set("i", "jk", "<Esc>", { desc = "Escape insert mode with 'jk'" })
 vim.keymap.set("i", "hl", "<Esc>", { desc = "Escape insert mode with 'hl'" })
 vim.keymap.set("i", "<C-c>", "<Esc>", { desc = "Escape insert mode with Ctrl+C" })
+vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>", { desc = "Escape with no hl search" })
 
 -- Navigation Enhancements
 vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Scroll down and center" })
@@ -26,6 +27,7 @@ vim.keymap.set("n", "<leader>=", "<C-a>", { desc = "Increment number" })
 vim.keymap.set("x", "<leader>=", "g<C-a>", { desc = "Increment numbers across selection" })
 vim.keymap.set("n", "<leader>-", '<C-x>', { desc = "Decrement number" })
 vim.keymap.set("x", "<leader>-", 'g<C-x>', { desc = "Decrement numbers across selection" })
+vim.keymap.set({ "n", "v" }, "yc", "yy<cmd>normal gcc<CR>p", { desc = "Duplicate a line and comment out the first line" })
 
 -- Clipboard Operations
 vim.keymap.set("x", "p", "\"_dP", { desc = "Replace with yanked text, and keep yanked" })
@@ -140,3 +142,26 @@ vim.keymap.set("n", "]S", "]S", { desc = "Spelling Next bad word only" })
 vim.keymap.set("n", "[S", "[S", { desc = "Spelling Previous bad word only" })
 vim.keymap.set("n", "]r", "]r", { desc = "Spelling Next rare word" })
 vim.keymap.set("n", "[r", "[r", { desc = "Spelling Previous rare word" })
+
+-- Gitlab Integration
+local function open_in_gitlab()
+   local gitlab_url = "https://gitlab.tds.ie"
+   local repo_name = "general/safe"
+   local branch = "master"
+   local file_path = vim.fn.expand("%:p")
+   local git_root = vim.fn.system("git rev-parse --show-toplevel"):gsub("\n", "")
+
+   if git_root == "" then
+      print("Error: Not a Git repository!")
+      return
+   end
+
+   local relative_path = file_path:sub(#git_root + 2)
+   local cursor_line = vim.fn.line(".")
+   local url = string.format("%s/%s/-/blob/%s/%s#L%s", gitlab_url, repo_name, branch, relative_path, cursor_line)
+
+   vim.fn.system(string.format("xdg-open '%s'", url))
+   print("Opening: " .. url)
+end
+
+vim.keymap.set("n", "<leader>ob", open_in_gitlab, { desc = "Open current file in GitLab at cursor" })
