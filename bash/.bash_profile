@@ -8,3 +8,4 @@ fi
 # User specific environment and startup programs
 
 source "$HOME/.go/env"
+. "$HOME/.cargo/env"
