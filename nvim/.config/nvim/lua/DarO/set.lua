@@ -33,6 +33,7 @@ vim.opt.undodir = os.getenv("HOME") .. "/.vim/undodir"
 vim.opt.undofile = true
 
 -- Visual Settings
+vim.o.statuscolumn = ""
 vim.opt.termguicolors = true
 vim.opt.wrap = false
 vim.o.cursorline = true
@@ -52,3 +53,6 @@ vim.g.netrw_special_syntax = 3
 vim.g.netrw_liststyle = 3
 vim.g.netrw_altv = 1
 vim.g.netrw_keepdir = 1
+
+-- Other
+vim.g.loaded_perl_provider = 0
