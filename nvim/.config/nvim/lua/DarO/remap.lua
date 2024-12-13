@@ -113,8 +113,9 @@ end, { desc = "Insert if statement snippet with clipboard content (log, debugger
 vim.keymap.set("v", "<leader>cj", function()
    vim.cmd('normal! "+y')
    local clipboard_content = vim.fn.getreg('+')
+   local current_file = vim.fn.expand('%:t:r')
    local snippet = {
-      "ca_log_pak.log_warning('Dwdw', '" .. clipboard_content .. ": ' || " .. clipboard_content .. ");"
+      "ca_log_pak.log_warning('Dwdw', '" .. clipboard_content .. ": ' || " .. clipboard_content .. ", '" .. current_file .. "');"
    }
    vim.api.nvim_put(snippet, 'l', true, true)
 end, { desc = "Insert ca_log_pak.log_warning snippet with clipboard content (log, debugger)" })
