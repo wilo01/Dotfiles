@@ -40,9 +40,9 @@ return {
          timeout = 3000,
       },
       quickfile = { enabled = true },
-      statuscolumn = { enabled = true },
       words = { enabled = true },
-      scope = { enabled = true },
+      statuscolumn = { enabled = false },
+      scope = { enabled = false },
       scroll = { enabled = false },
       input = { enabled = false },
       styles = {
