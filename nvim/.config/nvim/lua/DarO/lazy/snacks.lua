@@ -44,7 +44,7 @@ return {
       words = { enabled = true },
       scope = { enabled = true },
       scroll = { enabled = false },
-      input = { enabled = true },
+      input = { enabled = false },
       styles = {
          notification = {
             wo = { wrap = true }
