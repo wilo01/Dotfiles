@@ -1,9 +1,9 @@
 # NOTES: TODOs
 - [ ] Add autosave on neovim inactivity
+- [ ] Fix issue with telescope
 - [ ] Search breaks and does not search across the project directory
 - [ ] Add "multiple grep", "multiple search parameters"
 - [ ] Add something to exclude search
-- [ ] Fix issue with telescope
 - [ ] Fix annoying issue with LSP formatting -> Does not work in large files
 - [ ] Add git diff when jumping via gitsigns hunks
 - [X] Show current branch in tmux / neovim for example maintenance/12.1AV -> Used tmux instead
@@ -54,7 +54,7 @@ pavucontrol a gtk application? Try these two commands:
 - Command to edit
 ```sh
     git config --local -e
-```
+``
 - Example
 ```js
     [hooks]
