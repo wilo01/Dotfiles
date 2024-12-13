@@ -6,9 +6,6 @@ return {
       "nvim-telescope/telescope-file-browser.nvim",
       dependencies = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim" }
    },
-   file_ignore_patterns = {
-      "node_modules"
-   },
    config = function()
       local utils = require("DarO.utils")
       local telescope = require('telescope')
@@ -26,7 +23,7 @@ return {
       local grep_opts = {
          auto_depth = true,
          follow_symlinks = true,
-         grep_open_files = true
+         grep_open_files = false -- if true, restrict search to open files only
       }
 
       vim.keymap.set('n', '<leader>pf', function()

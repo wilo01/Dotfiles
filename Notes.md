@@ -1,11 +1,11 @@
 # NOTES: TODOs
 - [ ] Add autosave on neovim inactivity
-- [ ] Fix issue with telescope
-- [ ] Search breaks and does not search across the project directory
 - [ ] Add "multiple grep", "multiple search parameters"
 - [ ] Add something to exclude search
 - [ ] Fix annoying issue with LSP formatting -> Does not work in large files
 - [ ] Add git diff when jumping via gitsigns hunks
+- [X] Search breaks and does not search across the project directory
+- [X] Fix issue with telescope
 - [X] Show current branch in tmux / neovim for example maintenance/12.1AV -> Used tmux instead
 - [X] Fix issue with case sensitive search
 - [X] Implement easy rename of the files
