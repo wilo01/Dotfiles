@@ -12,7 +12,11 @@ return {
       local builtin = require('telescope.builtin')
       telescope.setup({
          defaults = {
-            file_ignore_patterns = { "node_modules" },
+            file_ignore_patterns = {
+               "node_modules",
+               "source/ui%-student%-portal",
+               "source/server/database/sql/student/"
+            },
             preview = {
                timeout = 2000,
             },
