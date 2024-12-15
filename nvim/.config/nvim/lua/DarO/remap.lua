@@ -9,8 +9,6 @@ vim.keymap.set("n", "<leader>R", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><
    { desc = "Replace text occurrences of the word under cursor" })
 
 -- Escape Mode
-vim.keymap.set("i", "jk", "<Esc>", { desc = "Escape insert mode with 'jk'" })
-vim.keymap.set("i", "hl", "<Esc>", { desc = "Escape insert mode with 'hl'" })
 vim.keymap.set("i", "<C-c>", "<Esc>", { desc = "Escape insert mode with Ctrl+C" })
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>", { desc = "Escape with no hl search" })
 
@@ -145,7 +143,7 @@ vim.keymap.set("n", "]r", "]r", { desc = "Spelling Next rare word" })
 vim.keymap.set("n", "[r", "[r", { desc = "Spelling Previous rare word" })
 
 -- Gitlab Integration
-local function open_in_gitlab()
+local function open_in_tds_gitlab()
    local gitlab_url = "https://gitlab.tds.ie"
    local remote_url = vim.fn.system("git config --get remote.origin.url"):gsub("\n", "")
    local repo_path = remote_url:match("git@[^:]+:(.+)%.git") or remote_url:match("https://[^/]+/(.+)%.git")
@@ -166,4 +164,45 @@ local function open_in_gitlab()
    print("Opening: " .. url)
 end
 
-vim.keymap.set("n", "<leader>ob", open_in_gitlab, { desc = "Open current file in GitLab at cursor" })
+vim.keymap.set("n", "<leader>ob", open_in_tds_gitlab, { desc = "Open current file in TDS GitLab at cursor" })
+
+local function open_git_online()
+   local remote_url = vim.fn.system("git config --get remote.origin.url"):gsub("\n", "")
+   local repo_path
+   local base_url
+
+   if remote_url:match("github.com") then
+      repo_path = remote_url:match("git@github.com:(.+)%.git") or remote_url:match("https://github.com/(.+)%.git")
+      base_url = "https://github.com"
+   elseif remote_url:match("gitlab.com") then
+      repo_path = remote_url:match("git@gitlab.com:(.+)%.git") or remote_url:match("https://gitlab.com/(.+)%.git")
+      base_url = "https://gitlab.com"
+   else
+      print("Error: Unsupported remote host!")
+      return
+   end
+
+   local branch = vim.fn.system("git branch --show-current"):gsub("\n", "")
+   local file_path = vim.fn.expand("%:p")
+   local git_root = vim.fn.system("git rev-parse --show-toplevel"):gsub("\n", "")
+
+   if not repo_path or git_root == "" then
+      print("Error: Not a Git repository or remote not configured!")
+      return
+   end
+
+   local relative_path = file_path:sub(#git_root + 2)
+   local cursor_line = vim.fn.line(".")
+
+   local url
+   if base_url == "https://github.com" then
+      url = string.format("%s/%s/blob/%s/%s#L%s", base_url, repo_path, branch, relative_path, cursor_line)
+   elseif base_url == "https://gitlab.com" then
+      url = string.format("%s/%s/-/blob/%s/%s#L%s", base_url, repo_path, branch, relative_path, cursor_line)
+   end
+
+   vim.fn.system(string.format("xdg-open '%s'", url))
+   print("Opening: " .. url)
+end
+
+vim.keymap.set("n", "<leader>og", open_git_online, { desc = "Open current file in GitHub or GitLab at cursor" })
