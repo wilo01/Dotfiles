@@ -13,6 +13,15 @@ return {
       "j-hui/fidget.nvim",
       "jose-elias-alvarez/null-ls.nvim",
       "jay-babu/mason-null-ls.nvim",
+      {
+         "folke/lazydev.nvim",
+         ft = "lua",
+         opts = {
+            library = {
+               { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+            }
+         }
+      }
    },
    config = function()
       local cmp = require('cmp')

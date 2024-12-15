@@ -3,6 +3,7 @@
 - [ ] Add "multiple grep", "multiple search parameters"
 - [ ] Add something to exclude search
 - [ ] Fix annoying issue with LSP formatting -> Does not work in large files
+- [ ] Add ignore witch key or add longer timeout
 - [x] Add git diff when jumping via gitsigns hunks -> Works with J / K and <leader>va
 - [X] Search breaks and does not search across the project directory
 - [X] Fix issue with telescope
