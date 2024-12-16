@@ -2,6 +2,7 @@
 - [ ] Add autosave on neovim inactivity
 - [ ] Fix annoying issue with LSP formatting -> Does not work in large files
 - [ ] Add ignore witch key or add longer timeout
+- [ ] Improve -> Disable plugins via snacks or command -> use "comp = false"
 - [X] Add "multiple grep", "multiple search parameters"
 - [X] Add something to exclude search
 - [x] Add git diff when jumping via gitsigns hunks -> Works with J / K and <leader>va

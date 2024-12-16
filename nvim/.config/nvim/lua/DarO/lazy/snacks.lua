@@ -87,20 +87,18 @@ return {
       }
    end,
    init = function()
-      local Snacks = require("snacks") -- Require Snacks locally
+      local Snacks = require("snacks")
       vim.api.nvim_create_autocmd("User", {
          pattern = "VeryLazy",
          callback = function()
-            -- Setup some globals for debugging (lazy-loaded)
             _G.dd = function(...)
                Snacks.debug.inspect(...)
             end
             _G.bt = function()
                Snacks.debug.backtrace()
             end
-            vim.print = _G.dd -- Override print to use snacks for `:=` command
+            vim.print = _G.dd
 
-            -- Create some toggle mappings using key binds
             Snacks.toggle.option("spell", { name = "Spelling" }):map("<leader>us")
             Snacks.toggle.option("wrap", { name = "Wrap" }):map("<leader>uw")
             Snacks.toggle.option("relativenumber", { name = "Relative Number" }):map("<leader>uL")
@@ -112,6 +110,7 @@ return {
             Snacks.toggle.option("background", { off = "light", on = "dark", name = "Dark Background" }):map(
                "<leader>ub")
             Snacks.toggle.inlay_hints():map("<leader>uh")
+            -- Snacks.toggle.option("which_key_ignore", { name = "Which Key Ignore" }):map("<leader>wk")
          end,
       })
    end,
