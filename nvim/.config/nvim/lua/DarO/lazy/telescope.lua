@@ -164,5 +164,12 @@ return {
       vim.keymap.set("n", "<leader>dg", function()
          utils.telescope_diff_from_history()
       end, { desc = "Telescope diff from Git history" })
+
+      vim.keymap.set('n', '<leader>ge', function()
+         builtin.git_status({
+            previewer = true,
+            sort_lastused = true,
+         })
+      end, { desc = "Telescope list Git edited files" })
    end
 }
