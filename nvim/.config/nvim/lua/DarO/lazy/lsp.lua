@@ -124,12 +124,14 @@ return {
       null_ls.setup({
          sources = {
             null_ls.builtins.formatting.gofmt,
-            null_ls.builtins.formatting.prettierd.with({ filetypes = { "yaml" } }),
+            null_ls.builtins.formatting.prettierd.with({
+               filetypes = { "javascript", "json", "yaml", "typescript", "html", "css", "scss", "markdown" },
+            }),
          },
          on_attach = function(client, bufnr)
             if client.supports_method("textDocument/formatting") then
                vim.api.nvim_buf_set_option(bufnr, "formatexpr", "v:lua.vim.lsp.formatexpr()")
-               vim.api.nvim_command [[autocmd BufWritePre <buffer> lua vim.lsp.buf.format()]] -- Format on save
+               vim.api.nvim_command [[autocmd BufWritePre <buffer> lua vim.lsp.buf.format({ async = true })]]
             end
          end,
       })
