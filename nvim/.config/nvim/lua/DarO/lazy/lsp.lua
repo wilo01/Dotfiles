@@ -125,7 +125,7 @@ return {
          sources = {
             null_ls.builtins.formatting.gofmt,
             null_ls.builtins.formatting.prettierd.with({
-               filetypes = { "javascript", "json", "yaml", "typescript", "html", "css", "scss", "markdown" },
+               filetypes = { "json", "yaml", "typescript", "html", "markdown" },
             }),
          },
          on_attach = function(client, bufnr)
