@@ -27,6 +27,14 @@ vim.keymap.set("x", "<leader>=", "g<C-a>", { desc = "Increment numbers across se
 vim.keymap.set("n", "<leader>-", '<C-x>', { desc = "Decrement number" })
 vim.keymap.set("x", "<leader>-", 'g<C-x>', { desc = "Decrement numbers across selection" })
 vim.keymap.set({ "n", "v" }, "yc", "yy<cmd>normal gcc<CR>p", { desc = "Duplicate a line and comment out the first line" })
+vim.keymap.set('n', '<leader>,', function()
+   local word = vim.fn.expand('<cword>')
+   if word == 'true' then
+      vim.cmd('normal! ciwfalse')
+   elseif word == 'false' then
+      vim.cmd('normal! ciwtrue')
+   end
+end, { desc = "Toggle true/false" })
 
 -- Clipboard Operations
 vim.keymap.set("x", "p", "\"_dP", { desc = "Replace with yanked text, and keep yanked" })
