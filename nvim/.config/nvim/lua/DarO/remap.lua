@@ -92,6 +92,8 @@ vim.keymap.set("n", "<leader>vs", "<CMD>Gitsigns diffthis<CR>", { desc = "Gitsig
 vim.keymap.set("n", "<leader>bl", "<CMD>Gitsigns blame<CR>", { desc = "Gitsigns Blame current file" })
 vim.keymap.set("n", "<leader>vt", "<CMD>Gitsigns toggle_deleted<CR>", { desc = "Gitsigns Toggle deleted lines" })
 vim.keymap.set("n", "<leader>vb", "<CMD>Gitsigns blame_line<CR>", { desc = "Gitsigns Blame current line" })
+vim.keymap.set("n", "<leader>rg", "<CMD>Gitsigns reset_hunk<CR>", { desc = "Gitsigns Reset Hunk (Reset git, diff)" })
+vim.keymap.set("n", "<leader>sh", "<CMD>Gitsigns stage_hunk<CR>", { desc = "Gitsigns Stage Hunk" })
 vim.keymap.set("n", "J", "<CMD>Gitsigns next_hunk<CR>zz", { desc = "Gitsigns go to next Git hunk and jump to center" })
 vim.keymap.set("n", "K", "<CMD>Gitsigns prev_hunk<CR>zz",
    { desc = "Gitsigns go to previous Git hunk and jump to center" })
