@@ -35,6 +35,7 @@ vim.keymap.set({ "n", "v" }, "<leader>y", "\"+y", { desc = "Yank to clipboard" }
 vim.keymap.set("n", "<leader>Y", "\"+Y", { desc = "Yank line to clipboard" })
 vim.keymap.set("v", "<C-c>", "\"+y", { desc = "Yank selection to clipboard with Ctrl+C" })
 vim.keymap.set({ "n", "v" }, "<leader>d", "\"_d", { desc = "Delete without yanking" })
+vim.keymap.set({ "n", "v" }, "<leader>x", "\"+d", { desc = "Delete & Yank to clipboard" })
 
 -- Disabling Default Mappings
 vim.keymap.set("n", "Q", "<nop>", { desc = "Disable 'Q'" })
