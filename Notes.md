@@ -1,4 +1,5 @@
 # NOTES: TODOs
+- [ ] witch key snacks toggle remaps and command
 - [ ] Add autosave on neovim inactivity
 - [ ] Fix annoying issue with LSP formatting -> Does not work in large files
 - [ ] Add ignore witch key or add longer timeout
