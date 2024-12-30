@@ -4,6 +4,7 @@
 [core]
 	editor = nvim
 	hooksPath = /home/dariuszw/.git-template/hooks
+	pager = delta
 [safe]
 	directory = /home/dariuszw/.local/share/nvim/site/pack/packer/start/packer.nvim
 	directory = ~/Dev/branch-opener/branches/safe
@@ -16,3 +17,24 @@
    commit-on-master = false
 [alias]
 	stauts = status
+[interactive]
+    diffFilter = delta --color-only
+[delta]
+    navigate = true
+    dark = true
+    line-numbers = true
+    syntax-theme = None
+    side-by-side = false
+[delta "features"]
+    line-numbers = true
+    side-by-side = false
+[delta "colors"]
+    plus-line = "rgb:87ceeb"
+    minus-line = "rgb:dc143c"
+    plus-emph = "rgb:00ff7f"
+    minus-emph = "rgb:ff4500"
+    syntax = "rgb:ffffff"
+    line-numbers = "rgb:737aa2"
+    commit = "rgb:ffb86c"
+    file-meta = "rgb:565f89"
+    hunk-header = "rgb:bb9af7"
