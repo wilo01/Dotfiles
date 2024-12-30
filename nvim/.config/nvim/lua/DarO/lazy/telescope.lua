@@ -11,6 +11,7 @@ return {
       local utils = require("DarO.utils")
       local telescope = require('telescope')
       local builtin = require('telescope.builtin')
+      local previewers = require('telescope.previewers')
 
       -- Live multigrep section start
       local pickers = require("telescope.pickers")
@@ -67,6 +68,8 @@ return {
                "source/ui%-student%-portal",
                "source/server/database/sql/student/"
             },
+            layout_strategy = 'vertical',
+            layout_config = { width = 0.9, height = 0.89 },
             preview = {
                timeout = 2000,
             },
@@ -79,6 +82,16 @@ return {
          follow_symlinks = true,
          grep_open_files = false -- if true, restrict search to open files only
       }
+
+      local delta = previewers.new_termopen_previewer({
+         get_command = function(entry)
+            if entry.status == '??' or 'A ' then
+               return { 'git', 'diff', entry.value }
+            end
+
+            return { 'git', 'diff', entry.value .. '^!' }
+         end
+      })
 
       vim.keymap.set('n', '<leader>l', function()
          live_multigrep()
@@ -146,7 +159,7 @@ return {
 
       vim.keymap.set('n', '<leader>pb', function()
          telescope.extensions.file_browser.file_browser({
-            layout_config = { width = 0.8, height = 0.89 },
+            layout_config = { width = 0.9, height = 0.89 },
             initial_mode = "normal",
             hidden = true,
             no_ignore = true
@@ -167,7 +180,7 @@ return {
 
       vim.keymap.set('n', '<leader>ge', function()
          builtin.git_status({
-            previewer = true,
+            previewer = delta,
             sort_lastused = true,
          })
       end, { desc = "Telescope list Git edited files" })
