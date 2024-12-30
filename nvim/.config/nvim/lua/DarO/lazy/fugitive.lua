@@ -14,8 +14,8 @@ return {
          end,
       })
 
-      vim.keymap.set("n", "<leader>gs", vim.cmd.Git, { desc = "Fugitive Open Git status" })
-      vim.keymap.set("n", "gu", "<cmd>diffget //2<CR>", { desc = "Fugitive Get changes from left side in diff" })
-      vim.keymap.set("n", "gh", "<cmd>diffget //3<CR>", { desc = "Fugitive Get changes from right side in diff" })
+      vim.keymap.set("n", "<leader>gs", vim.cmd.Git, { desc = "Fugitive Open Git status (Git control)" })
+      vim.keymap.set("n", "gu", "<cmd>diffget //2<CR>", { desc = "Fugitive Get changes from left side in git diff" })
+      vim.keymap.set("n", "gh", "<cmd>diffget //3<CR>", { desc = "Fugitive Get changes from right side in git diff" })
    end
 }

@@ -37,9 +37,11 @@ return {
 
       require("mason").setup()
       require("mason-null-ls").setup({
+         automatic_installation = true,
          ensure_installed = { "gofmt", "prettierd" },
       })
       require("mason-lspconfig").setup({
+         automatic_installation = true,
          ensure_installed = {
             "eslint",
             "lua_ls",
@@ -162,7 +164,7 @@ return {
             focusable = false,
             style = "minimal",
             border = "rounded",
-            source = "always",
+            source = "if_many",
             header = "",
             prefix = "",
          },
