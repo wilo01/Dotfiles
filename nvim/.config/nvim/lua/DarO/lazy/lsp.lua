@@ -128,6 +128,10 @@ return {
             null_ls.builtins.formatting.gofmt,
             null_ls.builtins.formatting.prettierd.with({
                filetypes = { "json", "yaml", "typescript", "html", "markdown" },
+               extra_args = {
+                  "--ignore-path", "/dev/null",
+                  "--ignore-patterns", "%[(.-)%]"
+               },
             }),
          },
          on_attach = function(client, bufnr)
