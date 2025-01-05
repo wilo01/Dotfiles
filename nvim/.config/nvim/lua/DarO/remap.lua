@@ -35,6 +35,34 @@ vim.keymap.set('n', '<leader>,', function()
       vim.cmd('normal! ciwtrue')
    end
 end, { desc = "Toggle true/false" })
+vim.keymap.set("n", "<leader>c/", function()
+   local ft = vim.bo.filetype
+   local comment_patterns = {
+      javascript = "//",
+      lua = "%-%-",
+      python = "#",
+      c = "//",
+   }
+
+   local pattern = comment_patterns[ft]
+
+   if not pattern then
+      vim.notify("No comment pattern defined for filetype: " .. ft, vim.log.levels.WARN)
+      return
+   end
+
+   local line_number = vim.fn.line(".") - 1
+   local current_line = vim.api.nvim_buf_get_lines(0, line_number, line_number + 1, false)[1]
+
+   if not current_line then
+      vim.notify("Could not fetch the current line!", vim.log.levels.ERROR)
+      return
+   end
+
+   local updated_line = current_line:gsub(pattern .. ".*", "")
+   vim.api.nvim_buf_set_lines(0, line_number, line_number + 1, false, { updated_line })
+   vim.notify("Comment removed from the current line!", vim.log.levels.INFO)
+end, { desc = "Remove comment from current line" })
 
 -- Clipboard Operations
 vim.keymap.set("x", "p", "\"_dP", { desc = "Replace with yanked text, and keep yanked" })
@@ -125,7 +153,8 @@ vim.keymap.set("v", "<leader>cj", function()
    local clipboard_content = vim.fn.getreg('+')
    local current_file = vim.fn.expand('%:t:r')
    local snippet = {
-      "ca_log_pak.log_warning('Dwdw', '" .. clipboard_content .. ": ' || " .. clipboard_content .. ", '" .. current_file .. "');"
+      "ca_log_pak.log_warning('Dwdw', '" ..
+      clipboard_content .. ": ' || " .. clipboard_content .. ", '" .. current_file .. "');"
    }
    vim.api.nvim_put(snippet, 'l', true, true)
 end, { desc = "Insert ca_log_pak.log_warning snippet with clipboard content (log, debugger)" })
