@@ -1,4 +1,5 @@
 # NOTES: TODOs
+- [ ] Add notification or proper action instead of error for <leader>p and <leader>pf
 - [ ] witch key snacks toggle remaps and command
 - [ ] Add autosave on neovim inactivity
 - [ ] Fix annoying issue with LSP formatting -> Does not work in large files
