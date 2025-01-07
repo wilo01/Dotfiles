@@ -58,7 +58,7 @@ return {
          { "<leader>bd", function() Snacks.bufdelete() end,               desc = "Snacks Delete Buffer" },
          { "<leader>gg", function() Snacks.lazygit() end,                 desc = "Snacks Lazygit" },
          { "<leader>gb", function() Snacks.git.blame_line() end,          desc = "Snacks Git Blame Line" },
-         { "<leader>gr", function() Snacks.gitbrowse() end,               desc = "Snacks Git Open in Browser" },
+         { "<leader>ob", function() Snacks.gitbrowse() end,               desc = "Snacks Git Open in Browser" },
          { "<leader>gf", function() Snacks.lazygit.log_file() end,        desc = "Snacks Lazygit Current File History" },
          { "<leader>gl", function() Snacks.lazygit.log() end,             desc = "Snacks Lazygit Log (cwd)" },
          { "<leader>cR", function() Snacks.rename.rename_file() end,      desc = "Snacks Rename File" },

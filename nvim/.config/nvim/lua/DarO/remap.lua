@@ -183,8 +183,8 @@ vim.keymap.set("n", "[S", "[S", { desc = "Spelling Previous bad word only" })
 vim.keymap.set("n", "]r", "]r", { desc = "Spelling Next rare word" })
 vim.keymap.set("n", "[r", "[r", { desc = "Spelling Previous rare word" })
 
--- Gitlab Integration
-local function open_in_tds_gitlab()
+-- GitHub, Gitlab Integration
+vim.keymap.set("n", "<leader>gr", function()
    local gitlab_url = "https://gitlab.tds.ie"
    local remote_url = vim.fn.system("git config --get remote.origin.url"):gsub("\n", "")
    local repo_path = remote_url:match("git@[^:]+:(.+)%.git") or remote_url:match("https://[^/]+/(.+)%.git")
@@ -203,9 +203,7 @@ local function open_in_tds_gitlab()
 
    vim.fn.system(string.format("xdg-open '%s'", url))
    print("Opening: " .. url)
-end
-
-vim.keymap.set("n", "<leader>ob", open_in_tds_gitlab, { desc = "Open current file in TDS GitLab at cursor" })
+end, { desc = "Git open current file in TDS GitHub / GitLab at cursor" })
 
 local function open_git_online()
    local remote_url = vim.fn.system("git config --get remote.origin.url"):gsub("\n", "")
