@@ -66,7 +66,8 @@ return {
             file_ignore_patterns = {
                "node_modules",
                "source/ui%-student%-portal",
-               "source/server/database/sql/student/"
+               "source/server/database/sql/student/",
+               "test/Cypress/cypress/e2e/safe/"
             },
             layout_strategy = 'vertical',
             layout_config = { width = 0.9, height = 0.89 },
@@ -183,6 +184,6 @@ return {
             previewer = delta,
             sort_lastused = true,
          })
-      end, { desc = "Telescope list Git edited files" })
+      end, { desc = "Telescope list Git edited files (Git changed files)" })
    end
 }
