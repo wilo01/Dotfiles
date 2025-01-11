@@ -1,4 +1,5 @@
 # NOTES: TODOs
+- [ ] Odd colors when on diff mode
 - [ ] Fix search with upper-case example ACCESS_INTEGRATIONS_TEMP_BADGE
 - [ ] Add notification or proper action instead of error for <leader>p and <leader>pf
 - [ ] witch key snacks toggle remaps and command
