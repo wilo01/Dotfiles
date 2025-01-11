@@ -136,8 +136,12 @@ return {
          },
          on_attach = function(client, bufnr)
             if client.supports_method("textDocument/formatting") then
-               vim.api.nvim_buf_set_option(bufnr, "formatexpr", "v:lua.vim.lsp.formatexpr()")
-               vim.api.nvim_command [[autocmd BufWritePre <buffer> lua vim.lsp.buf.format({ async = true })]]
+               vim.api.nvim_create_autocmd("BufWritePre", {
+                  buffer = bufnr,
+                  callback = function()
+                     vim.lsp.buf.format({ async = true })
+                  end,
+               })
             end
          end,
       })
