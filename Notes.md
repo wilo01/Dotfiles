@@ -5,9 +5,9 @@
 - [ ] witch key snacks toggle remaps and command
 - [ ] Add autosave on neovim inactivity
 - [ ] Fix annoying issue with LSP formatting -> Does not work in large files -> Example utility.js
-- [ ] Add ignore witch key or add longer timeout
 - [ ] Improve -> Disable plugins via snacks or command -> use "comp = false"
 - [ ] Fix issue with hardtime enabled -> Remap Ctrl+N in visual mode
+- [X] Add ignore witch key or add longer timeout
 - [X] Added telescope git status with remap <leader>ge
 - [X] Add "multiple grep", "multiple search parameters"
 - [X] Add something to exclude search

@@ -54,6 +54,7 @@ return {
    keys = function()
       local Snacks = require("snacks")
       return {
+         { "<leader>n",  function() Snacks.notifier.show_history() end,   desc = "Notification History" },
          { "<leader>un", function() Snacks.notifier.hide() end,           desc = "Snacks Dismiss All Notifications" },
          { "<leader>bd", function() Snacks.bufdelete() end,               desc = "Snacks Delete Buffer" },
          { "<leader>gg", function() Snacks.lazygit() end,                 desc = "Snacks Lazygit" },
