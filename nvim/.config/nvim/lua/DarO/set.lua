@@ -56,3 +56,4 @@ vim.g.netrw_keepdir = 1
 
 -- Other
 vim.g.loaded_perl_provider = 0
+vim.g.csv_prettify_ind = true

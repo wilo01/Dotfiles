@@ -114,3 +114,34 @@ autocmd('LspAttach', {
       end, { desc = "Autocmds Go to previous diagnostic", unpack(opts) })
    end
 })
+
+-- Auto-close CSV edit formatting before saving
+autocmd("BufWritePre", {
+   pattern = "*.csv",
+   callback = function()
+      if not vim.g.csv_prettify_ind then
+         print("CSV prettify functionality is disabled.")
+         return
+      end
+
+      if vim.g.is_csv_prettified then
+         local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+         local cleaned_lines = {}
+         for _, line in ipairs(lines) do
+            local cleaned_line = line:gsub("%s*,%s*", ","):gsub("%s+$", "")
+            table.insert(cleaned_lines, cleaned_line)
+         end
+         vim.api.nvim_buf_set_lines(0, 0, -1, false, cleaned_lines)
+         print("CSV compacted before saving.")
+         vim.g.is_csv_prettified = false
+      else
+         print("CSV already in compact format.")
+      end
+   end,
+   desc = "Remove spaces from CSV before saving",
+})
+
+vim.api.nvim_create_user_command("CSVformatting", function()
+   vim.g.csv_prettify_ind = not vim.g.csv_prettify_ind
+   print("CSV prettify functionality is now " .. (vim.g.csv_prettify_ind and "enabled" or "disabled") .. ".")
+end, { desc = "Toggle CSV prettify functionality globally" })

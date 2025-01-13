@@ -245,3 +245,42 @@ local function open_git_online()
 end
 
 vim.keymap.set("n", "<leader>og", open_git_online, { desc = "Open current file in GitHub or GitLab at cursor" })
+
+-- CSV editing format (Auto close on save in -> autocmds.lua)
+vim.g.is_csv_prettified = false
+vim.keymap.set("n", "<leader>tc", function()
+   local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+
+   if vim.g.is_csv_prettified then
+      local cleaned_lines = {}
+      for _, line in ipairs(lines) do
+         local cleaned_line = line:gsub("%s*,%s*", ","):gsub("%s+$", "")
+         table.insert(cleaned_lines, cleaned_line)
+      end
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, cleaned_lines)
+      print("CSV prettification disabled.")
+   else
+      local max_lengths = {}
+
+      for _, line in ipairs(lines) do
+         local cols = vim.split(line, ",", { plain = true })
+         for i, col in ipairs(cols) do
+            max_lengths[i] = math.max(max_lengths[i] or 0, #col)
+         end
+      end
+
+      local prettified_lines = {}
+      for _, line in ipairs(lines) do
+         local cols = vim.split(line, ",", { plain = true })
+         for i, col in ipairs(cols) do
+            cols[i] = string.format("%-" .. max_lengths[i] .. "s", col)
+         end
+         table.insert(prettified_lines, table.concat(cols, " , "))
+      end
+
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, prettified_lines)
+      print("CSV prettification enabled.")
+   end
+
+   vim.g.is_csv_prettified = not vim.g.is_csv_prettified
+end, { desc = "Toggle CSV formatting for csv edit", noremap = true, silent = true })
