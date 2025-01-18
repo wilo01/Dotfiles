@@ -107,8 +107,14 @@ return {
       end, { desc = "Telescope Find files" })
 
       vim.keymap.set('n', '<C-p>', function()
+         local is_git_repo = pcall(builtin.git_files)
+         if not is_git_repo then
+            vim.notify("Not a Git repository, using find_files instead", vim.log.levels.WARN)
+            builtin.find_files()
+            return
+         end
          builtin.git_files()
-      end, { desc = "Telescope Find Git files" })
+      end, { desc = "Telescope Find Git files or any files" })
 
       vim.keymap.set('n', '<leader>ws', function()
          builtin.grep_string(vim.tbl_extend("force", grep_opts, {
