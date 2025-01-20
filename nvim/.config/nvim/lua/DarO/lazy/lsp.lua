@@ -48,6 +48,7 @@ return {
             "gopls",
             "dockerls",
             "yamlls",
+            "volar"
          },
          handlers = {
             function(server_name) -- default handler (optional)
@@ -120,6 +121,24 @@ return {
                   }
                })
             end,
+
+            ["volar"] = function()
+               local lspconfig = require("lspconfig")
+               lspconfig.volar.setup({
+                  capabilities = capabilities,
+                  filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue", "json" },
+                  on_attach = function(client, bufnr)
+                     if client.supports_method("textDocument/formatting") then
+                        vim.api.nvim_create_autocmd("BufWritePre", {
+                           buffer = bufnr,
+                           callback = function()
+                              vim.lsp.buf.format({ async = true })
+                           end,
+                        })
+                     end
+                  end,
+               })
+            end,
          }
       })
 
@@ -127,7 +146,7 @@ return {
          sources = {
             null_ls.builtins.formatting.gofmt,
             null_ls.builtins.formatting.prettierd.with({
-               filetypes = { "json", "yaml", "typescript", "html", "markdown" },
+               filetypes = { "json", "yaml", "typescript", "html", "vue", "markdown" },
                extra_args = {
                   "--ignore-path", "/dev/null",
                   "--ignore-patterns", "%[(.-)%]"
