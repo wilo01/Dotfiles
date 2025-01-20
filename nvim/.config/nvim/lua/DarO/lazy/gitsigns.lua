@@ -57,22 +57,20 @@ return {
          group = TheDaroGroup,
          pattern = "*",
          callback = function()
-            -- Get the current buffer
             local bufnr = vim.api.nvim_get_current_buf()
-            -- Get the hunks (changed lines)
             local hunk_lines = gitsigns.get_hunks(bufnr)
 
-            -- Iterate over each hunk and remove trailing whitespaces in that range
-            if hunk_lines then
+            if hunk_lines and #hunk_lines > 0 then
                for _, hunk in ipairs(hunk_lines) do
-                  local start_line = hunk.added.start
-                  local end_line = hunk.added.start + hunk.added.count - 1
-                  -- Only run the command if the range is valid
-                  if start_line <= end_line then
-                     -- Remove trailing whitespaces only in the modified range
-                     vim.api.nvim_buf_call(bufnr, function()
-                        vim.cmd(string.format('%d,%ds/\\s\\+$//e', start_line, end_line))
-                     end)
+                  local start_line = hunk.added and hunk.added.start or nil
+                  local count = hunk.added and hunk.added.count or 0
+                  if start_line and count > 0 then
+                     local end_line = start_line + count - 1
+                     if start_line <= end_line then
+                        vim.api.nvim_buf_call(bufnr, function()
+                           vim.cmd(string.format("%d,%ds/\\s\\+$//e", start_line, end_line))
+                        end)
+                     end
                   end
                end
             end
