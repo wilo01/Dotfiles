@@ -80,7 +80,7 @@ elif args.qr_badge is not None:
     print(f'QR badge: {badge}')
 elif args.jira_commits is not None:
     textString = f'{args.jira_commits}'
-    jiraBranchName = re.sub(r"[ !+@#$%^&*()'/:;>-]", "-", textString.lower().replace('\n', '-')).replace('suite', 'SUITE').replace('vis-', 'VIS-').replace('bookr', 'BOOKR')
+    jiraBranchName = re.sub(r"[ !+@#$%^&*(),'/:;>-]", "-", textString.lower().replace('\n', '-')).replace('suite', 'SUITE').replace('vis-', 'VIS-').replace('bookr', 'BOOKR')
     jiraBranchName = re.sub(r'-+', '-', jiraBranchName)
     pyperclip.copy('git checkout -b ' + jiraBranchName)
     print('\n', jiraBranchName, '\n')
