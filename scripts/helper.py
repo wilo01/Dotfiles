@@ -80,13 +80,13 @@ elif args.qr_badge is not None:
     print(f'QR badge: {badge}')
 elif args.jira_commits is not None:
     textString = f'{args.jira_commits}'
-    jiraBranchName = re.sub(r"[ !+@#$%^&*(),'/:;>-]", "-", textString.lower().replace('\n', '-')).replace('suite', 'SUITE').replace('vis-', 'VIS-').replace('bookr', 'BOOKR')
+    jiraBranchName = re.sub(r"[ !+@#$%^&*(),_.'/:;>-]", "-", textString.lower().replace('\n', '-')).replace('suite', 'SUITE').replace('vis-', 'VIS-').replace('bookr', 'BOOKR')
     jiraBranchName = re.sub(r'-+', '-', jiraBranchName)
     pyperclip.copy('git checkout -b ' + jiraBranchName)
     print('\n', jiraBranchName, '\n')
 elif args.stash is not None:
     stash_text_raw = f'[stash]{args.stash}'
-    stash_text = re.sub(r"[ !+@#$%^&*()'/:;>-]", "-", stash_text_raw.lower().replace('\n', '-')).replace('suite', 'SUITE').replace('[stash]', 'git stash push -u -m ')
+    stash_text = re.sub(r"[ !+@#$%^&*(),_.'/:;>-]", "-", stash_text_raw.lower().replace('\n', '-')).replace('suite', 'SUITE').replace('[stash]', 'git stash push -u -m ')
     stash_text = re.sub(r'-+', '-', stash_text)
     pyperclip.copy(stash_text)
     print('\n', stash_text, '\n')
