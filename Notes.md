@@ -1,4 +1,5 @@
 # NOTES: TODOs
+- [ ] Bug in lsp with formatting maintainLabelLayout.js -> Volar was the issue
 - [ ] Add delta to <leader>gl -> Lazygit log
 - [ ] Odd colors when on diff mode
 - [ ] Fix search with upper-case example ACCESS_INTEGRATIONS_TEMP_BADGE
