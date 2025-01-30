@@ -1,4 +1,5 @@
 vim.g.mapleader = " "
+vim.keymap.set("n", "<leader><leader>", '<CMD>so<CR>', { desc = "Source config" })
 
 -- Text Actions
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selected text down" })
@@ -18,8 +19,8 @@ vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Scroll down and center" })
 vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Scroll up and center" })
 vim.keymap.set("n", "n", "nzzzv", { desc = "Center cursor on next search result" })
 vim.keymap.set("n", "N", "Nzzzv", { desc = "Center cursor on previous search result" })
-vim.keymap.set("n", "<A-j>", "/function<CR>zz", { desc = "Jump to next function and center" })
-vim.keymap.set("n", "<A-k>", "?function<CR>zz", { desc = "Jump to previous function and center" })
+vim.keymap.set("n", "<A-j>", "}zz", { desc = "Jump to next empty line and center" })
+vim.keymap.set("n", "<A-k>", "{zz", { desc = "Jump to previous empty line and center" })
 
 -- Editing Utilities
 vim.keymap.set("n", "x", '"_x', { desc = "Delete character without yanking" })
