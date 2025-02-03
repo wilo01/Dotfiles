@@ -4,7 +4,9 @@ vim.keymap.set("n", "<leader><leader>", '<CMD>so<CR>', { desc = "Source config" 
 -- Text Actions
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selected text down" })
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selected text up" })
-vim.keymap.set("n", "H", "mzJ`z", { desc = "Move text lines without moving cursor" })
+vim.keymap.set("n", "H", "gt0", { desc = "Move cursor to the begginig of the current line" })
+vim.keymap.set("n", "L", "gt$", { desc = "Move cursor to the end of the current line" })
+vim.keymap.set("n", "<A-h>", "mzJ`z", { desc = "Move text lines without moving cursor" })
 vim.keymap.set('n', '<leader>/', '/<C-r>+<CR>', { desc = "Search with clipboard text" })
 vim.keymap.set("n", "<leader>R", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
    { desc = "Replace text occurrences of the word under cursor" })
