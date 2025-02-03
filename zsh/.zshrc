@@ -234,3 +234,5 @@ esac
 export GOTOOLCHAIN=auto
 export PATH=$PATH:$(go env GOPATH)/bin
 eval "$(direnv hook zsh)"
+
+export PATH=$PATH:/home/dariuszw/.spicetify
