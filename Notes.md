@@ -1,14 +1,14 @@
 # NOTES: TODOs
-- [ ] Bug in lsp with formatting maintainLabelLayout.js -> Volar was the issue
-- [ ] Add delta to <leader>gl -> Lazygit log
 - [ ] Odd colors when on diff mode
 - [ ] Fix search with upper-case example ACCESS_INTEGRATIONS_TEMP_BADGE
-- [ ] Add notification or proper action instead of error for <leader>p and <leader>pf
 - [ ] witch key snacks toggle remaps and command
-- [ ] Add autosave on neovim inactivity
+- [ ] Add autosave on neovim inactivity -> Do I need this?
 - [ ] Fix annoying issue with LSP formatting -> Does not work in large files -> Example utility.js
 - [ ] Improve -> Disable plugins via snacks or command -> use "comp = false"
 - [ ] Fix issue with hardtime enabled -> Remap Ctrl+N in visual mode
+- [X] Bug in lsp with formatting maintainLabelLayout.js -> Volar was the issue
+- [X] Add notification or proper action instead of error for <leader>p and <leader>pf
+- [X] Add delta to <leader>gl -> Lazygit log
 - [X] Add ignore witch key or add longer timeout
 - [X] Added telescope git status with remap <leader>ge
 - [X] Add "multiple grep", "multiple search parameters"
