@@ -98,7 +98,8 @@ return {
             ls.parser.parse_snippet("deb", "debugger;${1}"),
             ls.parser.parse_snippet("if", "if (${1}) {}${2}"),
             ls.parser.parse_snippet("log_warn", "console.warn('${1}', ${1})"),
-            ls.parser.parse_snippet("log_warn_obj", "console.warn({\n\t'${1}': ${1}\n});${2}")
+            ls.parser.parse_snippet("log_warn_obj", "console.warn({\n\t'${1}': ${1}\n});${2}"),
+            ls.parser.parse_snippet("tryc", "try {\n\t${1}\n} catch (error) {\n\tconsole.error('An error occurred:', error);\n}")
          },
          sh = {
             ls.parser.parse_snippet("shebang", "#!/bin/sh\n${0}"),
