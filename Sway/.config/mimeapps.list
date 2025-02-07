@@ -6,6 +6,8 @@ x-scheme-handler/about=google-chrome.desktop
 x-scheme-handler/unknown=google-chrome.desktop
 x-scheme-handler/postman=Postman.desktop
 inode/directory=thunar.desktop
+x-scheme-handler/mailto=google-chrome.desktop
 
 [Added Associations]
 image/png=vimiv.desktop;imv.desktop;
+text/csv=google-chrome.desktop;
