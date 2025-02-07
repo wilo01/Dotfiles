@@ -1,4 +1,5 @@
 # NOTES: TODOs
+- [ ] DB connection with DB query from neovim
 - [ ] Odd colors when on diff mode
 - [ ] Fix search with upper-case example ACCESS_INTEGRATIONS_TEMP_BADGE
 - [ ] witch key snacks toggle remaps and command
