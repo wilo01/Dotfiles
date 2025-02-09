@@ -4,12 +4,11 @@
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
-
-# If you come from bash you might have to change your $PATH.
-# export PATH=$HOME/bin:/usr/local/bin:$PATH
-
+# If you come from bash you might have to change your $PATH. export PATH=$HOME/bin:/usr/local/bin:$PATH
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -111,21 +110,33 @@ source $ZSH/oh-my-zsh.sh
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-# nvim swithcer
-alias nvim-vimscript="NVIM_APPNAME=nvim-vimscript nvim"
-alias nvim-reddit="NVIM_APPNAME=nvim-reddit nvim"
+# # nvim swithcer
+# Dynamic Nvim switcher based on configuration folders in ~/.config
+function generate_nvim_aliases() {
+    local config_path="$HOME/.config"
+    local nvim_prefix="nvim-"
+
+    # Generate aliases for each found nvim configuration directory
+    for config_dir in "$config_path"/nvim-*; do
+        if [[ -d $config_dir ]]; then
+            local config_name="${config_dir##*/}"
+            local alias_name="${config_name/nvim-/}"
+            alias "$alias_name"="NVIM_APPNAME='$config_name' nvim"
+        fi
+    done
+}
 
 function nvims() {
     # Generate a list of configurations dynamically
     local config_path="$HOME/.config"
     local items=()
-    for config_dir in "$config_path"/nv*; do
+    for config_dir in "$config_path"/nvim-*; do
         if [[ -d $config_dir ]]; then
             items+=("${config_dir##*/}")
         fi
     done
     # Add the default nvim as an option
-    # items+=("nvim")
+    items+=("nvim")
 
     local config=$(printf "%s\n" "${items[@]}" | fzf --prompt=" Neovim Config  " --height=50% --layout=reverse --border --exit-0)
     if [[ -z $config ]]; then
@@ -137,15 +148,24 @@ function nvims() {
     NVIM_APPNAME=$config nvim $@
 }
 
-bindkey -s ^a "nvims\n"
+# Generate aliases when this script is sourced
+generate_nvim_aliases
+
+# bindkey -s ^a "nvims\n"
 # end
 
-bindkey "^[[1;2C" forward-word
-bindkey "^[[1;2D" backward-word
+# Attach to a Tmux window by it's name or create new one
+function @ {
+    local window_name="$1"
+    if ! tmux has-session -t "$window_name" 2>/dev/null; then
+        tmux new-session -d -s "$window_name" "$SHELL"
+    fi
+    tmux switch-client -t "$window_name"
+}
 
 # cd & ls movements
-alias LS="echo ls -lha -F --show-control-chars --time-style=locale --color=auto ; ls -lha -F --show-control-chars --time-style=locale --color=auto"
-alias ls="echo ls -lha -F --show-control-chars --time-style=locale --color=auto ; ls -lha -F --show-control-chars --time-style=locale --color=auto"
+# alias LS="echo la -lha -F --show-control-chars --time-style=locale --color=auto ; la -lha -F --show-control-chars --time-style=locale --color=auto"
+# alias ls="echo la -lha -F --show-control-chars --time-style=locale --color=auto ; la -lha -F --show-control-chars --time-style=locale --color=auto"
 # alias cd="~/bin/.local/scripts/tmux-sessionizer"
 # alias CD="~/bin/.local/scripts/tmux-sessionizer"
 alias CD="cd"
@@ -163,16 +183,14 @@ alias code_ks="echo code ~/Dev/branch-opener/branches/safe/source/ui-kiosk/app/g
 alias code_ka="echo code ~/Dev/branch-opener/branches/safe/source/ui-kiosk/app/Application.js ; code ~/Dev/branch-opener/branches/safe/source/ui-kiosk/app/Application.js"
 alias code_ksc="echo code ~/Dev/branch-opener/branches/safe/source/ui-kiosk/app/view/settings/SettingsController.js ; code ~/Dev/branch-opener/branches/safe/source/ui-kiosk/app/view/settings/SettingsController.js"
 alias kiosk_settings="echo open kiosk settings at: ; code_ks ; sleep 1 ; code_ka ; sleep 1 ; code_ksc ;"
-alias liqui_valid="echo cd ~/Dev/branch-opener/branches/safe/source/server/database/ ; echo ./liquibase --defaultsFile=validate.liquibase.properties validate ; cd ~/Dev/branch-opener/branches/safe/source/server/database/ ; ./liquibase --defaultsFile=validate.liquibase.properties validate"
+alias liqui_valid="echo cd ~/Dev/branch-opener/branches/safe/source/server/database/ ; echo ./liquibase --defaultsFile=validate.liquibase.properties validate ; cd ~/branch-opener/branches/safe/source/server/database/ ; ./liquibase --defaultsFile=validate.liquibase.properties validate"
 alias sqldev="echo ~/SQLDeveloper/opt/sqldeveloper/sqldeveloper.sh ; ~/SQLDeveloper/opt/sqldeveloper/sqldeveloper.sh"
-alias br="echo npm start at: ; echo ~/Dev/branch-opener/app/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; xdg-open http://localhost:3333/static/ ; npm start"
-alias br2="echo npm start at: ; echo ~/Dev/branch-opener2/app/ ; cd ~/Dev/branch-opener2/app/ ; sleep 1 ; xdg-open http://localhost:3333/static/ ; npm start"
+alias br="echo npm start at: ; echo ~/Dev/branch-opener/app/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
+alias bo="echo npm start at: ; echo ~/Dev/branch-opener/app/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
+alias BR="echo npm start at: ; echo ~/Dev/branch-opener/app/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
+alias BO="echo npm start at: ; echo ~/Dev/branch-opener/app/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
 alias cy="echo Cypress open at: ; cdy ; sleep 1 ; echo ./node_modules/cypress/bin/cypress open ; ./node_modules/cypress/bin/cypress open"
 alias cy_all="echo Cypress run all tests at: ; cdy ; sleep 1 ; echo npx cypress run --headless --spec cypress/integration/tdsvisitor/rt/*.js ; npx cypress run --headless --spec cypress/integration/tdsvisitor/rt/*.js"
-alias docker_start_trunk="echo cd ~/Dev/branch-opener/branches/safe ; echo sudo docker start -ai trunk ; cd ~/Dev/branch-opener/branches/safe && sudo docker start -ai trunk"
-alias liquibaseLocalDockerUpdate="echo cd ~/Dev/branch-opener/branches/safe ; echo npm run liquibaseLocalDockerUpdate ; cd ~/Dev/branch-opener/branches/safe && npm run liquibaseLocalDockerUpdate"
-alias npmliquibaseLocalDockerUpdate="echo cd ~/Dev/branch-opener/branches/safe ; echo npm run liquibaseLocalDockerUpdate ; cd ~/Dev/branch-opener/branches/safe && npm run liquibaseLocalDockerUpdate"
-# alias csp_hash="echo sha256-$(echo -n "$(xclip -o)" | openssl sha256 -binary | openssl base64)"
 # Git
 alias git_lens="git log --graph --oneline --decorate ; echo git log --graph --oneline --decorate"
 alias git_graph="git log --graph --oneline --decorate ; echo git log --graph --oneline --decorate"
@@ -191,48 +209,15 @@ alias git_clear="echo git restore . ; echo Git clear changes ; git restore . "
 alias git_clean="echo git restore . ; echo Git clear changes ; git restore . "
 alias git_branch="echo git branch --show-current ; echo Git show current branch ; echo ; git branch --show-current ; echo ;"
 alias git_undo="echo git commit --amend ; echo Git undo commit ; git commit --amend"
-
-function git() {
-    if [[ $1 == "bisect" && ($2 == "stop" || $2 == "exit") ]]; then
-        echo "❗ 'git bisect reset' is the proper way to exit bisect mode. Executing it for you now..."
-        command git bisect reset
-        return 0
-    fi
-    command git "$@"
-}
 # Ubuntu Setup
 alias sshkey="echo cat ~/.ssh/id_ed25519.pub ; cat ~/.ssh/id_ed25519.pub"
-alias open="echo xdg-open; xdg-open"
+# alias open="echo xdg-open; xdg-open"
 alias gnome-terminal='gnome-terminal --full-screen'
 alias zshrc="echo sudo nvim ~/.zshrc ; sudo nvim ~/.zshrc "
-alias recat="echo ~/recatest/recatest_run.sh ; ~/recatest/recatest_run.sh"
-alias clear_cashe="echo free -h ; echo ; echo Before clean:; free -h ; echo ; echo After clean: ; echo sync \&\& echo 3 \| sudo tee /proc/sys/vm/drop_caches \&\& free -h ; sync && echo 3 | sudo tee /proc/sys/vm/drop_caches && free -h"
 # Other exports
 export PATH="/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH"
-export PATH="/home/dariuszw/bin/Sencha/Cmd:$PATH"
-export PATH="$HOME/.cargo/bin:$PATH"
-export PATH=$PATH:/usr/local/go/bin
-export PATH="$PATH:/home/dariuszw/bin/.local/scripts"
+export PATH="/home/dariusz/bin/Sencha/Cmd:$PATH"
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-# export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-11.0.24.0.8-2.fc40.x86_64
-export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-11.0.25.*
-# eval "$(/bin/brew shellenv)"
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-export LD_LIBRARY_PATH=/opt/oracle/instantclient_21_14:$LD_LIBRARY_PATH
-export PATH=$LD_LIBRARY_PATH:$PATH
-
-# pnpm
-export PNPM_HOME="/home/dariuszw/.local/share/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
-# pnpm end
-export GOTOOLCHAIN=auto
-export PATH=$PATH:$(go env GOPATH)/bin
-eval "$(direnv hook zsh)"
-
-export PATH=$PATH:/home/dariuszw/.spicetify
+# Load Angular CLI autocompletion.
+source <(ng completion script)
+export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
