@@ -1,0 +1,62 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">TERMINAL_CODE</Item>
+      <Item class="java.lang.String">STATUS</Item>
+      <Item class="java.lang.String">CURRENT_SCREEN</Item>
+      <Item class="java.lang.String">LAST_CONTACT</Item>
+      <Item class="java.lang.String">NEEDS_UPDATE_IND</Item>
+      <Item class="java.lang.String">PRINTER_STATUS</Item>
+      <Item class="java.lang.String">READER_STATUS</Item>
+      <Item class="java.lang.String">LABEL_COUNT</Item>
+      <Item class="java.lang.String">TIMEZONE</Item>
+      <Item class="java.lang.String">TIME_ZONE_OFFSET</Item>
+      <Item class="java.lang.String">HOSTNAME</Item>
+      <Item class="java.lang.String">IP_ADDRESS</Item>
+      <Item class="java.lang.String">MAC_ADDRESS</Item>
+      <Item class="java.lang.String">LABEL_LAST_RESET_DATE_TIME</Item>
+      <Item class="java.lang.String">JSONCARD_VERSION</Item>
+      <Item class="java.lang.String">CACHE_VALID_IND</Item>
+      <Item class="java.lang.String">KIOSK_VERSION</Item>
+      <Item class="java.lang.String">CACHE_SYNCING_IND</Item>
+      <Item class="java.lang.String">LAST_CACHE_DATE_TIME</Item>
+      <Item class="java.lang.String">LAST_OFFLINE_NOTIFICATION_DATE</Item>
+      <Item class="java.lang.String">KIOSK_LOCAL_SETTINGS</Item>
+      <Item class="java.lang.String">REWRITE_LOCAL_SETTINGS_IND</Item>
+      <Item class="java.lang.String">TWAPPER_SETTINGS</Item>
+      <Item class="java.lang.String">OS_TYPE</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>0</Item>
+      <Item>0</Item>
+      <Item>111</Item>
+      <Item>64</Item>
+      <Item>133</Item>
+      <Item>165</Item>
+      <Item>132</Item>
+      <Item>181</Item>
+      <Item>613</Item>
+      <Item>99</Item>
+      <Item>157</Item>
+      <Item>133</Item>
+      <Item>125</Item>
+      <Item>405</Item>
+      <Item>405</Item>
+      <Item>196</Item>
+      <Item>132</Item>
+      <Item>119</Item>
+      <Item>462</Item>
+      <Item>139</Item>
+      <Item>165</Item>
+      <Item>217</Item>
+      <Item>605</Item>
+      <Item>196</Item>
+      <Item>605</Item>
+      <Item>70</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23TrunkSELECT * FROM "SAFE"."SAFE_KIOSK_MONITOR"</uniqueName>
+</TableSettings>

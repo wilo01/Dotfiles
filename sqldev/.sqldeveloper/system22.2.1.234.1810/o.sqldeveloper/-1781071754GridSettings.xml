@@ -1,0 +1,35 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">BOOKING_REFERENCE</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>320</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+test.tds.ie+Visitor-safe%2C+Trunkselect b.booking_reference from ca_booked_person b
+where  b.checked_out_date_time is null
+and b.rejected_date_time is null
+and b.cancellation_date_time is null
+and b.checked_in_date_time is not null
+and (
+   b.checked_in_date_time between ( to_date(:timeNow,'YYYY-MM-DD HH24:MI:SS') - 24) and to_date(:timeNow,'YYYY-MM-DD HH24:MI:SS')
+)
+and access_badge_number = :badge_number
+-- setting rfid_no_access is Y
+-- safe_get_setting_or_null('rfid_no_access') = 'Y
+union all(
+   select p.booking_reference 
+   from
+      ca_badge b,
+      ca_person_interface p
+   where b.person_code = p.person_code
+   and b.person_type = p.person_type
+   and b.person_type = 'V'
+   and b.status_ind = 'V'
+   and b.badge_number = :badge_number -- rfid_no_access is N and join it with ca_booked_person and add the same conditions regarding checkout, rejection, cancellation and checkin date time
+)</uniqueName>
+</TableSettings>

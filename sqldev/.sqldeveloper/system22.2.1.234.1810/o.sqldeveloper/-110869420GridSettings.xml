@@ -1,0 +1,24 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">LOG_INDEX</Item>
+      <Item class="java.lang.String">LOG_TIMESTAMP</Item>
+      <Item class="java.lang.String">RT_NAME</Item>
+      <Item class="java.lang.String">PARAMS</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>0</Item>
+      <Item>0</Item>
+      <Item>82</Item>
+      <Item>299</Item>
+      <Item>197</Item>
+      <Item>4861</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item class="java.lang.String">3 desc</Item>
+      <Item class="java.lang.String">3 asc</Item>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23TrunkSELECT * FROM "SAFE"."CA_REST_API_CALL_LOG"</uniqueName>
+</TableSettings>

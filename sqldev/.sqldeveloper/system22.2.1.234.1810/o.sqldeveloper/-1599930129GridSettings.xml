@@ -1,0 +1,21 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">SETTING_NAME</Item>
+      <Item class="java.lang.String">SETTING_VALUE</Item>
+      <Item class="java.lang.String">SETTING_VALUE_CAPITAL</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>145</Item>
+      <Item>259</Item>
+      <Item>229</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+test.tds.ie+Visitor-safe%2C+Trunkselect 'google_spreadsheet_3' setting_name, utl_encode.base64_encode(utl_raw.cast_to_raw(safe_enc_toolkit.decrypt(setting_value))) setting_value,
+  setting_value as setting_value_capital
+  from safe_qr_configurations
+  where setting_name in ('google_spreadsheet_app_id')</uniqueName>
+</TableSettings>

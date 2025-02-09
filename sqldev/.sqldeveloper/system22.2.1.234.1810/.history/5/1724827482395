@@ -1,0 +1,6 @@
+select 
+               user_role_name as "user_role_name"
+            from 
+               safe_user_roles
+            where 
+               user_role_name like :search_text

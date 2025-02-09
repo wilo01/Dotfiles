@@ -1,0 +1,93 @@
+{
+  "editor.rulers": [
+    99
+  ],
+  "terminal.integrated.fontFamily": "MesloLGMDZ Nerd Font Mono",
+  "vim.neovimPath": "/usr/bin/nvim",
+  "vim.enableNeovim": true,
+  "vim.insertModeKeyBindings": [
+    {
+      "before": [
+        "j",
+        "j"
+      ],
+      "after": [
+        "<Esc>"
+      ]
+    },
+    {
+      "before": [
+        "k",
+        "k"
+      ],
+      "after": [
+        "<Esc>"
+      ]
+    },
+    {
+      "before": [
+        "j",
+        "k"
+      ],
+      "after": [
+        "<Esc>"
+      ]
+    },
+    {
+      "before": [
+        "k",
+        "j"
+      ],
+      "after": [
+        "<Esc>"
+      ]
+    }
+  ],
+  "vim.normalModeKeyBindingsNonRecursive": [
+    {
+        "before": ["<S-k>"],
+        "after": ["{"]
+    },
+    {
+        "before": ["<S-j>"],
+        "after": ["}"]
+    },
+    {
+        "before": ["<C-j>"],
+        "commands": ["editor.action.moveLinesDownAction"]
+    }, // moveLineDown
+    {
+      "before": ["<C-k>"],
+        "commands": ["editor.action.moveLinesUpAction"]
+    } // moveLineUp
+],
+  "vim.handleKeys": {
+    "<C-f>": false,
+    "<C-d>": false,
+    "<C-b>": false
+  },
+  "keyboard.dispatch": "keyCode",
+  "editor.suggestSelection": "first",
+  "editor.fontFamily": "MesloLGS NF",
+  "files.autoSave": "afterDelay",
+  "update.mode": "start",
+  "editor.codeLensFontFamily": "MesloLGS NF",
+  "git.autorefresh": true,
+  "terminal.integrated.defaultProfile.linux": "tmux",
+  "[javascript]": {
+    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
+  },
+  "git.ignoreRebaseWarning": true,
+  "extensions.autoUpdate": "onlyEnabledExtensions",
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  "diffEditor.ignoreTrimWhitespace": false,
+  "eslint.alwaysShowStatus": true,
+  "eslint.quiet": true,
+  "eslint.run": "onSave",
+  "eslint.codeActionsOnSave.mode": "problems",
+  "editor.snippetSuggestions": "top",
+  "editor.minimap.showSlider": "always",
+  "editor.minimap.size": "fill",
+  "window.zoomLevel": -1
+}

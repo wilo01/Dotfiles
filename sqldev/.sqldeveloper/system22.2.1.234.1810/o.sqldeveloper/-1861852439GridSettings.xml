@@ -1,0 +1,55 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">ID</Item>
+      <Item class="java.lang.String">ITEM_TYPE</Item>
+      <Item class="java.lang.String">FONT</Item>
+      <Item class="java.lang.String">FONT_SIZE</Item>
+      <Item class="java.lang.String">MAPPING</Item>
+      <Item class="java.lang.String">X</Item>
+      <Item class="java.lang.String">Y</Item>
+      <Item class="java.lang.String">VALUE</Item>
+      <Item class="java.lang.String">WIDTH</Item>
+      <Item class="java.lang.String">HEIGHT</Item>
+      <Item class="java.lang.String">IMAGE</Item>
+      <Item class="java.lang.String">FONT_COLOR</Item>
+      <Item class="java.lang.String">FONT_WEIGHT</Item>
+      <Item class="java.lang.String">ROTATION</Item>
+      <Item class="java.lang.String">IS_BACKGROUND</Item>
+      <Item class="java.lang.String">TITLE</Item>
+      <Item class="java.lang.String">HORIZONTAL_AUTO_ALIGNMENT</Item>
+      <Item class="java.lang.String">VERTICAL_AUTO_ALIGNMENT</Item>
+      <Item class="java.lang.String">HORIZONTAL_ALIGNMENT</Item>
+      <Item class="java.lang.String">VERTICAL_ALIGNMENT</Item>
+      <Item class="java.lang.String">ITEM_ID</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>30</Item>
+      <Item>85</Item>
+      <Item>53</Item>
+      <Item>82</Item>
+      <Item>69</Item>
+      <Item>29</Item>
+      <Item>29</Item>
+      <Item>54</Item>
+      <Item>54</Item>
+      <Item>61</Item>
+      <Item>53</Item>
+      <Item>94</Item>
+      <Item>98</Item>
+      <Item>76</Item>
+      <Item>115</Item>
+      <Item>53</Item>
+      <Item>199</Item>
+      <Item>178</Item>
+      <Item>162</Item>
+      <Item>141</Item>
+      <Item>62</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item class="java.lang.String">15 asc</Item>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23Trunkselect * from ca_badge_layout_items where item_type in ('background', 'image')</uniqueName>
+</TableSettings>

@@ -1,0 +1,47 @@
+#!/bin/sh
+
+enable_global_hooks=$(git config --local hooks.enableGlobalHooks)
+if [ "$enable_global_hooks" != true ]; then
+   echo "Global git post-commit is disabled via Git config."
+   exit 0
+fi
+
+echo "Global git post-commit run"
+date=$(date +%Y-%m-%d)
+hours=$(date +%H:%M)
+commit_msg=$(git log -1 --format=%B)
+commit_hash=$(git rev-parse HEAD)
+current_branch=$(git branch --show-current)
+previous_branch=$(git rev-parse --abbrev-ref "@{-1}" 2>/dev/null)
+stash_list=$(git stash list --format="%H %gd: %gs")
+changed_files=$(git diff --cached --name-only HEAD~)
+hooks_local_path=$(git config --local hooks.hooksLocalPath | sed "s|^~|$HOME|")
+hooks_local_filename=$(git config --local hooks.hooksLocalFilename)
+
+if [ -z "$previous_branch" ] || [ "$previous_branch" = "@{-1}" ]; then
+   previous_branch=$current_branch
+   echo "No previous_branch replacing with current_branch:\n$current_branch"
+fi
+echo "Previous branch: $previous_branch"
+echo "Commit message:\n\n$commit_msg\n"
+
+if [ -n "$hooks_local_path" ] && [ -n "$hooks_local_filename" ]; then
+   notes_file_path=${hooks_local_path}/${hooks_local_filename}.md
+   stash_file_path=${hooks_local_path}/Stash_${hooks_local_filename}.md
+else
+   notes_file_path=$HOME/Notes.md
+   stash_file_path=$HOME/Stash_list.md
+fi
+echo "Commit saved here:      $notes_file_path"
+echo "Stashes saved here:     $stash_file_path"
+
+# Append the commit message to your notes file
+echo "
+# $date $hours
+## $previous_branch
+$commit_msg
+
+$changed_files
+- Commit branch HASH [$commit_hash]($current_branch)" >>"$notes_file_path"
+
+echo "$stash_list" >"$stash_file_path"

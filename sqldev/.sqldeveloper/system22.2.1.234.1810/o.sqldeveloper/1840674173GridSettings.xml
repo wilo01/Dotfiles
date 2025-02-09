@@ -1,0 +1,26 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">ID</Item>
+      <Item class="java.lang.String">VR_PERSON_CODE</Item>
+      <Item class="java.lang.String">CHIME_MEETING_ID</Item>
+      <Item class="java.lang.String">ACTIVE</Item>
+      <Item class="java.lang.String">CREATED</Item>
+      <Item class="java.lang.String">LAST_UPDATED</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>0</Item>
+      <Item>0</Item>
+      <Item>37</Item>
+      <Item>123</Item>
+      <Item>293</Item>
+      <Item>58</Item>
+      <Item>165</Item>
+      <Item>165</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23TrunkSELECT * FROM "SAFE"."SAFE_VI_REC_STREAM"</uniqueName>
+</TableSettings>

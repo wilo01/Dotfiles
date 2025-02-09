@@ -1,0 +1,26 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">CHROMEBOX_ID</Item>
+      <Item class="java.lang.String">CLIENT_CODE</Item>
+      <Item class="java.lang.String">FORCE_DEFAULT_SETTINGS_IND</Item>
+      <Item class="java.lang.String">DEFAULT_SETTINGS</Item>
+      <Item class="java.lang.String">TWAPPER_SETTINGS</Item>
+      <Item class="java.lang.String">BADGE_SETTINGS</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>0</Item>
+      <Item>0</Item>
+      <Item>293</Item>
+      <Item>96</Item>
+      <Item>199</Item>
+      <Item>605</Item>
+      <Item>605</Item>
+      <Item>109</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23rddemoSELECT * FROM "SUITE"."CA_CHROMEBOX_MAPPING"</uniqueName>
+</TableSettings>

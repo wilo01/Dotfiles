@@ -1,0 +1,34 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">PERSON_CODE</Item>
+      <Item class="java.lang.String">PERSON_TYPE</Item>
+      <Item class="java.lang.String">LICENSE_NUMBER</Item>
+      <Item class="java.lang.String">VALID_FROM_DATE</Item>
+      <Item class="java.lang.String">VALID_TO_DATE</Item>
+      <Item class="java.lang.String">ISSUING_AUTHORITY</Item>
+      <Item class="java.lang.String">PLACE_OF_BIRTH</Item>
+      <Item class="java.lang.String">DATE_OF_BIRTH</Item>
+      <Item class="java.lang.String">DRIVING_LICENSE_CATEGORIES</Item>
+      <Item class="java.lang.String">USERNAME</Item>
+      <Item class="java.lang.String">LAST_CHANGED_DATE_TIME</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>103</Item>
+      <Item>99</Item>
+      <Item>119</Item>
+      <Item>145</Item>
+      <Item>145</Item>
+      <Item>135</Item>
+      <Item>114</Item>
+      <Item>108</Item>
+      <Item>195</Item>
+      <Item>80</Item>
+      <Item>175</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+test11av.tds.ieselect * from ca_driving_license</uniqueName>
+</TableSettings>

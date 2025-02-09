@@ -1,0 +1,6 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Filters class="java.util.ArrayList" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-filters">
+   <Item class="java.lang.String">name like '%dwdw%'</Item>
+   <Item class="java.lang.String">name like 'dwdw'</Item>
+   <Item class="java.lang.String">name like '%dwdw'</Item>
+</Filters>

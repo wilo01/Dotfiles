@@ -1,0 +1,34 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">COLLECTION_POINT_CODE</Item>
+      <Item class="java.lang.String">DESCRIPTION_03</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>168</Item>
+      <Item>114</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23Trunkselect 
+   cbp.collection_point_code,
+   crc.description_03
+from 
+   ca_booked_person cbp
+join ca_reference_character8 crc
+   on cbp.collection_point_code = crc.reference_code
+where 
+   cbp.booking_reference = lower(safe_get_br_from_reference(regexp_replace(:public_reference, '([[:cntrl:]^\t]+)|([[:space:]]+)|([$/])', null)))
+   and cbp.checked_out_date_time is null
+   and cbp.rejected_date_time is null
+   and cbp.approved_date_time is not null
+   and cbp.cancellation_date_time is null
+--   crc.description_03 is not null
+   and (cbp.watchlist_ind = 'N' or cbp.watchlist_ind is null)
+   and cbp.zone_code = :zone_code
+   and crc.reference_type = 'CNPT'
+order by 
+   cbp.due_date_time desc</uniqueName>
+</TableSettings>

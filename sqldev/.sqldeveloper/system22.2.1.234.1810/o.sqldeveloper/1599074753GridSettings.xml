@@ -1,0 +1,23 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">PRINTER_CODE</Item>
+      <Item class="java.lang.String">PRINTER_DESCRIPTION</Item>
+      <Item class="java.lang.String">PIXEL_DIMENSIONS</Item>
+      <Item class="java.lang.String">BLUETOOTH_PIXEL_DIMENSIONS</Item>
+      <Item class="java.lang.String">BLUETOOTH_SCALE_FACTOR</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>0</Item>
+      <Item>117</Item>
+      <Item>146</Item>
+      <Item>253</Item>
+      <Item>263</Item>
+      <Item>180</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%2312.1AVSELECT * FROM "COREACCESS"."CA_PRINTER_DIMENSION"</uniqueName>
+</TableSettings>

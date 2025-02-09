@@ -1,0 +1,393 @@
+// -*- mode: jsonc -*-
+{
+    // "layer": "top", // Waybar at top layer
+    "position": "top", // Waybar position (top|bottom|left|right)
+    "height": 30, // Waybar height (to be removed for auto height)
+    // "width": 1280, // Waybar width
+    "spacing": 1, // Gaps between modules (4px)
+    // Choose the order of the modules
+    "modules-left": [
+        "custom/power",
+        "sway/workspaces",
+        "sway/mode",
+        "sway/scratchpad"
+    ],
+   // "modules-center": [
+   //    "sway/window"
+   //    "custom/media"
+   // ],
+    "modules-right": [
+        // "idle_inhibitor",
+        "custom/spotify",
+        "custom/weather",
+        "tray",
+        "custom/public_ip",
+        "network",
+        "pulseaudio#input",
+        "pulseaudio#output",
+        "power-profiles-daemon",
+        "cpu",
+        "memory",
+        "temperature",
+        "backlight",
+        // "sway/language",
+        "battery",
+        "custom/notification",
+        "clock"
+    ],
+    // Modules configuration
+     "sway/workspaces": {
+         "disable-scroll": false,
+         "all-outputs": false,
+         "warp-on-scroll": false,
+         "format": "{name} {icon} |",
+         "format-icons": {
+             "1": "",
+             // "2": "",
+             "2": "",
+             "3": "",
+             "4": "",
+             "5": "",
+             "10": "",
+             "11": "",
+             "19": "",
+             "20": "",
+             "urgent": "",
+             "focused": "",
+             "default": ""
+         }
+     },
+    "keyboard-state": {
+        "numlock": true,
+        "capslock": true,
+        "format": "{name} {icon}",
+        "format-icons": {
+            "locked": "",
+            "unlocked": ""
+        }
+    },
+    "sway/mode": {
+        "format": "<span style=\"italic\">{}</span>"
+    },
+    "sway/scratchpad": {
+        "format": "{icon} {count}",
+        "show-empty": false,
+        "format-icons": ["", ""],
+        "tooltip": true,
+        "tooltip-format": "{app}: {title}"
+    },
+    "mpd": {
+        "format": "{stateIcon} {consumeIcon}{randomIcon}{repeatIcon}{singleIcon}{artist} - {album} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S}) ⸨{songPosition}|{queueLength}⸩ {volume}% ",
+        "format-disconnected": "Disconnected ",
+        "format-stopped": "{consumeIcon}{randomIcon}{repeatIcon}{singleIcon}Stopped ",
+        "unknown-tag": "N/A",
+        "interval": 5,
+        "consume-icons": {
+            "on": " "
+        },
+        "random-icons": {
+            "off": "<span color=\"#f53c3c\"></span> ",
+            "on": " "
+        },
+        "repeat-icons": {
+            "on": " "
+        },
+        "single-icons": {
+            "on": "1 "
+        },
+        "state-icons": {
+            "paused": "",
+            "playing": ""
+        },
+        "tooltip-format": "MPD (connected)",
+        "tooltip-format-disconnected": "MPD (disconnected)"
+    },
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated": "",
+            "deactivated": ""
+        }
+    },
+    "tray": {
+        // "icon-size": 21,
+        "spacing": 10
+    },
+    "clock": {
+        "timezone": "Europe/Dublin",
+        "tooltip-format": "<tt><big>{calendar}</big></tt>",
+        "format": "{:%d.%m.%y %I:%M %p}",
+        "calendar": {
+        // "mode-mon-col"  : 3,
+        // "weeks-pos"     : "right",
+        "mode"          : "month",
+        "on-scroll"     : 1,
+        "on-click-right": "mode",
+        "format": {
+            "months":     "<span color='#ffead3'><b>{}</b></span>",
+            "days":       "<span color='#ecc6d9'><b>{}</b></span>",
+            "weeks":      "<span color='#99ffdd'><b>W{}</b></span>",
+            "weekdays":   "<span color='#ffcc66'><b>{}</b></span>",
+            "today":      "<span color='#ff6699'><b><u>{}</u></b></span>"
+        }
+      }
+    },
+    "cpu": {
+       "interval": 2,
+       "tooltip": true,
+       "critical-threshold": 80,
+       "format": "{usage}% {icon}",
+       "format-icons": [
+           "<span color='#a8ff60'></span>",  // 0-20%
+           "<span color='#94f272'></span>",  // 21-40%
+           "<span color='#ffe28c'></span>",  // 41-60%
+           "<span color='#ffba55'></span>",  // 61-80%
+           "<span color='#ff5233'></span>"   // 81-100%
+       ]
+    },
+    "memory": {
+       "interval": 5,
+       "critical-threshold": 80,
+       "format": "{used}G {icon}",
+       "format-icons": [
+           "<span color='#a8ff60'></span>",   // 0-20%
+           "<span color='#94f272'></span>",   // 21-40%
+           "<span color='#ffe28c'></span>",   // 41-60%
+           "<span color='#ffba55'></span>",   // 61-80%
+           "<span color='#ff5233'></span>"    // 81-100%
+          ]
+   },
+    "temperature": {
+        // "thermal-zone": 2,
+        // "hwmon-path": "/sys/class/hwmon/hwmon2/temp1_input",
+        // "format-critical": "{temperatureC}°C {icon}",
+        "interval": 2,
+        "critical-threshold": 80,
+        "format": "{temperatureC}°C {icon}",
+        // "format-icons": ["", "", ""]
+        "format-icons": [
+            "<span color='#69ff94'></span>",
+            "<span color='#5fff97'></span>",
+            "<span color='#4dff9d'></span>",
+            "<span color='#45f9a0'></span>",
+            "<span color='#3ef5a2'></span>",
+            "<span color='#33e6b2'></span>",
+            "<span color='#2ec7d8'></span>",
+            "<span color='#29badd'></span>",
+            "<span color='#2ab9e8'></span>",
+            "<span color='#29a9ff'></span>",
+            "<span color='#1e90ff'></span>",
+            "<span color='#1b85f2'></span>",
+            "<span color='#1572d4'></span>",
+            "<span color='#0073e6'></span>",
+            "<span color='#0065c2'></span>",
+            "<span color='#005fb8'></span>",
+            "<span color='#80faff'></span>",
+            "<span color='#73e8ff'></span>",
+            "<span color='#6adfff'></span>",
+            "<span color='#ffffa5'></span>",
+            "<span color='#ffe28c'></span>",
+            "<span color='#ffd177'></span>",
+            "<span color='#ffcd60'></span>",
+            "<span color='#ffba55'></span>",
+            "<span color='#ffa95e'></span>",
+            "<span color='#ff9966'></span>",
+            "<span color='#ff8972'></span>",
+            "<span color='#ff7a59'></span>",
+            "<span color='#ff6644'></span>",
+            "<span color='#ff5233'></span>",
+            "<span color='#ff3d23'></span>",
+            "<span color='#dd532e'></span>",
+            "<span color='#d93d23'></span>",
+            "<span color='#c32b14'></span>",
+            "<span color='#b5220b'></span>",
+            "<span color='#a81a05'></span>",
+            "<span color='#910700'></span>"
+        ]
+    },
+    "backlight": {
+        // "device": "acpi_video1",
+        "format": "{percent}% {icon}",
+        "format-icons": ["🌑", "🌘", "🌗", "🌖", "🌕"]
+    },
+   "battery": {
+       "states": {
+           "good": 95,
+           "warning": 30,
+           "critical": 15
+       },
+       "format": "{capacity}% {icon}",
+       "format-full": "{capacity}% {icon}",
+       "format-charging": "{capacity}% <span color='#a8ff60'></span>",
+       "format-plugged": "{capacity}% <span color='#a8ff60'></span>",
+       "format-icons": [
+             "<span color='#ff5233'></span>",   // 0-10%
+             "<span color='#ff7355'></span>",   // 11-20%
+             "<span color='#ffba55'></span>",   // 21-30%
+             "<span color='#ffd173'></span>",   // 31-40%
+             "<span color='#ffe28c'></span>",   // 41-50%
+             "<span color='#c9f572'></span>",   // 51-60%
+             "<span color='#94f272'></span>",   // 61-70%
+             "<span color='#73ff60'></span>",   // 71-80%
+             "<span color='#a8ff60'></span>",   // 81-90%
+             "<span color='#b8ff80'></span>"    // 91-100%
+       ],
+       "states": {
+          "10": {
+               "tooltip": "Battery critically low! Please charge now!",
+               "format": "{capacity}% "  // Critical icon and message at 0-10%
+          },
+          "20": {
+               "tooltip": "Battery low! Please consider charging soon.",
+               "format": "{capacity}% "  // Warning icon and message at 11-20%
+          }
+       }
+    },
+    "battery#bat2": {
+        "bat": "BAT2"
+    },
+    "power-profiles-daemon": {
+      "format": "{icon}",
+      "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
+      "tooltip": true,
+      "format-icons": {
+        "default": "",
+        "performance": "",
+        "balanced": "",
+        "power-saver": ""
+      }
+    },
+    "network": {
+       // "interface": "wlp2*", // (Optional) To force the use of this interface
+       "format-wifi": "{signalStrength}% {icon}",
+       "tooltip-format": "{essid}\n{ifname}\t{ipaddr}/{cidr} \ngateway\t{gwaddr}\n\n{icon} ⇣{bandwidthDownBytes} ⇡{bandwidthUpBytes}",
+       "format-alt": "{essid} {signalStrength}% {icon}",
+       "format-ethernet": "",
+       "format-linked": "{ifname} (No IP) ",
+       "format-disconnected": "Disconnected ⚠",
+       "interval": 30,
+       "format-icons": [
+         "<span color='#ff5233'></span>",  // 0-19%
+         "<span color='#ffba55'></span>",  // 20-39%
+         "<span color='#ffe28c'></span>",  // 40-59%
+         "<span color='#94f272'></span>",  // 60-79%
+         "<span color='#a8ff60'></span>"   // 80-100%
+       ],
+       "on-click-middle": "nmcli networking | grep -q 'enabled' && nmcli networking off || nmcli networking on"
+    },
+    "custom/public_ip": {
+       "exec": "[ $(curl -s --connect-timeout 5 https://ifconfig.me) ] && curl -s https://ifconfig.me || echo 'Unavailable'",
+       "interval": 600,
+       "tooltip": true,
+       "format": "🌐",
+       "format-alt": "🌐 Public IP: {}",
+       "tooltip-format": "🌐 Public IP: {}",
+       "on-click": "curl -s https://ifconfig.me | wl-copy"
+    },
+    "pulseaudio#input": {
+       "format": "{format_source}",
+       "format-source": "{volume}% <span color='#a8ff60'></span>",
+       "format-source-muted": "OFF <span color='#ff5233'></span>",
+       "format-icons": {
+           "default": [
+              "<span color='#a8ff60'></span>",
+              "<span color='#ffe28c'></span>",
+              "<span color='#ff5233'></span>"
+           ]
+       },
+       "scroll-step": 2,
+       "smooth-scrolling-threshold": 1,
+       "max-volume": 100,
+       "on-click": "pavucontrol",
+       "on-click-middle": "pactl set-source-mute @DEFAULT_SOURCE@ toggle",
+       "on-scroll-up": "pactl set-source-volume @DEFAULT_SOURCE@ +1%",
+       "on-scroll-down": "pactl set-source-volume @DEFAULT_SOURCE@ -1%",
+    },
+    "pulseaudio#output": {
+       "format": "{volume}% {icon}",
+       "format-muted": "OFF <span color='#ff5233'></span>",
+       "format-bluetooth": "{volume}% {icon}<span color='#2aa9ff'></span>",
+       "format-bluetooth-muted": "{volume}% <span color='#ff5233'></span><span color='#2aa9ff'></span>",
+       "format-icons": {
+           "headphone": [
+              "<span color='#a8ff60'></span>",
+              "<span color='#ffe28c'></span>",
+              "<span color='#ff5233'></span>"
+           ],
+           "default": [
+              "<span color='#a8ff60'></span>",
+              "<span color='#ffe28c'></span>",
+              "<span color='#ff5233'></span>"
+           ]
+       },
+       "scroll-step": 2,
+       "smooth-scrolling-threshold": 1,
+       "max-volume": 100,
+       "on-click": "pavucontrol",
+       "on-click-middle": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+       "on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +1%",
+       "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -1%",
+    },
+    "custom/media": {
+        "format": "{icon} {}",
+        "return-type": "json",
+        "max-length": 40,
+        "format-icons": {
+            "spotify": "",
+            "default": "🎜"
+        },
+        "escape": true,
+        "exec": "$HOME/.config/waybar/mediaplayer.py 2> /dev/null" // Script in resources folder
+        // "exec": "$HOME/.config/waybar/mediaplayer.py --player spotify 2> /dev/null" // Filter player based on name
+    },
+    "custom/power": {
+        "format": "",
+        "tooltip": false,
+        "on-click": "[ -z $(pgrep swaynag) ] && swaynag -t warning -m 'Power Menu Options' -B 'Logout' 'swaymsg exit' -B 'Restart' 'shutdown -r now' -b 'Shutdown' 'shutdown -h now'"
+    },
+    "custom/notification": {
+       "tooltip": false,
+       "format": "{icon}",
+       "format-icons": {
+         "notification": "<span foreground='red'><sup></sup></span>",
+         "none": "",
+         "dnd-notification": "<span foreground='red'><sup></sup></span>",
+         "dnd-none": "",
+         "inhibited-notification": "<span foreground='red'><sup></sup></span>",
+         "inhibited-none": "",
+         "dnd-inhibited-notification": "<span foreground='red'><sup></sup></span>",
+         "dnd-inhibited-none": ""
+       },
+       "return-type": "json",
+       "exec-if": "which swaync-client",
+       "exec": "swaync-client -swb",
+       "on-click": "swaync-client -t -sw",
+       "on-click-right": "swaync-client -d -sw",
+       "escape": true
+    },
+    "custom/spotify": {
+       "exec": "/usr/bin/python3 ~/.config/waybar/scripts/mediaplayer.py --player spotify",
+       "format": "{}  ",
+       "return-type": "json",
+       "on-click": "playerctl previous",
+       "on-click-right": "playerctl next",
+       "on-click-middle": "playerctl play-pause",
+       "on-scroll-up": "playerctl next",
+       "on-scroll-down": "playerctl previous"
+    },
+    "custom/weather": {
+       "format": "{}",
+       "tooltip": true,
+       "interval": 3600,
+       "return-type": "json",
+       "exec": "python ~/.config/waybar/scripts/waybar-wttr.py",
+       "on-click": "xdg-open https://en.wttr.in/"
+    }
+    // "custom/weather": {
+    //    "restart-interval": 300,
+    //    "return-type": "json",
+    //    "format-alt": "{alt}",
+    //    "exec": "python ~/.config/waybar/scripts/weather.py",
+    //    "on-click": "xdg-open https://weather.com/en-IN/weather/today/l/c30c030abf9ed22f44f266f185c46bf3576a32df6097d04973dd39e8d93628ae"
+    // },
+}

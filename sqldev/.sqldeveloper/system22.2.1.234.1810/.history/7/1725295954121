@@ -1,0 +1,22 @@
+begin
+   ca_menu_pak.manage_menu_item_setting( p_overwrite => true, p_menu_item_id => 'kioskmonitormenu', p_property_1 => 'kiosk', p_property_2 => 'textFields', p_value => '["terminal_code", "starWebPrntIP", "arrivalVideoID", "maxDateForExpiryTempBadge"]' );
+   ca_menu_pak.manage_menu_item_setting( p_overwrite => true, p_menu_item_id => 'kioskmonitormenu', p_property_1 => 'kiosk', p_property_2 => 'dropDownFields', p_value => '["shortDateFormat", "shortTimeFormat", "languageCode", "prebookedLabelCode", "badgeTypeCode", "tempBadgeLabelCode", "holdingPanelOption", "ndaScrollSpeed", "rfidBadges", "selfAssignRfid", "hostSearchType", "labelPrinter", "tempBadgePrinter"]' );
+end;
+/
+
+
+select
+   id acode,
+   name description
+from 
+   ca_badge_layout cbl
+where
+   (trim(:q) is null or lower(id || ' ' || name) like lower('%' || trim(:q) || '%' ))
+   and cbl.type = 'image'
+   and safe_request_permissions_pak.check_permission_sql (
+      :Uidtoken, 
+      '(kioskmonitormenu)', 
+      'holdingPanelOption', 
+      'GET' 
+   ) = 'Y'
+   order by lower(id)

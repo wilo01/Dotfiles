@@ -1,0 +1,22 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">LANGUAGE_CODE</Item>
+      <Item class="java.lang.String">VISIT_REASON_CODE</Item>
+      <Item class="java.lang.String">COLLECTION_POINT_TYPE</Item>
+      <Item class="java.lang.String">ITEM</Item>
+      <Item class="java.lang.String">VALUE</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>118</Item>
+      <Item>137</Item>
+      <Item>164</Item>
+      <Item>290</Item>
+      <Item>306</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23Visitor-devselect * from safe_webapp_translations where item = 'checkin-msg-save-details-first'</uniqueName>
+</TableSettings>

@@ -1,0 +1,18 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">USER_ROLE_NAME</Item>
+      <Item class="java.lang.String">REFERENCE_TYPE</Item>
+      <Item class="java.lang.String">SHOW_IND</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>121</Item>
+      <Item>117</Item>
+      <Item>78</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+QALIVE+12AVselect * from safe_user_role_reference</uniqueName>
+</TableSettings>

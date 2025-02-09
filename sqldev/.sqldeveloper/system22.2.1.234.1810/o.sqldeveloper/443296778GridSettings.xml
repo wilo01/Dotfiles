@@ -1,0 +1,38 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">PERSON_CODE</Item>
+      <Item class="java.lang.String">PERSON_TYPE</Item>
+      <Item class="java.lang.String">FORENAME</Item>
+      <Item class="java.lang.String">SURNAME</Item>
+      <Item class="java.lang.String">BADGE_NUMBER</Item>
+      <Item class="java.lang.String">ACCESS_REASON_CODE</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>103</Item>
+      <Item>99</Item>
+      <Item>79</Item>
+      <Item>75</Item>
+      <Item>111</Item>
+      <Item>249</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+test.tds.ie+Visitor-safe%2C+TrunkSELECT
+    p.person_code,
+    p.person_type,
+    p.forename,
+    p.surname,
+    b.badge_number,
+    p.access_reason_code
+FROM
+    ca_badge            b,
+    ca_person_interface p
+WHERE
+        b.person_code = p.person_code
+    AND b.person_type = p.person_type
+    AND b.badge_number = :badge_number
+    AND b.status_ind = 'V'</uniqueName>
+</TableSettings>

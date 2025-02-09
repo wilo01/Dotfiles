@@ -1,0 +1,78 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">BOOKING_REFERENCE</Item>
+      <Item class="java.lang.String">JOB_TITLE</Item>
+      <Item class="java.lang.String">INDUSTRY</Item>
+      <Item class="java.lang.String">LOCATION</Item>
+      <Item class="java.lang.String">LANGUAGE</Item>
+      <Item class="java.lang.String">COMPANY</Item>
+      <Item class="java.lang.String">SIGNED_NDA</Item>
+      <Item class="java.lang.String">LINKEDIN_IND</Item>
+      <Item class="java.lang.String">NDA_SENT_DATE_TIME</Item>
+      <Item class="java.lang.String">VETTING_REVIEWER</Item>
+      <Item class="java.lang.String">VETTING_IND</Item>
+      <Item class="java.lang.String">VETTING_REVIEWED_DATE_TIME</Item>
+      <Item class="java.lang.String">VETTING_COMMENT</Item>
+      <Item class="java.lang.String">LAST_WAITING_REMINDER</Item>
+      <Item class="java.lang.String">CHECKIN_SOURCE_IND</Item>
+      <Item class="java.lang.String">VISITOR_ON_SITE_IND</Item>
+      <Item class="java.lang.String">CANCELLATION_COUNT</Item>
+      <Item class="java.lang.String">EXTERNAL_SURVEY_ANSWERED_IND</Item>
+      <Item class="java.lang.String">CHECKOUT_COUNT</Item>
+      <Item class="java.lang.String">NOTIF_SEND_HOST</Item>
+      <Item class="java.lang.String">NOTIF_SEND_CCHOSTS</Item>
+      <Item class="java.lang.String">NOTIF_SEND_VISITOR</Item>
+      <Item class="java.lang.String">HOST_HEALTH_SURVEY</Item>
+      <Item class="java.lang.String">WAITING_MESSAGES_SENT_COUNT</Item>
+      <Item class="java.lang.String">NOTIF_SEND_SMS_HOST</Item>
+      <Item class="java.lang.String">NOTIF_SEND_SMS_CCHOSTS</Item>
+      <Item class="java.lang.String">NOTIF_SEND_SMS_VISITOR</Item>
+      <Item class="java.lang.String">NDA_SIGNATURE_BYPASS_USERNAME</Item>
+      <Item class="java.lang.String">ID_VERIFICATION_TRIES</Item>
+      <Item class="java.lang.String">ID_VERIFICATION_STATUS</Item>
+      <Item class="java.lang.String">ID_VERIFICATION_DATE_TIME</Item>
+      <Item class="java.lang.String">ID_CHECK_USERNAME</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>0</Item>
+      <Item>0</Item>
+      <Item>142</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>76</Item>
+      <Item>80</Item>
+      <Item>74</Item>
+      <Item>79</Item>
+      <Item>94</Item>
+      <Item>165</Item>
+      <Item>127</Item>
+      <Item>92</Item>
+      <Item>195</Item>
+      <Item>130</Item>
+      <Item>161</Item>
+      <Item>146</Item>
+      <Item>142</Item>
+      <Item>149</Item>
+      <Item>217</Item>
+      <Item>127</Item>
+      <Item>127</Item>
+      <Item>151</Item>
+      <Item>139</Item>
+      <Item>150</Item>
+      <Item>216</Item>
+      <Item>158</Item>
+      <Item>182</Item>
+      <Item>170</Item>
+      <Item>230</Item>
+      <Item>149</Item>
+      <Item>162</Item>
+      <Item>178</Item>
+      <Item>141</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23TrunkSELECT * FROM "SAFE"."CA_VISITOR_DETAIL"</uniqueName>
+</TableSettings>

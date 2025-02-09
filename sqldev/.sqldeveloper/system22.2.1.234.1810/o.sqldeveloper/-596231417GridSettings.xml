@@ -1,0 +1,98 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">REFERENCE_TYPE</Item>
+      <Item class="java.lang.String">VIEWABLE</Item>
+      <Item class="java.lang.String">ADDABLE</Item>
+      <Item class="java.lang.String">EDITABLE</Item>
+      <Item class="java.lang.String">DELETABLE</Item>
+      <Item class="java.lang.String">AUTO_CODE</Item>
+      <Item class="java.lang.String">CODE_01</Item>
+      <Item class="java.lang.String">DATE_01</Item>
+      <Item class="java.lang.String">DESCRIPTION_01</Item>
+      <Item class="java.lang.String">DESCRIPTION_02</Item>
+      <Item class="java.lang.String">DESCRIPTION_03</Item>
+      <Item class="java.lang.String">DESCRIPTION_04</Item>
+      <Item class="java.lang.String">DESCRIPTION_05</Item>
+      <Item class="java.lang.String">DESCRIPTION_06</Item>
+      <Item class="java.lang.String">DESCRIPTION_07</Item>
+      <Item class="java.lang.String">DESCRIPTION_08</Item>
+      <Item class="java.lang.String">DESCRIPTION_09</Item>
+      <Item class="java.lang.String">DESCRIPTION_10</Item>
+      <Item class="java.lang.String">DESCRIPTION_11</Item>
+      <Item class="java.lang.String">DESCRIPTION_12</Item>
+      <Item class="java.lang.String">DESCRIPTION_13</Item>
+      <Item class="java.lang.String">IND_01</Item>
+      <Item class="java.lang.String">IND_02</Item>
+      <Item class="java.lang.String">NUMBER_01</Item>
+      <Item class="java.lang.String">NUMBER_02</Item>
+      <Item class="java.lang.String">NUMBER_03</Item>
+      <Item class="java.lang.String">NUMBER_04</Item>
+      <Item class="java.lang.String">PARENT_CODE</Item>
+      <Item class="java.lang.String">PARENT_COMBO</Item>
+      <Item class="java.lang.String">PARENT_REFERENCE_TYPE</Item>
+      <Item class="java.lang.String">FORM_OPTIONS</Item>
+      <Item class="java.lang.String">DESCRIPTION_14</Item>
+      <Item class="java.lang.String">DESCRIPTION_15</Item>
+      <Item class="java.lang.String">DESCRIPTION_17</Item>
+      <Item class="java.lang.String">DESCRIPTION_18</Item>
+      <Item class="java.lang.String">DESCRIPTION_19</Item>
+      <Item class="java.lang.String">IND_03</Item>
+      <Item class="java.lang.String">IND_04</Item>
+      <Item class="java.lang.String">DESCRIPTION_16</Item>
+      <Item class="java.lang.String">IND_05</Item>
+      <Item class="java.lang.String">IND_06</Item>
+      <Item class="java.lang.String">IND_07</Item>
+      <Item class="java.lang.String">IND_08</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>117</Item>
+      <Item>73</Item>
+      <Item>70</Item>
+      <Item>72</Item>
+      <Item>82</Item>
+      <Item>88</Item>
+      <Item>89</Item>
+      <Item>138</Item>
+      <Item>180</Item>
+      <Item>180</Item>
+      <Item>187</Item>
+      <Item>187</Item>
+      <Item>180</Item>
+      <Item>145</Item>
+      <Item>114</Item>
+      <Item>114</Item>
+      <Item>114</Item>
+      <Item>114</Item>
+      <Item>114</Item>
+      <Item>114</Item>
+      <Item>114</Item>
+      <Item>180</Item>
+      <Item>173</Item>
+      <Item>215</Item>
+      <Item>201</Item>
+      <Item>166</Item>
+      <Item>159</Item>
+      <Item>166</Item>
+      <Item>187</Item>
+      <Item>166</Item>
+      <Item>2826</Item>
+      <Item>114</Item>
+      <Item>114</Item>
+      <Item>117</Item>
+      <Item>194</Item>
+      <Item>152</Item>
+      <Item>187</Item>
+      <Item>61</Item>
+      <Item>114</Item>
+      <Item>58</Item>
+      <Item>58</Item>
+      <Item>58</Item>
+      <Item>96</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23Learning+envselect * from CA_REFERENCE_DATA_OPTIONS</uniqueName>
+</TableSettings>

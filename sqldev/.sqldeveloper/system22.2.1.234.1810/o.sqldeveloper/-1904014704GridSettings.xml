@@ -1,0 +1,76 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">ACODE</Item>
+      <Item class="java.lang.String">ADESCRIPTION</Item>
+      <Item class="java.lang.String">ADESCRIPTION2</Item>
+      <Item class="java.lang.String">FULL_NAME_LOWER</Item>
+      <Item class="java.lang.String">TITLE</Item>
+      <Item class="java.lang.String">FORENAME</Item>
+      <Item class="java.lang.String">SURNAME</Item>
+      <Item class="java.lang.String">FORENAME_LOWER</Item>
+      <Item class="java.lang.String">SURNAME_LOWER</Item>
+      <Item class="java.lang.String">ASSEMBLY_POINT_CODE</Item>
+      <Item class="java.lang.String">DEPARTMENT</Item>
+      <Item class="java.lang.String">ZONE_DESCRIPTION</Item>
+      <Item class="java.lang.String">EMAIL_LOWER</Item>
+      <Item class="java.lang.String">EMAIL_ADDRESS_LOWER</Item>
+      <Item class="java.lang.String">EMAIL</Item>
+      <Item class="java.lang.String">EMAIL_ADDRESS</Item>
+      <Item class="java.lang.String">LDAP</Item>
+      <Item class="java.lang.String">KNOWNAS</Item>
+      <Item class="java.lang.String">KNOWN_AS</Item>
+      <Item class="java.lang.String">HASPHOTO</Item>
+      <Item class="java.lang.String">ALLOWED_VIP_IND</Item>
+      <Item class="java.lang.String">NOTIFICATION_EMAIL_IND</Item>
+      <Item class="java.lang.String">NOTIFICATION_SMS_IND</Item>
+      <Item class="java.lang.String">ZONE_CODE</Item>
+      <Item class="java.lang.String">DEPARTMENT_CODE</Item>
+      <Item class="java.lang.String">PERSON_TYPE</Item>
+      <Item class="java.lang.String">PERSON_CODE</Item>
+      <Item class="java.lang.String">CA_PERSON_INTERFACE_ROWID</Item>
+      <Item class="java.lang.String">CA_DEPARTMENT_ROWID</Item>
+      <Item class="java.lang.String">CA_ZONE_ROWID</Item>
+      <Item class="java.lang.String">CA_PERSON_PHOTO_ROWID</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>0</Item>
+      <Item>0</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>252</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DevSELECT * FROM "SAFE"."CA_ACTIVE_HOST_LOCATION_HR"</uniqueName>
+</TableSettings>

@@ -1,0 +1,9 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Filters class="java.util.ArrayList" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-filters">
+   <Item class="java.lang.String">GROUP_ID like '64134'</Item>
+   <Item class="java.lang.String">BOOKING_REFERENCE like '61329'</Item>
+   <Item class="java.lang.String">BOOKING_REFERENCE like '61335'</Item>
+   <Item class="java.lang.String">GROUP_ID like '64111'</Item>
+   <Item class="java.lang.String">BOOKING_REFERENCE like '61285'</Item>
+   <Item class="java.lang.String">BOOKING_REFERENCE like '61286'</Item>
+</Filters>

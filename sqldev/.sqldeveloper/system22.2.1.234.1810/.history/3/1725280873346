@@ -1,0 +1,1 @@
+select * from safe_menu_item_settings where menu_item_id = 'kioskmonitormenu'

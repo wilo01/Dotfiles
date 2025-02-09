@@ -1,0 +1,7 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Filters class="java.util.ArrayList" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-filters">
+   <Item class="java.lang.String">kiosk_version like 'trunk%'</Item>
+   <Item class="java.lang.String">kiosk_version like '8f26bb39-eebd-4498-9571-462f90dac03'</Item>
+   <Item class="java.lang.String">kiosk_version like '%8f26bb39-eebd-4498-9571-462f90dac03'</Item>
+   <Item class="java.lang.String">terminal_code = '130'</Item>
+</Filters>

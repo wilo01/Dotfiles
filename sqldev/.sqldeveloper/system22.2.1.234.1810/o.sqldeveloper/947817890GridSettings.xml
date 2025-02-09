@@ -1,0 +1,65 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">TERMINAL_CODE</Item>
+      <Item class="java.lang.String">STATUS</Item>
+      <Item class="java.lang.String">CURRENT_SCREEN</Item>
+      <Item class="java.lang.String">LAST_CONTACT</Item>
+      <Item class="java.lang.String">NEEDS_UPDATE_IND</Item>
+      <Item class="java.lang.String">PRINTER_STATUS</Item>
+      <Item class="java.lang.String">READER_STATUS</Item>
+      <Item class="java.lang.String">LABEL_COUNT</Item>
+      <Item class="java.lang.String">TIMEZONE</Item>
+      <Item class="java.lang.String">TIME_ZONE_OFFSET</Item>
+      <Item class="java.lang.String">HOSTNAME</Item>
+      <Item class="java.lang.String">IP_ADDRESS</Item>
+      <Item class="java.lang.String">MAC_ADDRESS</Item>
+      <Item class="java.lang.String">LABEL_LAST_RESET_DATE_TIME</Item>
+      <Item class="java.lang.String">JSONCARD_VERSION</Item>
+      <Item class="java.lang.String">CACHE_VALID_IND</Item>
+      <Item class="java.lang.String">KIOSK_VERSION</Item>
+      <Item class="java.lang.String">CACHE_SYNCING_IND</Item>
+      <Item class="java.lang.String">LAST_CACHE_DATE_TIME</Item>
+      <Item class="java.lang.String">LAST_OFFLINE_NOTIFICATION_DATE</Item>
+      <Item class="java.lang.String">KIOSK_LOCAL_SETTINGS</Item>
+      <Item class="java.lang.String">REWRITE_LOCAL_SETTINGS_IND</Item>
+      <Item class="java.lang.String">TWAPPER_SETTINGS</Item>
+      <Item class="java.lang.String">OS_TYPE</Item>
+      <Item class="java.lang.String">COLLECTION_POINT_DESCRIPTION</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>111</Item>
+      <Item>64</Item>
+      <Item>122</Item>
+      <Item>167</Item>
+      <Item>132</Item>
+      <Item>116</Item>
+      <Item>113</Item>
+      <Item>99</Item>
+      <Item>96</Item>
+      <Item>133</Item>
+      <Item>96</Item>
+      <Item>96</Item>
+      <Item>102</Item>
+      <Item>196</Item>
+      <Item>132</Item>
+      <Item>119</Item>
+      <Item>108</Item>
+      <Item>139</Item>
+      <Item>158</Item>
+      <Item>217</Item>
+      <Item>711</Item>
+      <Item>196</Item>
+      <Item>138</Item>
+      <Item>70</Item>
+      <Item>211</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+test.tds.ie+Visitor-safe%2C+Trunkselect k.* , nvl(c.collection_point_description,'Kiosk not configured') collection_point_description
+from safe_kiosk_monitor k, ca_collection_point c
+where k.terminal_code = :terminal_code
+and k.terminal_code = c.collection_point_code (+)</uniqueName>
+</TableSettings>

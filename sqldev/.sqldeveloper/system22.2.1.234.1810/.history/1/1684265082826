@@ -1,0 +1,9 @@
+
+set serveroutput on format wrapped;
+declare
+    p_booking_enc_manage varchar2(512);
+begin
+    ca_visit_pak.hash_booking('E70A', 'manage', p_booking_enc_manage);
+    caup.println(p_booking_enc_manage);
+    DBMS_OUTPUT.put_line(p_booking_enc_manage);
+end;

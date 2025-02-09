@@ -1,0 +1,32 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">PRINTER_CODE</Item>
+      <Item class="java.lang.String">PRINTER_DESCRIPTION</Item>
+      <Item class="java.lang.String">PIXEL_DIMENSIONS</Item>
+      <Item class="java.lang.String">BLUETOOTH_PIXEL_DIMENSIONS</Item>
+      <Item class="java.lang.String">BLUETOOTH_SCALE_FACTOR</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>117</Item>
+      <Item>149</Item>
+      <Item>261</Item>
+      <Item>261</Item>
+      <Item>180</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+test.tds.ie+Visitor-dev%2C+Trunkselect 
+   *
+from 
+   ca_printer_dimension
+where 
+   lower (
+      printer_code || ' ' ||
+      printer_description ) like lower('%' || nvl(trim(:query), '%') || '%')
+   and safe_request_permissions_pak.check_permission_sql (:Uidtoken,  '()', 'printerDimensionCombo', 'GET') = 'Y'
+order by
+   lower(trim(printer_code))</uniqueName>
+</TableSettings>

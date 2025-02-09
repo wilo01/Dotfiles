@@ -16,4 +16,6 @@
 !~/.tmux.conf
 !~/.zshrc
 !~/helper.py
-.DS_Store
+!~/recatest/*
+!sqldev/.sqldeveloper/system23*
+!sqldev/.sqldeveloper/SqlHistory/*

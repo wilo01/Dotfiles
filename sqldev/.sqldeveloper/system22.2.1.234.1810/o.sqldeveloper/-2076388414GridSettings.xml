@@ -1,0 +1,28 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">VISIT_REASON_CODE</Item>
+      <Item class="java.lang.String">VISIT_REASON_DESCRIPTION</Item>
+      <Item class="java.lang.String">COMPANY_HOST_IND</Item>
+      <Item class="java.lang.String">SECONDARY_CHECK_IND</Item>
+      <Item class="java.lang.String">DEFAULT_VISITOR_LABEL</Item>
+      <Item class="java.lang.String">EVENT_IND</Item>
+      <Item class="java.lang.String">PERSON_TYPE_EXCLUDED</Item>
+      <Item class="java.lang.String">HIDE_IND</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>156</Item>
+      <Item>180</Item>
+      <Item>137</Item>
+      <Item>176</Item>
+      <Item>177</Item>
+      <Item>99</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23Learning+envselect * from ca_visit_reason</uniqueName>
+</TableSettings>

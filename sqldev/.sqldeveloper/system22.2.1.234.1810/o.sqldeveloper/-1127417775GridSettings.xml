@@ -1,0 +1,61 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">PERSON_CODE</Item>
+      <Item class="java.lang.String">PERSON_TYPE</Item>
+      <Item class="java.lang.String">TITLE</Item>
+      <Item class="java.lang.String">FORENAME</Item>
+      <Item class="java.lang.String">SURNAME</Item>
+      <Item class="java.lang.String">KNOWN_AS</Item>
+      <Item class="java.lang.String">BADGE_NUMBER</Item>
+      <Item class="java.lang.String">EMAIL_ADDRESS</Item>
+      <Item class="java.lang.String">BOOKING_REFERENCE</Item>
+      <Item class="java.lang.String">DEPARTMENT_DESCRIPTION</Item>
+      <Item class="java.lang.String">DISPLAY_NAME</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>135</Item>
+      <Item>117</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+test.tds.ie+Visitor-safe%2C+Trunkselect 
+   p.person_code, 
+   p.person_type, 
+   p.title,
+   p.forename, 
+   p.surname, 
+   p.known_as,
+   b.badge_number, 
+   p.email_address,
+   p.booking_reference,
+   d.department_description,
+   nvl(p.known_as, p.forename ||' '|| p.surname) display_name
+from ca_badge b, 
+   ca_person_interface p,
+   ca_department d
+where b.person_code = p.person_code
+   and p.department_code = d.department_code (+)
+   and b.person_type = p.person_type
+   and b.status_ind = 'V'
+   and b.badge_number = '7889'
+   and b.badge_number > 0
+   and (
+         safe_get_setting_or_null('badge_facility_code') is null
+      or
+         safe_get_setting_or_null('badge_facility_code') = :fac
+      ) 
+   and p.allowed_visitor_ind = 'Y'
+   and rownum = 1</uniqueName>
+</TableSettings>

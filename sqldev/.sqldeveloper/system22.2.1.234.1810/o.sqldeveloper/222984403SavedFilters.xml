@@ -1,0 +1,7 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Filters class="java.util.ArrayList" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-filters">
+   <Item class="java.lang.String">setting_name like '%use_knownas_in_visitor%'</Item>
+   <Item class="java.lang.String">setting_name like '%kiosk_host_search_min_two_%'</Item>
+   <Item class="java.lang.String">setting_name like '%use_known%'</Item>
+   <Item class="java.lang.String">setting_name like '%kiosk%'</Item>
+</Filters>

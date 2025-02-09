@@ -1,0 +1,7 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Filters class="java.util.ArrayList" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-filters">
+   <Item class="java.lang.String">REFERENCE_TYPE = 'DT'</Item>
+   <Item class="java.lang.String">REFERENCE_CODE = '012'</Item>
+   <Item class="java.lang.String">REFERENCE_CODE = 'DT'</Item>
+   <Item class="java.lang.String">reference_type = 'DT'</Item>
+</Filters>

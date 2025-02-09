@@ -1,0 +1,98 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">SETTING_NAME</Item>
+      <Item class="java.lang.String">SETTING_VALUE</Item>
+      <Item class="java.lang.String">SETTING_DESCRIPTION</Item>
+      <Item class="java.lang.String">VALIDATOR_TYPE_NAME</Item>
+      <Item class="java.lang.String">VALIDATOR_ID</Item>
+      <Item class="java.lang.String">ALLOWED_EMPTY</Item>
+      <Item class="java.lang.String">DEFAULT_VALUE</Item>
+      <Item class="java.lang.String">METADATA</Item>
+      <Item class="java.lang.String">RNUM</Item>
+      <Item class="java.lang.String">BEGIN</Item>
+      <Item class="java.lang.String">END</Item>
+      <Item class="java.lang.String">TOTAL</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>317</Item>
+      <Item>224</Item>
+      <Item>124</Item>
+      <Item>151</Item>
+      <Item>97</Item>
+      <Item>114</Item>
+      <Item>109</Item>
+      <Item>88</Item>
+      <Item>51</Item>
+      <Item>54</Item>
+      <Item>42</Item>
+      <Item>55</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23Trunkselect
+   *
+from
+(  select
+      iq.*,
+      rownum rnum,
+      :st begin,
+      :lim end,
+      count(*) over () total
+   from
+   (
+      select * from (
+         select
+            setting_name,
+            setting_value,
+            setting_description,
+            ssov.validator_name validator_type_name,
+            ssov.id validator_id,
+            allowed_empty,
+            default_value,
+            to_char(metadata) metadata
+         from
+            safe_system_options sso
+               inner join safe_system_options_validators ssov
+                          on ssov.id = sso.validator_id
+         where (setting_visible_ind is null or upper(setting_visible_ind) ='Y') and (product is null or REGEXP_LIKE(safe_get_setting_or_null('product_install_string'), product))
+         union
+         select setting_name, setting_value, setting_description, ssov.validator_name, validator_id, allowed_empty, default_value, metadata from ca_system_portability csp
+            inner join safe_system_options_validators ssov
+                          on ssov.id = csp.validator_id
+         where (setting_visible_ind is null or upper(setting_visible_ind) ='Y')
+      ) caSafeUnion
+      where
+        lower(
+            caSafeUnion.setting_name  || ' ' ||
+            caSafeUnion.setting_value || ' ' ||
+            caSafeUnion.validator_type_name || ' ' ||
+            caSafeUnion.setting_description
+         )
+        like lower('%' || :query || '%')
+      order by
+         case when lower(:dir) = 'asc' then
+         decode( :sort ,
+            'setting_name',                 lower(caSafeUnion.setting_name),
+            'setting_value',                lower(caSafeUnion.setting_value),
+            'setting_description',          lower(caSafeUnion.setting_description)
+         )end asc,
+         case when lower(:dir) = 'desc' then
+         decode( :sort ,
+            'setting_name',                 lower(caSafeUnion.setting_name),
+            'setting_value',                lower(caSafeUnion.setting_value),
+            'setting_description',          lower(caSafeUnion.setting_description)
+         )end desc
+   ) iq
+)
+where
+   rnum > begin AND rownum &lt;= end
+   and safe_request_permissions_pak.check_permission_sql (
+      :Uidtoken,
+      '(safesystemoptionsmanu)',
+      'systemSettingsGrid',
+      'GET'
+   ) = 'Y'</uniqueName>
+</TableSettings>

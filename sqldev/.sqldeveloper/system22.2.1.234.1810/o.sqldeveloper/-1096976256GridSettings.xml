@@ -1,0 +1,294 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">BOOKING_REFERENCE</Item>
+      <Item class="java.lang.String">PERSON_CODE</Item>
+      <Item class="java.lang.String">PERSON_TYPE</Item>
+      <Item class="java.lang.String">DUE_DATE_TIME</Item>
+      <Item class="java.lang.String">REASON_CODE</Item>
+      <Item class="java.lang.String">VISIT_TYPE_CODE</Item>
+      <Item class="java.lang.String">DEPARTURE_DATE_TIME</Item>
+      <Item class="java.lang.String">COLLECTION_POINT_CODE</Item>
+      <Item class="java.lang.String">WEB_IND</Item>
+      <Item class="java.lang.String">FORENAME</Item>
+      <Item class="java.lang.String">SURNAME</Item>
+      <Item class="java.lang.String">TITLE</Item>
+      <Item class="java.lang.String">COMPANY_CODE</Item>
+      <Item class="java.lang.String">SITE_CODE</Item>
+      <Item class="java.lang.String">ZONE_CODE</Item>
+      <Item class="java.lang.String">COMMENTS</Item>
+      <Item class="java.lang.String">ALLOCATED_IND</Item>
+      <Item class="java.lang.String">GROUP_CODE</Item>
+      <Item class="java.lang.String">ACCESS_LEVEL_CODE</Item>
+      <Item class="java.lang.String">HOME_PHONE_NUMBER</Item>
+      <Item class="java.lang.String">WORK_PHONE_NUMBER</Item>
+      <Item class="java.lang.String">MOBILE_PHONE_NUMBER</Item>
+      <Item class="java.lang.String">FAX_PHONE_NUMBER</Item>
+      <Item class="java.lang.String">EMAIL_ADDRESS</Item>
+      <Item class="java.lang.String">INVITE_EMAIL_DATE_TIME</Item>
+      <Item class="java.lang.String">CANCELLATION_EMAIL_DATE_TIME</Item>
+      <Item class="java.lang.String">INVITE_SMS_DATE_TIME</Item>
+      <Item class="java.lang.String">CANCELLATION_SMS_DATE_TIME</Item>
+      <Item class="java.lang.String">GROUP_ID</Item>
+      <Item class="java.lang.String">ACCEPT_CONDITIONS_IND</Item>
+      <Item class="java.lang.String">LEADER_IND</Item>
+      <Item class="java.lang.String">FOLLOWERS</Item>
+      <Item class="java.lang.String">CANCELLATION_DATE_TIME</Item>
+      <Item class="java.lang.String">BOOKER_PERSON_CODE</Item>
+      <Item class="java.lang.String">BOOKER_PERSON_TYPE</Item>
+      <Item class="java.lang.String">SIGNATURE</Item>
+      <Item class="java.lang.String">PUBLIC_REFERENCE_NUMBER</Item>
+      <Item class="java.lang.String">PRINTED_BADGE_NUMBER</Item>
+      <Item class="java.lang.String">VEHICLE_REG</Item>
+      <Item class="java.lang.String">CHECKED_IN_DATE_TIME</Item>
+      <Item class="java.lang.String">COLLECTION_POINT</Item>
+      <Item class="java.lang.String">GUARDIAN_MOBILE_NUMBER</Item>
+      <Item class="java.lang.String">LAST_ESCALATED_DATE_TIME</Item>
+      <Item class="java.lang.String">CHECKED_OUT_DATE_TIME</Item>
+      <Item class="java.lang.String">PICTURE</Item>
+      <Item class="java.lang.String">ID_CHECK_CODE</Item>
+      <Item class="java.lang.String">ACTIVATED_BADGE_NUMBER</Item>
+      <Item class="java.lang.String">ALLOW_SEND_SMS_IND</Item>
+      <Item class="java.lang.String">ALLOW_SEND_EMAIL_IND</Item>
+      <Item class="java.lang.String">PRINTED_DATE_TIME</Item>
+      <Item class="java.lang.String">SAVED_IND</Item>
+      <Item class="java.lang.String">COLLECTING_PERSON_CODE</Item>
+      <Item class="java.lang.String">COLLECTING_PERSON_TYPE</Item>
+      <Item class="java.lang.String">COLLECTING_BADGE_NUMBER</Item>
+      <Item class="java.lang.String">CHECKED_IN_SMS_DATE_TIME</Item>
+      <Item class="java.lang.String">CHECKED_IN_EMAIL_DATE_TIME</Item>
+      <Item class="java.lang.String">INVITE_DATE_TIME</Item>
+      <Item class="java.lang.String">APPROVED_DATE_TIME</Item>
+      <Item class="java.lang.String">REJECTED_DATE_TIME</Item>
+      <Item class="java.lang.String">REJECTED_EMAIL_DATE_TIME</Item>
+      <Item class="java.lang.String">REJECTED_SMS_DATE_TIME</Item>
+      <Item class="java.lang.String">REJECTED_COMMENT</Item>
+      <Item class="java.lang.String">PENDING_DATE_TIME</Item>
+      <Item class="java.lang.String">PENDING_EMAIL_DATE_TIME</Item>
+      <Item class="java.lang.String">PENDING_SMS_DATE_TIME</Item>
+      <Item class="java.lang.String">ARRIVED_COLLECTION_POINT</Item>
+      <Item class="java.lang.String">COLLECTED_DATE_TIME</Item>
+      <Item class="java.lang.String">BOOKING_SOURCE_IND</Item>
+      <Item class="java.lang.String">JOB_TITLE</Item>
+      <Item class="java.lang.String">LANGUAGE_CODE</Item>
+      <Item class="java.lang.String">COUNTRY_CODE</Item>
+      <Item class="java.lang.String">EVENT_ID</Item>
+      <Item class="java.lang.String">AUTO_CHECKED_OUT_IND</Item>
+      <Item class="java.lang.String">CANCELLER_PERSON_CODE</Item>
+      <Item class="java.lang.String">CANCELLER_PERSON_TYPE</Item>
+      <Item class="java.lang.String">WATCHLIST_CHECKED_DATE_TIME</Item>
+      <Item class="java.lang.String">BOOKER_USERNAME</Item>
+      <Item class="java.lang.String">ARUBA_USERNAME</Item>
+      <Item class="java.lang.String">ARUBA_PASSWORD</Item>
+      <Item class="java.lang.String">FEEDBACK</Item>
+      <Item class="java.lang.String">NDA_ACCEPTED_DATE_TIME</Item>
+      <Item class="java.lang.String">MEAL_CODE</Item>
+      <Item class="java.lang.String">NATIONALITY_CODE</Item>
+      <Item class="java.lang.String">CONF_TEXT_1</Item>
+      <Item class="java.lang.String">CONF_COMBO_1</Item>
+      <Item class="java.lang.String">CONF_TEXT_2</Item>
+      <Item class="java.lang.String">CONF_COMBO_2</Item>
+      <Item class="java.lang.String">CONF_TEXT_3</Item>
+      <Item class="java.lang.String">CONF_COMBO_3</Item>
+      <Item class="java.lang.String">CONF_TEXT_4</Item>
+      <Item class="java.lang.String">CONF_COMBO_4</Item>
+      <Item class="java.lang.String">CONF_TEXT_5</Item>
+      <Item class="java.lang.String">CONF_COMBO_5</Item>
+      <Item class="java.lang.String">ASSEMBLY_POINT_CODE</Item>
+      <Item class="java.lang.String">ID_CHECK_DATE_TIME</Item>
+      <Item class="java.lang.String">ID_PICTURE</Item>
+      <Item class="java.lang.String">CALENDAR_UID</Item>
+      <Item class="java.lang.String">VISITOR_TYPE_CODE</Item>
+      <Item class="java.lang.String">INTERNAL_VISIT_IND</Item>
+      <Item class="java.lang.String">PERSON_CODE_INTERNAL</Item>
+      <Item class="java.lang.String">WATCHLIST_IND</Item>
+      <Item class="java.lang.String">LENEL_BADGE_NUMBER</Item>
+      <Item class="java.lang.String">COMPANY_NAME</Item>
+      <Item class="java.lang.String">END_DATE_TIME</Item>
+      <Item class="java.lang.String">KIOSK_ARRIVE_DATE_TIME</Item>
+      <Item class="java.lang.String">CHECKED_IN_SOURCE</Item>
+      <Item class="java.lang.String">ACCESS_BADGE_NUMBER</Item>
+      <Item class="java.lang.String">RECEPTION_ACCEPT_IND</Item>
+      <Item class="java.lang.String">ARRIVE_DATE_TIME</Item>
+      <Item class="java.lang.String">NOTIFIED_DATE_TIME</Item>
+      <Item class="java.lang.String">ARRIVING_EMAIL_DATE_TIME</Item>
+      <Item class="java.lang.String">ARRIVING_SMS_DATE_TIME</Item>
+      <Item class="java.lang.String">POPUP_CODE</Item>
+      <Item class="java.lang.String">WATCHLIST_APPROVER</Item>
+      <Item class="java.lang.String">GUEST_COLLECTION_USERNAME</Item>
+      <Item class="java.lang.String">VISITOR_ACCEPTED_DATE_TIME</Item>
+      <Item class="java.lang.String">NDA_VERSION</Item>
+      <Item class="java.lang.String">VIRTUAL_BADGE_SENT_DATE_TIME</Item>
+      <Item class="java.lang.String">VIP_CODE</Item>
+      <Item class="java.lang.String">INFINITE_NDA_IND</Item>
+      <Item class="java.lang.String">AGENDA</Item>
+      <Item class="java.lang.String">MIDDLE_NAME</Item>
+      <Item class="java.lang.String">DATE_OF_BIRTH</Item>
+      <Item class="java.lang.String">WATCHLIST_ID</Item>
+      <Item class="java.lang.String">THRESHOLDWARN_EMAIL_DATE_TIME</Item>
+      <Item class="java.lang.String">REPEAT_ID</Item>
+      <Item class="java.lang.String">LAST_MODIFIED_DATE_TIME</Item>
+      <Item class="java.lang.String">NDA_VERSION2</Item>
+      <Item class="java.lang.String">VISITOR_REPEAT_ID</Item>
+      <Item class="java.lang.String">CONF_TEXT_6</Item>
+      <Item class="java.lang.String">UNNAMED_VISITORS</Item>
+      <Item class="java.lang.String">MOBILE_PASS_GOOGLE_TOKEN_URL</Item>
+      <Item class="java.lang.String">COMMUNICATION_LANGUAGE_CODE</Item>
+      <Item class="java.lang.String">MOBILE_PASS_APPLE_TOKEN_URL</Item>
+      <Item class="java.lang.String">CHECKIN_SOURCE</Item>
+      <Item class="java.lang.String">PICTURE_THUMB</Item>
+      <Item class="java.lang.String">CAR_PARKING_BOOKING_ID</Item>
+      <Item class="java.lang.String">CAR_PARKING_SOURCE</Item>
+      <Item class="java.lang.String">CAR_PARKING_LOCATION</Item>
+      <Item class="java.lang.String">SHARED_QR_CC_HOSTS</Item>
+      <Item class="java.lang.String">WALKIN_VISIT_IND</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>142</Item>
+      <Item>103</Item>
+      <Item>99</Item>
+      <Item>145</Item>
+      <Item>103</Item>
+      <Item>119</Item>
+      <Item>151</Item>
+      <Item>168</Item>
+      <Item>68</Item>
+      <Item>79</Item>
+      <Item>73</Item>
+      <Item>49</Item>
+      <Item>112</Item>
+      <Item>82</Item>
+      <Item>90</Item>
+      <Item>84</Item>
+      <Item>109</Item>
+      <Item>97</Item>
+      <Item>142</Item>
+      <Item>150</Item>
+      <Item>149</Item>
+      <Item>159</Item>
+      <Item>137</Item>
+      <Item>110</Item>
+      <Item>159</Item>
+      <Item>208</Item>
+      <Item>152</Item>
+      <Item>201</Item>
+      <Item>76</Item>
+      <Item>165</Item>
+      <Item>86</Item>
+      <Item>86</Item>
+      <Item>170</Item>
+      <Item>156</Item>
+      <Item>152</Item>
+      <Item>71</Item>
+      <Item>182</Item>
+      <Item>164</Item>
+      <Item>94</Item>
+      <Item>156</Item>
+      <Item>130</Item>
+      <Item>177</Item>
+      <Item>185</Item>
+      <Item>169</Item>
+      <Item>54</Item>
+      <Item>112</Item>
+      <Item>178</Item>
+      <Item>149</Item>
+      <Item>156</Item>
+      <Item>133</Item>
+      <Item>81</Item>
+      <Item>180</Item>
+      <Item>176</Item>
+      <Item>188</Item>
+      <Item>187</Item>
+      <Item>194</Item>
+      <Item>145</Item>
+      <Item>145</Item>
+      <Item>140</Item>
+      <Item>178</Item>
+      <Item>171</Item>
+      <Item>136</Item>
+      <Item>136</Item>
+      <Item>174</Item>
+      <Item>167</Item>
+      <Item>182</Item>
+      <Item>152</Item>
+      <Item>150</Item>
+      <Item>75</Item>
+      <Item>118</Item>
+      <Item>111</Item>
+      <Item>72</Item>
+      <Item>164</Item>
+      <Item>173</Item>
+      <Item>169</Item>
+      <Item>208</Item>
+      <Item>133</Item>
+      <Item>123</Item>
+      <Item>125</Item>
+      <Item>77</Item>
+      <Item>174</Item>
+      <Item>86</Item>
+      <Item>129</Item>
+      <Item>97</Item>
+      <Item>112</Item>
+      <Item>97</Item>
+      <Item>112</Item>
+      <Item>97</Item>
+      <Item>112</Item>
+      <Item>97</Item>
+      <Item>112</Item>
+      <Item>97</Item>
+      <Item>112</Item>
+      <Item>157</Item>
+      <Item>141</Item>
+      <Item>71</Item>
+      <Item>102</Item>
+      <Item>135</Item>
+      <Item>131</Item>
+      <Item>162</Item>
+      <Item>107</Item>
+      <Item>151</Item>
+      <Item>111</Item>
+      <Item>145</Item>
+      <Item>164</Item>
+      <Item>142</Item>
+      <Item>163</Item>
+      <Item>157</Item>
+      <Item>124</Item>
+      <Item>137</Item>
+      <Item>175</Item>
+      <Item>168</Item>
+      <Item>95</Item>
+      <Item>146</Item>
+      <Item>202</Item>
+      <Item>195</Item>
+      <Item>97</Item>
+      <Item>212</Item>
+      <Item>74</Item>
+      <Item>118</Item>
+      <Item>65</Item>
+      <Item>97</Item>
+      <Item>108</Item>
+      <Item>99</Item>
+      <Item>223</Item>
+      <Item>78</Item>
+      <Item>173</Item>
+      <Item>104</Item>
+      <Item>128</Item>
+      <Item>97</Item>
+      <Item>132</Item>
+      <Item>223</Item>
+      <Item>220</Item>
+      <Item>208</Item>
+      <Item>121</Item>
+      <Item>100</Item>
+      <Item>171</Item>
+      <Item>148</Item>
+      <Item>158</Item>
+      <Item>154</Item>
+      <Item>118</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item/>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DB+test.tds.ie+Visitor-dev%2C+Trunkselect * from ca_booked_person where forename = 'archived' order by due_date_time desc</uniqueName>
+</TableSettings>

@@ -1,0 +1,30 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSettings class="oracle.dbtools.raptor.controls.grid.RaptorGridPersistedSettings" xmlns="http://xmlns.oracle.com/jdeveloper/110000/Table-attributes">
+   <columnPositions class="java.util.ArrayList">
+      <Item class="java.lang.String">MENU_ITEM_ID</Item>
+      <Item class="java.lang.String">PROPERTY_1</Item>
+      <Item class="java.lang.String">PROPERTY_2</Item>
+      <Item class="java.lang.String">PROPERTY_3</Item>
+      <Item class="java.lang.String">PROPERTY_4</Item>
+      <Item class="java.lang.String">VALUE</Item>
+      <Item class="java.lang.String">DISPLAY_NAME</Item>
+   </columnPositions>
+   <columnWidths>
+      <Item>0</Item>
+      <Item>0</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>194</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+      <Item>75</Item>
+   </columnWidths>
+   <searchParams class="java.util.ArrayList"/>
+   <sortClauses>
+      <Item class="java.lang.String">5 asc</Item>
+      <Item/>
+      <Item class="java.lang.String">5 desc</Item>
+   </sortClauses>
+   <uniqueName>IdeConnections%23DockerSELECT * FROM "COREACCESS"."SAFE_MENU_ITEM_SETTINGS"</uniqueName>
+</TableSettings>
