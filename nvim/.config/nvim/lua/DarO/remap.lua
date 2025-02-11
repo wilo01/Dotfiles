@@ -140,7 +140,21 @@ vim.keymap.set("v", "<leader>cl", function()
       "});"
    }
    vim.api.nvim_put(snippet, 'l', true, true)
+   vim.lsp.buf.format()
+   vim.cmd("write")
 end, { desc = "Insert object console.warn snippet with selection (log, debugger)" })
+vim.keymap.set("v", "<leader>cn", function()
+   vim.cmd('normal! "+y')
+   local selected_text = vim.fn.getreg('+')
+   local snippet = {
+      "console.warn(",
+      string.format("\t'%s'", selected_text),
+      ");"
+   }
+   vim.api.nvim_put(snippet, 'l', true, true)
+   vim.lsp.buf.format()
+   vim.cmd("write")
+end, { desc = "Insert without object console.warn snippet with selection (log, debugger)" })
 
 vim.keymap.set("v", "<leader>ck", function()
    vim.cmd('normal! "+y')
