@@ -191,6 +191,10 @@ alias git_clear="echo git restore . ; echo Git clear changes ; git restore . "
 alias git_clean="echo git restore . ; echo Git clear changes ; git restore . "
 alias git_branch="echo git branch --show-current ; echo Git show current branch ; echo ; git branch --show-current ; echo ;"
 alias git_undo="echo git commit --amend ; echo Git undo commit ; git commit --amend"
+alias git_merge_abort="echo git merge --abort ; echo Git abort merge ; git merge --abort"
+alias git_abort_merge="echo git merge --abort ; echo Git abort merge ; git merge --abort"
+alias git_undo_merge="echo git merge --abort ; echo Git abort merge ; git merge --abort"
+alias git_merge_undo="echo git merge --abort ; echo Git abort merge ; git merge --abort"
 
 function git() {
     if [[ $1 == "bisect" && ($2 == "stop" || $2 == "exit") ]]; then
