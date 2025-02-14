@@ -16,7 +16,7 @@ export LANG=en_US.UTF-8
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
 ZSH_THEME="powerlevel10k/powerlevel10k"
 POWERLEVEL9K_MODE="nerdfont-complete"
-plugins=(git zsh-autosuggestions zsh-syntax-highlighting evalcache git-extras debian tmux screen history extract colorize web-search docker)
+plugins=(git zsh-autosuggestions zsh-syntax-highlighting evalcache git-extras debian screen history extract colorize web-search)
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -221,3 +221,4 @@ export PATH="/home/dariusz/bin/Sencha/Cmd:$PATH"
 # Load Angular CLI autocompletion.
 source <(ng completion script)
 export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
+export PATH="/opt/homebrew/bin:$PATH"
