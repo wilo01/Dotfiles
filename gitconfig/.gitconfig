@@ -1,17 +1,16 @@
 [user]
-	name = Dariusz Wilk
-	email = dariuszw@timedatasecurity.com
+	name = wilo01
+	email = wilk9496@gmail.com
 [core]
 	editor = nvim
-	hooksPath = /home/dariuszw/.git-template/hooks
-	pager = delta
+	hookspath = /Users/daro/.git-template/hooks/
+   pager = delta
 [safe]
-	directory = /home/dariuszw/.local/share/nvim/site/pack/packer/start/packer.nvim
-	directory = ~/Dev/branch-opener/branches/safe
-[maintenance]
-	repo = /home/dariuszw/Dev/branch-opener/branches/safe
+	directory = /Users/daro/Dotfiles.git
+	directory = /Users/daro/Dotfiles.git/Linux
+	directory = /Users/daro/Dotfiles.git/MacOS
 [init]
-   templateDir = /home/dariusz/.git-template/
+	templateDir = /Users/daro/.git-template
 [git-hooks]
    append-branch-name = true
    commit-on-master = false
