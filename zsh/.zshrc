@@ -222,3 +222,4 @@ export PATH="/home/dariusz/bin/Sencha/Cmd:$PATH"
 source <(ng completion script)
 export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
 export PATH="/opt/homebrew/bin:$PATH"
+export PATH="/opt/homebrew/bin:$PATH"
