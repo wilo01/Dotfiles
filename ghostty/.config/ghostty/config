@@ -2,3 +2,4 @@ theme = "tokyonight_night"
 command=/opt/homebrew/bin/tmux new-session -A -s MacOS
 confirm-close-surface = false
 font-family = "MesloLGS NF"
+background-opacity = 0.8
