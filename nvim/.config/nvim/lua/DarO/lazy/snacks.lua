@@ -19,7 +19,7 @@ return {
                end,
                indent = 3,
             },
-            { icon = " ", title = "Recent Files", section = "recent_files", indent = 3, padding = 1, pane = 2 },
+            { icon = " ", title = "Recent Files", cwd = true, section = "recent_files", indent = 3, padding = 1, pane = 2 },
             {
                icon = " ",
                title = "Git Status",
