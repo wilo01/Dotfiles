@@ -34,6 +34,22 @@ return {
                pane = 2
             },
          },
+         styles = {
+            snacks_image = {
+               relative = "editor",
+               col = -1,
+            },
+         },
+         image = {
+            enabled = true,
+            force = true,
+            doc = {
+               inline = true,
+               float = true,
+               max_width = 60,
+               max_height = 30,
+            },
+         },
       },
       notifier = {
          enabled = true,
@@ -89,6 +105,13 @@ return {
    end,
    init = function()
       local Snacks = require("snacks")
+      vim.api.nvim_create_autocmd("CursorHold", {
+         -- pattern = "*.md",
+         callback = function()
+            Snacks.image.hover();
+         end,
+      })
+
       vim.api.nvim_create_autocmd("User", {
          pattern = "VeryLazy",
          callback = function()
