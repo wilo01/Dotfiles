@@ -230,3 +230,4 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 export PATH="$HOME/.luaver/bin:$PATH"
 source "$HOME/.luaver/luaver"
+setopt ignore_eof
