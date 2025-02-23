@@ -106,7 +106,7 @@ return {
    init = function()
       local Snacks = require("snacks")
       vim.api.nvim_create_autocmd("CursorHold", {
-         -- pattern = "*.md",
+         pattern = "*.md",
          callback = function()
             Snacks.image.hover();
          end,
