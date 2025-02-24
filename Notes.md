@@ -1,4 +1,6 @@
 # NOTES: TODOs
+- [ ] Improve image preview and enable it for every file
+- [ ] LSP needs to be rewritten -> find proper easier to maintain lsp with formatter
 - [ ] DB connection with DB query from neovim
 - [ ] Odd colors when on diff mode
 - [ ] Fix search with upper-case example ACCESS_INTEGRATIONS_TEMP_BADGE
