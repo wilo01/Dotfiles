@@ -1,0 +1,1 @@
+../../.Dotfiles/Sway/.config/sway/idle_config.sh

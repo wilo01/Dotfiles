@@ -32,7 +32,7 @@ if [ -n "$hooks_local_path" ] && [ -n "$hooks_local_filename" ]; then
    notes_file_path=${hooks_local_path}/${hooks_local_filename}.md
    stash_file_path=${hooks_local_path}/Stash_${hooks_local_filename}.md
 else
-   notes_file_path=$HOME/Notes.md
+   notes_file_path=$HOME/Commit_notes.md
    stash_file_path=$HOME/Stash_list.md
 fi
 echo "Commit saved here:      $notes_file_path"
