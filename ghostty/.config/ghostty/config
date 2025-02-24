@@ -2,3 +2,4 @@ theme = "tokyonight_night"
 command = tmux
 confirm-close-surface = false
 font-family = "MesloLGS NF"
+font-feature = -calt
