@@ -163,6 +163,11 @@ function @ {
     tmux switch-client -t "$window_name"
 }
 
+function json() {
+    local args=("$@")
+    "${args[@]}" > response.json && nvim +'%!jq .' response.json
+}
+
 # cd & ls movements
 # alias LS="echo la -lha -F --show-control-chars --time-style=locale --color=auto ; la -lha -F --show-control-chars --time-style=locale --color=auto"
 # alias ls="echo la -lha -F --show-control-chars --time-style=locale --color=auto ; la -lha -F --show-control-chars --time-style=locale --color=auto"
