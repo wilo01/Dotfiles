@@ -8,11 +8,12 @@ return {
       provider = "claude",
       claude = {
          endpoint = "https://api.anthropic.com",
-         model = "claude-3-5-sonnet-20241022",
+         model = "claude-3-haiku-20240307", -- Cheapest Claude 3 model
+         -- model = "claude-3-5-sonnet-20241022", -- Best Claude model
          timeout = 30000,
          temperature = 0,
          max_tokens = 4096,
-         -- disable_tools = true, -- optional: disables built-in tools Claude sometimes overuses
+         disable_tools = true, -- optional: disables built-in tools Claude sometimes overuses
       },
       behaviour = {
          enable_cursor_planning_mode = true,
