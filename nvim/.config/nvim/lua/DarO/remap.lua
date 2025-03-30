@@ -31,6 +31,28 @@ vim.keymap.set("x", "<leader>=", "g<C-a>", { desc = "Increment numbers across se
 vim.keymap.set("n", "<leader>-", '<C-x>', { desc = "Decrement number" })
 vim.keymap.set("x", "<leader>-", 'g<C-x>', { desc = "Decrement numbers across selection" })
 vim.keymap.set({ "n", "v" }, "yc", "yy<cmd>normal gcc<CR>p", { desc = "Duplicate a line and comment out the first line" })
+vim.keymap.set("n", "<leader>oc", function()
+   local filenameAndLine = vim.fn.expand("%:t") .. ":" .. vim.fn.line(".")
+   local script = [[
+    tell application "Google Chrome"
+      activate
+      tell application "System Events"
+        keystroke "i" using {command down, option down}
+        delay 0.5
+        keystroke "p" using command down
+        delay 1
+        keystroke "<<filenameAndLine>>"
+      end tell
+    end tell
+  ]]
+   script = script:gsub("<<filenameAndLine>>", filenameAndLine)
+   vim.print("Running script: " .. script)
+   vim.system({
+      "osascript",
+      "-e",
+      script,
+   })
+end, { desc = "Open chrome dev tools and run \"open file\" with current file and line" })
 vim.keymap.set('n', '<leader>,', function()
    local word = vim.fn.expand('<cword>')
    if word == 'true' then
