@@ -14,16 +14,28 @@ return {
          max_tokens = 4096,
          -- disable_tools = true, -- optional: disables built-in tools Claude sometimes overuses
       },
+      behaviour = {
+         enable_cursor_planning_mode = true,
+      },
+      file_selector = {
+         provider = "telescope", -- or 'fzf' or 'mini.pick'
+         telescope = {
+            show_preview = true,
+         },
+      },
+
    },
    dependencies = {
       "nvim-treesitter/nvim-treesitter",
       "stevearc/dressing.nvim",
       "nvim-lua/plenary.nvim",
       "MunifTanjim/nui.nvim",
-      "echasnovski/mini.pick",       -- or "nvim-telescope/telescope.nvim" for file selection
-      "nvim-tree/nvim-web-devicons", -- or "echasnovski/mini.icons"
-      "hrsh7th/nvim-cmp",
-      -- "zbirenbaum/copilot.lua",      -- optional: Copilot integration
+      "echasnovski/mini.pick",         -- for file_selector provider mini.pick
+      "nvim-telescope/telescope.nvim", -- for file_selector provider telescope
+      "hrsh7th/nvim-cmp",              -- autocompletion for avante commands and mentions
+      "ibhagwan/fzf-lua",              -- for file_selector provider fzf
+      "nvim-tree/nvim-web-devicons",   -- or echasnovski/mini.icons
+      "zbirenbaum/copilot.lua",        -- for providers='copilot'
       {
          "HakonHarnes/img-clip.nvim",
          event = "VeryLazy",
@@ -34,6 +46,7 @@ return {
                drag_and_drop = {
                   insert_mode = true,
                },
+               use_absolute_path = true,
             },
          },
       },

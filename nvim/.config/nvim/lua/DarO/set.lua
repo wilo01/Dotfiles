@@ -1,6 +1,7 @@
 -- Line Numbers
 vim.opt.nu = true
 vim.opt.relativenumber = true
+vim.opt.laststatus = 3
 
 -- Tabs and Indentation
 vim.opt.tabstop = 3
