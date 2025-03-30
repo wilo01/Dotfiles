@@ -1,7 +1,9 @@
+-- ~/.config/nvim/lua/plugins/avante.lua
 return {
    "yetone/avante.nvim",
    event = "VeryLazy",
    version = false,
+   build = "make",
    opts = {
       provider = "claude",
       claude = {
@@ -10,20 +12,18 @@ return {
          timeout = 30000,
          temperature = 0,
          max_tokens = 4096,
+         -- disable_tools = true, -- optional: disables built-in tools Claude sometimes overuses
       },
    },
-   build = "make",
    dependencies = {
       "nvim-treesitter/nvim-treesitter",
       "stevearc/dressing.nvim",
       "nvim-lua/plenary.nvim",
       "MunifTanjim/nui.nvim",
-      "echasnovski/mini.pick",
-      "nvim-telescope/telescope.nvim",
+      "echasnovski/mini.pick",       -- or "nvim-telescope/telescope.nvim" for file selection
+      "nvim-tree/nvim-web-devicons", -- or "echasnovski/mini.icons"
       "hrsh7th/nvim-cmp",
-      "ibhagwan/fzf-lua",
-      "nvim-tree/nvim-web-devicons",
-      "zbirenbaum/copilot.lua",
+      -- "zbirenbaum/copilot.lua",      -- optional: Copilot integration
       {
          "HakonHarnes/img-clip.nvim",
          event = "VeryLazy",
@@ -38,7 +38,7 @@ return {
          },
       },
       {
-         'MeanderingProgrammer/render-markdown.nvim',
+         "MeanderingProgrammer/render-markdown.nvim",
          opts = {
             file_types = { "markdown", "Avante" },
          },
