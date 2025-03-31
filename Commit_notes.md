@@ -4437,3 +4437,116 @@ Logs:
 
 ghostty/.config/ghostty/config
 - Commit branch HASH [950cb384b62edc113a6bab9b96e051974dc888d9](Linux)
+
+# 2025-02-24 15:10
+## Linux
+JIRA: #Linux
+
+Logs:
+- Lazy plugins update
+
+nvim/.config/nvim/lazy-lock.json
+- Commit branch HASH [c2e03189501296a66166899f1b0ada097d26192f](Linux)
+
+# 2025-03-03 15:25
+## master-bakcup
+JIRA: #master
+
+Logs:
+- Added diff
+- Update of notes
+
+MRs/vis-3432-webapp-upload-a-profile-photo-does-not-support-heic-image-format.md
+Notes.md
+- Commit branch HASH [8582ec180ef0ae1948196955e7b66f01ad76f695](master)
+
+# 2025-03-03 15:41
+## master-bakcup
+JIRA: #master
+
+Logs:
+- Added new notes
+
+MRs/vis-3432-webapp-upload-a-profile-photo-does-not-support-heic-image-format.md
+Notes.md
+- Commit branch HASH [d6dbaf369747bc578065c411471352f873dc87f0](master)
+
+# 2025-03-14 08:44
+## Linux
+JIRA: #Linux
+
+Logs:
+- Added new rc file for taskwarrior
+
+taskwarrior/.taskrc
+- Commit branch HASH [4bcd167e5a017d24caee38d4b63f8a6188151f7e](Linux)
+
+# 2025-03-22 22:49
+## master-bakcup
+JIRA: #master
+
+Logs:
+- Adding notes
+- Added .png-s
+
+Notes.md
+- Commit branch HASH [c9d67d063da17bfa2bf4dfe267ae0b2f3f73d255](master)
+
+# 2025-03-22 22:49
+## master-bakcup
+JIRA: #master
+
+Logs:
+- Adding pictures
+
+Pictures/cio-685-northumbria-uat-matrialised-views-not-refreshing-1.png
+Pictures/cio-685-northumbria-uat-matrialised-views-not-refreshing-2.png
+Pictures/cio-685-northumbria-uat-matrialised-views-not-refreshing-3.png
+Pictures/cio-685-northumbria-uat-matrialised-views-not-refreshing-4.png
+Pictures/cio-685-northumbria-uat-matrialised-views-not-refreshing-5.png
+Pictures/cio-685-northumbria-uat-matrialised-views-not-refreshing-6.png
+oracle_mview_debugging.md
+- Commit branch HASH [d5372ed0e177a16d34f1c3b628c34b1e0501b006](master)
+
+# 2025-03-31 08:23
+## Linux
+JIRA: #Linux
+
+Logs:
+- Updated sway config after updating to fedora 41
+- Added screen default position
+
+Sway/.config/mimeapps.list
+Sway/.config/sway/config
+- Commit branch HASH [11dcbcd184df34fe45764832db3fd6c70b5dc4c0](Linux)
+
+# 2025-03-31 21:01
+## master-bakcup
+JIRA: #master
+
+Logs:
+- Update notes
+
+Notes.md
+- Commit branch HASH [784975aea86f33743f7f1672ed53d8926261726b](master)
+
+# 2025-03-31 21:23
+## master-bakcup
+JIRA: #master
+
+Logs:
+- Commit test
+
+Notes.md
+- Commit branch HASH [4dea1a55ed81655b8aac9e574ad4cd755285856f](master)
+
+# 2025-03-31 22:45
+## Linux
+JIRA: #Linux
+
+Logs:
+- Added taskwarrior config
+
+taskwarrior/.bugwarriorrc
+taskwarrior/.taskrc
+- Commit branch HASH [7895f1e877789cc543aab96fc762b8b08f84d0c2](Linux)
