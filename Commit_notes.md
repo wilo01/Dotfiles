@@ -4564,3 +4564,29 @@ zsh/.oh-my-zsh/cache/.zsh-update
 zsh/.oh-my-zsh/cache/completions/_docker
 zsh/.zshrc
 - Commit branch HASH [e13d5b75372ccca878ef1a5363274f8ff8fabc5f](Linux)
+
+# 2025-03-31 23:02
+## Linux
+JIRA: #Linux
+
+Logs:
+- init.lua -> Added version to start-up
+- remap.lua -> Added new remap
+- set.lua -> Added new line regarding new plugin avante
+
+Commit_notes.md
+nvim/.config/nvim/init.lua
+nvim/.config/nvim/lazy-lock.json
+nvim/.config/nvim/lua/DarO/remap.lua
+nvim/.config/nvim/lua/DarO/set.lua
+- Commit branch HASH [69e64ca054d9aed15f8fe9ddf3290d0339feadae](Linux)
+
+# 2025-04-01 12:34
+## Linux
+JIRA: #Linux
+
+Logs:
+- Adding avante-nvim
+
+nvim/.config/nvim/lua/DarO/lazy/avante-nvim.lua
+- Commit branch HASH [fa1236ae1816be8c77adf32f605d6f8976a50518](Linux)
