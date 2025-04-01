@@ -40,3 +40,7 @@ data.location=/home/dariuszw/.task
 #include no-color.theme
 
 news.version=2.6.0
+report.standup.description=Tasks for standup
+report.standup.filter=(project:work)
+report.standup.sort=end-
+report.standup.columns=id,start,end,description

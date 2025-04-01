@@ -9,8 +9,8 @@ jira.username = dariuszw@timedatasecurity.com
 jira.password = @oracle:eval:pass jira/dariuszwilk@acresecurity.com
 jira.query = assignee = currentUser() AND resolution is null
 jira.label_template = {{label}}
-jira.description_template = {{jiraid}} {{jirasummary}} - [{{jiraissuetype}}] {{jirastatus}} ({{jiraestimate}} h)
-jira.add_tags =  {{jiraissuetype}}, work
+jira.description_template = {{jiraid}} {{jirasummary}}
+jira.add_tags =  {{jirastatus}}, {{jiraissuetype}}, work
 jira.verify_ssl = True
 jira.import_labels_as_tags = True
 jira.import_sprints_as_tags = True
