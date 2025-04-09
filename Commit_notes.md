@@ -4590,3 +4590,47 @@ Logs:
 
 nvim/.config/nvim/lua/DarO/lazy/avante-nvim.lua
 - Commit branch HASH [fa1236ae1816be8c77adf32f605d6f8976a50518](Linux)
+
+# 2025-04-01 13:00
+## Linux
+JIRA: #Linux
+
+Logs:
+- Updating configuration for taskwarrior
+
+Commit_notes.md
+taskwarrior/.bugwarriorrc
+taskwarrior/.taskrc
+- Commit branch HASH [ef72407b47787f31fdc8da830580e80713db79d9](Linux)
+
+# 2025-04-09 14:35
+## master-bakcup
+JIRA: #master
+
+Logs:
+- Updating notes
+- Added various sql scripts
+- Added exported csv text
+
+DB Scripts/export.csv
+DB Scripts/export2.tsv
+DB Scripts/export3.csv
+DB Scripts/export4.csv
+DB Scripts/label_layouts1.sql
+DB Scripts/label_layouts2.sql
+DB Scripts/label_layouts3.sql
+DB Scripts/out.ps
+Notes.md
+Stash_Notes.md
+- Commit branch HASH [289f297243801013304502957987bb4d1f420fbc](master)
+
+# 2025-04-09 22:51
+## Linux
+JIRA: #Linux
+
+Logs:
+- Updating the zshrc
+- Changed paths to universal $HOME dir
+
+zsh/.zshrc
+- Commit branch HASH [f7b6b95f4fc67adc0dd94768695579c61e288da6](Linux)
