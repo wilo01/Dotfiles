@@ -11,4 +11,4 @@ then
 fi
 export PATH
 
-source "$HOME/.go/env"
+[[ -f "$HOME/.go/env" ]] && source "$HOME/.go/env"

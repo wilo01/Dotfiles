@@ -230,8 +230,7 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-11.0.*
-# eval "$(/bin/brew shellenv)"
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+[[ -f "$HOME/.linuxbrew/bin/brew" ]] && eval "$("$HOME/.linuxbrew/bin/brew" shellenv)"
 export LD_LIBRARY_PATH=/opt/oracle/instantclient_21_14:$LD_LIBRARY_PATH
 export PATH=$LD_LIBRARY_PATH:$PATH
 
@@ -244,18 +243,13 @@ esac
 # pnpm end
 export GOTOOLCHAIN=auto
 export PATH=$PATH:$(go env GOPATH)/bin
-eval "$(direnv hook zsh)"
+command -v direnv >/dev/null 2>&1 && eval "$(direnv hook zsh)"
 
 export PATH=$PATH:$HOME/.spicetify
 setopt ignore_eof
 
 export PYENV_ROOT="$HOME/.pyenv"
 [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
-
-# Restart your shell for the changes to take effect.
-
-# Load pyenv-virtualenv automatically by adding
-# the following to ~/.bashrc:
-
-eval "$(pyenv virtualenv-init -)"
+command -v pyenv >/dev/null 2>&1 && eval "$(pyenv init --path)"
+command -v pyenv >/dev/null 2>&1 && eval "$(pyenv init -)"
+command -v pyenv >/dev/null 2>&1 && eval "$(pyenv virtualenv-init -)"
