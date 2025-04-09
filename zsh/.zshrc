@@ -220,24 +220,23 @@ alias clear_cashe="echo free -h ; echo ; echo Before clean:; free -h ; echo ; ec
 export MANPAGER='nvim +Man!'
 # export MANWIDTH=999
 export PATH="/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH"
-export PATH="/home/dariuszw/bin/Sencha/Cmd:$PATH"
+export PATH="$HOME/bin/Sencha/Cmd:$PATH"
 export PATH="$HOME/.cargo/bin:$PATH"
 export PATH=$PATH:/usr/local/go/bin
-export PATH="$PATH:/home/dariuszw/bin/.local/scripts"
+export PATH="$PATH:$HOME/bin/.local/scripts"
 export PATH="$HOME/.local/bin:$PATH"
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-# export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-11.0.24.0.8-2.fc40.x86_64
-export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-11.0.25.*
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-11.0.*
 # eval "$(/bin/brew shellenv)"
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 export LD_LIBRARY_PATH=/opt/oracle/instantclient_21_14:$LD_LIBRARY_PATH
 export PATH=$LD_LIBRARY_PATH:$PATH
 
 # pnpm
-export PNPM_HOME="/home/dariuszw/.local/share/pnpm"
+export PNPM_HOME="$HOME/.local/share/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
@@ -247,7 +246,7 @@ export GOTOOLCHAIN=auto
 export PATH=$PATH:$(go env GOPATH)/bin
 eval "$(direnv hook zsh)"
 
-export PATH=$PATH:/home/dariuszw/.spicetify
+export PATH=$PATH:$HOME/.spicetify
 setopt ignore_eof
 
 export PYENV_ROOT="$HOME/.pyenv"
