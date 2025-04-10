@@ -11,8 +11,6 @@ return {
       "L3MON4D3/LuaSnip",
       "saadparwaiz1/cmp_luasnip",
       "j-hui/fidget.nvim",
-      "jose-elias-alvarez/null-ls.nvim",
-      "jay-babu/mason-null-ls.nvim",
       {
          "folke/lazydev.nvim",
          ft = "lua",
@@ -26,20 +24,11 @@ return {
    config = function()
       local cmp = require('cmp')
       local cmp_lsp = require("cmp_nvim_lsp")
-      local null_ls = require("null-ls")
 
-      local capabilities = vim.tbl_deep_extend(
-         "force",
-         {},
-         vim.lsp.protocol.make_client_capabilities(),
-         cmp_lsp.default_capabilities()
-      )
+      local capabilities = vim.lsp.protocol.make_client_capabilities()
+      capabilities = cmp_lsp.default_capabilities(capabilities)
 
       require("mason").setup()
-      require("mason-null-ls").setup({
-         automatic_installation = true,
-         ensure_installed = { "gofmt", "prettierd" },
-      })
       require("mason-lspconfig").setup({
          automatic_installation = true,
          ensure_installed = {
@@ -140,30 +129,6 @@ return {
             --    })
             -- end,
          }
-      })
-
-      null_ls.setup({
-         sources = {
-            null_ls.builtins.formatting.gofmt,
-            null_ls.builtins.formatting.prettierd.with({
-               -- filetypes = { "json", "yaml", "typescript", "html", "vue", "markdown" },
-               filetypes = { "json", "yaml", "typescript", "html", "markdown" },
-               extra_args = {
-                  "--ignore-path", "/dev/null",
-                  "--ignore-patterns", "%[(.-)%]"
-               },
-            }),
-         },
-         on_attach = function(client, bufnr)
-            if client.supports_method("textDocument/formatting") then
-               vim.api.nvim_create_autocmd("BufWritePre", {
-                  buffer = bufnr,
-                  callback = function()
-                     vim.lsp.buf.format({ async = true })
-                  end,
-               })
-            end
-         end,
       })
 
       local cmp_select = { behavior = cmp.SelectBehavior.Select }
