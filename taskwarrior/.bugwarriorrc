@@ -1,0 +1,21 @@
+# https://bugwarrior.readthedocs.io/en/latest/common_configuration.html
+[general]
+targets = my_issue_tracker
+
+[my_issue_tracker]
+service = jira
+jira.base_uri = https://acre-int.atlassian.net
+jira.username = dariuszw@timedatasecurity.com
+jira.password = @oracle:eval:pass jira/dariuszwilk@acresecurity.com
+jira.query = assignee = currentUser() AND resolution is null
+jira.label_template = {{label}}
+jira.description_template = {{jiraid}} {{jirasummary}}
+jira.add_tags =  {{jirastatus}}, {{jiraissuetype}}, work
+jira.verify_ssl = True
+jira.import_labels_as_tags = True
+jira.import_sprints_as_tags = True
+jira.tag_subtasks = True
+jira.use_cookies = False
+jira.subtask_tag = subtask
+jira.annotation_links = true
+jira.version = 5
