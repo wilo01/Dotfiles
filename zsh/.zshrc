@@ -169,13 +169,16 @@ alias code_ksc="echo code ~/Dev/branch-opener/branches/safe/source/ui-kiosk/app/
 alias kiosk_settings="echo open kiosk settings at: ; code_ks ; sleep 1 ; code_ka ; sleep 1 ; code_ksc ;"
 alias liqui_valid="echo cd ~/Dev/branch-opener/branches/safe/source/server/database/ ; echo ./liquibase --defaultsFile=validate.liquibase.properties validate ; cd ~/Dev/branch-opener/branches/safe/source/server/database/ ; ./liquibase --defaultsFile=validate.liquibase.properties validate"
 alias sqldev="echo ~/SQLDeveloper/opt/sqldeveloper/sqldeveloper.sh ; ~/SQLDeveloper/opt/sqldeveloper/sqldeveloper.sh"
-alias br="echo npm start at: ; echo ~/Dev/branch-opener/app/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; xdg-open http://localhost:3333/static/ ; npm start"
-alias br2="echo npm start at: ; echo ~/Dev/branch-opener2/app/ ; cd ~/Dev/branch-opener2/app/ ; sleep 1 ; xdg-open http://localhost:3333/static/ ; npm start"
+alias br='echo npm start at: ; echo ~/Dev/branch-opener/app/ ; if [[ -n "$(find ~/Dev/branch-opener/app/apex/kiosk/bdb/ -maxdepth 0 -type f -o -type d -printf '%s')" ]]; then echo "Removing content from ~/Dev/branch-opener/app/apex/kiosk/bdb/" ; rm -rf ~/Dev/branch-opener/app/apex/kiosk/bdb/* ; else echo "No content found in ~/Dev/branch-opener/app/apex/kiosk/bdb/, skipping removal." ; fi ; ls ~/Dev/branch-opener/app/apex/kiosk/bdb/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; xdg-open http://localhost:3333/static/ ; npm start'
 alias cy="echo Cypress open at: ; cdy ; sleep 1 ; echo ./node_modules/cypress/bin/cypress open ; ./node_modules/cypress/bin/cypress open"
 alias cy_all="echo Cypress run all tests at: ; cdy ; sleep 1 ; echo npx cypress run --headless --spec cypress/integration/tdsvisitor/rt/*.js ; npx cypress run --headless --spec cypress/integration/tdsvisitor/rt/*.js"
 alias docker_start_trunk="echo cd ~/Dev/branch-opener/branches/safe ; echo sudo docker start -ai trunk ; cd ~/Dev/branch-opener/branches/safe && sudo docker start -ai trunk"
 alias liquibaseLocalDockerUpdate="echo cd ~/Dev/branch-opener/branches/safe ; echo npm run liquibaseLocalDockerUpdate ; cd ~/Dev/branch-opener/branches/safe && npm run liquibaseLocalDockerUpdate"
 alias npmliquibaseLocalDockerUpdate="echo cd ~/Dev/branch-opener/branches/safe ; echo npm run liquibaseLocalDockerUpdate ; cd ~/Dev/branch-opener/branches/safe && npm run liquibaseLocalDockerUpdate"
+alias apex_remove="echo sudo rm -rf ~/Dev/branch-opener/app/apex/backoffice/bdb/* ; sudo rm -rf ~/Dev/branch-opener/app/apex/backoffice/bdb/*"
+alias remove_apex="echo sudo rm -rf ~/Dev/branch-opener/app/apex/backoffice/bdb/* ; sudo rm -rf ~/Dev/branch-opener/app/apex/backoffice/bdb/*"
+alias apex_zip="echo zip -r rt.zip ~/Dev/branch-opener/branches/safe/source/server/rt/* ; zip -r rt.zip ~/Dev/branch-opener/branches/safe/source/server/rt/* && "
+alias zip_apex="echo zip -r rt.zip ~/Dev/branch-opener/branches/safe/source/server/rt/* ; zip -r rt.zip ~/Dev/branch-opener/branches/safe/source/server/rt/* && "
 # alias csp_hash="echo sha256-$(echo -n "$(xclip -o)" | openssl sha256 -binary | openssl base64)"
 # Git
 alias git_lens="git log --graph --oneline --decorate ; echo git log --graph --oneline --decorate"
@@ -235,7 +238,7 @@ export LD_LIBRARY_PATH=/opt/oracle/instantclient_21_14:$LD_LIBRARY_PATH
 export PATH=$LD_LIBRARY_PATH:$PATH
 
 # pnpm
-export PNPM_HOME="$HOME/.local/share/pnpm"
+export PNPM_HOME="/home/dariuszw/.local/share/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;

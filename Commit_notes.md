@@ -4634,3 +4634,42 @@ Logs:
 
 zsh/.zshrc
 - Commit branch HASH [f7b6b95f4fc67adc0dd94768695579c61e288da6](Linux)
+
+# 2025-04-09 22:51
+## Linux
+JIRA: #Linux
+
+Logs:
+- Updating taskrc
+- Removing Avante temporary
+
+Commit_notes.md
+nvim/.config/nvim/lazy-lock.json
+nvim/.config/nvim/lua/DarO/lazy/avante-nvim.lua
+taskwarrior/.taskrc
+- Commit branch HASH [ce0acf0eeebf502bfeb19c1fc5b93968a2c837cf](Linux)
+
+# 2025-04-22 12:51
+## master-bakcup
+JIRA: #master
+
+Logs:
+- Added new notes
+
+Notes.md
+Stash_Notes.md
+- Commit branch HASH [92fb54dba8d7f29593991dfe0ee948a2f170e879](master)
+
+# 2025-04-23 12:29
+## master-bakcup
+JIRA: #master
+
+Logs:
+- Updated notes
+
+DB Scripts/Docker3-1.sql
+DB Scripts/Docker~41.sql
+DB Scripts/nls_territory.sql
+Notes.md
+Stash_Notes.md
+- Commit branch HASH [dbab34f3f236fd325d8314cc98183348f4ecf3e0](master)

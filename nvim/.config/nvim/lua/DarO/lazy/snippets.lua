@@ -84,7 +84,7 @@ return {
             })
          },
          javascript = {
-            ls.parser.parse_snippet("clwo", "console.warn({\n\t'${1}': ${1}\n});${2}"),
+            ls.parser.parse_snippet("clwo", "console.warn('', {\n\t'${1}': ${1}\n});${2}"),
             ls.parser.parse_snippet("clw", "console.warn('${1}', ${1})"),
             ls.parser.parse_snippet("clg", "console.log('${1}');${2}"),
             ls.parser.parse_snippet("clo", "console.log('${1}Obj', ${2}Obj);${3}"),
