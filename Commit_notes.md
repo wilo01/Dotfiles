@@ -4673,3 +4673,22 @@ DB Scripts/nls_territory.sql
 Notes.md
 Stash_Notes.md
 - Commit branch HASH [dbab34f3f236fd325d8314cc98183348f4ecf3e0](master)
+
+# 2025-04-24 14:02
+## Linux
+JIRA: #Linux
+
+Logs:
+- Updated remap and snippets for console.warn()
+- Updated zshrc (new branch-opener command, pnpm path)
+
+Commit_notes.md
+Stash_list.md
+nvim/.config/nvim/lua/DarO/lazy/snippets.lua
+nvim/.config/nvim/lua/DarO/remap.lua
+zsh/.oh-my-zsh/cache/.zsh-update
+zsh/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+zsh/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+zsh/.oh-my-zsh/custom/themes/powerlevel10k
+zsh/.zshrc
+- Commit branch HASH [01f0f7047752f74ba64ab950e5b01594521ea2df](Linux)
