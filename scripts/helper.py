@@ -72,7 +72,7 @@ parser.add_argument("-ap", "--APEX",
 args = parser.parse_args()
 
 if args.rfid_badge is not None:
-    badge = f'@{args.rfid_badge}#'
+    badge = f'{args.rfid_badge}'
     print(f'RFID badge: {badge}')
     type_string_with_delay(badge)
 elif args.qr_badge is not None:
