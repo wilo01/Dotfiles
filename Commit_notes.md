@@ -4719,3 +4719,126 @@ DB Scripts/badge_number-access_badge_number.sql
 Notes.md
 Stash_Notes.md
 - Commit branch HASH [acab756574a928e8ababcec71d1b303a8ae5f0bd](master)
+
+# 2025-05-04 10:19
+## Linux
+JIRA: #Linux
+
+Logs:
+- Added IMU config
+- Updated helper.py script
+
+Commit_notes.md
+IMU/DEBUG_OMV1-013-FW-NOIMU/firmware.bin
+IMU/DEBUG_OMV1-013-FW-NOIMU/firmware.elf
+IMU/DEBUG_OMV1-013-FW-NOIMU/firmware.uf2
+Stash_list.md
+scripts/helper.py
+zsh/.oh-my-zsh/cache/.zsh-update
+- Commit branch HASH [375f166ea5a0daa6f7dbade93b593f6062a65f12](Linux)
+
+# 2025-05-12 12:20
+## master-bakcup
+JIRA: #master
+
+Logs:
+- Adding new scripts
+- Adding new Notes
+- Adding new Docs
+
+DB Scripts/13AV-23123.sql
+DB Scripts/DB Edgescan Pentest.sql
+DB Scripts/DB Scripts2/11.1AV.sql
+DB Scripts/DB Scripts2/12.2AV.sql
+DB Scripts/DB Scripts2/12.2AV~1.sql
+DB Scripts/DB Scripts2/12.2AV~2.sql
+DB Scripts/DB Scripts2/12.2AV~4.sql
+DB Scripts/DB Scripts2/12.2AV~5.sql
+DB Scripts/DB Scripts2/DB se1demo.sql
+DB Scripts/DB Scripts2/Docker.sql
+DB Scripts/DB Scripts2/Docker1.sql
+DB Scripts/DB Scripts2/Docker2.sql
+DB Scripts/DB Scripts2/Docker3.sql
+DB Scripts/DB Scripts2/Docker~1.sql
+DB Scripts/DB Scripts2/Docker~11-1.sql
+DB Scripts/DB Scripts2/Docker~2.sql
+DB Scripts/DB Scripts2/Docker~3.sql
+DB Scripts/DB Scripts2/Docker~31.sql
+DB Scripts/DB Scripts2/Docker~4.sql
+DB Scripts/DB Scripts2/Docker~51.sql
+DB Scripts/DB Scripts2/Trunk.sql
+DB Scripts/DB Scripts2/Trunk1.sql
+DB Scripts/DB Scripts2/Trunk2.sql
+DB Scripts/DB Scripts2/Trunk4.sql
+DB Scripts/DB Scripts2/Trunk5.sql
+DB Scripts/DB Scripts2/Trunk6-1.sql
+DB Scripts/DB Scripts2/Trunk~9.sql
+DB Scripts/Docker3432.sql
+DB Scripts/Trunk-3432.sql
+DB Scripts/badge_number-access_badge_number.sql
+Docs/AssistiveTouchRFID.pdf
+Docs/my_visitor_app_server_deployment.pdf
+Notes.md
+Stash_Notes.md
+- Commit branch HASH [8902d13e05e1a7cacd9d66b8d6d3ddc451264bed](master)
+
+# 2025-05-12 12:36
+## master-bakcup
+JIRA: #master
+
+Logs:
+- Added some notes regarding moving cursor on LDAP
+
+Notes.md
+- Commit branch HASH [d22ec1fdca8dc4b8f430a2704710639714eb4db9](master)
+
+# 2025-05-13 15:47
+## Linux
+JIRA: #Linux
+
+Logs:
+- Adding snipe config
+
+nvim/.config/nvim/lua/DarO/lazy/snipe.lua
+- Commit branch HASH [570adf1592f248f0a1b5a5bd29c9986f3e23d684](Linux)
+
+# 2025-05-13 23:08
+## Linux
+JIRA: #Linux
+
+Logs:
+- Added file_ignore_paths to ignore extjs debug files from grep
+
+nvim/.config/nvim/lua/DarO/lazy/telescope.lua
+- Commit branch HASH [c0feb6c209940b5dafaf8f4c2a1c7e61b82283a5](Linux)
+
+# 2025-05-13 23:08
+## Linux
+JIRA: #Linux
+
+Logs:
+- Changed remap for terminal for snacks
+
+nvim/.config/nvim/lua/DarO/lazy/snacks.lua
+- Commit branch HASH [234c62ae90915f62e0c17714db20b5f24911fff3](Linux)
+
+# 2025-05-13 23:10
+## Linux
+JIRA: #Linux
+
+Logs:
+- Adding new aliases
+
+zsh/.zshrc
+- Commit branch HASH [1f284e15458d12206e7f620916e19f62b2f9236c](Linux)
+
+# 2025-05-13 23:11
+## Linux
+JIRA: #Linux
+
+Logs:
+- Updating tmux scripts to pane / window management
+- Disabling remap for D
+
+tmux/.tmux.conf
+- Commit branch HASH [4b0e9a3972f582e7281b14583d76f2ff3f576f53](Linux)
