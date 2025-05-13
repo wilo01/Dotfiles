@@ -63,8 +63,15 @@ return {
 
       telescope.setup({
          defaults = {
+            -- Example: { "^scratch/" } -- ignore all files in scratch directory
+            -- Example: { "%.npz" } -- ignore all npz files
             file_ignore_patterns = {
                "node_modules",
+               "ext%-all%.js$",
+               "ext%-all%-debug%.js$",
+               "ext%-all%-rtl%.js$",
+               "ext%-all%-rtl%-debug%.js$",
+               "source/ui/api/bundle%.js",
                "source/ui%-student%-portal",
                "source/server/database/sql/student/",
                "test/Cypress/cypress/e2e/safe/"
