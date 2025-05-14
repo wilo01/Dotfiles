@@ -77,6 +77,14 @@ autocmd('LspAttach', {
          vim.lsp.buf.definition()
       end, { desc = "Autocmds Go to definition", unpack(opts) })
 
+      vim.keymap.set("n", "gD", function()
+         vim.lsp.buf.declaration()
+      end, { desc = "Autocmds Go to declaration", unpack(opts) })
+
+      vim.keymap.set("n", "gT", function()
+         vim.lsp.buf.type_definition()
+      end, { desc = "Autocmds Go to type_definition", unpack(opts) })
+
       vim.keymap.set("n", "<leader>K", function()
          vim.lsp.buf.hover()
       end, { desc = "Autocmds Show hover information", unpack(opts) })
@@ -93,11 +101,11 @@ autocmd('LspAttach', {
          vim.lsp.buf.code_action()
       end, { desc = "Autocmds Show code actions", unpack(opts) })
 
-      vim.keymap.set("n", "<leader>vrr", function()
+      vim.keymap.set("n", "gr", function()
          vim.lsp.buf.references()
       end, { desc = "Autocmds Show references", unpack(opts) })
 
-      vim.keymap.set("n", "<leader>vrn", function()
+      vim.keymap.set("n", "<leader>rn", function()
          vim.lsp.buf.rename()
       end, { desc = "Autocmds Rename symbol", unpack(opts) })
 
