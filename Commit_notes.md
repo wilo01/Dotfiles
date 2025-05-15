@@ -4855,3 +4855,14 @@ Stash_list.md
 nvim/.config/nvim/lazy-lock.json
 zsh/.oh-my-zsh/cache/.zsh-update
 - Commit branch HASH [47f9d585eb98c4e38c048fa5121f5425a8d70597](Linux)
+
+# 2025-05-14 23:18
+## Linux
+JIRA: #Linux
+
+Logs:
+- Added some new auto commands
+
+Commit_notes.md
+nvim/.config/nvim/lua/DarO/autocmds.lua
+- Commit branch HASH [70c1488d7c9a4020f38a965b117ee4b0c823f7d8](Linux)
