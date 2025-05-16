@@ -4866,3 +4866,31 @@ Logs:
 Commit_notes.md
 nvim/.config/nvim/lua/DarO/autocmds.lua
 - Commit branch HASH [70c1488d7c9a4020f38a965b117ee4b0c823f7d8](Linux)
+
+# 2025-05-15 13:39
+## Linux
+Linux
+
+Logs:
+- Updating the prepare-commit-msg
+
+Commit_notes.md
+gitconfig/.git-template/hooks/prepare-commit-msg
+nvim/.config/nvim/lazy-lock.json
+- Commit branch HASH [714c6c75289f5851301d71211f4f20b2b112baed](Linux)
+
+# 2025-05-16 09:53
+## master-bakcup
+master
+
+Logs:
+- Updating notes
+
+DB Scripts/Docker21321.sql
+DB Scripts/Docker~12313.sql
+DB Scripts/Docker~3321321.sql
+DB Scripts/Docker~4321321.sql
+DB Scripts/Drops for VIS 4525.sql
+Notes.md
+Stash_Notes.md
+- Commit branch HASH [27708c7906619ca21407c5fc5dd34a317197a353](master)

@@ -224,7 +224,10 @@ alias clear_cashe="echo free -h ; echo ; echo Before clean:; free -h ; echo ; ec
 # Other exports
 export MANPAGER='nvim +Man!'
 # export MANWIDTH=999
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
+export PATH="$JAVA_HOME/bin:$PATH"
 export PATH="/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH"
+
 export PATH="$HOME/bin/Sencha/Cmd:$PATH"
 export PATH="$HOME/.cargo/bin:$PATH"
 export PATH=$PATH:/usr/local/go/bin
@@ -234,7 +237,6 @@ export PATH="$HOME/.local/bin:$PATH"
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-11.0.*
 [[ -f "$HOME/.linuxbrew/bin/brew" ]] && eval "$("$HOME/.linuxbrew/bin/brew" shellenv)"
 export LD_LIBRARY_PATH=/opt/oracle/instantclient_21_14:$LD_LIBRARY_PATH
 export PATH=$LD_LIBRARY_PATH:$PATH
