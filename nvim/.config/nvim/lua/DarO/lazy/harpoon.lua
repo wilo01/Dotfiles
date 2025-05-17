@@ -9,6 +9,11 @@ return {
       harpoon:setup()
 
       local conf = require("telescope.config").values
+      local extensions = require("harpoon.extensions")
+
+      harpoon:extend(extensions.builtins.highlight_current_file())
+      harpoon:extend(extensions.builtins.navigate_with_number());
+
       local function toggle_telescope(harpoon_files)
          local file_paths = {}
          for _, item in ipairs(harpoon_files.items) do

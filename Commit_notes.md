@@ -4894,3 +4894,17 @@ DB Scripts/Drops for VIS 4525.sql
 Notes.md
 Stash_Notes.md
 - Commit branch HASH [27708c7906619ca21407c5fc5dd34a317197a353](master)
+
+# 2025-05-16 23:15
+## Linux
+Linux
+
+Logs:
+- Updated zshrc config for JAVA_HOME
+- Changed remap to center screen when searching with <leader>/
+
+Commit_notes.md
+Stash_list.md
+nvim/.config/nvim/lua/DarO/remap.lua
+zsh/.zshrc
+- Commit branch HASH [4626f2b8628068811f0c16d8216a7c8257f3955d](Linux)
