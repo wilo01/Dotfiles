@@ -4921,3 +4921,16 @@ Stash_list.md
 nvim/.config/nvim/lazy-lock.json
 nvim/.config/nvim/lua/DarO/lazy/harpoon.lua
 - Commit branch HASH [867b7d6308aa27759d404677000a947b6ff06a4c](Linux)
+
+# 2025-05-17 02:17
+## Linux
+Linux
+
+Logs:
+- Added new global function util.is_get_repo()
+- Updated telescope
+
+Commit_notes.md
+nvim/.config/nvim/lua/DarO/lazy/telescope.lua
+nvim/.config/nvim/lua/DarO/utils.lua
+- Commit branch HASH [4a8793fc13468e2e2db2514e7e2f40b33e21ae70](Linux)

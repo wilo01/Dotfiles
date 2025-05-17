@@ -119,6 +119,7 @@ return {
             builtin.find_files()
             return
          end
+
          builtin.git_files()
       end, { desc = "Telescope Find Git files or any files" })
 
@@ -184,16 +185,26 @@ return {
       end, { desc = "Telescope show keymaps" })
 
       vim.keymap.set("n", "<leader>df", function()
+         if not utils.is_git_repo() then
+            vim.notify("Not a Git repository, cannot show diff file with current buffer", vim.log.levels.WARN)
+            return
+         end
+
          utils.telescope_diff_file()
       end, { desc = "Telescope diff file with current buffer" })
 
       vim.keymap.set("n", "<leader>dg", function()
+         if not utils.is_git_repo() then
+            vim.notify("Not a Git repository, cannot show diff history", vim.log.levels.WARN)
+            return
+         end
+
          utils.telescope_diff_from_history()
       end, { desc = "Telescope diff from Git history" })
 
       vim.keymap.set('n', '<leader>ge', function()
          if not utils.is_git_repo() then
-            vim.notify("Not a Git repository, cannot show Git status.", vim.log.levels.WARN)
+            vim.notify("Not a Git repository, cannot show edited files", vim.log.levels.WARN)
             return
          end
 
