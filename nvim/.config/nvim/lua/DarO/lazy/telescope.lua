@@ -114,9 +114,7 @@ return {
       end, { desc = "Telescope Find files" })
 
       vim.keymap.set('n', '<C-p>', function()
-         local git_path    = vim.loop.cwd() .. "/.git"
-         local is_git_repo = vim.loop.fs_stat(git_path)
-         if not is_git_repo then
+         if not utils.is_git_repo() then
             vim.notify("Not a Git repository, using find_files instead", vim.log.levels.WARN)
             builtin.find_files()
             return
@@ -194,6 +192,11 @@ return {
       end, { desc = "Telescope diff from Git history" })
 
       vim.keymap.set('n', '<leader>ge', function()
+         if not utils.is_git_repo() then
+            vim.notify("Not a Git repository, cannot show Git status.", vim.log.levels.WARN)
+            return
+         end
+
          builtin.git_status({
             previewer = delta,
             sort_lastused = true,

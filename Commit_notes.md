@@ -4908,3 +4908,16 @@ Stash_list.md
 nvim/.config/nvim/lua/DarO/remap.lua
 zsh/.zshrc
 - Commit branch HASH [4626f2b8628068811f0c16d8216a7c8257f3955d](Linux)
+
+# 2025-05-17 01:08
+## Linux
+Linux
+
+Logs:
+- Updated harpoon with new features
+
+Commit_notes.md
+Stash_list.md
+nvim/.config/nvim/lazy-lock.json
+nvim/.config/nvim/lua/DarO/lazy/harpoon.lua
+- Commit branch HASH [867b7d6308aa27759d404677000a947b6ff06a4c](Linux)

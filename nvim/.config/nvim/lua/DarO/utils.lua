@@ -209,4 +209,11 @@ function M.telescope_diff_from_history()
    })
 end
 
+function M.is_git_repo()
+   local git_path    = vim.loop.cwd() .. "/.git"
+   local is_git_repo = vim.loop.fs_stat(git_path)
+
+   return is_git_repo
+end
+
 return M
