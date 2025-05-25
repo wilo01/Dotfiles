@@ -4934,3 +4934,43 @@ Commit_notes.md
 nvim/.config/nvim/lua/DarO/lazy/telescope.lua
 nvim/.config/nvim/lua/DarO/utils.lua
 - Commit branch HASH [4a8793fc13468e2e2db2514e7e2f40b33e21ae70](Linux)
+
+# 2025-05-17 21:33
+## Linux
+Linux
+
+Logs:
+- Little update with error handling
+
+Commit_notes.md
+nvim/.config/nvim/lua/DarO/lazy/telescope.lua
+- Commit branch HASH [9399a1f88f089d9bcb020e367aaa077228fb48c5](Linux)
+
+# 2025-05-25 17:17
+## Linux
+Linux
+
+Logs:
+- Added `CopilotChat.nvim` plugin for AI-assisted coding with various
+  features like prompt actions, model selection, and chat window
+  customization.
+- Integrated `copilot-cmp` for autocompletion support in insert mode.
+- Included `todo-comments.nvim` for highlighting and managing TODO
+  comments in the codebase.
+
+nvim/.config/nvim/lua/DarO/lazy/copilot-chat.lua
+nvim/.config/nvim/lua/DarO/lazy/copilot.lua
+nvim/.config/nvim/lua/DarO/lazy/todo-comments.lua
+- Commit branch HASH [f397f70462409b8776d4fa5a9b7b2f8502d2607d](Linux)
+
+# 2025-05-25 17:24
+## Linux
+Linux
+
+Logs:
+- Updated JAVA_HOME to point to Java 8 OpenJDK and adjusted PATH
+accordingly. Commented out the previous Java 11 configuration
+to retain flexibility for future use.
+
+zsh/.zshrc
+- Commit branch HASH [62b66894104d6b7bc1a28a9438f050d7b1402716](Linux)

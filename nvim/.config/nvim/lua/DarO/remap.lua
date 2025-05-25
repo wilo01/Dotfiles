@@ -7,6 +7,8 @@ vim.keymap.set("n", "H", "gt0", { desc = "Move cursor to the begginig of the cur
 vim.keymap.set("n", "L", "gt$", { desc = "Move cursor to the end of the current line" })
 vim.keymap.set("n", "<A-h>", "mzJ`z", { desc = "Move text lines without moving cursor" })
 vim.keymap.set('n', '<leader>/', '/<C-r>+<CR>zz', { desc = "Search with clipboard text" })
+vim.keymap.set('n', '<leader><leader>', 'ggVG"+y', { desc = "Select all and yank to clipboard" })
+vim.keymap.set('n', '<C-i>', '"+yi[', { desc = "Yank inside square brackets" })
 vim.keymap.set("n", "<leader>R", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
    { desc = "Replace text occurrences of the word under cursor" })
 
@@ -96,8 +98,8 @@ vim.keymap.set("x", "<leader>p", "p", { desc = "Replace with yanked text, and ne
 vim.keymap.set({ "n", "v" }, "<leader>y", "\"+y", { desc = "Yank to clipboard" })
 vim.keymap.set("n", "<leader>Y", "\"+Y", { desc = "Yank line to clipboard" })
 vim.keymap.set("v", "<C-c>", "\"+y", { desc = "Yank selection to clipboard with Ctrl+C" })
-vim.keymap.set({ "n", "v" }, "<leader>d", "\"_d", { desc = "Delete without yanking" })
-vim.keymap.set({ "n", "v" }, "<leader>dy", "\"+d", { desc = "Delete & Yank to clipboard" })
+vim.keymap.set({ "n", "v" }, "<leader>z", "\"_d", { desc = "Delete without yanking" })
+vim.keymap.set({ "n", "v" }, "<leader>zy", "\"+d", { desc = "Delete & Yank to clipboard" })
 
 -- Disabling Default Mappings
 vim.keymap.set("n", "Q", "<nop>", { desc = "Disable 'Q'" })
@@ -115,6 +117,9 @@ vim.keymap.set("v", "<leader>f", function()
    vim.lsp.buf.format()
    vim.cmd("write")
 end, { desc = "Format selection and save with LSP" })
+vim.keymap.set("n", "<leader>d", function()
+   vim.diagnostic.open_float(nil, { focusable = false, source = "if_many" })
+end, { desc = "Show diagnostic errors and warnings in a floating window" })
 
 -- Quickfix and Location List Navigation
 vim.keymap.set("n", "<C-k>", "<cmd>cnext<CR>zz", { desc = "Next quickfix item" })
