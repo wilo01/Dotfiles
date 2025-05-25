@@ -224,9 +224,10 @@ alias clear_cashe="echo free -h ; echo ; echo Before clean:; free -h ; echo ; ec
 # Other exports
 export MANPAGER='nvim +Man!'
 # export MANWIDTH=999
-export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
+# export JAVA_HOME="/usr/lib/jvm/java-11-openjdk/"
+export JAVA_HOME="/usr/lib/jvm/java-1.8.0-openjdk"
 export PATH="$JAVA_HOME/bin:$PATH"
-export PATH="/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH"
+export PATH="/usr/lib/jvm/java-8-openjdk/bin:$PATH"
 
 export PATH="$HOME/bin/Sencha/Cmd:$PATH"
 export PATH="$HOME/.cargo/bin:$PATH"
