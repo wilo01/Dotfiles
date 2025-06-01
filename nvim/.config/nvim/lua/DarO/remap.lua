@@ -7,7 +7,6 @@ vim.keymap.set("n", "H", "gt0", { desc = "Move cursor to the begginig of the cur
 vim.keymap.set("n", "L", "gt$", { desc = "Move cursor to the end of the current line" })
 vim.keymap.set("n", "<A-h>", "mzJ`z", { desc = "Move text lines without moving cursor" })
 vim.keymap.set('n', '<leader>/', '/<C-r>+<CR>zz', { desc = "Search with clipboard text" })
-vim.keymap.set('n', '<leader><leader>', 'ggVG"+y', { desc = "Select all and yank to clipboard" })
 vim.keymap.set('n', '<C-i>', '"+yi[', { desc = "Yank inside square brackets" })
 vim.keymap.set("n", "<leader>R", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
    { desc = "Replace text occurrences of the word under cursor" })
@@ -100,6 +99,11 @@ vim.keymap.set("n", "<leader>Y", "\"+Y", { desc = "Yank line to clipboard" })
 vim.keymap.set("v", "<C-c>", "\"+y", { desc = "Yank selection to clipboard with Ctrl+C" })
 vim.keymap.set({ "n", "v" }, "<leader>z", "\"_d", { desc = "Delete without yanking" })
 vim.keymap.set({ "n", "v" }, "<leader>zy", "\"+d", { desc = "Delete & Yank to clipboard" })
+-- vim.keymap.set('n', '<leader><leader>', ':%y+<CR>', { desc = "Yank entire file to clipboard without moving cursor" })
+vim.keymap.set('n', '<leader><leader>', 'ggVG"+y', { desc = "Select all and yank to clipboard" })
+-- vim.keymap.set("n", "<leader><leader>", function()
+--    vim.cmd("silent !tmux split-window -dh")
+-- end, { desc = "Open remap file in new tmux split by sending keys" })
 
 -- Disabling Default Mappings
 vim.keymap.set("n", "Q", "<nop>", { desc = "Disable 'Q'" })
@@ -122,8 +126,8 @@ vim.keymap.set("n", "<leader>d", function()
 end, { desc = "Show diagnostic errors and warnings in a floating window" })
 
 -- Quickfix and Location List Navigation
-vim.keymap.set("n", "<C-k>", "<cmd>cnext<CR>zz", { desc = "Next quickfix item" })
-vim.keymap.set("n", "<C-j>", "<cmd>cprev<CR>zz", { desc = "Previous quickfix item" })
+vim.keymap.set("n", "<C-j>", "<cmd>cnext<CR>zz", { desc = "Next quickfix item" })
+vim.keymap.set("n", "<C-k>", "<cmd>cprev<CR>zz", { desc = "Previous quickfix item" })
 vim.keymap.set("n", "<leader>k", "<cmd>lnext<CR>zz", { desc = "Next location list item" })
 vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz", { desc = "Previous location list item" })
 

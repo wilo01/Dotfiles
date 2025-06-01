@@ -6,7 +6,15 @@ return {
    version = false,
    build = "make",
    opts = {
-      provider = "claude",
+      provider = "gemini",
+      gemini = {
+         endpoint = "https://generativelanguage.googleapis.com/v1beta/models",
+         -- model = "gemini-2.5-pro-preview-03-25",
+         model = "gemini-2.0-flash",
+         timeout = 30000,
+         temperature = 0,
+         max_tokens = 8192,
+      },
       claude = {
          endpoint = "https://api.anthropic.com",
          model = "claude-3-haiku-20240307", -- Cheapest Claude 3 model

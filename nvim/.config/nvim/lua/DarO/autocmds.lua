@@ -1,10 +1,6 @@
 local utils = require("DarO.utils")
 local autocmd = vim.api.nvim_create_autocmd
 local augroup = vim.api.nvim_create_augroup
-local DarOGroup = augroup('DarO', {})
-local yank_group = augroup('HighlightYank', {})
-
--- General Settings
 local general = augroup("General Settings", { clear = true })
 
 autocmd("BufEnter", {
@@ -53,7 +49,7 @@ vim.filetype.add({
 })
 
 autocmd('TextYankPost', {
-   group = yank_group,
+   group = augroup('HighlightYank', {}),
    pattern = '*',
    callback = function()
       vim.highlight.on_yank({
@@ -64,15 +60,37 @@ autocmd('TextYankPost', {
 })
 
 autocmd({ "BufWritePre" }, {
-   group = DarOGroup,
+   group = augroup('DarO', {}),
    pattern = { "*.md", "*.lua", "*.js", "*.jsx", "*.ts", "*.rs", "*.go", "*.py" },
    command = [[%s/\s\+$//e]],
 })
 
-autocmd('LspAttach', {
-   group = DarOGroup,
-   callback = function(e)
-      local opts = { buffer = e.buf }
+vim.api.nvim_create_autocmd('LspAttach', {
+   group = vim.api.nvim_create_augroup('LspAttach', { clear = true }),
+   callback = function(event)
+      local opts = { buffer = event.buf }
+
+      if vim.fn.has 'nvim-0.11' == 1 then
+         local client = vim.lsp.get_client_by_id(event.data.client_id)
+         if client and client_supports_method(client, vim.lsp.protocol.Methods.textDocument_documentHighlight, event.buf) then
+            local highlight_augroup = vim.api.nvim_create_augroup("lsp-highlight", { clear = true })
+            vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+               group = highlight_augroup,
+               buffer = event.buf,
+               callback = function()
+                  vim.lsp.buf.document_highlight()
+               end,
+            })
+            vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+               group = highlight_augroup,
+               buffer = event.buf,
+               callback = function()
+                  vim.lsp.buf.clear_references()
+               end,
+            })
+         end
+      end
+
       vim.keymap.set("n", "gd", function()
          vim.lsp.buf.definition()
       end, { desc = "Autocmds Go to definition", unpack(opts) })
@@ -107,7 +125,7 @@ autocmd('LspAttach', {
 
       vim.keymap.set("n", "<leader>rn", function()
          vim.lsp.buf.rename()
-      end, { desc = "Autocmds Rename symbol", unpack(opts) })
+      end, { desc = "Autocmds Global word rename (via LSP)", unpack(opts) })
 
       vim.keymap.set("i", "<C-h>", function()
          vim.lsp.buf.signature_help()
@@ -153,3 +171,11 @@ vim.api.nvim_create_user_command("CSVformatting", function()
    vim.g.csv_prettify_ind = not vim.g.csv_prettify_ind
    print("CSV prettify functionality is now " .. (vim.g.csv_prettify_ind and "enabled" or "disabled") .. ".")
 end, { desc = "Toggle CSV prettify functionality globally" })
+
+-- vim.api.nvim_create_autocmd("FileType", {
+--    pattern = "qf",
+--    callback = function()
+--       vim.keymap.set("n", "k", "<Up><CR><C-w>p", { buffer = true, remap = false, desc = "Navigate up quickfix" })
+--       vim.keymap.set("n", "j", "<Down><CR><C-w>p", { remap = false, desc = "Navigate down quickfix" })
+--    end,
+-- })

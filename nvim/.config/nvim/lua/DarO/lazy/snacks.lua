@@ -79,7 +79,7 @@ return {
          { "<leader>gf", function() Snacks.lazygit.log_file() end,        desc = "Snacks Lazygit Current File History" },
          { "<leader>gl", function() Snacks.lazygit.log() end,             desc = "Snacks Lazygit Log (cwd)" },
          { "<leader>cR", function() Snacks.rename.rename_file() end,      desc = "Snacks Rename File" },
-         { "<leader>tr", function() Snacks.terminal() end,                desc = "Snacks Toggle Terminal" },
+         { "<leader>te", function() Snacks.terminal() end,                desc = "Snacks Toggle Terminal" },
          -- { "<leader>T",  function() Snacks.terminal() end,                desc = "Snacks which_key_ignore" },
          { "<leader>]",  function() Snacks.words.jump(vim.v.count1) end,  desc = "Snacks Next Reference",              mode = { "n", "t" } },
          { "<leader>[",  function() Snacks.words.jump(-vim.v.count1) end, desc = "Snacks Prev Reference",              mode = { "n", "t" } },
