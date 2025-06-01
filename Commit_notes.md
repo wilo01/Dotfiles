@@ -4974,3 +4974,82 @@ to retain flexibility for future use.
 
 zsh/.zshrc
 - Commit branch HASH [62b66894104d6b7bc1a28a9438f050d7b1402716](Linux)
+
+# 2025-05-25 17:28
+## Linux
+Linux
+
+Logs:
+- Added `CopilotChat.nvim` and `todo-comments.nvim` plugins to Neovim.
+- Integrated GPG signing for commits in `.gitconfig`.
+- Updated key mappings in `remap.lua` for better usability.
+- Adjusted Java configuration in SQL Developer to use Java 11.
+- Modified tmux sessionizer path for `tds-suite` branch.
+
+Commit_notes.md
+gitconfig/.gitconfig
+nvim/.config/nvim/lazy-lock.json
+nvim/.config/nvim/lua/DarO/lazy/hardtime.lua
+nvim/.config/nvim/lua/DarO/remap.lua
+sqldev/.sqldeveloper/23.1.1/product.conf
+tmux/.tmux.conf
+- Commit branch HASH [df9f132396909313b7671bb243a0204e58e504d7](Linux)
+
+# 2025-05-26 08:40
+## master-bakcup
+master
+
+Logs:
+- Added SQL scripts for NDA management, including procedures for
+  adding, editing, cloning, and deleting NDAs.
+- Introduced new tables for NDA content and mapping.
+- Added desktop entry for SQL Developer.
+- Updated notes with NDA-related tasks and meeting details.
+
+DB Scripts/Docker-21-05-2025.sql
+DB Scripts/Docker21-05-2025~1.sql
+DB Scripts/NDA-tables.sql
+DB Scripts/sqldeveloper.desktop
+Notes.md
+Stash_Notes.md
+- Commit branch HASH [2dbb85f57bd090e83bcf5495a17ec1fb4eb0fbc0](master)
+
+# 2025-05-29 11:48
+## master-bakcup
+master
+
+Logs:
+- Updated notes
+
+DB Scripts/ca_nda_tables.sql
+Notes.md
+Stash_Notes.md
+- Commit branch HASH [47dce318ccd1f0124b816e2f9d1dfa7f538ebefb](master)
+
+# 2025-06-01 08:36
+## Linux
+Linux
+
+Logs:
+- Adding avante-nvim.lua
+
+nvim/.config/nvim/lua/DarO/lazy/avante-nvim.lua
+- Commit branch HASH [044df418a5eaac90544b14980cdb685483b0398b](Linux)
+
+# 2025-06-01 18:24
+## Linux
+Linux
+
+Logs:
+- Refactored autocmds.lua to use inline augroup creation.
+- Updated lazy/avante-nvim.lua to switch provider to gemini.
+- Enhanced lazy/lsp.lua with conditional LSP configurations.
+- Fixed keymap descriptions in lazy/snacks.lua.
+- Corrected remap.lua mappings for quickfix navigation.
+
+nvim/.config/nvim/lua/DarO/autocmds.lua
+nvim/.config/nvim/lua/DarO/lazy/avante-nvim.lua
+nvim/.config/nvim/lua/DarO/lazy/lsp.lua
+nvim/.config/nvim/lua/DarO/lazy/snacks.lua
+nvim/.config/nvim/lua/DarO/remap.lua
+- Commit branch HASH [52a0d50a4c1b09b25e6962449b369781dcaff059](Linux)
