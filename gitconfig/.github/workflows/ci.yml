@@ -1,0 +1,74 @@
+# .github/workflows/ci.yml
+
+name: CI Pipeline (Gitlab Clone)
+
+# Define triggers for the workflow
+on: push
+
+jobs:
+  # Lint Job (corresponds to GitLab 'lint' stage)
+  lint:
+    name: ESLint Check
+    runs-on: ubuntu-latest # Specify the runner environment
+    container: node:latest # Use the same Docker image as in GitLab CI
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4 # Action to check out the repository code
+
+      - name: Install ESLint dependencies
+        run: bash linters/eslint/install.sh
+
+      - name: Run ESLint
+        run: bash linters/eslint/run.sh
+
+  # Liquibase Validation Job (corresponds to GitLab 'validate_liquibase' stage)
+  validate_liquibase:
+    name: Validate Liquibase
+    runs-on: ubuntu-latest
+    needs: lint # Ensure the lint job completes successfully first
+    container: adoptopenjdk/openjdk16:ubuntu-jre # Use the specified Java image
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Install and Run Liquibase Checks
+        working-directory: linters/liquibase # Change directory before running scripts
+        run: |
+          bash install.sh
+          bash run.sh
+
+  # Semgrep Security Scan Job (corresponds to GitLab 'security-semgrep-test' stage)
+  security-semgrep-test:
+    name: Semgrep Security Scan
+    runs-on: ubuntu-latest
+    needs: validate_liquibase # Ensure the liquibase job completes successfully first
+    container: returntocorp/semgrep:1.14.0 # Use the specific Semgrep image
+    env:
+      # Define environment variables corresponding to GitLab CI variables
+      # Note the YAML multi-line syntax for SEMGREP_RULES
+      SEMGREP_RULES: >-
+        p/security-audit
+        p/secrets
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Run Semgrep CI Scan
+        run: semgrep ci
+
+  # Test Job (Commented out, corresponding to the commented GitLab 'test' stage)
+  # test:
+  #   name: Cypress Tests
+  #   runs-on: ubuntu-latest
+  #   needs: security-semgrep-test # Runs after semgrep if enabled
+  #   container: cypress/base:10 # Use the Cypress base image
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Configure and Run Cypress Tests
+  #       working-directory: test/Cypress # Change to the Cypress test directory
+  #       run: |
+  #         sed -i 's/devMode\s=\strue/devMode=false/' cypress/integration/config/tdsConfig.js
+  #         npm install # Use install instead of i for clarity/potential CI differences
+  #         npx cypress run --headless --spec 'cypress/integration/tdsvisitor/rt/*.js' # Ensure spec path is quoted if it contains wildcards/special chars

@@ -22,11 +22,11 @@ if [ "$enable_global_hooks" != true ]; then
 fi
 
 echo "Global git prepare-commit-msg run"
-branchPath=$(git symbolic-ref --short HEAD)
-branchName=${branchPath}
+branchFullName=$(git symbolic-ref --short HEAD)
+jiraTag=$(git symbolic-ref --short HEAD | cut -d'-' -f1,2)
 
 firstLine=$(head -n1 "$1")
 
 if [ -z "$firstLine" ]; then
-   sed -i.bak "1s/^/$branchName\n\nLogs:\n-/" "$1"
+   sed -i.bak "1s/^/$jiraTag\n\n$branchFullName\n\nLogs:\n-/" "$1"
 fi
