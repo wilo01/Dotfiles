@@ -5,7 +5,7 @@ targets = my_issue_tracker
 [my_issue_tracker]
 service = jira
 jira.base_uri = https://acre-int.atlassian.net
-jira.username = dariuszw@timedatasecurity.com
+jira.username = dariuszwilk@acresecurity.com
 jira.password = @oracle:eval:pass jira/dariuszwilk@acresecurity.com
 jira.query = assignee = currentUser() AND resolution is null
 jira.label_template = {{label}}

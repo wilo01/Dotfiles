@@ -59,6 +59,9 @@ return {
 
       ls.add_snippets(nil, {
          all = {
+            ls.parser.parse_snippet("todo", "[ ] TODO: "),
+            ls.parser.parse_snippet("todo-", "- [ ] TODO: "),
+            ls.parser.parse_snippet("todo--", "-- [ ] TODO: "),
             ls.parser.parse_snippet("log_dbms", "DBMS_OUTPUT.PUT_LINE('Dwdw ${1}: ' || ${1});${2}"),
             ls.parser.parse_snippet("log_pak", "ca_log_pak.log_warning('Dwdw', '${1}: ' || ${1});${2}"),
             snip({
@@ -99,7 +102,8 @@ return {
             ls.parser.parse_snippet("if", "if (${1}) {}${2}"),
             ls.parser.parse_snippet("log_warn", "console.warn('${1}', ${1})"),
             ls.parser.parse_snippet("log_warn_obj", "console.warn({\n\t'${1}': ${1}\n});${2}"),
-            ls.parser.parse_snippet("tryc", "try {\n\t${1}\n} catch (error) {\n\tconsole.error('An error occurred:', error);\n}")
+            ls.parser.parse_snippet("tryc",
+               "try {\n\t${1}\n} catch (error) {\n\tconsole.error('An error occurred:', error);\n}")
          },
          sh = {
             ls.parser.parse_snippet("shebang", "#!/bin/sh\n${0}"),

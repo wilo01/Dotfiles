@@ -4,6 +4,10 @@
    signingkey = 4C4330CC1E4BA6DA
 [commit]
    gpgSign = true
+[branch]
+   sort = -committerdate
+[push]
+   autoSetupRemote = true
 [core]
 	editor = nvim
 	hooksPath = /home/dariuszw/.git-template/hooks

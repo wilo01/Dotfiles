@@ -11,7 +11,7 @@ return {
       { "<c-s>",     "<CR>", ft = "copilot-chat", desc = "Submit Prompt", remap = true },
       { "<leader>A", "",     desc = "+ai",        mode = { "n", "v" } },
       {
-         "<leader>aa",
+         "<leader>gc",
          function()
             return require("CopilotChat").toggle()
          end,
@@ -19,7 +19,7 @@ return {
          mode = { "n", "v" },
       },
       {
-         "<leader>ax",
+         "<leader>gx",
          function()
             return require("CopilotChat").reset()
          end,
@@ -27,7 +27,7 @@ return {
          mode = { "n", "v" },
       },
       {
-         "<leader>ap",
+         "<leader>gp",
          function()
             require("CopilotChat").select_prompt()
          end,
@@ -35,7 +35,7 @@ return {
          mode = { "n", "v" },
       },
       {
-         "<leader>am",
+         "<leader>gm",
          function()
             require("CopilotChat").select_model()
          end,
@@ -44,7 +44,7 @@ return {
       },
    },
    opts = {
-      model = "gpt-4o", -- List model names with `:CopilotChatModels` command
+      model = "claude-sonnet-4", -- List model names with `:CopilotChatModels` command
       agent = "copilot",
       remember_as_sticky = true,
       auto_insert_mode = true,

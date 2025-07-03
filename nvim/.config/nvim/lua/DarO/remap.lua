@@ -10,6 +10,15 @@ vim.keymap.set('n', '<leader>/', '/<C-r>+<CR>zz', { desc = "Search with clipboar
 vim.keymap.set('n', '<C-i>', '"+yi[', { desc = "Yank inside square brackets" })
 vim.keymap.set("n", "<leader>R", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
    { desc = "Replace text occurrences of the word under cursor" })
+vim.keymap.set("v", "<leader>8", "c**<C-r>\"**<Esc>", { desc = "Markdown Bold text with **TEXT**" })
+vim.keymap.set("v", "<leader>{", "c{<C-r>\"}<Esc>", { desc = "Wrap text with { }" })
+vim.keymap.set("v", "<leader>}", "c{<C-r>\"}<Esc>", { desc = "Wrap text with { }" })
+vim.keymap.set("v", "<leader>[", "c[<C-r>\"]<Esc>", { desc = "Wrap text with [ ]" })
+vim.keymap.set("v", "<leader>]", "c[<C-r>\"]<Esc>", { desc = "Wrap text with [ ]" })
+vim.keymap.set("v", "<leader>(", "c(<C-r>\")<Esc>", { desc = "Wrap text with ( )" })
+vim.keymap.set("v", "<leader>)", "c(<C-r>\")<Esc>", { desc = "Wrap text with ( )" })
+vim.keymap.set("v", '<leader>"', 'c"<C-r>""<Esc>', { desc = 'Wrap text with " "' })
+vim.keymap.set("v", "<leader>'", "c'<C-r>\"'<Esc>", { desc = "Wrap text with ' '" })
 
 -- Escape Mode
 vim.keymap.set({ "n", "i", "v" }, "qq", "<Esc>", { desc = "Escape with qq" })
@@ -113,14 +122,10 @@ vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>",
    { desc = "Switch projects using tmux-sessionizer" })
 
 -- LSP Formatting
-vim.keymap.set("n", "<leader>f", function()
+vim.keymap.set({ "n", "v" }, "<leader>f", function()
    vim.lsp.buf.format()
    vim.cmd("write")
 end, { desc = "Format and save with LSP" })
-vim.keymap.set("v", "<leader>f", function()
-   vim.lsp.buf.format()
-   vim.cmd("write")
-end, { desc = "Format selection and save with LSP" })
 vim.keymap.set("n", "<leader>d", function()
    vim.diagnostic.open_float(nil, { focusable = false, source = "if_many" })
 end, { desc = "Show diagnostic errors and warnings in a floating window" })
@@ -139,11 +144,16 @@ vim.keymap.set("n", "<leader>mr", "<cmd>CellularAutomaton make_it_rain<CR>", { d
 vim.keymap.set('n', '<leader>fp', function()
    local filepath = vim.fn.expand('%:p')
    local home_dir = vim.fn.getenv('HOME')
-   local relative_path = filepath:gsub('^' .. home_dir, '~')
+   local file_path = filepath:gsub('^' .. home_dir, '~')
 
+   vim.fn.setreg('+', file_path)
+   vim.notify('Copied path: ' .. file_path)
+end, { desc = 'Copy current file path to clipboard (pwd)' })
+vim.keymap.set('n', '<leader>rp', function()
+   local relative_path = vim.fn.expand('%:~:.')
    vim.fn.setreg('+', relative_path)
    vim.notify('Copied path: ' .. relative_path)
-end, { desc = 'Copy current file path to clipboard (pwd)' })
+end, { desc = 'Copy current file path to clipboard (relative)' })
 
 -- Markdown Preview
 vim.keymap.set("n", "<leader>m", "<CMD>MarkdownPreview<CR>", { desc = "Start Markdown preview" })
@@ -152,7 +162,7 @@ vim.keymap.set("n", "<leader>mn", "<CMD>MarkdownPreviewStop<CR>", { desc = "Stop
 -- Gitsigns Integration
 vim.keymap.set("n", "<leader>va", "<CMD>Gitsigns preview_hunk_inline<CR>", { desc = "Gitsigns preview Git hunk" })
 vim.keymap.set("n", "<leader>vs", "<CMD>Gitsigns diffthis<CR>", { desc = "Gitsigns Diff current buffer" })
-vim.keymap.set("n", "<leader>bl", "<CMD>Gitsigns blame<CR>", { desc = "Gitsigns Blame current file" })
+vim.keymap.set("n", "<leader>bl", "<CMD>Gitsigns blame<CR>", { desc = "Gitsigns Blame current file" }) -- [ ] TODO: Add toggle blame
 vim.keymap.set("n", "<leader>vt", "<CMD>Gitsigns toggle_deleted<CR>", { desc = "Gitsigns Toggle deleted lines" })
 vim.keymap.set("n", "<leader>vb", "<CMD>Gitsigns blame_line<CR>", { desc = "Gitsigns Blame current line" })
 vim.keymap.set("n", "<leader>rg", "<CMD>Gitsigns reset_hunk<CR>", { desc = "Gitsigns Reset Hunk (Reset git, diff)" })

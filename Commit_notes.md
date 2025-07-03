@@ -5053,3 +5053,426 @@ nvim/.config/nvim/lua/DarO/lazy/lsp.lua
 nvim/.config/nvim/lua/DarO/lazy/snacks.lua
 nvim/.config/nvim/lua/DarO/remap.lua
 - Commit branch HASH [52a0d50a4c1b09b25e6962449b369781dcaff059](Linux)
+
+# 2025-06-01 18:25
+## Linux
+Linux
+
+Logs:
+- ZSH update
+- gitconfig changed email
+
+Commit_notes.md
+gitconfig/.gitconfig
+zsh/.oh-my-zsh/cache/.zsh-update
+- Commit branch HASH [59ba50ac33cf5d9b0a3e096b5cdb076556209b7f](Linux)
+
+# 2025-06-03 09:32
+## master-bakcup
+master
+
+Logs:
+- Updated notes
+- Added new liquibase scripts
+
+DB Scripts/liquibase-clear-checksum-local-docker.sh
+DB Scripts/liquibase-update-local-docker.sh
+Notes.md
+Stash_Notes.md
+- Commit branch HASH [6f38a242f0564390dfa29cb6705ec6f995277574](master)
+
+# 2025-06-10 10:59
+## master-bakcup
+master
+
+master
+
+Logs:
+- Added CSV bulk .csv
+- Added new DB scripts
+- Updated the notes regarding the VIS-4525
+
+CSV-Tests/Bulk CSV/bulk 111 (Orginal).csv
+CSV-Tests/Bulk CSV/bulk 111.csv
+CSV-Tests/Bulk CSV/bulk 111v2.csv
+CSV-Tests/Bulk CSV/donal_bulk_docker.csl~
+CSV-Tests/Bulk CSV/donal_bulk_docker.csm~
+CSV-Tests/Bulk CSV/donal_bulk_docker.csn~
+CSV-Tests/Bulk CSV/donal_bulk_docker.cso~
+CSV-Tests/Bulk CSV/donal_bulk_docker.csp~
+CSV-Tests/Bulk CSV/donal_bulk_docker.csq~
+CSV-Tests/Bulk CSV/donal_bulk_docker.csr~
+CSV-Tests/Bulk CSV/donal_bulk_docker.css~
+CSV-Tests/Bulk CSV/donal_bulk_docker.cst~
+CSV-Tests/Bulk CSV/donal_bulk_docker.csu~
+CSV-Tests/Bulk CSV/donal_bulk_docker.csv
+CSV-Tests/Bulk CSV/donal_bulk_docker.csv~
+CSV-Tests/Bulk CSV/donal_bulk_docker.csw~
+CSV-Tests/Bulk CSV/donal_bulk_docker.csx~
+CSV-Tests/Bulk CSV/donal_bulk_docker.csy~
+CSV-Tests/Bulk CSV/donal_bulk_docker.csz~
+CSV-Tests/Bulk CSV/donal_bulk_docker2 - donal_bulk_docker2.csv
+CSV-Tests/Bulk CSV/donal_bulk_docker2.css~
+CSV-Tests/Bulk CSV/donal_bulk_docker2.cst~
+CSV-Tests/Bulk CSV/donal_bulk_docker2.csu~
+CSV-Tests/Bulk CSV/donal_bulk_docker2.csv
+CSV-Tests/Bulk CSV/donal_bulk_docker2.csv~
+CSV-Tests/Bulk CSV/donal_bulk_docker2.csw~
+CSV-Tests/Bulk CSV/donal_bulk_docker2.csx~
+CSV-Tests/Bulk CSV/donal_bulk_docker2.csy~
+CSV-Tests/Bulk CSV/donal_bulk_docker2.csz~
+CSV-Tests/Bulk CSV/orginal/repeating_BULK csvfile 2024_3_donal.csv
+CSV-Tests/Oryginals/Bulk upload semi colon.csv
+CSV-Tests/Oryginals/bulk trunk.csv
+CSV-Tests/Other CSV Tests/SUITE-16477 - csv spreadsheet - TDS Visitor names (1).csv
+CSV-Tests/Other CSV Tests/SUITE-16477 - csv spreadsheet - TDS Visitor names (2).csv
+CSV-Tests/Other CSV Tests/SUITE-16477 - csv spreadsheet - TDS Visitor names.csv
+CSV-Tests/Other CSV Tests/TDS Visitor - csv spreadsheet - TDS Visitor names.csv
+CSV-Tests/Other CSV Tests/TestRail-stats-6-20230426135841.csv
+CSV-Tests/Other CSV Tests/Universal with email 3 visitors Watchlist (copy).csv
+CSV-Tests/Other CSV Tests/Virtual Badge QALive.csv
+CSV-Tests/Other CSV Tests/bulk 11.csv
+CSV-Tests/Other CSV Tests/bulk 111 (1) (1).csv
+CSV-Tests/Other CSV Tests/bulk 111 (1).csv
+CSV-Tests/Other CSV Tests/bulk trunk - DOB.csv
+CSV-Tests/Other CSV Tests/bulk trunk - changed both other.csv
+CSV-Tests/Other CSV Tests/bulk trunk - changed both.csv
+CSV-Tests/Other CSV Tests/bulk trunk - changed pause limited.csv
+CSV-Tests/Other CSV Tests/bulk trunk - changed pause.csv
+CSV-Tests/Other CSV Tests/bulk trunk - changed slash Virtual Badge.csv
+CSV-Tests/Other CSV Tests/bulk trunk - changed slash.csv
+CSV-Tests/Other CSV Tests/bulk trunk.csv
+CSV-Tests/Other CSV Tests/example_csv_upload (5) (1).csv
+CSV-Tests/Other CSV Tests/example_csv_upload (5).csv
+CSV-Tests/Other CSV Tests/example_csv_upload (6).csv
+CSV-Tests/Other CSV Tests/example_csv_upload.csv
+CSV-Tests/Other CSV Tests/kioskVisitData.js
+CSV-Tests/Other CSV Tests/mutateVisitorData.js
+CSV-Tests/Other CSV Tests/standard default (1).csv
+CSV-Tests/Other CSV Tests/standard default (2).csv
+CSV-Tests/Other CSV Tests/standard default.csv
+CSV-Tests/Other CSV Tests/tds-visitor-csv-example (1).csv
+CSV-Tests/Other CSV Tests/tds-visitor-csv-example-trunk.csv
+CSV-Tests/Other CSV Tests/tds-visitor-csv-example.csv
+CSV-Tests/Other CSV Tests/testcsv (1).csv
+CSV-Tests/Other CSV Tests/testcsv.csv
+CSV-Tests/Universal mix with email 50 visitors with watchlist.csv
+CSV-Tests/Universal with email 10 visitors Watchlist.csv
+CSV-Tests/Universal with email 10 visitors v2.csv
+CSV-Tests/Universal with email 10 visitors.csv
+CSV-Tests/Universal with email 100 visitors.csv
+CSV-Tests/Universal with email 15 visitors.csv
+CSV-Tests/Universal with email 25 visitors - meal.csv
+CSV-Tests/Universal with email 25 visitors.csv
+CSV-Tests/Universal with email 3 annual visitors.csv
+CSV-Tests/Universal with email 3 visitors Watchlist.csv
+CSV-Tests/Universal with email 3 visitors.csv
+CSV-Tests/Universal with email 3 weekly annual visitors.csv
+CSV-Tests/Universal with email 3 weekly visitors.csv
+CSV-Tests/Universal with email 5 visitors Watchlist.csv
+CSV-Tests/Universal with email 5 visitors.csv
+CSV-Tests/Universal with email 50 visitors - repeat.csv
+CSV-Tests/Universal with email 50 visitors.csv
+CSV-Tests/Universal with email 9 visitors UAT.csv
+CSV-Tests/Universal without email 5 visitors Watchlist.csv
+CSV-Tests/example_csv_upload.csv
+DB Scripts/Docker~24324.sql
+DB Scripts/Docker~343242.sql
+DB Scripts/archive_nda_by_location.sql
+DB Scripts/ca_nda_version-ca_nda_mapping.sql
+DB Scripts/liquibase-clear-checksum-local-docker.sh
+DB Scripts/working_hours_tables.sql
+Notes.md
+Stash_Notes.md
+- Commit branch HASH [613994530f2bb6aa2ceff1464909c194dc38961d](master)
+
+# 2025-06-20 08:09
+## Linux
+Linux
+
+Linux
+
+Logs:
+- Added new github files for copilot
+
+gitconfig/.git-template/hooks/prepare-commit-msg
+gitconfig/.github/instructions/copilot-instructions.md
+gitconfig/.github/workflows/ci.yml
+gitconfig/.github/workflows/instructions/tdssuite.md
+- Commit branch HASH [ebc88740ac869b053eb3363a4536324c3e088f32](Linux)
+
+# 2025-06-23 09:48
+## master
+master
+
+master
+
+Logs:
+- Added new notes
+
+Notes.md
+Stash_Notes.md
+- Commit branch HASH [1200ea2a6b2930b800a1544c473235de24b26a7c](master)
+
+# 2025-06-23 09:48
+## master
+master
+
+master
+
+Logs:
+- Added missing files
+
+DB Scripts/VIS-4703-core-hr-tables.sql
+prompts.md
+- Commit branch HASH [52581249c752dcdd4dd188910594df2569c6ac99](master)
+
+# 2025-06-26 08:14
+## master
+master
+
+master
+
+Logs:
+- Added new core hr tables
+- Added new docs
+- Updated notes
+
+DB Scripts/VIS-4703-core-hr-tables.sql
+Docs/2023-09-28-whatchlist-check-in-notification.pdf
+Docs/SUITE-18130 Watchlist check-in notification v1.0.docx
+Docs/SUITE-18130-watchlist-check-in-notification.pdf
+Notes.md
+Pictures/check_watchlist_on_check_in.png
+Stash_Notes.md
+- Commit branch HASH [1a82deb47cd4f05247b773aad63c4c34638ecb38](master)
+
+# 2025-06-27 15:44
+## master
+master
+
+master
+
+Logs:
+- Updated message templates scripts
+- Updated notes regarding the message templates
+
+DB Scripts/message_templates.sql
+Notes.md
+- Commit branch HASH [0030dd104120f4c3e6b3a5a060399db243f2c34b](master)
+
+# 2025-06-27 15:48
+## master
+master
+
+master
+
+Logs:
+- Updated notes regarding watchlist
+
+Notes.md
+- Commit branch HASH [83893bc2e9575824dcb0954db992186a0d7e4eba](master)
+
+# 2025-07-01 17:21
+## master
+master
+
+master
+
+Logs:
+- Added new watchlist CSV
+- Updated notes
+
+CSV-Tests/Universal mix with email 50 visitors with watchlist2.csv
+Notes.md
+Stash_Notes.md
+- Commit branch HASH [adef97f583a7063599eddd0952c415a24088127e](master)
+
+# 2025-07-02 10:02
+## master
+master
+
+master
+
+Logs:
+- Moved DB scripts as DB-Scripts
+- Added new notes regarding docker
+
+AI/.github/copilot-instructions-detailed.md
+AI/.github/workflows/instructions/tdssuite.md
+AI/CLAUDE.md
+AI/VIS-4703.md
+DB-Scripts/11.1AV-v1.sql
+DB-Scripts/12.2AV-2.sql
+DB-Scripts/12.2AV-3.sql
+DB-Scripts/12.2AV.sql
+DB-Scripts/13AV-23123.sql
+DB-Scripts/1Docker~11.sql
+DB-Scripts/BACKUP.sql
+DB-Scripts/DB Edgescan Pentest.sql
+DB-Scripts/DB Scripts2/11.1AV.sql
+DB-Scripts/DB Scripts2/12.2AV.sql
+DB-Scripts/DB Scripts2/12.2AV~1.sql
+DB-Scripts/DB Scripts2/12.2AV~2.sql
+DB-Scripts/DB Scripts2/12.2AV~4.sql
+DB-Scripts/DB Scripts2/12.2AV~5.sql
+DB-Scripts/DB Scripts2/DB se1demo.sql
+DB-Scripts/DB Scripts2/Docker.sql
+DB-Scripts/DB Scripts2/Docker1.sql
+DB-Scripts/DB Scripts2/Docker2.sql
+DB-Scripts/DB Scripts2/Docker3.sql
+DB-Scripts/DB Scripts2/Docker~1.sql
+DB-Scripts/DB Scripts2/Docker~11-1.sql
+DB-Scripts/DB Scripts2/Docker~2.sql
+DB-Scripts/DB Scripts2/Docker~3.sql
+DB-Scripts/DB Scripts2/Docker~31.sql
+DB-Scripts/DB Scripts2/Docker~4.sql
+DB-Scripts/DB Scripts2/Docker~51.sql
+DB-Scripts/DB Scripts2/Trunk.sql
+DB-Scripts/DB Scripts2/Trunk1.sql
+DB-Scripts/DB Scripts2/Trunk2.sql
+DB-Scripts/DB Scripts2/Trunk4.sql
+DB-Scripts/DB Scripts2/Trunk5.sql
+DB-Scripts/DB Scripts2/Trunk6-1.sql
+DB-Scripts/DB Scripts2/Trunk~9.sql
+DB-Scripts/DB test.tds.ie Visitor-safe, Trunk.sql
+DB-Scripts/DB test.tds.ie Visitor-safe, Trunk2.sql
+DB-Scripts/DB test.tds.ie Visitor-safe, Trunk~1.sql
+DB-Scripts/DB test.tds.ie Visitor-safe, Trunk~2.sql
+DB-Scripts/DB test.tds.ie Visitor-safe, Trunk~3.sql
+DB-Scripts/DB-SCRIPT.sql
+DB-Scripts/Dev-some-script.sql
+DB-Scripts/Docker-21-05-2025.sql
+DB-Scripts/Docker-6.sql
+DB-Scripts/Docker-some-script.sql
+DB-Scripts/Docker.sql
+DB-Scripts/Docker1.sql
+DB-Scripts/Docker21-05-2025~1.sql
+DB-Scripts/Docker21321.sql
+DB-Scripts/Docker3-1.sql
+DB-Scripts/Docker3432.sql
+DB-Scripts/Docker4.sql
+DB-Scripts/Docker~1.sql
+DB-Scripts/Docker~10.sql
+DB-Scripts/Docker~11.sql
+DB-Scripts/Docker~12.sql
+DB-Scripts/Docker~12313.sql
+DB-Scripts/Docker~2.sql
+DB-Scripts/Docker~22.sql
+DB-Scripts/Docker~24324.sql
+DB-Scripts/Docker~3.sql
+DB-Scripts/Docker~3321321.sql
+DB-Scripts/Docker~343242.sql
+DB-Scripts/Docker~4.sql
+DB-Scripts/Docker~41.sql
+DB-Scripts/Docker~42.sql
+DB-Scripts/Docker~4321321.sql
+DB-Scripts/Docker~5.sql
+DB-Scripts/Docker~7.sql
+DB-Scripts/Docker~8.sql
+DB-Scripts/Docker~9.sql
+DB-Scripts/Drops for VIS 4525.sql
+DB-Scripts/INSERT INTO ca_person_detail (Host inserting).sql
+DB-Scripts/NDA-tables.sql
+DB-Scripts/PL-SQL.md
+DB-Scripts/RemoveCovidConfigGoogle.sql
+DB-Scripts/SUITE-16031-1-dev.sql
+DB-Scripts/SUITE-16031-2-safe.sql
+DB-Scripts/SUITE-16031-dev.sql
+DB-Scripts/SUITE-16050.sql
+DB-Scripts/SUITE-16334-v2.sql
+DB-Scripts/SUITE-16334.sql
+DB-Scripts/SUITE-16559-21-03.sql
+DB-Scripts/SUITE-16559-v2.sql
+DB-Scripts/SUITE-16559.sql
+DB-Scripts/SUITE-16856.sql
+DB-Scripts/SUUITE-16855 Virtual Badge.sql
+DB-Scripts/Trunk (copy 1).sql
+DB-Scripts/Trunk-3432.sql
+DB-Scripts/Trunk.sql
+DB-Scripts/Trunk17.sql
+DB-Scripts/Trunk2.sql
+DB-Scripts/Trunk3.sql
+DB-Scripts/Trunk4.sql
+DB-Scripts/Trunk6.sql
+DB-Scripts/Trunk7.sql
+DB-Scripts/Trunk8.sql
+DB-Scripts/Trunk~11.sql
+DB-Scripts/Trunk~8.sql
+DB-Scripts/Trunk~9.sql
+DB-Scripts/VIS-2133-safe_default_data.sql
+DB-Scripts/VIS-2295-Watchlist.sql
+DB-Scripts/VIS-391-multiple-sql-helpers.sql
+DB-Scripts/VIS-4703-core-hr-tables.sql
+DB-Scripts/Watchlist_dummy_data_generator.sql
+DB-Scripts/agenda_qr_field_fix.sql
+DB-Scripts/archive_nda_by_location.sql
+DB-Scripts/badge_number-access_badge_number.sql
+DB-Scripts/ca_annual_schedule.sql
+DB-Scripts/ca_kiosk_available_annual_schedule.sql
+DB-Scripts/ca_kiosk_available_weekly_schedule.sql
+DB-Scripts/ca_nda_tables.sql
+DB-Scripts/ca_nda_version-ca_nda_mapping.sql
+DB-Scripts/ca_visit_reason.sql
+DB-Scripts/ca_weekly_schedule-ca_annual_schedule.sql
+DB-Scripts/ca_weekly_schedule-ca_annual_schedule2.sql
+DB-Scripts/ca_weekly_schedule.sql
+DB-Scripts/check_out.sql
+DB-Scripts/contractor_add_issue_ca_system.sql
+DB-Scripts/custom_default_data.sql
+DB-Scripts/default_working_hours.sql
+DB-Scripts/ex43242port.sql
+DB-Scripts/exp554353ort.sql
+DB-Scripts/expo4342rt.sql
+DB-Scripts/expor53535t.sql
+DB-Scripts/expor5555t.sql
+DB-Scripts/expor64564565t.sql
+DB-Scripts/exporgggggt.sql
+DB-Scripts/export.csv
+DB-Scripts/export.sql
+DB-Scripts/export2.sql
+DB-Scripts/export2.tsv
+DB-Scripts/export3.csv
+DB-Scripts/export32432.sql
+DB-Scripts/export352432.sql
+DB-Scripts/export4.csv
+DB-Scripts/getAnnualSchedule.sql
+DB-Scripts/getWeeklySchedule-old.sql
+DB-Scripts/getWeeklySchedule.sql
+DB-Scripts/label_layouts1.sql
+DB-Scripts/label_layouts2.sql
+DB-Scripts/label_layouts3.sql
+DB-Scripts/liquibase-clear-checksum-local-docker.sh
+DB-Scripts/liquibase-update-local-docker.sh
+DB-Scripts/message_templates.sql
+DB-Scripts/nls_territory.sql
+DB-Scripts/out.ps
+DB-Scripts/rtkiosk-visitReason.sql
+DB-Scripts/safe_vi_rec_ring.sql
+DB-Scripts/safe_vi_rec_stream.sql
+DB-Scripts/save1.sql
+DB-Scripts/save2.sql
+DB-Scripts/save3.sql
+DB-Scripts/singleCheckedIn.sql
+DB-Scripts/some_Docker3.sql
+DB-Scripts/sqldeveloper.desktop
+DB-Scripts/suite-16824-message-template-email_cc_host_removed-meeting-point-details-tags-are-missing.sql
+DB-Scripts/test_ca_api_utility_pak.sql
+DB-Scripts/test_ca_area_types_api.sql
+DB-Scripts/test_ca_company_api.sql
+DB-Scripts/test_ca_visitor_booking_api.sql
+DB-Scripts/working_hours_tables.sql
+Notes.md
+- Commit branch HASH [73d8a66dd3790dc029a82a4af78415370437fee8](master)
+
+# 2025-07-02 12:03
+## master
+master
+
+master
+
+Logs:
+- Sysdba command
+
+Notes.md
+- Commit branch HASH [4ef347abb09e0de5ffd13ef513b46eb5f21cd4c6](master)
