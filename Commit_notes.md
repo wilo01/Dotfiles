@@ -5476,3 +5476,346 @@ Logs:
 
 Notes.md
 - Commit branch HASH [4ef347abb09e0de5ffd13ef513b46eb5f21cd4c6](master)
+
+# 2025-07-03 09:27
+## Linux
+Linux
+
+Linux
+
+Logs:
+- Update git configuration with branch sorting and auto-setup
+- Update Neovim plugins and configurations:
+  - Change CopilotChat model to claude-sonnet-4
+  - Update key mappings for CopilotChat and Snipe
+  - Add new text wrapping and markdown formatting keymaps
+  - Add TODO snippets and improve file path copying
+  - Update telescope file ignores for new project structure
+- Update taskwarrior email configuration
+- Increase tmux history limit to 10000
+- Update ZSH aliases to use tds-suite instead of safe branch
+- Clear stash list and update oh-my-zsh cache
+
+Commit_notes.md
+Stash_list.md
+gitconfig/.gitconfig
+nvim/.config/nvim/lazy-lock.json
+nvim/.config/nvim/lua/DarO/lazy/copilot-chat.lua
+nvim/.config/nvim/lua/DarO/lazy/snipe.lua
+nvim/.config/nvim/lua/DarO/lazy/snippets.lua
+nvim/.config/nvim/lua/DarO/lazy/telescope.lua
+nvim/.config/nvim/lua/DarO/remap.lua
+sqldev/.sqldeveloper/ca_basic_data.log
+taskwarrior/.bugwarriorrc
+tmux/.tmux.conf
+zsh/.oh-my-zsh/cache/.zsh-update
+zsh/.zshrc
+- Commit branch HASH [5871e4cc96b58a18efc31c196069cd2055c4c82b](Linux)
+
+# 2025-07-03 13:05
+## master
+master
+
+master
+
+Logs:
+- Updated notes
+- Created new script for docker environment
+
+AI/docker-new.sh
+Notes.md
+- Commit branch HASH [1364db64aa14c1979d6f3acce017c0ed24930143](master)
+
+# 2025-07-03 13:58
+## master
+master
+
+master
+
+Logs:
+- Updated notes and updated the docker script
+
+AI/docker-new.sh
+Notes.md
+- Commit branch HASH [6d30778a0ff628349efc82255ef3310d78f61e4b](master)
+
+# 2025-07-03 14:01
+## master
+master
+
+master
+
+Logs:
+- Docker script rename
+
+AI/docker-env.sh
+- Commit branch HASH [c0b35a4ec2677fd2c8457a7e4cfd0ee50319cec9](master)
+
+# 2025-07-03 14:16
+## master
+master
+
+master
+
+Logs:
+- Updated the docker script
+- Added Felipe s script
+
+AI/create-docker-database.sh
+AI/docker-env.sh
+- Commit branch HASH [5dbbcf9af706c72937325d71f4eded8a52f8a2a6](master)
+
+# 2025-07-03 14:43
+## master
+master
+
+master
+
+Logs:
+- Updated the script for docker env
+
+AI/docker-env.sh
+- Commit branch HASH [236daa4a3a4278b2ab1ef208543384e63329fbaf](master)
+
+# 2025-07-03 15:10
+## master
+master
+
+master
+
+Logs:
+- Updated script for docker
+
+AI/docker-env.sh
+- Commit branch HASH [6819c28c8508c88bde24610d456c3cc88cdec594](master)
+
+# 2025-07-04 11:14
+## master
+master
+
+master
+
+Logs:
+- Added and updated copilot instructions
+- Updated notes
+- Added cool way of testing suite API via scripts
+
+AI/.github/copilot-instructions-detailed.md
+AI/.github/copilot-instructions.md
+AI/.github/workflows/ci.yml
+AI/.github/workflows/instructions/tdssuite.md
+AI/docker-env.sh
+Notes.md
+Scripts/Working Hours Schedule/discover_schedule_mappings.sh
+Scripts/Working Hours Schedule/test_api_endpoints.sh
+Scripts/Working Hours Schedule/test_corrected_priority_logic.sh
+Scripts/Working Hours Schedule/test_kiosk_weekly_schedule_priority.sql
+Scripts/Working Hours Schedule/test_priority_logic_enhanced.sh
+Scripts/Working Hours Schedule/test_weekly_schedule_priority.sh
+Scripts/Working Hours Schedule/test_weekly_schedule_priority.sql
+Stash_Notes.md
+- Commit branch HASH [0e05dd8139856adf1593b10f35e077b7b5e1778b](master)
+
+# 2025-07-04 13:00
+## master
+master
+
+master
+
+Logs:
+- Updated new claude config
+- Stow new claude config
+- Added claude related files
+- Added some DB-scripts from home directory
+
+AI/claude/.claude.json
+AI/claude/.claude/.credentials.json
+AI/claude/.claude/CLAUDE.md
+AI/claude/.claude/projects/-home-dariuszw--Dotfiles/84d500b5-e353-42b3-a47e-f991267d82ad.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-Private-AI/0a7a54b9-9fb6-4a7d-bf3b-3ac678faeed6.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-Private-AI/2b8f8dbf-eaa0-49df-ad8e-c58e1e6af687.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-Private-AI/354fbbe4-8338-44ae-a04c-ffeee71ea867.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-Private-AI/37faf445-471b-4f4a-b9ee-2b03e0d3b2b4.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-Private-AI/3c0dafcb-00ac-4c83-a766-382d661c43ea.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-Private-AI/57b74e54-3d5a-4ddc-8cd9-29e0f2cb4233.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-Private-AI/6a044dda-6cfd-47be-b0b3-0e4ebe864bb2.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-Private-AI/6ea1ae8e-9923-48b0-a236-df7609c0f127.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-Private-AI/77fae080-3ca7-4d50-bec3-127d8d7a736c.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-Private-AI/7d1e5818-4021-42a2-9cbb-3f2dfcfb7f9f.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-Private-AI/80f6b55f-9ada-4223-82d4-f9fa206257b1.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-Private-AI/8d74624c-52c1-4ea0-ad0f-089de48841b3.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-Private-AI/cc38fbfd-e56a-470e-93b8-713f9476ee07.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-Private-AI/ccf720d3-631a-456c-80a8-fdc63d239757.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-Private-AI/eacbd0ae-0f40-406c-bd79-4cceab3a5f85.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-suite/064ad515-099b-4251-8cb0-bc7f14f1f459.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-suite/255d2954-4b37-42ca-9c56-abac3b1022eb.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-suite/63f090fa-9c21-467c-a0bf-f6e7f0bb7169.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-suite/71e2f52f-9fbd-466c-bb03-707f48b65813.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-suite/cd3e6cc5-2e0b-4963-8a39-e3b84c5a45b1.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-suite/d14770e0-227f-4e64-9236-2c79ab7b4add.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-visitor-web-app/63857042-bc2b-49ef-bede-001a8bed54cb.jsonl
+AI/claude/.claude/statsig/statsig.cached.evaluations.ed4a6e3607
+AI/claude/.claude/statsig/statsig.last_modified_time.evaluations
+AI/claude/.claude/statsig/statsig.session_id.2656274335
+AI/claude/.claude/statsig/statsig.stable_id.2656274335
+AI/claude/.claude/todos/064ad515-099b-4251-8cb0-bc7f14f1f459-agent-064ad515-099b-4251-8cb0-bc7f14f1f459.json
+AI/claude/.claude/todos/0a7a54b9-9fb6-4a7d-bf3b-3ac678faeed6-agent-0a7a54b9-9fb6-4a7d-bf3b-3ac678faeed6.json
+AI/claude/.claude/todos/0ddcd4bf-af7c-4677-a95e-839fe9fb207b-agent-0ddcd4bf-af7c-4677-a95e-839fe9fb207b.json
+AI/claude/.claude/todos/255d2954-4b37-42ca-9c56-abac3b1022eb-agent-255d2954-4b37-42ca-9c56-abac3b1022eb.json
+AI/claude/.claude/todos/2b8f8dbf-eaa0-49df-ad8e-c58e1e6af687-agent-2b8f8dbf-eaa0-49df-ad8e-c58e1e6af687.json
+AI/claude/.claude/todos/354fbbe4-8338-44ae-a04c-ffeee71ea867-agent-354fbbe4-8338-44ae-a04c-ffeee71ea867.json
+AI/claude/.claude/todos/37faf445-471b-4f4a-b9ee-2b03e0d3b2b4-agent-37faf445-471b-4f4a-b9ee-2b03e0d3b2b4.json
+AI/claude/.claude/todos/3c0dafcb-00ac-4c83-a766-382d661c43ea-agent-3c0dafcb-00ac-4c83-a766-382d661c43ea.json
+AI/claude/.claude/todos/57b74e54-3d5a-4ddc-8cd9-29e0f2cb4233-agent-57b74e54-3d5a-4ddc-8cd9-29e0f2cb4233.json
+AI/claude/.claude/todos/63857042-bc2b-49ef-bede-001a8bed54cb-agent-63857042-bc2b-49ef-bede-001a8bed54cb.json
+AI/claude/.claude/todos/63f090fa-9c21-467c-a0bf-f6e7f0bb7169-agent-63f090fa-9c21-467c-a0bf-f6e7f0bb7169.json
+AI/claude/.claude/todos/6a044dda-6cfd-47be-b0b3-0e4ebe864bb2-agent-6a044dda-6cfd-47be-b0b3-0e4ebe864bb2.json
+AI/claude/.claude/todos/6ea1ae8e-9923-48b0-a236-df7609c0f127-agent-6ea1ae8e-9923-48b0-a236-df7609c0f127.json
+AI/claude/.claude/todos/71e2f52f-9fbd-466c-bb03-707f48b65813-agent-71e2f52f-9fbd-466c-bb03-707f48b65813.json
+AI/claude/.claude/todos/77fae080-3ca7-4d50-bec3-127d8d7a736c-agent-77fae080-3ca7-4d50-bec3-127d8d7a736c.json
+AI/claude/.claude/todos/7d1e5818-4021-42a2-9cbb-3f2dfcfb7f9f-agent-7d1e5818-4021-42a2-9cbb-3f2dfcfb7f9f.json
+AI/claude/.claude/todos/80f6b55f-9ada-4223-82d4-f9fa206257b1-agent-80f6b55f-9ada-4223-82d4-f9fa206257b1.json
+AI/claude/.claude/todos/84d500b5-e353-42b3-a47e-f991267d82ad-agent-84d500b5-e353-42b3-a47e-f991267d82ad.json
+AI/claude/.claude/todos/8d0f6951-2f11-451a-8c38-5beaf47995c5-agent-8d0f6951-2f11-451a-8c38-5beaf47995c5.json
+AI/claude/.claude/todos/8d74624c-52c1-4ea0-ad0f-089de48841b3-agent-8d74624c-52c1-4ea0-ad0f-089de48841b3.json
+AI/claude/.claude/todos/cc38fbfd-e56a-470e-93b8-713f9476ee07-agent-cc38fbfd-e56a-470e-93b8-713f9476ee07.json
+AI/claude/.claude/todos/ccf720d3-631a-456c-80a8-fdc63d239757-agent-ccf720d3-631a-456c-80a8-fdc63d239757.json
+AI/claude/.claude/todos/cd3e6cc5-2e0b-4963-8a39-e3b84c5a45b1-agent-cd3e6cc5-2e0b-4963-8a39-e3b84c5a45b1.json
+AI/claude/.claude/todos/d14770e0-227f-4e64-9236-2c79ab7b4add-agent-d14770e0-227f-4e64-9236-2c79ab7b4add.json
+AI/claude/.claude/todos/eacbd0ae-0f40-406c-bd79-4cceab3a5f85-agent-eacbd0ae-0f40-406c-bd79-4cceab3a5f85.json
+DB-Scripts/Docker (copy 1).sql
+DB-Scripts/Docker-342.sql
+DB-Scripts/Docker~1342234.sql
+DB-Scripts/Docker~3 (copy 1).sql
+DB-Scripts/Trunk3.sql
+DB-Scripts/Trunk6.sql
+DB-Scripts/ca_badge_layout1.sql
+DB-Scripts/printBadgeLayouts.sql
+DB-Scripts/widget-guestTodaysVisitors.sql
+- Commit branch HASH [f41fa78bc5b210fbd793b3d4dd98f3980e385303](master)
+
+# 2025-07-07 07:59
+## master
+master
+
+master
+
+Logs:
+- Updated notes
+- Added scripts
+
+AI/claude/.claude/settings.local.json
+AI/claude/.claude/statsig/statsig.session_id.2656274335
+DB-Scripts/test_kiosk_weekly_schedule_priority.sql
+DB-Scripts/test_weekly_schedule_priority.sql
+Kiosk/Linux_x64_1109227_chrome-linux.zip
+Kiosk/chrome-linux/chrome
+Notes.md
+Scripts/discover_schedule_mappings.sh
+Scripts/test_api_endpoints.sh
+Scripts/test_corrected_priority_logic.sh
+Scripts/test_priority_logic_enhanced.sh
+Scripts/test_weekly_schedule_priority.sh
+Stash_Notes.md
+- Commit branch HASH [fe61bb8b575b6f542ae0d2542d121d73255e7f00](master)
+
+# 2025-07-07 08:23
+## master
+master
+
+master
+
+Logs:
+- Updated notes
+
+Notes.md
+- Commit branch HASH [d4b33a4c1715f1b9c59ad1f77c06447356e4c68d](master)
+
+# 2025-07-07 08:24
+## master
+master
+
+master
+
+Logs:
+- Added DB-Scripts
+
+DB-Scripts/test_kiosk_weekly_schedule_priority.sql
+DB-Scripts/test_weekly_schedule_priority.sql
+- Commit branch HASH [4b134200c8322255552320e1e557b4f9ac28cdb5](master)
+
+# 2025-07-07 08:24
+## master
+master
+
+master
+
+Logs:
+- Added .sh scripts
+
+Scripts/discover_schedule_mappings.sh
+Scripts/test_api_endpoints.sh
+Scripts/test_corrected_priority_logic.sh
+Scripts/test_priority_logic_enhanced.sh
+Scripts/test_weekly_schedule_priority.sh
+- Commit branch HASH [d45c30b48dcc83e14adb529c663241dd642d9161](master)
+
+# 2025-07-07 08:28
+## master
+master
+
+master
+
+Logs:
+- Gitignore update
+
+.gitignore
+AI/claude/.claude/statsig/statsig.session_id.2656274335
+Stash_Notes.md
+- Commit branch HASH [37d009244066c5e9265f28dbcd9dd35b0d608eee](master)
+
+# 2025-07-07 13:26
+## master
+master
+
+master
+
+Logs:
+- Added new files for claude
+
+AI/claude-talk-to-figma-mcp
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-suite/170a0581-49df-45e3-b21f-378d472eaea7.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-suite/a789f2db-d596-4f26-8ab2-b8793e2f5566.jsonl
+AI/claude/.claude/statsig/statsig.cached.evaluations.d1330577c8
+AI/claude/.claude/statsig/statsig.last_modified_time.evaluations
+AI/claude/.claude/statsig/statsig.session_id.2656274335
+AI/claude/.claude/todos/170a0581-49df-45e3-b21f-378d472eaea7-agent-170a0581-49df-45e3-b21f-378d472eaea7.json
+AI/claude/.claude/todos/a789f2db-d596-4f26-8ab2-b8793e2f5566-agent-a789f2db-d596-4f26-8ab2-b8793e2f5566.json
+- Commit branch HASH [7a78abb37881ff887addfb587e54256444157ecf](master)
+
+# 2025-07-07 14:10
+## master
+master
+
+master
+
+Logs:
+- Update cladue logs
+- added docker-env.sh
+- Updated notes
+
+AI/claude/.claude/projects/-home-dariuszw-Dev-Private-AI/7f232ac5-35aa-483e-a549-60e9b29d1174.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-suite/6a6fce49-ede9-41f0-ac96-015357a94abd.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-suite/72405fc4-c330-4494-8466-1622af5c3999.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-suite/93541ee0-ef7a-4a05-b7a2-4a435a743928.jsonl
+AI/claude/.claude/statsig/statsig.cached.evaluations.d1330577c8
+AI/claude/.claude/statsig/statsig.last_modified_time.evaluations
+AI/claude/.claude/statsig/statsig.session_id.2656274335
+AI/claude/.claude/todos/6a6fce49-ede9-41f0-ac96-015357a94abd-agent-6a6fce49-ede9-41f0-ac96-015357a94abd.json
+AI/claude/.claude/todos/72405fc4-c330-4494-8466-1622af5c3999-agent-72405fc4-c330-4494-8466-1622af5c3999.json
+AI/claude/.claude/todos/7f232ac5-35aa-483e-a549-60e9b29d1174-agent-7f232ac5-35aa-483e-a549-60e9b29d1174.json
+AI/claude/.claude/todos/93541ee0-ef7a-4a05-b7a2-4a435a743928-agent-93541ee0-ef7a-4a05-b7a2-4a435a743928.json
+AI/claude/.claude/todos/b4426d82-d8e4-4594-9a35-f4269534b86e-agent-b4426d82-d8e4-4594-9a35-f4269534b86e.json
+AI/docker-env.sh
+Notes.md
+- Commit branch HASH [7f8831d1aa3ac72ef29aaf3210e7a7db07b01201](master)

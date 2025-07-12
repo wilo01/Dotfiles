@@ -12,10 +12,10 @@ insert into ca_reference_character8 ( reference_type, reference_code, reference_
 values ( 'CN', '1', 'ACRE')
 Error at Command Line : 36 Column : 13
 Error report -
-SQL Error: ORA-00942: table or view does not exist
-00942. 00000 -  "table or view does not exist"
-*Cause:    
-*Action:
+SQL Error: ORA-20110: CN/ZE/SE 1.
+ORA-06512: at "COREACCESS.CA_REF_CHAR8_UNIQUE_CN_SE_ZE", line 6
+ORA-04088: error during execution of trigger 'COREACCESS.CA_REF_CHAR8_UNIQUE_CN_SE_ZE'
+
 SQL> 
 SQL> insert into ca_reference_character8 ( reference_type, reference_code, reference_description, parent_code )
   2  values ( 'SE', '&v_site_code', '&v_client_name Site', '&v_corporation_code' );
@@ -29,10 +29,10 @@ insert into ca_reference_character8 ( reference_type, reference_code, reference_
 values ( 'SE', '01', 'ACRE Site', '1' )
 Error at Command Line : 39 Column : 13
 Error report -
-SQL Error: ORA-00942: table or view does not exist
-00942. 00000 -  "table or view does not exist"
-*Cause:    
-*Action:
+SQL Error: ORA-20110: CN/ZE/SE 01.
+ORA-06512: at "COREACCESS.CA_REF_CHAR8_UNIQUE_CN_SE_ZE", line 6
+ORA-04088: error during execution of trigger 'COREACCESS.CA_REF_CHAR8_UNIQUE_CN_SE_ZE'
+
 SQL> 
 SQL> insert into ca_reference_character8 ( reference_type, reference_code, reference_description, parent_code )
   2  values ( 'ZE', '&v_zone_code', '&v_client_name Zone', '&v_site_code' );
@@ -46,25 +46,18 @@ insert into ca_reference_character8 ( reference_type, reference_code, reference_
 values ( 'ZE', '101001', 'ACRE Zone', '01' )
 Error at Command Line : 42 Column : 13
 Error report -
-SQL Error: ORA-00942: table or view does not exist
-00942. 00000 -  "table or view does not exist"
-*Cause:    
-*Action:
+SQL Error: ORA-20110: CN/ZE/SE 101001.
+ORA-06512: at "COREACCESS.CA_REF_CHAR8_UNIQUE_CN_SE_ZE", line 6
+ORA-04088: error during execution of trigger 'COREACCESS.CA_REF_CHAR8_UNIQUE_CN_SE_ZE'
+
 SQL> 
 SQL> 
 SQL> -- Visitor Label (Standard)
 SQL> insert into ca_visitor_label ( visitor_label_name, visitor_label_short_name, priority_number )
   2  values ( 'CAR041.rep', 'Label', 1 );
 
-Error starting at line : 47 in command -
-insert into ca_visitor_label ( visitor_label_name, visitor_label_short_name, priority_number )
-values ( 'CAR041.rep', 'Label', 1 )
-Error at Command Line : 47 Column : 13
-Error report -
-SQL Error: ORA-00942: table or view does not exist
-00942. 00000 -  "table or view does not exist"
-*Cause:    
-*Action:
+1 row inserted.
+
 SQL> 
 SQL> 
 SQL> -- Access Level
@@ -77,13 +70,10 @@ values ( '1', 'ACRE Access Level' )
 
 Error starting at line : 52 in command -
 insert into ca_access_level ( access_level_code, access_level_description )
-values ( '1', 'ACRE Access Level' )
-Error at Command Line : 52 Column : 13
+values ( '&v_access_level_code', '&v_client_name Access Level' )
 Error report -
-SQL Error: ORA-00942: table or view does not exist
-00942. 00000 -  "table or view does not exist"
-*Cause:    
-*Action:
+ORA-00001: unique constraint (COREACCESS.CA_ACCESS_LEVEL_1) violated
+
 SQL> 
 SQL> 
 SQL> -- Access Reason
@@ -96,13 +86,10 @@ values ( 'ASRN', '1', 'General Site Access' )
 
 Error starting at line : 57 in command -
 insert into ca_reference_character8 ( reference_type, reference_code, reference_description )
-values ( 'ASRN', '1', 'General Site Access' )
-Error at Command Line : 57 Column : 13
+values ( 'ASRN', '&v_access_reason_code', 'General Site Access' )
 Error report -
-SQL Error: ORA-00942: table or view does not exist
-00942. 00000 -  "table or view does not exist"
-*Cause:    
-*Action:
+ORA-00001: unique constraint (COREACCESS.CA_REFERENCE_CHARACTER8_1) violated
+
 SQL> 
 SQL> 
 SQL> -- Visit Type
@@ -115,25 +102,16 @@ values ( 'VTTE', '1', 'Standard Visit' )
 
 Error starting at line : 62 in command -
 insert into ca_reference_character8 ( reference_type, reference_code, reference_description )
-values ( 'VTTE', '1', 'Standard Visit' )
-Error at Command Line : 62 Column : 13
+values ( 'VTTE', '&v_visit_type_code', 'Standard Visit' )
 Error report -
-SQL Error: ORA-00942: table or view does not exist
-00942. 00000 -  "table or view does not exist"
-*Cause:    
-*Action:
+ORA-00001: unique constraint (COREACCESS.CA_REFERENCE_CHARACTER8_1) violated
+
 SQL> 
 SQL> -- Location Zone -- if no rows inserted - doesn't matter
 SQL> delete from ca_location_zone;
 
-Error starting at line : 66 in command -
-delete from ca_location_zone
-Error at Command Line : 66 Column : 13
-Error report -
-SQL Error: ORA-00942: table or view does not exist
-00942. 00000 -  "table or view does not exist"
-*Cause:    
-*Action:
+0 rows deleted.
+
 SQL> 
 SQL> insert into ca_location_zone ( location_code, zone_code )
   2  select location, '&v_zone_code'
@@ -171,17 +149,8 @@ set licensee = 'ACRE',
     visitor_badge_expiry_days = 1,
     visitor_badge_expiry_time = trunc(sysdate) + 17/24
 
-Error starting at line : 74 in command -
-update ca_system
-set licensee = 'ACRE',
-    visitor_badge_expiry_days = 1,
-    visitor_badge_expiry_time = trunc(sysdate) + 17/24
-Error at Command Line : 74 Column : 8
-Error report -
-SQL Error: ORA-00942: table or view does not exist
-00942. 00000 -  "table or view does not exist"
-*Cause:    
-*Action:
+1 row updated.
+
 SQL> 
 SQL> 
 SQL> -- User Defaults
@@ -264,52 +233,14 @@ values (
    'B'
 )
 
-Error starting at line : 81 in command -
-insert into ca_user_data (
-   username,
-   corporation_code,
-   maintain_employee_ind,
-   query_employee_ind,
-   maintain_contractor_ind,
-   query_contractor_ind,
-   maintain_visitor_ind,
-   query_visitor_ind,
-   maintain_student_ind,
-   query_student_ind,
-   access_type_ind
-)
-values (
-   user,
-   '1',
-   'Y',
-   'Y',
-   'Y',
-   'Y',
-   'Y',
-   'Y',
-   'Y',
-   'Y',
-   'B'
-)
-Error at Command Line : 81 Column : 13
-Error report -
-SQL Error: ORA-00942: table or view does not exist
-00942. 00000 -  "table or view does not exist"
-*Cause:    
-*Action:
+1 row inserted.
+
 SQL> 
 SQL> delete from ca_user_control
   2  where username = user;
 
-Error starting at line : 108 in command -
-delete from ca_user_control
-where username = user
-Error at Command Line : 108 Column : 13
-Error report -
-SQL Error: ORA-00942: table or view does not exist
-00942. 00000 -  "table or view does not exist"
-*Cause:    
-*Action:
+1 row deleted.
+
 SQL> 
 SQL> insert into ca_user_control (
   2     username,
@@ -450,59 +381,8 @@ values (
    '1'
 )
 
-Error starting at line : 111 in command -
-insert into ca_user_control (
-   username,
-   site_code,
-   zone_code,
-   access_level_code,
-   maintain_badge_ind, 
-   maintain_access_profile_ind,
-   maintain_photo_ind,
-   maintain_address_ind,
-   maintain_emergency_ind,
-   maintain_induction_ind,
-   maintain_user_fields_ind,
-   maintain_new_company_ind,
-   maintain_contact_ind,
-   maintain_next_of_kin_ind,
-   maintain_person_status_ind,
-   maintain_driver_ind,
-   maintain_ledger_ind,
-   maintain_profile_override_ind,
-   view_access_log_ind,
-   department_code,
-   access_group_code
-)
-values (
-   user,
-   '01',
-   '101001',
-   '1',
-   'Y',
-   'Y',
-   'Y',
-   'Y',
-   'Y',
-   'Y',
-   'Y',
-   'Y',
-   'Y',
-   'Y',
-   'Y',
-   'Y',
-   'Y',
-   'Y',
-   'Y',
-   '1',
-   '1'
-)
-Error at Command Line : 111 Column : 13
-Error report -
-SQL Error: ORA-00942: table or view does not exist
-00942. 00000 -  "table or view does not exist"
-*Cause:    
-*Action:
+1 row inserted.
+
 SQL> 
 SQL> insert into ca_user_department (
   2     username,
@@ -522,12 +402,9 @@ select
    user,
    department_code
 from ca_department
-Error at Command Line : 165 Column : 6
 Error report -
-SQL Error: ORA-00942: table or view does not exist
-00942. 00000 -  "table or view does not exist"
-*Cause:    
-*Action:
+ORA-00001: unique constraint (COREACCESS.CA_USER_DEPARTMENT_1) violated
+
 SQL> 
 SQL> insert into ca_user_access_group (
   2     username,
@@ -547,12 +424,9 @@ select
    user,
    access_group_code
 from ca_access_group
-Error at Command Line : 174 Column : 6
 Error report -
-SQL Error: ORA-00942: table or view does not exist
-00942. 00000 -  "table or view does not exist"
-*Cause:    
-*Action:
+ORA-00001: unique constraint (COREACCESS.CA_USER_ACCESS_GROUP_1) violated
+
 SQL> 
 SQL> insert into ca_user_access_time (
   2     username,
@@ -563,20 +437,7 @@ SQL> insert into ca_user_access_time (
   7     access_time_code
   8  from ca_access_time;
 
-Error starting at line : 176 in command -
-insert into ca_user_access_time (
-   username,
-   access_time_code
-)
-select 
-   user,
-   access_time_code
-from ca_access_time
-Error at Command Line : 183 Column : 6
-Error report -
-SQL Error: ORA-00942: table or view does not exist
-00942. 00000 -  "table or view does not exist"
-*Cause:    
-*Action:
+0 rows inserted.
+
 SQL> 
 SQL> spool off;

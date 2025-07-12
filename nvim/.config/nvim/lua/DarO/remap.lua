@@ -154,6 +154,10 @@ vim.keymap.set('n', '<leader>rp', function()
    vim.fn.setreg('+', relative_path)
    vim.notify('Copied path: ' .. relative_path)
 end, { desc = 'Copy current file path to clipboard (relative)' })
+vim.keymap.set("n", "<leader>ov", function()
+   local filepath = vim.fn.expand('%:p')
+   vim.system({'code', filepath})
+end, { desc = "Open current file in VSCode" })
 
 -- Markdown Preview
 vim.keymap.set("n", "<leader>m", "<CMD>MarkdownPreview<CR>", { desc = "Start Markdown preview" })

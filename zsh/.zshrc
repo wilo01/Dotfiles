@@ -115,35 +115,6 @@ fi
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-# nvim swithcer
-alias nvim-vimscript="NVIM_APPNAME=nvim-vimscript nvim"
-alias nvim-reddit="NVIM_APPNAME=nvim-reddit nvim"
-
-function nvims() {
-    # Generate a list of configurations dynamically
-    local config_path="$HOME/.config"
-    local items=()
-    for config_dir in "$config_path"/nv*; do
-        if [[ -d $config_dir ]]; then
-            items+=("${config_dir##*/}")
-        fi
-    done
-    # Add the default nvim as an option
-    # items+=("nvim")
-
-    local config=$(printf "%s\n" "${items[@]}" | fzf --prompt=" Neovim Config  " --height=50% --layout=reverse --border --exit-0)
-    if [[ -z $config ]]; then
-        echo "Nothing selected"
-        return 0
-    elif [[ $config == "nvim" ]]; then
-        config=""
-    fi
-    NVIM_APPNAME=$config nvim $@
-}
-
-bindkey -s ^a "nvims\n"
-# end
-
 bindkey "^[[1;2C" forward-word
 bindkey "^[[1;2D" backward-word
 
@@ -221,6 +192,7 @@ alias gnome-terminal='gnome-terminal --full-screen'
 alias zshrc="echo sudo nvim ~/.zshrc ; sudo nvim ~/.zshrc "
 alias recat="echo ~/recatest/recatest_run.sh ; ~/recatest/recatest_run.sh"
 alias clear_cashe="echo free -h ; echo ; echo Before clean:; free -h ; echo ; echo After clean: ; echo sync \&\& echo 3 \| sudo tee /proc/sys/vm/drop_caches \&\& free -h ; sync && echo 3 | sudo tee /proc/sys/vm/drop_caches && free -h"
+# alias xsave="echo '$(xclip -selection clipboard -o)' >> ~/.clipboard_history ; cat ~/.clipboard_history"
 # Other exports
 export MANPAGER='nvim +Man!'
 # export MANWIDTH=999
@@ -261,3 +233,5 @@ export PYENV_ROOT="$HOME/.pyenv"
 command -v pyenv >/dev/null 2>&1 && eval "$(pyenv init --path)"
 command -v pyenv >/dev/null 2>&1 && eval "$(pyenv init -)"
 command -v pyenv >/dev/null 2>&1 && eval "$(pyenv virtualenv-init -)"
+
+alias claude="/home/dariuszw/.claude/local/claude"
