@@ -5942,3 +5942,24 @@ AI/claude/.claude/statsig/statsig.session_id.2656274335
 Notes.md
 Stash_Notes.md
 - Commit branch HASH [0a8263af77572f000b27b8dfb08f1882d5c56340](master)
+
+# 2025-07-16 06:28
+## Linux
+Linux
+
+Linux
+
+Logs:
+- Add tm and taskmaster aliases for task-master command
+- Configure global git excludesfile in gitconfig
+- Add new GTK bookmark for tds-suite directory
+- Add git hunk comment removal keybind (<leader>*)
+- Update VSCode opener formatting in nvim remap
+- Document changes in commit notes with timestamps
+
+Commit_notes.md
+Sway/.config/gtk-3.0/bookmarks
+gitconfig/.gitconfig
+nvim/.config/nvim/lua/DarO/remap.lua
+zsh/.zshrc
+- Commit branch HASH [c2ec537a6b8eefad40f5db824f1d5f5ac8dc872a](Linux)
