@@ -100,6 +100,58 @@ vim.keymap.set("n", "<leader>c/", function()
    vim.notify("Comment removed from the current line!", vim.log.levels.INFO)
 end, { desc = "Remove comment from current line" })
 
+vim.keymap.set("n", "<leader>*", function()
+   local gitsigns = require('gitsigns')
+   local ft = vim.bo.filetype
+   local comment_patterns = {
+      javascript = "//",
+      lua = "%-%-",
+      python = "#",
+      c = "//",
+      sh = "#",
+      bash = "#",
+      zsh = "#",
+      vim = '"',
+   }
+
+   local pattern = comment_patterns[ft]
+
+   if not pattern then
+      vim.notify("No comment pattern defined for filetype: " .. ft, vim.log.levels.WARN)
+      return
+   end
+
+   local bufnr = vim.api.nvim_get_current_buf()
+   local hunks = gitsigns.get_hunks(bufnr)
+
+   if not hunks or #hunks == 0 then
+      vim.notify("No git changes found in current buffer", vim.log.levels.INFO)
+      return
+   end
+
+   local removed_count = 0
+   for _, hunk in ipairs(hunks) do
+      if hunk.added and hunk.added.start and hunk.added.count > 0 then
+         local start_line = hunk.added.start - 1 -- Convert to 0-based
+         local end_line = start_line + hunk.added.count - 1
+
+         for line_idx = start_line, end_line do
+            local lines = vim.api.nvim_buf_get_lines(bufnr, line_idx, line_idx + 1, false)
+            if lines[1] then
+               local original_line = lines[1]
+               local updated_line = original_line:gsub(pattern .. ".*", "")
+               if original_line ~= updated_line then
+                  vim.api.nvim_buf_set_lines(bufnr, line_idx, line_idx + 1, false, { updated_line })
+                  removed_count = removed_count + 1
+               end
+            end
+         end
+      end
+   end
+
+   vim.notify(string.format("Removed comments from %d changed lines", removed_count), vim.log.levels.INFO)
+end, { desc = "Remove comments from git-changed lines only" })
+
 -- Clipboard Operations
 vim.keymap.set("x", "p", "\"_dP", { desc = "Replace with yanked text, and keep yanked" })
 vim.keymap.set("x", "<leader>p", "p", { desc = "Replace with yanked text, and new yanked text" })
@@ -156,7 +208,7 @@ vim.keymap.set('n', '<leader>rp', function()
 end, { desc = 'Copy current file path to clipboard (relative)' })
 vim.keymap.set("n", "<leader>ov", function()
    local filepath = vim.fn.expand('%:p')
-   vim.system({'code', filepath})
+   vim.system({ 'code', filepath })
 end, { desc = "Open current file in VSCode" })
 
 -- Markdown Preview

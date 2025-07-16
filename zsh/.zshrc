@@ -235,3 +235,7 @@ command -v pyenv >/dev/null 2>&1 && eval "$(pyenv init -)"
 command -v pyenv >/dev/null 2>&1 && eval "$(pyenv virtualenv-init -)"
 
 alias claude="/home/dariuszw/.claude/local/claude"
+
+# Task Master aliases added on 7/15/2025
+alias tm='task-master'
+alias taskmaster='task-master'

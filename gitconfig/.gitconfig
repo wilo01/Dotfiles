@@ -12,6 +12,7 @@
 	editor = nvim
 	hooksPath = /home/dariuszw/.git-template/hooks
 	pager = delta
+	excludesfile = /home/dariuszw/gitconfig/gitignore/.gitignore
 [safe]
 	directory = /home/dariuszw/.local/share/nvim/site/pack/packer/start/packer.nvim
 	directory = ~/Dev/branch-opener/branches/safe

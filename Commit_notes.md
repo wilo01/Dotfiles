@@ -5819,3 +5819,126 @@ AI/claude/.claude/todos/b4426d82-d8e4-4594-9a35-f4269534b86e-agent-b4426d82-d8e4
 AI/docker-env.sh
 Notes.md
 - Commit branch HASH [7f8831d1aa3ac72ef29aaf3210e7a7db07b01201](master)
+
+# 2025-07-12 09:35
+## Linux
+Linux
+
+Linux
+
+Logs:
+- Add tmux keybind H for tds-hexer project navigation
+- Add <leader>ov mapping to open current file in VSCode
+- Add GTK bookmark for new_icons directory
+- Add claude CLI alias for easier access
+- Update various config files and logs
+
+Commit_notes.md
+Sway/.config/gtk-3.0/bookmarks
+nvim/.config/nvim/lua/DarO/remap.lua
+sqldev/.sqldeveloper/ca_basic_data.log
+tmux/.tmux.conf
+zsh/.oh-my-zsh/cache/.zsh-update
+zsh/.zshrc
+- Commit branch HASH [8bb6d97bb1628722d7afc563bef57025cd9d9cce](Linux)
+
+# 2025-07-14 09:54
+## master
+master
+
+master
+
+Logs:
+- Update notes
+
+Notes.md
+- Commit branch HASH [b76257dafd6f4208baa378307d51671228554ac4](master)
+
+# 2025-07-14 09:54
+## master
+master
+
+master
+
+Logs:
+- Adding new files
+
+AI/claude/.claude/projects/-home-dariuszw--Dotfiles/0deb94cb-a638-45df-a726-56c20497edeb.jsonl
+AI/claude/.claude/projects/-home-dariuszw--Dotfiles/417ffe3b-3817-45cb-bd2e-121a91a78fa6.jsonl
+AI/claude/.claude/projects/-home-dariuszw--Dotfiles/8106db00-6f99-47b0-bb0c-6a46deaebc6c.jsonl
+AI/claude/.claude/projects/-home-dariuszw--Dotfiles/c7bd171b-b2dc-420e-92c1-506ff548a6ca.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-hexer/0e725f23-7d11-4b61-be54-e15106377517.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-hexer/2603fb25-e41f-4a93-9898-7c0e6fe060b3.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-hexer/450ee64a-cb24-44ed-960c-ea8c14638911.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-hexer/45218084-ecdc-4987-8b7c-98bd24c135fb.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-hexer/897ef0d9-c932-45a1-9ea3-974d2170db77.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-hexer/a00340e0-65f2-4347-b9ab-cf4978cdbf70.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-suite--claude/58080ca2-9c0b-4e83-9365-4ae974022eea.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-suite/21d63cca-ec92-46b8-abbc-d523d13025ab.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-suite/23ff301e-8645-4a54-a795-bbf898452c09.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-suite/291add66-0850-4503-8e9d-bc1f3147d527.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-suite/2e98dc89-0eee-4767-b093-3984439cdeef.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-suite/3e2a9a47-238e-43b8-b27e-dbf542df35d1.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-suite/6e277679-d269-4d99-a77e-0d6574ea4679.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-suite/78372d39-bf1b-4195-9365-6438511c64cc.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-suite/83a2487d-06f8-4d27-bbca-bacf6a3a406d.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-suite/87799bfa-9582-4b23-ac8c-8b216852eb07.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-suite/888205d0-f775-4cfa-a45b-0531cc6bb6ee.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-suite/8d0ac8d3-c4da-4196-a295-141f9235ec24.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-suite/90558b51-1085-4da3-a246-9b3065d95e3d.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-suite/c38cd477-6a30-4bc0-a0b3-de1c22b6a5c2.jsonl
+AI/claude/.claude/projects/-home-dariuszw-Dev-branch-opener-branches-tds-suite/e5603b76-8d27-4559-8b7d-7b236a36c1ad.jsonl
+AI/claude/.claude/statsig/statsig.cached.evaluations.d1330577c8
+AI/claude/.claude/statsig/statsig.last_modified_time.evaluations
+AI/claude/.claude/statsig/statsig.session_id.2656274335
+AI/claude/.claude/todos/0deb94cb-a638-45df-a726-56c20497edeb-agent-0deb94cb-a638-45df-a726-56c20497edeb.json
+AI/claude/.claude/todos/0e725f23-7d11-4b61-be54-e15106377517-agent-0e725f23-7d11-4b61-be54-e15106377517.json
+AI/claude/.claude/todos/1f165c6c-49c4-484d-8007-f8427cc0a889-agent-1f165c6c-49c4-484d-8007-f8427cc0a889.json
+AI/claude/.claude/todos/21d63cca-ec92-46b8-abbc-d523d13025ab-agent-21d63cca-ec92-46b8-abbc-d523d13025ab.json
+AI/claude/.claude/todos/23ff301e-8645-4a54-a795-bbf898452c09-agent-23ff301e-8645-4a54-a795-bbf898452c09.json
+AI/claude/.claude/todos/2603fb25-e41f-4a93-9898-7c0e6fe060b3-agent-2603fb25-e41f-4a93-9898-7c0e6fe060b3.json
+AI/claude/.claude/todos/291add66-0850-4503-8e9d-bc1f3147d527-agent-291add66-0850-4503-8e9d-bc1f3147d527.json
+AI/claude/.claude/todos/2da31526-dd71-4c43-aace-936520ce8dd2-agent-2da31526-dd71-4c43-aace-936520ce8dd2.json
+AI/claude/.claude/todos/2e98dc89-0eee-4767-b093-3984439cdeef-agent-2e98dc89-0eee-4767-b093-3984439cdeef.json
+AI/claude/.claude/todos/3e2a9a47-238e-43b8-b27e-dbf542df35d1-agent-3e2a9a47-238e-43b8-b27e-dbf542df35d1.json
+AI/claude/.claude/todos/3e2a9a47-238e-43b8-b27e-dbf542df35d1-agent-a8a37a20-d2e1-4995-bb33-5dbf6c25ebe3.json
+AI/claude/.claude/todos/417ffe3b-3817-45cb-bd2e-121a91a78fa6-agent-417ffe3b-3817-45cb-bd2e-121a91a78fa6.json
+AI/claude/.claude/todos/450ee64a-cb24-44ed-960c-ea8c14638911-agent-450ee64a-cb24-44ed-960c-ea8c14638911.json
+AI/claude/.claude/todos/45218084-ecdc-4987-8b7c-98bd24c135fb-agent-45218084-ecdc-4987-8b7c-98bd24c135fb.json
+AI/claude/.claude/todos/58080ca2-9c0b-4e83-9365-4ae974022eea-agent-58080ca2-9c0b-4e83-9365-4ae974022eea.json
+AI/claude/.claude/todos/6e277679-d269-4d99-a77e-0d6574ea4679-agent-6e277679-d269-4d99-a77e-0d6574ea4679.json
+AI/claude/.claude/todos/78372d39-bf1b-4195-9365-6438511c64cc-agent-78372d39-bf1b-4195-9365-6438511c64cc.json
+AI/claude/.claude/todos/8106db00-6f99-47b0-bb0c-6a46deaebc6c-agent-8106db00-6f99-47b0-bb0c-6a46deaebc6c.json
+AI/claude/.claude/todos/82eaccd9-9e7b-4f37-b962-9d22365854d0-agent-82eaccd9-9e7b-4f37-b962-9d22365854d0.json
+AI/claude/.claude/todos/83a2487d-06f8-4d27-bbca-bacf6a3a406d-agent-83a2487d-06f8-4d27-bbca-bacf6a3a406d.json
+AI/claude/.claude/todos/87799bfa-9582-4b23-ac8c-8b216852eb07-agent-87799bfa-9582-4b23-ac8c-8b216852eb07.json
+AI/claude/.claude/todos/888205d0-f775-4cfa-a45b-0531cc6bb6ee-agent-888205d0-f775-4cfa-a45b-0531cc6bb6ee.json
+AI/claude/.claude/todos/897ef0d9-c932-45a1-9ea3-974d2170db77-agent-897ef0d9-c932-45a1-9ea3-974d2170db77.json
+AI/claude/.claude/todos/8d0ac8d3-c4da-4196-a295-141f9235ec24-agent-8d0ac8d3-c4da-4196-a295-141f9235ec24.json
+AI/claude/.claude/todos/90558b51-1085-4da3-a246-9b3065d95e3d-agent-90558b51-1085-4da3-a246-9b3065d95e3d.json
+AI/claude/.claude/todos/983e1c0c-2835-414e-b326-a07899383b7e-agent-983e1c0c-2835-414e-b326-a07899383b7e.json
+AI/claude/.claude/todos/a00340e0-65f2-4347-b9ab-cf4978cdbf70-agent-a00340e0-65f2-4347-b9ab-cf4978cdbf70.json
+AI/claude/.claude/todos/c38cd477-6a30-4bc0-a0b3-de1c22b6a5c2-agent-c38cd477-6a30-4bc0-a0b3-de1c22b6a5c2.json
+AI/claude/.claude/todos/c7bd171b-b2dc-420e-92c1-506ff548a6ca-agent-c7bd171b-b2dc-420e-92c1-506ff548a6ca.json
+AI/claude/.claude/todos/e5603b76-8d27-4559-8b7d-7b236a36c1ad-agent-e5603b76-8d27-4559-8b7d-7b236a36c1ad.json
+AI/prompts.md
+"Docs/JIRA_ VIS-4528 by martinsarvas \302\267 Pull Request #233 \302\267 acreidentity_tds-suite.pdf"
+Scripts/.env-old
+Scripts/.env-old2
+Scripts/.env-old3
+Stash_Notes.md
+- Commit branch HASH [f81fa8436afac39b78857598eb80232ffe8bc163](master)
+
+# 2025-07-14 10:10
+## master
+master
+
+master
+
+Logs:
+- Added new notes
+
+AI/claude/.claude/statsig/statsig.session_id.2656274335
+Notes.md
+Stash_Notes.md
+- Commit branch HASH [0a8263af77572f000b27b8dfb08f1882d5c56340](master)
