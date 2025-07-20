@@ -15,9 +15,9 @@
 	excludesfile = /home/dariuszw/gitconfig/gitignore/.gitignore
 [safe]
 	directory = /home/dariuszw/.local/share/nvim/site/pack/packer/start/packer.nvim
-	directory = ~/Dev/branch-opener/branches/safe
+	directory = /home/dariuszw/Dev/branch-opener/branches/tds-suite/
 [maintenance]
-	repo = /home/dariuszw/Dev/branch-opener/branches/safe
+	repo =/home/dariuszw/Dev/branch-opener/branches/tds-suite/
 [init]
    templateDir = /home/dariusz/.git-template/
 [git-hooks]
