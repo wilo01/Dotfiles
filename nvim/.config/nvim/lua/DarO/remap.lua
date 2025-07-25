@@ -345,16 +345,36 @@ local function open_git_online()
    local repo_path
    local base_url
 
-   if remote_url:match("github.com") then
-      repo_path = remote_url:match("git@github.com:(.+)%.git") or remote_url:match("https://github.com/(.+)%.git")
-      base_url = "https://github.com"
-   elseif remote_url:match("gitlab.com") then
-      repo_path = remote_url:match("git@gitlab.com:(.+)%.git") or remote_url:match("https://gitlab.com/(.+)%.git")
-      base_url = "https://gitlab.com"
-   else
+   local git_hosts = {
+      github = {
+         pattern = "github",
+         base_url = "https://github.com",
+         ssh_pattern = "git@[^:]*github[^:]*:(.+)%.git",
+         https_pattern = "https://[^/]*github[^/]*/(.+)%.git"
+      },
+      gitlab = {
+         pattern = "gitlab",
+         base_url = "https://gitlab.com",
+         ssh_pattern = "git@[^:]*gitlab[^:]*:(.+)%.git",
+         https_pattern = "https://[^/]*gitlab[^/]*/(.+)%.git"
+      }
+   }
+
+   local detected_host = nil
+   for host_name, host_config in pairs(git_hosts) do
+      if remote_url:find(host_config.pattern) then
+         detected_host = host_config
+         break
+      end
+   end
+
+   if not detected_host then
       print("Error: Unsupported remote host!")
       return
    end
+
+   repo_path = remote_url:match(detected_host.ssh_pattern) or remote_url:match(detected_host.https_pattern)
+   base_url = detected_host.base_url
 
    local branch = vim.fn.system("git branch --show-current"):gsub("\n", "")
    local file_path = vim.fn.expand("%:p")
