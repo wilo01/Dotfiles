@@ -3,7 +3,6 @@ import time
 import random
 import argparse
 import pyshorteners
-from pynput.keyboard import Controller
 import pyperclip
 import segno
 import shutil
@@ -15,7 +14,8 @@ type_tiny = pyshorteners.Shortener()
 rfid_badge = '@4324325553#'
 qr_badge = '$4324325553#'
 
-keyboard = Controller()  # Create the controller
+# Only import pynput when needed for keyboard functions
+keyboard = None
 
 def create_temp_dir(path):
     os.makedirs(path, exist_ok=True)
@@ -34,6 +34,17 @@ def copy_and_override_files(source1, source2, temp_dir):
         shutil.copy(os.path.join(source2, file_name), temp_dir)
 
 def type_string_with_delay(string):
+    global keyboard
+    if keyboard is None:
+        try:
+            from pynput.keyboard import Controller
+            keyboard = Controller()
+        except ImportError as e:
+            print(f"Error: Cannot use keyboard automation: {e}")
+            print("Running in CLI-only mode. Text copied to clipboard instead.")
+            pyperclip.copy(string)
+            return
+    
     delay = 2
     time.sleep(delay)  # Sleep for the amount of seconds generated
     for character in string:  # Loop over each character in the string

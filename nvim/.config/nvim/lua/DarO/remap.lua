@@ -130,6 +130,9 @@ vim.keymap.set("n", "<leader>*", function()
    end
 
    local removed_count = 0
+   local deleted_lines = 0
+   local lines_to_delete = {}
+
    for _, hunk in ipairs(hunks) do
       if hunk.added and hunk.added.start and hunk.added.count > 0 then
          local start_line = hunk.added.start - 1 -- Convert to 0-based
@@ -139,18 +142,34 @@ vim.keymap.set("n", "<leader>*", function()
             local lines = vim.api.nvim_buf_get_lines(bufnr, line_idx, line_idx + 1, false)
             if lines[1] then
                local original_line = lines[1]
-               local updated_line = original_line:gsub(pattern .. ".*", "")
-               if original_line ~= updated_line then
-                  vim.api.nvim_buf_set_lines(bufnr, line_idx, line_idx + 1, false, { updated_line })
+
+               if original_line:match("^%s*" .. pattern) then
+                  table.insert(lines_to_delete, line_idx)
                   removed_count = removed_count + 1
+               else
+                  local updated_line = original_line:gsub("%s*" .. pattern .. ".*", "")
+                  if original_line ~= updated_line then
+                     vim.api.nvim_buf_set_lines(bufnr, line_idx, line_idx + 1, false, { updated_line })
+                     removed_count = removed_count + 1
+                  end
                end
             end
          end
       end
    end
 
-   vim.notify(string.format("Removed comments from %d changed lines", removed_count), vim.log.levels.INFO)
-end, { desc = "Remove comments from git-changed lines only" })
+   table.sort(lines_to_delete, function(a, b) return a > b end)
+   for _, line_idx in ipairs(lines_to_delete) do
+      vim.api.nvim_buf_set_lines(bufnr, line_idx, line_idx + 1, false, {})
+      deleted_lines = deleted_lines + 1
+   end
+
+   local msg = string.format("Removed comments from %d changed lines", removed_count)
+   if deleted_lines > 0 then
+      msg = msg .. string.format(" (deleted %d empty lines)", deleted_lines)
+   end
+   vim.notify(msg, vim.log.levels.INFO)
+end, { desc = "Remove comments from git-changed lines and delete empty comment lines" })
 
 -- Clipboard Operations
 vim.keymap.set("x", "p", "\"_dP", { desc = "Replace with yanked text, and keep yanked" })

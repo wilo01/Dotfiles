@@ -72,9 +72,9 @@ return {
                "ext%-all%-rtl%.js$",
                "ext%-all%-rtl%-debug%.js$",
                "source/ui/api/bundle%.js",
-               "source/ui%-student%-portal",
+               -- "source/ui%-student%-portal",
                "source/ui%-muster",
-               "source/server/database/sql/student/",
+               -- "source/server/database/sql/student/",
                "source/server/rtmuster",
                "test/Cypress/cypress/e2e/safe/"
             },
