@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Wrapper script for Claude Code Prompt Manager
+# Makes the prompt manager available system-wide
+
+exec /home/dariuszw/.Dotfiles/.claude/prompts/prompt-manager.sh "$@"

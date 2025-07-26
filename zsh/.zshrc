@@ -239,3 +239,6 @@ alias claude="/home/dariuszw/.claude/local/claude"
 # Task Master aliases added on 7/15/2025
 alias tm='task-master'
 alias taskmaster='task-master'
+
+# Simple listing alias for small screens (files and directories including hidden)
+alias lsd='command ls -1a --color=always'
