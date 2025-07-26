@@ -27,8 +27,7 @@ set $rofi_cmd rofi \
         -terminal '$term'
 # Shows a combined list of the applications with desktop files and
 # executables from PATH.
-# TODO: add window with the next release of rofi-wayland
-set $menu $rofi_cmd -show combi -combi-modes drun#run -modes combi
+set $menu $rofi_cmd -show combi -combi-modes drun#run#window -modes combi
 
 #bindsym Mod4+space exec rofi -show drun
 
@@ -71,10 +70,10 @@ input "type:touchpad" {
 #
 for_window [class=".*"] inhibit_idle fullscreen
 for_window [app_id=".*"] inhibit_idle fullscreen
-# exec swayidle -w \
-#          timeout 300 'swaylock -i $default_bg -f' \
-#          timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
-#          before-sleep 'swaylock -i $default_bg -f'
+exec swayidle -w \
+         timeout 300 'swaylock -i $default_bg -f' \
+         timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
+         before-sleep 'swaylock -i $default_bg -f'
 #
 # This will lock your screen after 300 seconds of inactivity, then turn off
 # your displays after another 300 seconds, and turn your screens back on when
@@ -137,7 +136,7 @@ for_window [app_id=".*"] inhibit_idle fullscreen
     bindsym $mod+Shift+Escape exec "[ -z $(pgrep swaynag) ] && swaynag -t warning -m 'Power Menu Options' -B 'Logout' 'swaymsg exit' -B 'Restart' 'shutdown -r now' -b 'Shutdown' 'shutdown -h now'"
 
     # Reload the configuration file
-    bindsym $mod+Shift+c reload
+    bindsym $mod+Shift+r reload
 
     # Start your launcher
     bindsym $mod+space exec $menu
@@ -263,6 +262,12 @@ for_window [app_id=".*"] inhibit_idle fullscreen
     # Move focus to the parent container
     bindsym $mod+a focus parent
     bindsym $mod+z focus child
+
+    # Dynamic gap controls
+    bindsym $mod+equal gaps inner current plus 5
+    bindsym $mod+minus gaps inner current minus 5
+    bindsym $mod+Shift+equal gaps outer current plus 5
+    bindsym $mod+Shift+minus gaps outer current minus 5
 
     #Floating Apps
     for_window [app_id="thunar"] floating enable, resize set 1200 800
