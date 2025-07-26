@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "helper-cli"
-version = "0.1.0"
+version = "0.1.1"
 description = "Development helper CLI for JIRA, badges, URLs, and automation tasks"
 authors = [{name = "Helper CLI", email = "dev@example.com"}]
 license = {text = "MIT"}

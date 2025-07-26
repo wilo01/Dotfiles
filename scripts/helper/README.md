@@ -33,7 +33,7 @@ helper jira "Fix user authentication issue"
 # Generate RFID badge
 helper badge 4324325553 --type rfid
 
-# Generate QR badge  
+# Generate QR badge
 helper badge 4324325553 --type qr
 
 # Create git stash command
