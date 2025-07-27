@@ -27,7 +27,16 @@ return {
                enabled = function()
                   return Snacks.git.get_root() ~= nil
                end,
-               cmd = "hub --no-pager diff --stat -B -M -C",
+               cmd = (function()
+                  -- Use git command for Neovim v0.11.3+ (Flatpak compatible), hub for older versions
+                  local version = vim.version()
+                  if version.major > 0 or (version.major == 0 and version.minor > 11) or
+                     (version.major == 0 and version.minor == 11 and version.patch >= 3) then
+                     return "git --no-pager diff --stat -B -M -C"
+                  else
+                     return "hub --no-pager diff --stat -B -M -C"
+                  end
+               end)(),
                ttl = 5 * 60,
                indent = 3,
                padding = 1,
