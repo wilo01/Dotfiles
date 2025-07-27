@@ -119,8 +119,8 @@ bindkey "^[[1;2C" forward-word
 bindkey "^[[1;2D" backward-word
 
 # cd & ls movements
-alias LS="echo ls -lha -F --show-control-chars --time-style=locale --color=auto ; ls -lha -F --show-control-chars --time-style=locale --color=auto"
-alias ls="echo ls -lha -F --show-control-chars --time-style=locale --color=auto ; ls -lha -F --show-control-chars --time-style=locale --color=auto"
+alias ls="ls --group-directories-first --color=auto"
+alias ll="ls -lha -F --show-control-chars --time-style=locale --color=auto"
 # alias cd="~/bin/.local/scripts/tmux-sessionizer"
 # alias CD="~/bin/.local/scripts/tmux-sessionizer"
 alias CD="cd"
@@ -241,5 +241,3 @@ alias clauded="/home/dariuszw/.claude/local/claude --dangerously-skip-permission
 alias tm='task-master'
 alias taskmaster='task-master'
 
-# Simple listing alias for small screens (files and directories including hidden)
-alias lsd='command ls -1a --color=always'
