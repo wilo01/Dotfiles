@@ -8,22 +8,22 @@ The TDS Suite uses Oracle Database running in Docker container 'trunk'.
 
 **Connection Details:**
 - **Container Name**: `trunk`
-- **Database User**: `coreaccess`
-- **Password**: `xy*0m9`
-- **Database Service**: `xepdb1`
+- **Database User**: `some_user`
+- **Password**: `some_pass`
+- **Database Service**: `serv`
 - **Connection Role**: Normal user
 
 ### Standard Docker Database Query Pattern
 
 ```bash
 # Primary user access
-docker exec -i trunk bash -c "sqlplus -s 'coreaccess/xy*0m9@xepdb1'" <<EOF
+docker exec -i --env-file .env trunk bash -c "sqlplus -s '\$DB_USER/\$DB_PASS@\$DB_SERVICE'" <<EOF
 [SQL COMMANDS]
 EXIT;
 EOF
 
 # System administrator access
-docker exec -i trunk bash -c "sqlplus -s 'sys/TDSSuite1@xepdb1 as sysdba'" <<EOF
+docker exec -i --env-file .env trunk bash -c "sqlplus -s '\$DB_USER/\$DB_PASS@\$DB_SERVICE'" <<EOF
 [SQL COMMANDS]
 EXIT;
 EOF
@@ -33,7 +33,7 @@ EOF
 
 #### 1. Check Table Existence
 ```bash
-docker exec -i trunk bash -c "sqlplus -s 'sys/TDSSuite1@xepdb1 as sysdba'" <<EOF
+docker exec -i --env-file .env trunk bash -c "sqlplus -s '\$DB_USER/\$DB_PASS@\$DB_SERVICE'" <<EOF
 SELECT owner, table_name FROM all_tables WHERE table_name = 'CA_NDA_VERSION';
 EXIT;
 EOF
@@ -41,7 +41,7 @@ EOF
 
 #### 2. Describe Table Structure
 ```bash
-docker exec -i trunk bash -c "sqlplus -s 'coreaccess/xy*0m9@xepdb1'" <<EOF
+docker exec -i --env-file .env trunk bash -c "sqlplus -s '\$DB_USER/\$DB_PASS@\$DB_SERVICE'" <<EOF
 DESC ca_nda_mapping;
 EXIT;
 EOF
@@ -49,7 +49,7 @@ EOF
 
 #### 3. Query Table Data with Row Limit
 ```bash
-docker exec -i trunk bash -c "sqlplus -s 'coreaccess/xy*0m9@xepdb1'" <<EOF
+docker exec -i --env-file .env trunk bash -c "sqlplus -s '\$DB_USER/\$DB_PASS@\$DB_SERVICE'" <<EOF
 SELECT * FROM ca_nda_mapping WHERE ROWNUM <= 5;
 EXIT;
 EOF
@@ -57,7 +57,7 @@ EOF
 
 #### 4. Complex Query with Filters
 ```bash
-docker exec -i trunk bash -c "sqlplus -s 'coreaccess/xy*0m9@xepdb1'" <<EOF
+docker exec -i --env-file .env trunk bash -c "sqlplus -s '\$DB_USER/\$DB_PASS@\$DB_SERVICE'" <<EOF
 SELECT DISTINCT location_name FROM (
     SELECT CASE
         WHEN cnm.cnpt_code IS NOT NULL AND ccp.collection_point_description IS NOT NULL
@@ -77,7 +77,7 @@ EOF
 
 #### 5. Test Query Performance
 ```bash
-docker exec -i trunk bash -c "sqlplus -s 'coreaccess/xy*0m9@xepdb1'" <<EOF
+docker exec -i --env-file .env trunk bash -c "sqlplus -s '\$DB_USER/\$DB_PASS@\$DB_SERVICE'" <<EOF
 SET TIMING ON
 SELECT COUNT(*) FROM ca_nda_mapping;
 EXIT;
@@ -99,64 +99,6 @@ EOF
 - Use `ROWNUM <= N` for limiting large result sets
 - Test queries with small datasets first
 - Always verify table existence before complex operations
-
-#### 4. Error Handling
-```bash
-# Check if Docker container is running
-if ! docker ps | grep -q "trunk"; then
-    echo "Error: Docker container 'trunk' is not running"
-    exit 1
-fi
-
-# Execute SQL with error checking
-RESULT=$(docker exec -i trunk bash -c "sqlplus -s 'sys/TDSSuite1@xepdb1 as sysdba'" <<EOF
-SELECT COUNT(*) FROM ca_nda_mapping;
-EXIT;
-EOF)
-
-if [[ $RESULT == *"ORA-"* ]]; then
-    echo "SQL Error: $RESULT"
-    exit 1
-fi
-```
-
-### Database Schema Investigation
-
-#### Create Reusable Database Inspection Scripts
-
-```bash
-#!/bin/bash
-# File: .github/scripts/inspect-table.sh
-# Usage: ./inspect-table.sh TABLE_NAME
-
-TABLE_NAME=${1:-CA_NDA_MAPPING}
-
-echo "=== TDS Suite Database Table Inspection: $TABLE_NAME ==="
-
-echo "1. Checking table existence:"
-docker exec -i trunk bash -c "sqlplus -s 'sys/TDSSuite1@xepdb1 as sysdba'" <<EOF
-SELECT owner, table_name FROM all_tables WHERE table_name = '$TABLE_NAME';
-EXIT;
-EOF
-
-echo "2. Table structure:"
-docker exec -i trunk bash -c "sqlplus -s 'sys/TDSSuite1@xepdb1 as sysdba'" <<EOF
-DESC $TABLE_NAME;
-EXIT;
-EOF
-
-echo "3. Sample data (first 3 rows):"
-docker exec -i trunk bash -c "sqlplus -s 'sys/TDSSuite1@xepdb1 as sysdba'" <<EOF
-SELECT * FROM $TABLE_NAME WHERE ROWNUM <= 3;
-EXIT;
-EOF
-
-echo "4. Row count:"
-docker exec -i trunk bash -c "sqlplus -s 'sys/TDSSuite1@xepdb1 as sysdba'" <<EOF
-SELECT COUNT(*) as total_rows FROM $TABLE_NAME;
-EXIT;
-EOF
-```
 
 ## REST API Architecture
 
