@@ -20,22 +20,6 @@
 				"OLLAMA_API_KEY": "YOUR_OLLAMA_API_KEY_HERE"
 			}
 		},
-		"sqlite": {
-			"type": "stdio",
-			"command": "npx",
-			"args": [
-				"-y",
-				"@modelcontextprotocol/server-sqlite"
-			]
-		},
-		"fetch": {
-			"type": "stdio",
-			"command": "npx",
-			"args": [
-				"-y",
-				"@modelcontextprotocol/server-fetch"
-			]
-		},
 		"filesystem": {
 			"type": "stdio",
 			"command": "npx",
@@ -44,15 +28,6 @@
 				"@modelcontextprotocol/server-filesystem",
 				"/home/dariuszw/.Dotfiles",
 				"/home/dariuszw/Dev"
-			]
-		},
-		"git": {
-			"type": "stdio",
-			"command": "npx",
-			"args": [
-				"-y",
-				"@modelcontextprotocol/server-git",
-				"--repository=/home/dariuszw/.Dotfiles"
 			]
 		}
 	}

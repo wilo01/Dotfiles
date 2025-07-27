@@ -1,56 +1,30 @@
 {
-  "allowedTools": [
-    "Edit",
-    "MultiEdit", 
-    "Read",
-    "Write",
-    "Bash",
-    "Glob",
-    "Grep",
-    "LS",
-    "TodoWrite",
-    "Task",
-    "ExitPlanMode",
-    "NotebookRead",
-    "NotebookEdit",
-    "WebFetch",
-    "WebSearch",
-    "mcp__task_master_ai__*"
-  ],
-  "deniedTools": [
-    "Bash(rm *)",
-    "Bash(rm -*)",
-    "Bash(*rm *)"
-  ],
-  "defaultProjectPath": "/home/dariuszw/AI",
-  "autoLoadContext": true,
-  "globalInstructions": "/home/dariuszw/AI/CLAUDE.md",
-  "sessionManagement": {
-    "clearBetweenTasks": true,
-    "maintainFocusedContext": true
-  },
-  "taskManagement": {
-    "useTaskMaster": true,
-    "requireJiraId": false,
-    "defaultStatus": "pending"
-  },
-  "security": {
-    "preventSecretLogging": true,
-    "validateInputData": true,
-    "enforcePermissionChecks": true,
-    "deniedFiles": [
-      ".env",
-      ".env*",
-      "env*",
-      ".secret*",
-      "*.pem",
-      "*.key",
-      "*.cert",
-      "*.crt",
-      "**/secrets/**",
-      "**/node_modules/**",
-      "**/credentials/**"
+  "permissions": {
+    "allowedTools": [
+      "Edit",
+      "MultiEdit", 
+      "Read",
+      "Write",
+      "Bash",
+      "Glob",
+      "Grep",
+      "LS",
+      "TodoWrite",
+      "Task",
+      "ExitPlanMode",
+      "NotebookRead",
+      "NotebookEdit",
+      "WebFetch",
+      "WebSearch",
+      "mcp__task_master_ai__*"
     ],
-    "deniedFileMessage": "Access denied: This file type contains sensitive information and is protected by security policy."
-  }
+    "deniedTools": [
+      "Bash(rm *)",
+      "Bash(rm -*)",
+      "Bash(*rm *)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "includeCoAuthoredBy": true,
+  "cleanupPeriodDays": 30
 }
