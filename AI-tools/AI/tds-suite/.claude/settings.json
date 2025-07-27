@@ -9,12 +9,12 @@
     "Bash(liquibase *)",
     "Bash(docker *)"
   ],
-  "projectInstructions": "/home/dariuszw/AI/tds-suite/CLAUDE.md",
+  "projectInstructions": "/home/dariuszw/.Dotfiles/AI-tools/AI/tds-suite/CLAUDE.md",
   "projectContext": {
-    "sharedKnowledge": "/home/dariuszw/AI/tds-suite/shared/",
-    "patterns": "/home/dariuszw/AI/tds-suite/patterns/",
-    "protocols": "/home/dariuszw/AI/tds-suite/protocols/",
-    "agentConfigs": "/home/dariuszw/AI/tds-suite/agents/"
+    "sharedKnowledge": "/home/dariuszw/.Dotfiles/AI-tools/AI/tds-suite/shared/",
+    "patterns": "/home/dariuszw/.Dotfiles/AI-tools/AI/tds-suite/patterns/",
+    "protocols": "/home/dariuszw/.Dotfiles/AI-tools/AI/tds-suite/protocols/",
+    "agentConfigs": "/home/dariuszw/.Dotfiles/AI-tools/AI/tds-suite/agents/"
   },
   "taskManagement": {
     "requireJiraId": true,
@@ -40,12 +40,21 @@
     }
   },
   "multiAgent": {
-    "coordinationProtocol": "/home/dariuszw/AI/tds-suite/protocols/MULTI_AGENT_COORDINATION.md",
-    "fileConflictPrevention": "/home/dariuszw/AI/tds-suite/protocols/FILE_CONFLICT_PREVENTION.md",
+    "coordinationProtocol": "/home/dariuszw/.Dotfiles/AI-tools/AI/tds-suite/protocols/MULTI_AGENT_COORDINATION.md",
+    "fileConflictPrevention": "/home/dariuszw/.Dotfiles/AI-tools/AI/tds-suite/protocols/FILE_CONFLICT_PREVENTION.md",
     "roles": {
       "claude": "Senior Software Developer - Complex implementation",
       "gemini": "Task Manager & Planner - Planning mode only", 
       "copilot": "Coordinated Assistant - Simple tasks"
     }
+  },
+  "environment": {
+    "WORKSPACE": "/home/dariuszw/.Dotfiles/AI-tools/AI/tds-suite/.claude"
+  },
+  "experimentalTools": {},
+  "experimentalHooks": {
+    "preToolUse": "bash /home/dariuszw/.Dotfiles/AI-tools/AI/tds-suite/.claude/hooks/mcp-security-scan.sh",
+    "preToolUse_gemini": "bash /home/dariuszw/.Dotfiles/AI-tools/AI/tds-suite/.claude/hooks/gemini-context-injector.sh",
+    "preToolUse_task": "bash /home/dariuszw/.Dotfiles/AI-tools/AI/tds-suite/.claude/hooks/subagent-context-injector.sh"
   }
 }
