@@ -120,7 +120,7 @@ bindkey "^[[1;2D" backward-word
 
 # cd & ls movements
 alias ls="ls --group-directories-first --color=auto"
-alias ll="ls -lha -F --show-control-chars --time-style=locale --color=auto"
+alias ll="ls -lha -F --show-control-chars --time-style=locale --group-directories-first --color=auto"
 # alias cd="~/bin/.local/scripts/tmux-sessionizer"
 # alias CD="~/bin/.local/scripts/tmux-sessionizer"
 alias CD="cd"
