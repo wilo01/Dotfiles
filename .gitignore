@@ -42,6 +42,8 @@ node_modules/
 # OS specific
 .DS_Store
 
+__pycache__
+
 # Task files
 # tasks.json
 # tasks/ 

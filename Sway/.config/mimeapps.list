@@ -7,8 +7,10 @@ x-scheme-handler/unknown=google-chrome.desktop
 x-scheme-handler/postman=Postman.desktop
 inode/directory=thunar.desktop
 x-scheme-handler/mailto=google-chrome.desktop
+application/octet-stream=cc.arduino.arduinoide.desktop
 
 [Added Associations]
 image/png=vimiv.desktop;imv.desktop;
 text/csv=google-chrome.desktop;
 application/msword=google-chrome.desktop;
+application/octet-stream=cc.arduino.arduinoide.desktop;
