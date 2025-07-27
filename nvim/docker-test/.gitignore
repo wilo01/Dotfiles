@@ -1,0 +1,10 @@
+# Docker build artifacts
+.dockerignore
+
+# Temporary test files
+*.tmp
+*.log
+
+# IDE files
+.vscode/
+.idea/
