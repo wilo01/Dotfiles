@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(prompt-manager:*)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(pip install:*)",
+      "Bash(helper:*)",
+      "Bash(command ls -la /home/dariuszw/)",
+      "Bash(ls:*)",
+      "Bash(cp:*)",
+      "Bash(mkdir:*)",
+      "Bash(command ls -la /home/dariuszw/.Dotfiles/)",
+      "Bash(command ls -la /home/dariuszw/.Dotfiles/taskwarrior/)",
+      "Bash(command ls -la /home/dariuszw/.Dotfiles/zsh/)",
+      "Bash(stow:*)",
+      "Bash(command ls -la /home/dariuszw/.Dotfiles/git/)",
+      "Bash(command ls -la /home/dariuszw/.Dotfiles/git/.config/git/)",
+      "Bash(command ls -la /home/dariuszw/.Dotfiles/gitconfig/)",
+      "Bash(mv:*)",
+      "Bash(rofi:*)",
+      "Bash(docker run:*)",
+      "Bash(nvim:*)",
+      "Bash(chmod:*)",
+      "Bash(tmux source-file:*)",
+      "Bash(tree:*)"
+    ],
+    "deny": []
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "task-master-ai"
+  ],
+  "hooks": {}
+}

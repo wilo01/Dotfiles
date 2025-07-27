@@ -1,0 +1,31 @@
+{
+  "sessions": [
+    {
+      "id": "2025-07-26_00-49-10_This_is_a_longer_test_prompt_to_verify_the_automat",
+      "title": "This is a longer test prompt to verify the automat",
+      "tags": "auto-captured,testing",
+      "timestamp": "2025-07-26T00:49:10+01:00"
+    },
+    {
+      "id": "2025-07-26_00-49-40_This_is_a_longer_test_prompt_to_verify_the_automat",
+      "title": "This is a longer test prompt to verify the automat",
+      "tags": "auto-captured,testing",
+      "timestamp": "2025-07-26T00:49:40+01:00"
+    },
+    {
+      "id": "2025-07-26_00-50-29_heres_the_prompt_test",
+      "title": "heres the prompt test",
+      "tags": "auto-captured,testing",
+      "timestamp": "2025-07-26T00:50:29+01:00"
+    },
+    {
+      "id": "2025-07-26_00-57-00_Lua_refactoring_-_pattern_matching_for_git_remotes",
+      "title": "Lua refactoring - pattern matching for git remotes",
+      "tags": "lua,refactoring,git,pattern-matching",
+      "timestamp": "2025-07-26T00:57:00+01:00"
+    }
+  ],
+  "saved_prompts": [],
+  "tags": [],
+  "last_updated": "2025-07-26T00:57:00+01:00"
+}

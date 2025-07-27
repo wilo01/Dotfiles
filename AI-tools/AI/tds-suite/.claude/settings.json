@@ -1,0 +1,51 @@
+{
+  "extends": "../.claude/settings.json",
+  "allowedTools": [
+    "Bash(npm run *)",
+    "Bash(sencha *)",
+    "Bash(make *)",
+    "Bash(task-master *)",
+    "Bash(git *)",
+    "Bash(liquibase *)",
+    "Bash(docker *)"
+  ],
+  "projectInstructions": "/home/dariuszw/AI/tds-suite/CLAUDE.md",
+  "projectContext": {
+    "sharedKnowledge": "/home/dariuszw/AI/tds-suite/shared/",
+    "patterns": "/home/dariuszw/AI/tds-suite/patterns/",
+    "protocols": "/home/dariuszw/AI/tds-suite/protocols/",
+    "agentConfigs": "/home/dariuszw/AI/tds-suite/agents/"
+  },
+  "taskManagement": {
+    "requireJiraId": true,
+    "jiraPattern": "VIS-\\d+",
+    "taskStatuses": ["pending", "in-progress", "review", "blocked"],
+    "neverMarkDone": true
+  },
+  "tdsSpecific": {
+    "primaryFileOwnership": [
+      "source/ui/app/",
+      "source/server/rt/",
+      "source/ui/css/"
+    ],
+    "developmentCommands": {
+      "database": ["npm run lldupdate", "make db-update"],
+      "testing": ["npm run devDocker", "npm run devDockerAll"],
+      "build": ["sencha app build development", "sencha app build production"]
+    },
+    "architecturePatterns": {
+      "extjs": "MVC/MVVM patterns with proper lifecycle management",
+      "apex": ".apex file format with parameterized queries",
+      "database": "Liquibase changesets with Oracle PL/SQL"
+    }
+  },
+  "multiAgent": {
+    "coordinationProtocol": "/home/dariuszw/AI/tds-suite/protocols/MULTI_AGENT_COORDINATION.md",
+    "fileConflictPrevention": "/home/dariuszw/AI/tds-suite/protocols/FILE_CONFLICT_PREVENTION.md",
+    "roles": {
+      "claude": "Senior Software Developer - Complex implementation",
+      "gemini": "Task Manager & Planner - Planning mode only", 
+      "copilot": "Coordinated Assistant - Simple tasks"
+    }
+  }
+}
