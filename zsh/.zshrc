@@ -120,7 +120,7 @@ bindkey "^[[1;2D" backward-word
 
 # cd & ls movements
 alias ls="ls --group-directories-first --color=auto"
-alias ll="ls -lha -F --show-control-chars --time-style=locale --group-directories-first --color=auto"
+alias ll="ls -lha -F --show-control-chars --time-style=locale --color=auto"
 # alias cd="~/bin/.local/scripts/tmux-sessionizer"
 # alias CD="~/bin/.local/scripts/tmux-sessionizer"
 alias CD="cd"
@@ -233,9 +233,6 @@ export PYENV_ROOT="$HOME/.pyenv"
 command -v pyenv >/dev/null 2>&1 && eval "$(pyenv init --path)"
 command -v pyenv >/dev/null 2>&1 && eval "$(pyenv init -)"
 command -v pyenv >/dev/null 2>&1 && eval "$(pyenv virtualenv-init -)"
-
-alias claude="/home/dariuszw/.claude/local/claude"
-alias clauded="/home/dariuszw/.claude/local/claude --dangerously-skip-permissions"
 
 # Task Master aliases added on 7/15/2025
 alias tm='task-master'
