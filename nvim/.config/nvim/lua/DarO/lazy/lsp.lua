@@ -7,22 +7,21 @@ if vim.fn.has 'nvim-0.11' == 1 then
          end
       },
       {
-         "stevearc/conform.nvim",
+         "williamboman/mason-lspconfig.nvim",
+         dependencies = { "williamboman/mason.nvim" },
          config = function()
-            require("conform").setup({
-               formatters_by_ft = {
-                  go = { "gofmt" },
-                  javascript = { "prettierd" },
-                  typescript = { "prettierd" },
-                  json = { "prettierd" },
-                  yaml = { "prettierd" },
-                  html = { "prettierd" },
-                  markdown = { "prettierd" },
+            require("mason-lspconfig").setup({
+               ensure_installed = {
+                  "ts_ls",
+                  "eslint",
+                  "lua_ls",
+                  "bashls",
+                  "gopls",
+                  "dockerls",
+                  "yamlls",
+                  "zls"
                },
-               format_on_save = {
-                  timeout_ms = 500,
-                  lsp_fallback = true,
-               },
+               automatic_installation = true,
             })
          end
       },
@@ -69,29 +68,28 @@ if vim.fn.has 'nvim-0.11' == 1 then
             }
          }
       },
-      config = function()
-         local capabilities = require('cmp_nvim_lsp').default_capabilities()
+      {
+         "neovim/nvim-lspconfig", -- Add this to ensure LSP config is triggered
+         dependencies = { "williamboman/mason.nvim", "hrsh7th/nvim-cmp" },
+         config = function()
+            local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
-         vim.lsp.enable({
-            {
-               name = "gopls",
-               cmd = { "gopls" },
-               root_markers = { "go.mod", ".git" },
+            vim.lsp.config['*'] = {
                capabilities = capabilities,
+            }
+
+            vim.lsp.config.gopls = {
+               root_markers = { "go.work", "go.mod", ".git" },
                settings = {
                   gopls = {
-                     analyses = {
-                        unusedparams = true,
-                     },
+                     analyses = { unusedparams = true },
                      staticcheck = true,
                   },
                },
-            },
-            {
-               name = "lua_ls",
-               cmd = { "lua-language-server" },
-               root_markers = { ".luarc.json", ".git" },
-               capabilities = capabilities,
+            }
+
+            vim.lsp.config.lua_ls = {
+               root_markers = { ".luarc.json", ".luarc.jsonc", ".git" },
                settings = {
                   Lua = {
                      runtime = { version = "Lua 5.1" },
@@ -100,37 +98,36 @@ if vim.fn.has 'nvim-0.11' == 1 then
                      }
                   }
                }
-            },
-            {
-               name = "eslint",
-               cmd = { "vscode-eslint-language-server", "--stdio" },
-               root_markers = { ".eslintrc.js", ".eslintrc.json", "package.json", ".git" },
-               capabilities = capabilities,
-            },
-            {
-               name = "dockerls",
-               cmd = { "docker-langserver", "--stdio" },
+            }
+
+            vim.lsp.config.eslint = {
+               root_markers = { ".eslintrc.js", ".eslintrc.json", "eslint.config.js", "package.json", ".git" },
+               settings = {
+                  format = { enable = true },
+                  codeActionOnSave = {
+                     enable = true,
+                     mode = "all"
+                  },
+               },
+            }
+
+            vim.lsp.config.dockerls = {
                root_markers = { "Dockerfile", ".git" },
-               capabilities = capabilities,
-            },
-            {
-               name = "yamlls",
-               cmd = { "yaml-language-server", "--stdio" },
-               root_markers = { ".git" },
-               capabilities = capabilities,
+            }
+
+            vim.lsp.config.yamlls = {
                settings = {
                   yaml = {
                      schemas = {
-                        ["https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json"] = "/docker-compose.yml"
+                        ["https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json"] =
+                        "/docker-compose.yml"
                      }
                   }
                }
-            },
-            {
-               name = "zls",
-               cmd = { "zls" },
-               root_markers = { ".git", "build.zig", "zls.json" },
-               capabilities = capabilities,
+            }
+
+            vim.lsp.config.zls = {
+               root_markers = { "build.zig", "build.zig.zon", ".git" },
                settings = {
                   zls = {
                      enable_inlay_hints = true,
@@ -139,38 +136,82 @@ if vim.fn.has 'nvim-0.11' == 1 then
                   },
                },
             }
-         })
 
-         vim.diagnostic.config({
-            virtual_text = true,
-            underline = true,
-            update_in_insert = false,
-            severity_sort = true,
-            float = {
-               focusable = false,
-               style = "minimal",
-               border = "rounded",
-               source = true,
-               header = "",
-               prefix = "",
-            },
-            signs = {
-               text = {
-                  [vim.diagnostic.severity.ERROR] = "",
-                  [vim.diagnostic.severity.WARN] = "",
-                  [vim.diagnostic.severity.INFO] = "",
-                  [vim.diagnostic.severity.HINT] = ""
-               },
-               numhl = {
-                  [vim.diagnostic.severity.ERROR] = "ErrorMsg",
-                  [vim.diagnostic.severity.WARN] = "WarningMsg",
-               }
+            vim.lsp.config.bashls = {
+               root_markers = { ".git" },
             }
-         })
 
-         vim.g.zig_fmt_parse_errors = 0
-         vim.g.zig_fmt_autosave = 0
-      end
+            vim.lsp.config.ts_ls = {
+               root_markers = { "package.json", "tsconfig.json", "jsconfig.json", ".git" },
+               settings = {
+                  typescript = {
+                     format = { indentSize = 3, tabSize = 3 },
+                  },
+                  javascript = {
+                     format = { indentSize = 3, tabSize = 3 },
+                  },
+               },
+            }
+
+            local servers = { 'gopls', 'lua_ls', 'eslint', 'ts_ls', 'dockerls', 'yamlls', 'zls', 'bashls' }
+            vim.lsp.enable(servers)
+
+            vim.diagnostic.config({
+               virtual_text = true,
+               underline = true,
+               update_in_insert = false,
+               severity_sort = true,
+               float = {
+                  focusable = false,
+                  style = "minimal",
+                  border = "rounded",
+                  source = true,
+                  header = "",
+                  prefix = "",
+               },
+               signs = {
+                  text = {
+                     [vim.diagnostic.severity.ERROR] = "",
+                     [vim.diagnostic.severity.WARN] = "",
+                     [vim.diagnostic.severity.INFO] = "",
+                     [vim.diagnostic.severity.HINT] = ""
+                  },
+                  numhl = {
+                     [vim.diagnostic.severity.ERROR] = "ErrorMsg",
+                     [vim.diagnostic.severity.WARN] = "WarningMsg",
+                  }
+               }
+            })
+
+            vim.g.zig_fmt_parse_errors = 0
+            vim.g.zig_fmt_autosave = 0
+
+            -- Format on save using built-in LSP formatting with client filtering
+            vim.api.nvim_create_autocmd("BufWritePre", {
+               group = vim.api.nvim_create_augroup("LspFormat", { clear = true }),
+               callback = function()
+                  vim.lsp.buf.format({
+                     async = false,
+                     filter = function(client)
+                        -- Only format with servers that support formatting
+                        -- ESLint doesn't provide formatting, only linting
+                        return client.name ~= "eslint"
+                     end
+                  })
+               end,
+            })
+
+            -- Manual format keybinding
+            vim.keymap.set("n", "<leader>f", function()
+               vim.lsp.buf.format({
+                  async = false,
+                  filter = function(client)
+                     return client.name ~= "eslint"
+                  end
+               })
+            end, { desc = "Format buffer with LSP" })
+         end
+      }
    }
 else
    return {
@@ -305,10 +346,10 @@ else
                --       filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue", "json" },
                --       on_attach = function(client, bufnr)
                --          if client.supports_method("textDocument/formatting") then
-               --             vim.api.nvim_create_autocmd("BufWritePre", {
+               --                vim.api.nvim_create_autocmd("BufWritePre", {
                --                buffer = bufnr,
                --                callback = function()
-               --                   vim.lsp.buf.format({ async = true })
+               --                      vim.lsp.buf.format({ async = true })
                --                end,
                --             })
                --          end
