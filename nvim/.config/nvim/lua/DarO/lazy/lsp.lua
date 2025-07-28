@@ -186,15 +186,19 @@ if vim.fn.has 'nvim-0.11' == 1 then
             vim.g.zig_fmt_parse_errors = 0
             vim.g.zig_fmt_autosave = 0
 
-            -- Format on save using built-in LSP formatting with client filtering
+            -- Format on save using built-in LSP formatting
             vim.api.nvim_create_autocmd("BufWritePre", {
                group = vim.api.nvim_create_augroup("LspFormat", { clear = true }),
                callback = function()
                   vim.lsp.buf.format({
                      async = false,
                      filter = function(client)
-                        -- Only format with servers that support formatting
-                        -- ESLint doesn't provide formatting, only linting
+                        -- Prefer ESLint for JS/TS files, ts_ls for everything else
+                        local filetype = vim.bo.filetype
+                        if filetype == "javascript" or filetype == "typescript" or
+                            filetype == "javascriptreact" or filetype == "typescriptreact" then
+                           return client.name == "eslint"
+                        end
                         return client.name ~= "eslint"
                      end
                   })
@@ -206,6 +210,12 @@ if vim.fn.has 'nvim-0.11' == 1 then
                vim.lsp.buf.format({
                   async = false,
                   filter = function(client)
+                     -- Prefer ESLint for JS/TS files, ts_ls for everything else
+                     local filetype = vim.bo.filetype
+                     if filetype == "javascript" or filetype == "typescript" or
+                         filetype == "javascriptreact" or filetype == "typescriptreact" then
+                        return client.name == "eslint"
+                     end
                      return client.name ~= "eslint"
                   end
                })
