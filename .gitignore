@@ -44,9 +44,9 @@ node_modules/
 
 __pycache__
 
-# Task files
-# tasks.json
-# tasks/
-
 # OAuth credentials and sensitive files
 AI-tools/.gemini/oauth_creds.json 
+
+# Task files
+# tasks.json
+# tasks/ 

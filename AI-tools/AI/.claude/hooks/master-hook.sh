@@ -41,6 +41,11 @@ determine_active_hooks() {
         fi
     fi
     
+    # Agent completion detection
+    if echo "$PROMPT_TEXT" | grep -qi -E "(analysis complete|review complete|task complete|scope complete|analysis summary|testing effort.*hours|estimated.*testing|success criteria|code quality|security.*issues|root cause|solution.*implemented|query.*results|data.*insights)"; then
+        hooks+=("agent-completion-hook.sh")
+    fi
+
     printf '%s\n' "${hooks[@]}"
 }
 

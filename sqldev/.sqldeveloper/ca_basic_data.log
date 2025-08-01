@@ -9,10 +9,9 @@ values ( 'CN', '1', 'ACRE')
 
 Error starting at line : 36 in command -
 insert into ca_reference_character8 ( reference_type, reference_code, reference_description )
-values ( 'CN', '1', 'ACRE')
-Error at Command Line : 36 Column : 13
+values ( 'CN', '&v_corporation_code', '&v_client_name')
 Error report -
-SQL Error: ORA-20110: CN/ZE/SE 1.
+ORA-20110: CN/ZE/SE 1.
 ORA-06512: at "COREACCESS.CA_REF_CHAR8_UNIQUE_CN_SE_ZE", line 6
 ORA-04088: error during execution of trigger 'COREACCESS.CA_REF_CHAR8_UNIQUE_CN_SE_ZE'
 
@@ -26,10 +25,9 @@ values ( 'SE', '01', 'ACRE Site', '1' )
 
 Error starting at line : 39 in command -
 insert into ca_reference_character8 ( reference_type, reference_code, reference_description, parent_code )
-values ( 'SE', '01', 'ACRE Site', '1' )
-Error at Command Line : 39 Column : 13
+values ( 'SE', '&v_site_code', '&v_client_name Site', '&v_corporation_code' )
 Error report -
-SQL Error: ORA-20110: CN/ZE/SE 01.
+ORA-20110: CN/ZE/SE 01.
 ORA-06512: at "COREACCESS.CA_REF_CHAR8_UNIQUE_CN_SE_ZE", line 6
 ORA-04088: error during execution of trigger 'COREACCESS.CA_REF_CHAR8_UNIQUE_CN_SE_ZE'
 
@@ -43,10 +41,9 @@ values ( 'ZE', '101001', 'ACRE Zone', '01' )
 
 Error starting at line : 42 in command -
 insert into ca_reference_character8 ( reference_type, reference_code, reference_description, parent_code )
-values ( 'ZE', '101001', 'ACRE Zone', '01' )
-Error at Command Line : 42 Column : 13
+values ( 'ZE', '&v_zone_code', '&v_client_name Zone', '&v_site_code' )
 Error report -
-SQL Error: ORA-20110: CN/ZE/SE 101001.
+ORA-20110: CN/ZE/SE 101001.
 ORA-06512: at "COREACCESS.CA_REF_CHAR8_UNIQUE_CN_SE_ZE", line 6
 ORA-04088: error during execution of trigger 'COREACCESS.CA_REF_CHAR8_UNIQUE_CN_SE_ZE'
 

@@ -204,22 +204,6 @@ if vim.fn.has 'nvim-0.11' == 1 then
                   })
                end,
             })
-
-            -- Manual format keybinding
-            vim.keymap.set("n", "<leader>f", function()
-               vim.lsp.buf.format({
-                  async = false,
-                  filter = function(client)
-                     -- Prefer ESLint for JS/TS files, ts_ls for everything else
-                     local filetype = vim.bo.filetype
-                     if filetype == "javascript" or filetype == "typescript" or
-                         filetype == "javascriptreact" or filetype == "typescriptreact" then
-                        return client.name == "eslint"
-                     end
-                     return client.name ~= "eslint"
-                  end
-               })
-            end, { desc = "Format buffer with LSP" })
          end
       }
    }

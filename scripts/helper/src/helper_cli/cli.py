@@ -126,6 +126,75 @@ def apex(apex_file, port, auth, copy):
 
 
 @main.command()
+@click.argument('text')
+@click.option('--copy/--no-copy', default=False, help='Copy result to clipboard')
+def dash(text, copy):
+    """Convert text to dash-separated format for filenames."""
+    dash_result = helper.convert_to_dash_format(text)
+
+    if copy:
+        pyperclip.copy(dash_result)
+        console.print(f"✅ Copied to clipboard: [bold green]{dash_result}[/bold green]")
+    else:
+        console.print(f"{dash_result}")
+
+
+@main.command()
+@click.argument('ticket_text', required=False)
+@click.argument('agent_name', required=False)
+@click.option('--output', '-o', help='Agent output (if not provided, will prompt for input)')
+@click.option('--auto', '-a', is_flag=True, help='Auto-detect ticket from context')
+@click.option('--append/--no-append', default=True, help='Append to existing log file instead of creating new one (default: append)')
+def log(ticket_text, agent_name, output, auto, append):
+    """Create work log for VIS tickets with agent output."""
+
+    # Auto-detect ticket from context if requested or if no ticket provided
+    if auto or not ticket_text:
+        detected_ticket, ticket_number = helper.detect_vis_ticket_from_context()
+        if detected_ticket:
+            if not ticket_text:
+                ticket_text = detected_ticket
+                console.print(f"🔍 Auto-detected ticket: [bold green]{ticket_text}[/bold green]")
+            else:
+                console.print(f"🔍 Context shows: [dim]{detected_ticket}[/dim] (using provided: [bold blue]{ticket_text}[/bold blue])")
+        elif not ticket_text:
+            console.print("❌ No VIS ticket detected in context. Please provide ticket text.")
+            return
+
+    # Prompt for agent name if not provided
+    if not agent_name:
+        agent_name = console.input("🤖 Enter agent name: ").strip()
+        if not agent_name:
+            console.print("❌ Agent name is required.")
+            return
+
+    # If no output provided, read from stdin or prompt
+    if not output:
+        console.print(f"📝 Creating work log for: [bold blue]{ticket_text}[/bold blue]")
+        console.print(f"🤖 Agent: [bold cyan]{agent_name}[/bold cyan]")
+        console.print("")
+        console.print("Please paste the complete agent output below (press Ctrl+D when done):")
+        console.print("─" * 60)
+
+        import sys
+        agent_output = sys.stdin.read().strip()
+
+        console.print("")
+        console.print("─" * 60)
+        console.print("🔄 Processing...")
+    else:
+        agent_output = output
+
+    # Create work log
+    success, result = helper.create_work_log(ticket_text, agent_name, agent_output, append=append)
+
+    if success:
+        console.print(f"✅ Work log created: [bold green]{result}[/bold green]")
+    else:
+        console.print(f"❌ Error creating work log: [bold red]{result}[/bold red]")
+
+
+@main.command()
 def interactive():
     """Interactive mode for helper commands."""
     console.print(Panel.fit("🔧 Helper CLI - Interactive Mode", style="bold blue"))
@@ -139,6 +208,8 @@ def interactive():
         ("jira <text>", "Generate JIRA branch name"),
         ("badge <id>", "Generate badge string (RFID/QR)"),
         ("stash <text>", "Generate git stash command"),
+        ("dash <text>", "Convert text to dash-separated format"),
+        ("log [ticket] [agent]", "Create work log for VIS tickets (auto-detect with -a)"),
         ("ngrok <url>", "Generate QR code for NGROK URL"),
         ("vsc <url>", "Generate QR code for VSC URL"),
         ("rt <name>", "Setup RT directory"),

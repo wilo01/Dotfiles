@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: helper-cli
-Version: 0.1.0
+Version: 0.1.1
 Summary: Development helper CLI for JIRA, badges, URLs, and automation tasks
 Author-email: Helper CLI <dev@example.com>
 License: MIT
@@ -58,7 +58,7 @@ helper jira "Fix user authentication issue"
 # Generate RFID badge
 helper badge 4324325553 --type rfid
 
-# Generate QR badge  
+# Generate QR badge
 helper badge 4324325553 --type qr
 
 # Create git stash command

@@ -8,7 +8,6 @@ return {
       vim.api.nvim_set_keymap("x", "<C-_>", "<Plug>kommentary_visual_default",
          { desc = "Toggle comment for visual selection" })
 
-
       require('kommentary.config').configure_language("default", {
          prefer_single_line_comments = true,
       })
