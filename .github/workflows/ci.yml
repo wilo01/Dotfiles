@@ -6,7 +6,7 @@ jobs:
   security-semgrep-test:
     name: Semgrep Security Scan
     runs-on: ubuntu-latest
-    container: returntocorp/semgrep:1.14.0
+    container: semgrep/semgrep:latest
     env:
       SEMGREP_RULES: >-
         p/security-audit
