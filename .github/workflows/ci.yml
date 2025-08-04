@@ -1,0 +1,19 @@
+name: CI Pipeline (Gitlab Clone)
+
+on: push
+
+jobs:
+  security-semgrep-test:
+    name: Semgrep Security Scan
+    runs-on: ubuntu-latest
+    container: returntocorp/semgrep:1.14.0
+    env:
+      SEMGREP_RULES: >-
+        p/security-audit
+        p/secrets
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Run Semgrep CI Scan
+        run: semgrep ci
