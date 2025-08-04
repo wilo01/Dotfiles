@@ -14,33 +14,33 @@ echo "$(date): Master hook triggered in $PWD_DIR" >> "$LOG_FILE"
 # Determine which hooks to run based on context
 determine_active_hooks() {
     local hooks=()
-    
+
     # Always run project context hook
     hooks+=("project-context-hook.sh")
-    
+
     # Task Master projects
     if [[ -d ".taskmaster" ]]; then
         hooks+=("taskmaster-workflow-hook.sh")
     fi
-    
+
     # Git repositories
     if [[ -d ".git" ]]; then
         hooks+=("git-workflow-hook.sh")
     fi
-    
+
     # Prompt-based hook selection
     if echo "$PROMPT_TEXT" | grep -qi "git\|commit\|branch\|push\|pull"; then
         if [[ ! " ${hooks[@]} " =~ " git-workflow-hook.sh " ]]; then
             hooks+=("git-workflow-hook.sh")
         fi
     fi
-    
+
     if echo "$PROMPT_TEXT" | grep -qi "task\|todo\|next\|tm/"; then
         if [[ ! " ${hooks[@]} " =~ " taskmaster-workflow-hook.sh " ]]; then
             hooks+=("taskmaster-workflow-hook.sh")
         fi
     fi
-    
+
     # Agent completion detection
     if echo "$PROMPT_TEXT" | grep -qi -E "(analysis complete|review complete|task complete|scope complete|analysis summary|testing effort.*hours|estimated.*testing|success criteria|code quality|security.*issues|root cause|solution.*implemented|query.*results|data.*insights)"; then
         hooks+=("agent-completion-hook.sh")
@@ -53,7 +53,7 @@ determine_active_hooks() {
 execute_hook() {
     local hook_name="$1"
     local hook_path="$HOOKS_DIR/$hook_name"
-    
+
     if [[ -x "$hook_path" ]]; then
         echo "🔗 Running $hook_name..."
         "$hook_path" "$PROMPT_TEXT" 2>/dev/null || {

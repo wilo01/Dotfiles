@@ -24,6 +24,10 @@ return {
          return { os.date "%d.%m.%Y" }
       end
 
+      local timestamp = function()
+         return { os.date("%d.%m.%Y %H:%M:%S") }
+      end
+
       local filename = function()
          return { vim.fn.expand "%:p" }
       end
@@ -64,6 +68,20 @@ return {
             ls.parser.parse_snippet("todo--", "-- [ ] TODO: "),
             ls.parser.parse_snippet("log_dbms", "DBMS_OUTPUT.PUT_LINE('Dwdw ${1}: ' || ${1});${2}"),
             ls.parser.parse_snippet("log_pak", "ca_log_pak.log_warning('Dwdw', '${1}: ' || ${1});${2}"),
+            snip({
+               trig = "datetime",
+               namr = "Timestamp",
+               dscr = "Timestamp in the form of DD.MM.YYYY HH:MM:SS",
+            }, {
+               func(timestamp, {}),
+            }),
+            snip({
+               trig = "timestamp",
+               namr = "Timestamp",
+               dscr = "Timestamp in the form of DD.MM.YYYY HH:MM:SS",
+            }, {
+               func(timestamp, {}),
+            }),
             snip({
                trig = "date",
                namr = "Date",

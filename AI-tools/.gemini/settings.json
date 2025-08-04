@@ -1,5 +1,6 @@
 {
   "selectedAuthType": "oauth-personal",
   "theme": "GitHub",
-  "preferredEditor": "vscode"
+  "preferredEditor": "vscode",
+  "vimMode": true
 }
