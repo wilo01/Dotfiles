@@ -140,6 +140,34 @@ def dash(text, copy):
 
 
 @main.command()
+@click.argument('text')
+@click.option('--copy/--no-copy', default=True, help='Copy result to clipboard')
+def pr(text, copy):
+    """Generate PR title with uppercased ticket numbers."""
+    pr_title = helper.generate_pr_title(text)
+    
+    if copy:
+        pyperclip.copy(pr_title)
+        console.print(f"✅ Copied to clipboard: [bold green]{pr_title}[/bold green]")
+    else:
+        console.print(f"PR Title: [bold blue]{pr_title}[/bold blue]")
+
+
+@main.command()
+@click.argument('text')
+@click.option('--copy/--no-copy', default=True, help='Copy result to clipboard')
+def filename(text, copy):
+    """Generate clean filename from text (lowercase, with .md extension)."""
+    filename_result = helper.generate_filename(text)
+    
+    if copy:
+        pyperclip.copy(filename_result)
+        console.print(f"✅ Copied to clipboard: [bold green]{filename_result}[/bold green]")
+    else:
+        console.print(f"Filename: [bold blue]{filename_result}[/bold blue]")
+
+
+@main.command()
 @click.argument('ticket_text', required=False)
 @click.argument('agent_name', required=False)
 @click.option('--output', '-o', help='Agent output (if not provided, will prompt for input)')

@@ -9,9 +9,10 @@ values ( 'CN', '1', 'ACRE')
 
 Error starting at line : 36 in command -
 insert into ca_reference_character8 ( reference_type, reference_code, reference_description )
-values ( 'CN', '&v_corporation_code', '&v_client_name')
+values ( 'CN', '1', 'ACRE')
+Error at Command Line : 36 Column : 13
 Error report -
-ORA-20110: CN/ZE/SE 1.
+SQL Error: ORA-20110: CN/ZE/SE 1.
 ORA-06512: at "COREACCESS.CA_REF_CHAR8_UNIQUE_CN_SE_ZE", line 6
 ORA-04088: error during execution of trigger 'COREACCESS.CA_REF_CHAR8_UNIQUE_CN_SE_ZE'
 
@@ -25,9 +26,10 @@ values ( 'SE', '01', 'ACRE Site', '1' )
 
 Error starting at line : 39 in command -
 insert into ca_reference_character8 ( reference_type, reference_code, reference_description, parent_code )
-values ( 'SE', '&v_site_code', '&v_client_name Site', '&v_corporation_code' )
+values ( 'SE', '01', 'ACRE Site', '1' )
+Error at Command Line : 39 Column : 13
 Error report -
-ORA-20110: CN/ZE/SE 01.
+SQL Error: ORA-20110: CN/ZE/SE 01.
 ORA-06512: at "COREACCESS.CA_REF_CHAR8_UNIQUE_CN_SE_ZE", line 6
 ORA-04088: error during execution of trigger 'COREACCESS.CA_REF_CHAR8_UNIQUE_CN_SE_ZE'
 
@@ -41,9 +43,10 @@ values ( 'ZE', '101001', 'ACRE Zone', '01' )
 
 Error starting at line : 42 in command -
 insert into ca_reference_character8 ( reference_type, reference_code, reference_description, parent_code )
-values ( 'ZE', '&v_zone_code', '&v_client_name Zone', '&v_site_code' )
+values ( 'ZE', '101001', 'ACRE Zone', '01' )
+Error at Command Line : 42 Column : 13
 Error report -
-ORA-20110: CN/ZE/SE 101001.
+SQL Error: ORA-20110: CN/ZE/SE 101001.
 ORA-06512: at "COREACCESS.CA_REF_CHAR8_UNIQUE_CN_SE_ZE", line 6
 ORA-04088: error during execution of trigger 'COREACCESS.CA_REF_CHAR8_UNIQUE_CN_SE_ZE'
 
@@ -412,17 +415,7 @@ SQL> insert into ca_user_access_group (
   7     access_group_code
   8  from ca_access_group;
 
-Error starting at line : 167 in command -
-insert into ca_user_access_group (
-   username,
-   access_group_code
-)
-select 
-   user,
-   access_group_code
-from ca_access_group
-Error report -
-ORA-00001: unique constraint (COREACCESS.CA_USER_ACCESS_GROUP_1) violated
+1 row inserted.
 
 SQL> 
 SQL> insert into ca_user_access_time (
