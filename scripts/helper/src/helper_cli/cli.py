@@ -42,9 +42,9 @@ def jira(text, copy):
 def badge(badge_id, type, auto_type):
     """Generate and optionally auto-type badge strings."""
     if type == 'rfid':
-        badge_string = f'@{badge_id}#'
-    else:  # qr
-        badge_string = f'${badge_id}#'
+        badge_string = f'@{badge_id}
+    else:
+        badge_string = f'${badge_id}
 
     console.print(f"[bold blue]{type.upper()} badge:[/bold blue] {badge_string}")
 
@@ -145,7 +145,7 @@ def dash(text, copy):
 def pr(text, copy):
     """Generate PR title with uppercased ticket numbers."""
     pr_title = helper.generate_pr_title(text)
-    
+
     if copy:
         pyperclip.copy(pr_title)
         console.print(f"✅ Copied to clipboard: [bold green]{pr_title}[/bold green]")
@@ -159,7 +159,7 @@ def pr(text, copy):
 def filename(text, copy):
     """Generate clean filename from text (lowercase, with .md extension)."""
     filename_result = helper.generate_filename(text)
-    
+
     if copy:
         pyperclip.copy(filename_result)
         console.print(f"✅ Copied to clipboard: [bold green]{filename_result}[/bold green]")
@@ -176,7 +176,6 @@ def filename(text, copy):
 def log(ticket_text, agent_name, output, auto, append):
     """Create work log for VIS tickets with agent output."""
 
-    # Auto-detect ticket from context if requested or if no ticket provided
     if auto or not ticket_text:
         detected_ticket, ticket_number = helper.detect_vis_ticket_from_context()
         if detected_ticket:
@@ -189,14 +188,12 @@ def log(ticket_text, agent_name, output, auto, append):
             console.print("❌ No VIS ticket detected in context. Please provide ticket text.")
             return
 
-    # Prompt for agent name if not provided
     if not agent_name:
         agent_name = console.input("🤖 Enter agent name: ").strip()
         if not agent_name:
             console.print("❌ Agent name is required.")
             return
 
-    # If no output provided, read from stdin or prompt
     if not output:
         console.print(f"📝 Creating work log for: [bold blue]{ticket_text}[/bold blue]")
         console.print(f"🤖 Agent: [bold cyan]{agent_name}[/bold cyan]")
@@ -213,7 +210,6 @@ def log(ticket_text, agent_name, output, auto, append):
     else:
         agent_output = output
 
-    # Create work log
     success, result = helper.create_work_log(ticket_text, agent_name, agent_output, append=append)
 
     if success:
@@ -227,7 +223,6 @@ def interactive():
     """Interactive mode for helper commands."""
     console.print(Panel.fit("🔧 Helper CLI - Interactive Mode", style="bold blue"))
 
-    # Create options table
     table = Table(title="Available Commands")
     table.add_column("Command", justify="left", style="cyan")
     table.add_column("Description", justify="left")
@@ -257,13 +252,12 @@ def interactive():
                 console.print("👋 Goodbye!")
                 break
             elif user_input:
-                # Parse and execute command
                 parts = user_input.split()
                 if parts:
                     try:
                         main(parts, standalone_mode=False)
                     except SystemExit:
-                        pass  # Click commands call sys.exit, ignore in interactive mode
+                        pass
                     except Exception as e:
                         console.print(f"[bold red]Error:[/bold red] {e}")
         except KeyboardInterrupt:
