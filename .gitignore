@@ -19,8 +19,8 @@
 !~/recatest/*
 !sqldev/.sqldeveloper/system23*
 !sqldev/.sqldeveloper/SqlHistory/*
-!browser/
-!browser/**
+!Browser/
+!Browser/**
 
 # Logs
 logs
@@ -43,6 +43,10 @@ node_modules/
 *.sw?
 # OS specific
 .DS_Store
+
+# Large binary files
+Browser/chrome-linux.zip
+Browser/chrome-linux/
 
 __pycache__
 

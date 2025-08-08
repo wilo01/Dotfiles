@@ -1,5 +1,5 @@
 {
-  "numStartups": 208,
+  "numStartups": 209,
   "installMethod": "local",
   "autoUpdates": true,
   "editorMode": "vim",
@@ -1140,6 +1140,26 @@
       "allowedTools": [],
       "history": [
         {
+          "display": " I want to fit into the limits and have this in my repo but please do not remove it do not create scripts to download some random version of chrome ... I need this specific version to be keept in my repo ... [Pasted text #1 +16 lines]",
+          "pastedContents": {
+            "1": {
+              "id": 1,
+              "type": "text",
+              "content": "git push                                                                                                                                                                     took  51s  system  !2/9 at  12:39:14 PM\nEnumerating objects: 154, done.\nCounting objects: 100% (154/154), done.\nDelta compression using up to 4 threads\nCompressing objects: 100% (132/132), done.\nWriting objects: 100% (139/139), 291.27 MiB | 5.33 MiB/s, done.\nTotal 139 (delta 16), reused 0 (delta 0), pack-reused 0 (from 0)\nremote: Resolving deltas: 100% (16/16), completed with 12 local objects.\nremote: error: Trace: d193b35143d844c9922e19fae32f33fd9abdedaa363935d3c59b8a37592bab92\nremote: error: See https://gh.io/lfs for more information.\nremote: error: File Browser/chrome-linux.zip is 147.28 MB; this exceeds GitHub's file size limit of 100.00 MB\nremote: error: File Browser/chrome-linux/chrome is 336.33 MB; this exceeds GitHub's file size limit of 100.00 MB\nremote: error: GH001: Large files detected. You may want to try Git Large File Storage - https://git-lfs.github.com.\nTo github-wilo01:wilo01/Dotfiles.git\n ! [remote rejected] Linux -> Linux (pre-receive hook declined)\nerror: failed to push some refs to 'github-wilo01:wilo01/Dotfiles.git'\n"
+            }
+          }
+        },
+        {
+          "display": "okey let's do something with this do you have idea how to add this extension even when it excedes limitations ? [Pasted text #1 +16 lines]",
+          "pastedContents": {
+            "1": {
+              "id": 1,
+              "type": "text",
+              "content": "git push                                                                                                                                                                     took  51s  system  !2/9 at  12:39:14 PM\nEnumerating objects: 154, done.\nCounting objects: 100% (154/154), done.\nDelta compression using up to 4 threads\nCompressing objects: 100% (132/132), done.\nWriting objects: 100% (139/139), 291.27 MiB | 5.33 MiB/s, done.\nTotal 139 (delta 16), reused 0 (delta 0), pack-reused 0 (from 0)\nremote: Resolving deltas: 100% (16/16), completed with 12 local objects.\nremote: error: Trace: d193b35143d844c9922e19fae32f33fd9abdedaa363935d3c59b8a37592bab92\nremote: error: See https://gh.io/lfs for more information.\nremote: error: File Browser/chrome-linux.zip is 147.28 MB; this exceeds GitHub's file size limit of 100.00 MB\nremote: error: File Browser/chrome-linux/chrome is 336.33 MB; this exceeds GitHub's file size limit of 100.00 MB\nremote: error: GH001: Large files detected. You may want to try Git Large File Storage - https://git-lfs.github.com.\nTo github-wilo01:wilo01/Dotfiles.git\n ! [remote rejected] Linux -> Linux (pre-receive hook declined)\nerror: failed to push some refs to 'github-wilo01:wilo01/Dotfiles.git'\n"
+            }
+          }
+        },
+        {
           "display": "Create alias in @zsh/.zshrc I belive I will remember this command better putting it there with alias as name of command filepath \n  ~/Downloads ❯ readlink -f chrome-linux.zip                                                                                                                                                                                 system  !2/9 at  12:31:09 PM\n/home/dariuszw/Downloads/chrome-linux.zip\n  ~/Downloads ❯ realpath chrome-linux.zip                                                                                                                                                                                    system  !2/9 at  12:32:15 PM\n/home/dariuszw/Downloads/chrome-linux.zip\n",
           "pastedContents": {}
         },
@@ -1627,14 +1647,6 @@
         },
         {
           "display": "I want simple installation script that will handle installing neovim it will ask me if I want to remove existing neovim and then proceed with the latest installation of neovim here are the scripts that works for me for manual installation sudo apt-get update && sudo apt-get install -y \\ git cmake ninja-build libtool libtool-bin autoconf automake pkg-config unzip gettext \\\ngit clone --branch v0.11.1 https://github.com/neovim/neovim\ncd /neovim\nmake -j4 CMAKE_BUILD_TYPE=RelWithDebInfo\nsudo make -j4 install ... don't remove configuration only remove the necessary stuff and cashed neovim files when they are any please make sure that it will always get the latest neovim installation ... make only one installation script ... I will use this in fedora or ubuntu so make this compatiblile ",
-          "pastedContents": {}
-        },
-        {
-          "display": "I want simple installation script that will handle installing neovim it will ask me if I want to remove existing neovim and then proceed with the latest installation of neovim here are the scripts that works for me for manual installation sudo apt-get update && sudo apt-get install -y \\ git cmake ninja-build libtool libtool-bin autoconf automake pkg-config unzip gettext \\\ngit clone --branch v0.11.1 https://github.com/neovim/neovim\ncd /neovim\nmake -j4 CMAKE_BUILD_TYPE=RelWithDebInfo\nsudo make -j4 install ... don't remove configuration only remove the necessary stuff and cashed neovim files when they are any please make sure that it will always get the latest neovim installation ... make only one installation script ...",
-          "pastedContents": {}
-        },
-        {
-          "display": "I want simple installation script that will handle installing neovim it will ask me if I want to remove existing neovim and then proceed with the latest installation of neovim here are the scripts that works for me for manual installation sudo apt-get update && sudo apt-get install -y \\ git cmake ninja-build libtool libtool-bin autoconf automake pkg-config unzip gettext \\\ngit clone --branch v0.11.1 https://github.com/neovim/neovim\ncd /neovim\nmake -j4 CMAKE_BUILD_TYPE=RelWithDebInfo\nsudo make -j4 install ... don't remove configuration only remove the necessary stuff and cashed neovim files when they are any please make sure that it will always get the latest neovim installation ",
           "pastedContents": {}
         }
       ],
