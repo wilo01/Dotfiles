@@ -238,3 +238,6 @@ command -v pyenv >/dev/null 2>&1 && eval "$(pyenv virtualenv-init -)"
 alias tm='task-master'
 alias taskmaster='task-master'
 alias clauded='claude --dangerously-skip-permissions'
+
+# File path alias - get absolute path of a file
+alias filepath='realpath'

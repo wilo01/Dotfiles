@@ -23,7 +23,22 @@ class HelperCore:
     def _get_keyboard(self):
         """Lazy load keyboard controller."""
         if self.keyboard is None:
+            import os
+            
+            # Check if we're on Wayland (pynput doesn't work well on Wayland)
+            if os.environ.get('XDG_SESSION_TYPE') == 'wayland':
+                # Wayland doesn't support pynput properly
+                return None
+            
             try:
+                # Suppress Xlib warnings
+                import warnings
+                warnings.filterwarnings("ignore", category=UserWarning)
+                
+                # Set display if not set (helps with SSH sessions)
+                if not os.environ.get('DISPLAY'):
+                    os.environ['DISPLAY'] = ':0'
+                
                 from pynput.keyboard import Controller
                 self.keyboard = Controller()
             except ImportError as e:
@@ -33,7 +48,36 @@ class HelperCore:
         return self.keyboard
 
     def type_string_with_delay(self, string: str, delay: int = 2):
-        """Type a string with delay, fallback to clipboard if keyboard unavailable."""
+        """Type a string with delay, using Wayland-compatible tools if available."""
+        import os
+        import subprocess
+        import shutil
+        
+        # Check if we're on Wayland and try Wayland-compatible tools
+        if os.environ.get('XDG_SESSION_TYPE') == 'wayland':
+            time.sleep(delay)
+            
+            # Try wtype first (Wayland native)
+            if shutil.which('wtype'):
+                try:
+                    subprocess.run(['wtype', string], check=True, capture_output=True)
+                    return
+                except subprocess.CalledProcessError:
+                    pass
+            
+            # Try ydotool (requires ydotoold daemon)
+            if shutil.which('ydotool'):
+                try:
+                    subprocess.run(['ydotool', 'type', string], check=True, capture_output=True)
+                    return
+                except subprocess.CalledProcessError:
+                    pass
+            
+            # Fallback to clipboard if no Wayland tools available
+            pyperclip.copy(string)
+            return
+        
+        # Use pynput for X11
         keyboard = self._get_keyboard()
         if keyboard is None:
             pyperclip.copy(string)

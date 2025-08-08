@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title></title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+  <link rel="stylesheet" href="css/bootstrap.css">
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body ng-app="app">
+
+<div class="container">
+
+  <div class="col-md-12">
+    <h1>Forever pinned</h1>
+  <h2>Add new pinned tab</h2>
+
+  <div ng-controller="formCtrl">
+    <form ng-submit="addItem(item)" name="urlForm" novalidate>
+      <div class="grid-row">
+        <div class="grid-col8">
+          <input  type="text" name="url" ng-model="url" class="form-control" id="siteOne" urlvaildation placeholder="http://www.example.com">
+        </div>
+        <div class="grid-col2">
+          <input type="submit" class="btn btn-success" value="Add Url">
+        </div>
+      </div>
+      <p class="bg-warning" ng-show="!urlForm.$valid">Please enter a full url, make sure to include http:// or https://</p>
+    </form>
+  </div>
+
+    <div ng-controller="listCtrl" ng-show="items.length">
+      <h2>Current pinned tabs</h2>
+      <div ui-sortable="sortableOptions" ng-model="items">
+        <div class="grid-row url-item" ng-repeat="item in items track by $index">
+          <div class="grid-col8">
+            <span class="glyphicon glyphicon-sort" aria-hidden="true"></span>
+            <span>{{item.url}}</span>
+          </div>
+          <div class="grid-col2">
+            <button type="button" class="btn btn-danger" ng-click="remove(item, element)">Remove</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <div ng-controller="optionsCtrl">
+    <h2>Settings</h2>
+    <form>
+      <p>
+      <input type="checkbox" ng-click="reopenChange()" ng-model="reopen" value="{{reopen}}" name="reopen" />
+        <label>Reopen tabs when a new window is created</label>
+      </p>
+      <p class="bg-warning">You will need to restart chrome before settings take effect</p>
+    </form>
+    <form>
+      <p>
+      <input type="checkbox" ng-click="ignoreParamsChange()" ng-model="ignoreParams" value="{{ignoreParams}}" name="ignoreParams" />
+        <label>Ignore url parameters when comparing openned and saved tabs (site.com/?param1=value....)</label>
+      </p>
+    </form>
+  </div>
+  <footer>Forever pinned created by <a href="http://www.scottw.io/">scottw.io</a> source is available on <a href="https://github.com/scottwio/forever-pinned">Forever pinned</a></footer>
+  </div>
+
+</div>
+<script src="js/jquery-3.3.1.min.js"></script>
+<script src="js/jquery-ui.min.js"></script>
+<script src="js/angular.min.js"></script>
+<script src="js/main.js"></script>
+<script src="js/sortable.min.js"></script>
+</body>
+</html>

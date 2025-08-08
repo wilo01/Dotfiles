@@ -22,11 +22,27 @@ def main():
 @main.command()
 @click.argument('text')
 @click.option('--copy/--no-copy', default=True, help='Copy result to clipboard')
-def jira(text, copy):
+@click.option('--type', '-t', is_flag=True, help='Type command directly using wtype/ydotool')
+def jira(text, copy, type):
     """Generate JIRA branch name from commit message text."""
+    import os
+    import shutil
     branch_command = helper.generate_jira_branch_name(text)
 
-    if copy:
+    if type:
+        # Check if we're on Wayland and no typing tools available
+        if os.environ.get('XDG_SESSION_TYPE') == 'wayland':
+            if not shutil.which('wtype') and not shutil.which('ydotool'):
+                console.print("[yellow]⚠ Auto-type on Wayland requires 'wtype' or 'ydotool'. Install with:[/yellow]")
+                console.print("[dim]  sudo dnf install wtype  # or[/dim]")
+                console.print("[dim]  sudo dnf install ydotool[/dim]")
+                pyperclip.copy(branch_command)
+                console.print(f"✅ Copied to clipboard instead: [bold green]{branch_command}[/bold green]")
+                return
+
+        helper.type_string_with_delay(branch_command, delay=0)  # No delay for commands
+        console.print(f"✅ Typed command: [bold green]{branch_command}[/bold green]")
+    elif copy:
         pyperclip.copy(branch_command)
         console.print(f"✅ Copied to clipboard: [bold green]{branch_command}[/bold green]")
     else:
@@ -34,36 +50,107 @@ def jira(text, copy):
 
 
 @main.command()
-@click.argument('badge_id')
-@click.option('--type', '-t', type=click.Choice(['rfid', 'qr']), default='rfid',
-              help='Badge type (rfid or qr)')
-@click.option('--auto-type/--no-auto-type', default=True,
-              help='Automatically type the badge (requires pynput)')
-def badge(badge_id, type, auto_type):
-    """Generate and optionally auto-type badge strings."""
-    if type == 'rfid':
-        badge_string = f'@{badge_id}
-    else:
-        badge_string = f'${badge_id}
+@click.argument('badge_string')
+@click.option('--copy', '-c', is_flag=True, help='Copy to clipboard instead of auto-typing')
+def badge(badge_string, copy):
+    """Type or copy badge string exactly as provided (e.g., '@1234#' or '$5678#')."""
+    import os
+    # Use the badge string exactly as provided by the user
+    console.print(f"[bold blue]Badge string:[/bold blue] {badge_string}")
 
-    console.print(f"[bold blue]{type.upper()} badge:[/bold blue] {badge_string}")
-
-    if auto_type:
-        helper.type_string_with_delay(badge_string)
-        console.print("✅ Badge typed automatically")
-    else:
+    # Check if we're on Wayland
+    if not copy and os.environ.get('XDG_SESSION_TYPE') == 'wayland':
+        console.print("[yellow]⚠ Auto-type not supported on Wayland. Copying to clipboard instead.[/yellow]")
         pyperclip.copy(badge_string)
         console.print("✅ Badge copied to clipboard")
+    elif copy:
+        pyperclip.copy(badge_string)
+        console.print("✅ Badge copied to clipboard")
+    else:
+        helper.type_string_with_delay(badge_string)
+        console.print("✅ Badge typed automatically")
+
+
+@main.command()
+@click.argument('badge_id')
+@click.option('--copy', '-c', is_flag=True, help='Copy to clipboard instead of auto-typing')
+def rfid(badge_id, copy):
+    """Type or copy RFID badge ID exactly as provided."""
+    import os
+    import shutil
+    # Use the badge_id exactly as provided - no prefix or suffix added
+    console.print(f"[bold blue]RFID badge:[/bold blue] {badge_id}")
+
+    if copy:
+        pyperclip.copy(badge_id)
+        console.print("✅ Badge copied to clipboard")
+    else:
+        # Check if we're on Wayland and no typing tools available
+        if os.environ.get('XDG_SESSION_TYPE') == 'wayland':
+            if not shutil.which('wtype') and not shutil.which('ydotool'):
+                console.print("[yellow]⚠ Auto-type on Wayland requires 'wtype' or 'ydotool'. Install with:[/yellow]")
+                console.print("[dim]  sudo dnf install wtype  # or[/dim]")
+                console.print("[dim]  sudo dnf install ydotool[/dim]")
+                pyperclip.copy(badge_id)
+                console.print("✅ Badge copied to clipboard instead")
+                return
+
+        helper.type_string_with_delay(badge_id)
+        console.print("✅ Badge typed automatically")
+
+
+@main.command()
+@click.argument('badge_id')
+@click.option('--copy', '-c', is_flag=True, help='Copy to clipboard instead of auto-typing')
+def qr(badge_id, copy):
+    """Type or copy QR badge ID exactly as provided."""
+    import os
+    import shutil
+    # Use the badge_id exactly as provided - no prefix or suffix added
+    console.print(f"[bold blue]QR badge:[/bold blue] {badge_id}")
+
+    if copy:
+        pyperclip.copy(badge_id)
+        console.print("✅ Badge copied to clipboard")
+    else:
+        # Check if we're on Wayland and no typing tools available
+        if os.environ.get('XDG_SESSION_TYPE') == 'wayland':
+            if not shutil.which('wtype') and not shutil.which('ydotool'):
+                console.print("[yellow]⚠ Auto-type on Wayland requires 'wtype' or 'ydotool'. Install with:[/yellow]")
+                console.print("[dim]  sudo dnf install wtype  # or[/dim]")
+                console.print("[dim]  sudo dnf install ydotool[/dim]")
+                pyperclip.copy(badge_id)
+                console.print("✅ Badge copied to clipboard instead")
+                return
+
+        helper.type_string_with_delay(badge_id)
+        console.print("✅ Badge typed automatically")
 
 
 @main.command()
 @click.argument('text')
 @click.option('--copy/--no-copy', default=True, help='Copy result to clipboard')
-def stash(text, copy):
+@click.option('--type', '-t', is_flag=True, help='Type command directly using wtype/ydotool')
+def stash(text, copy, type):
     """Generate git stash command with formatted message."""
+    import os
+    import shutil
     stash_command = helper.generate_stash_command(text)
 
-    if copy:
+    if type:
+        # Check if we're on Wayland and no typing tools available
+        if os.environ.get('XDG_SESSION_TYPE') == 'wayland':
+            if not shutil.which('wtype') and not shutil.which('ydotool'):
+                console.print("[yellow]⚠ Auto-type on Wayland requires 'wtype' or 'ydotool'. Install with:[/yellow]")
+                console.print("[dim]  sudo dnf install wtype  # or[/dim]")
+                console.print("[dim]  sudo dnf install ydotool[/dim]")
+                pyperclip.copy(stash_command)
+                console.print(f"✅ Copied to clipboard instead: [bold green]{stash_command}[/bold green]")
+                return
+
+        helper.type_string_with_delay(stash_command, delay=0)  # No delay for commands
+        console.print(f"✅ Typed command: [bold green]{stash_command}[/bold green]")
+    elif copy:
         pyperclip.copy(stash_command)
         console.print(f"✅ Copied to clipboard: [bold green]{stash_command}[/bold green]")
     else:
@@ -128,11 +215,25 @@ def apex(apex_file, port, auth, copy):
 @main.command()
 @click.argument('text')
 @click.option('--copy/--no-copy', default=False, help='Copy result to clipboard')
-def dash(text, copy):
+@click.option('--type', '-t', is_flag=True, help='Type result directly using wtype/ydotool')
+def dash(text, copy, type):
     """Convert text to dash-separated format for filenames."""
+    import os
+    import shutil
     dash_result = helper.convert_to_dash_format(text)
 
-    if copy:
+    if type:
+        # Check if we're on Wayland and no typing tools available
+        if os.environ.get('XDG_SESSION_TYPE') == 'wayland':
+            if not shutil.which('wtype') and not shutil.which('ydotool'):
+                console.print("[yellow]⚠ Auto-type on Wayland requires 'wtype' or 'ydotool'.[/yellow]")
+                pyperclip.copy(dash_result)
+                console.print(f"✅ Copied to clipboard instead: [bold green]{dash_result}[/bold green]")
+                return
+
+        helper.type_string_with_delay(dash_result, delay=0)
+        console.print(f"✅ Typed: [bold green]{dash_result}[/bold green]")
+    elif copy:
         pyperclip.copy(dash_result)
         console.print(f"✅ Copied to clipboard: [bold green]{dash_result}[/bold green]")
     else:
@@ -229,7 +330,9 @@ def interactive():
 
     commands = [
         ("jira <text>", "Generate JIRA branch name"),
-        ("badge <id>", "Generate badge string (RFID/QR)"),
+        ("rfid <id>", "Generate RFID badge (@id#)"),
+        ("qr <id>", "Generate QR badge ($id#)"),
+        ("badge <string>", "Type or copy badge string as-is"),
         ("stash <text>", "Generate git stash command"),
         ("dash <text>", "Convert text to dash-separated format"),
         ("log [ticket] [agent]", "Create work log for VIS tickets (auto-detect with -a)"),

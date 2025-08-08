@@ -3,6 +3,7 @@ pyproject.toml
 src/helper_cli/__init__.py
 src/helper_cli/cli.py
 src/helper_cli/core.py
+src/helper_cli/terminal_input.py
 src/helper_cli.egg-info/PKG-INFO
 src/helper_cli.egg-info/SOURCES.txt
 src/helper_cli.egg-info/dependency_links.txt

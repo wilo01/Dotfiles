@@ -19,6 +19,8 @@
 !~/recatest/*
 !sqldev/.sqldeveloper/system23*
 !sqldev/.sqldeveloper/SqlHistory/*
+!browser/
+!browser/**
 
 # Logs
 logs
