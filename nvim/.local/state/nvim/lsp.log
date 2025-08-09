@@ -112751,3 +112751,31 @@
 [ERROR][2025-08-09 21:48:19] ...m/lsp/client.lua:1051	"LSP[lua_ls]"	"on_error"	{ code = "SERVER_REQUEST_HANDLER_ERROR", err = "/usr/local/share/nvim/runtime/lua/vim/lsp/rpc.lua:281: Cannot serialise function: type not supported" }
 [START][2025-08-09 22:17:28] LSP logging initiated
 [WARN][2025-08-09 22:17:28] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-08-09 22:41:59] LSP logging initiated
+[WARN][2025-08-09 22:41:59] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-08-09 22:49:44] LSP logging initiated
+[ERROR][2025-08-09 22:49:44] ...lsp/handlers.lua:562	"[default] unhandledRejection: BugIndicatingError: Assertion Failed: unexpected state\n    at assert (/home/dariuszw/.local/share/nvim/lazy/copilot.vim/copilot-language-server/lib/src/nextEditSuggestions/vscode-copilot/src/util/vs/base/common/assert.ts:36:15)\n    at new Edit (/home/dariuszw/.local/share/nvim/lazy/copilot.vim/copilot-language-server/lib/src/nextEditSuggestions/vscode-copilot/src/platform/inlineEdits/common/dataTypes/edit.ts:89:9)\n    at Function.create (/home/dariuszw/.local/share/nvim/lazy/copilot.vim/copilot-language-server/lib/src/nextEditSuggestions/vscode-copilot/src/platform/inlineEdits/common/dataTypes/edit.ts:32:16)\n    at joinEdits (/home/dariuszw/.local/share/nvim/lazy/copilot.vim/copilot-language-server/lib/src/nextEditSuggestions/vscode-copilot/src/platform/inlineEdits/common/dataTypes/edit.ts:405:17)\n    at t.compose (/home/dariuszw/.local/share/nvim/lazy/copilot.vim/copilot-language-server/lib/src/nextEditSuggestions/vscode-copilot/src/platform/inlineEdits/common/dataTypes/edit.ts:97:16)\n    at Function.compose (/home/dariuszw/.local/share/nvim/lazy/copilot.vim/copilot-language-server/lib/src/nextEditSuggestions/vscode-copilot/src/platform/inlineEdits/common/dataTypes/edit.ts:57:33)\n    at t.compose (/home/dariuszw/.local/share/nvim/lazy/copilot.vim/copilot-language-server/lib/src/nextEditSuggestions/vscode-copilot/src/platform/inlineEdits/common/dataTypes/edit.ts:624:21)\n    at FIe.applyLspContentChanges (/home/dariuszw/.local/share/nvim/lazy/copilot.vim/copilot-language-server/lib/src/nextEditSuggestions/observableLspWorkspace.ts:167:30)\n    at bre.onDidChangeLspDocument (/home/dariuszw/.local/share/nvim/lazy/copilot.vim/copilot-language-server/lib/src/nextEditSuggestions/observableLspWorkspace.ts:79:17)\n    at /home/dariuszw/.local/share/nvim/lazy/copilot.vim/copilot-language-server/lib/src/nextEditSuggestions/observableLspWorkspace.ts:59:18"
+[START][2025-08-09 22:50:27] LSP logging initiated
+[WARN][2025-08-09 22:50:27] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-08-09 22:51:35] LSP logging initiated
+[WARN][2025-08-09 22:51:35] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-08-09 22:54:25] LSP logging initiated
+[WARN][2025-08-09 22:54:25] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-08-09 23:02:49] LSP logging initiated
+[WARN][2025-08-09 23:02:49] ...lsp/handlers.lua:564	'Settings: Settings { dailynote: "%Y-%m-%d", new_file_folder_path: "", daily_notes_folder: "", heading_completions: true, title_headings: true, unresolved_diagnostics: true, semantic_tokens: true, tags_in_codeblocks: false, references_in_codeblocks: false, include_md_extension_md_link: false, include_md_extension_wikilink: false, hover: true, case_matching: Smart, inlay_hints: true, block_transclusion: true, block_transclusion_length: Full, link_filenames_only: false }'
+[ERROR][2025-08-09 23:02:49] ...lsp/handlers.lua:562	"FILES Lock is good"
+[WARN][2025-08-09 23:02:49] ...lsp/handlers.lua:564	"Update Vault Started"
+[ERROR][2025-08-09 23:02:49] ...lsp/handlers.lua:562	"VAULT Lock is good"
+[WARN][2025-08-09 23:02:49] ...lsp/handlers.lua:564	"Update Vault Done"
+[WARN][2025-08-09 23:02:49] ...lsp/handlers.lua:564	"Diagnostics Started"
+[WARN][2025-08-09 23:02:49] ...lsp/handlers.lua:564	"Diagnostics Done"
+[WARN][2025-08-09 23:02:50] ...lsp/handlers.lua:564	"Diagnostics Done took 83ms"
+[WARN][2025-08-09 23:02:50] ...lsp/handlers.lua:564	"Semantic Tokens Done took 58ms"
+[WARN][2025-08-09 23:02:50] ...lsp/handlers.lua:564	"Diagnostics Started"
+[WARN][2025-08-09 23:02:50] ...lsp/handlers.lua:564	"Semantic Tokens Done took 46ms"
+[WARN][2025-08-09 23:02:50] ...lsp/handlers.lua:564	"Diagnostics Done"
+[WARN][2025-08-09 23:02:50] ...lsp/handlers.lua:564	"Diagnostics Done took 97ms"
+[START][2025-08-09 23:11:27] LSP logging initiated
+[WARN][2025-08-09 23:11:27] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-08-09 23:11:56] LSP logging initiated
+[WARN][2025-08-09 23:11:56] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"

@@ -29,6 +29,13 @@ return {
             -- Using this option may slow down your editor, and you may see some duplicate highlights.
             -- Instead of true it can also be a list of languages
             additional_vim_regex_highlighting = { "markdown" },
+
+            -- Disable for very large files only
+            disable = function(lang, buf)
+               local max_filesize = 1000 * 1024 -- 1MB
+               local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+               return ok and stats and stats.size > max_filesize
+            end,
          },
       })
 

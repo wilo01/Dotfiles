@@ -1,4 +1,8 @@
-local utils = require("DarO.utils")
+local ok_utils, utils = pcall(require, "DarO.utils")
+if not ok_utils then
+   vim.notify("Failed to load DarO.utils: " .. tostring(utils), vim.log.levels.ERROR)
+   return
+end
 local autocmd = vim.api.nvim_create_autocmd
 local augroup = vim.api.nvim_create_augroup
 local general = augroup("General Settings", { clear = true })
@@ -32,7 +36,9 @@ autocmd("BufEnter", {
 
 autocmd("BufWinEnter", {
    callback = function(data)
-      utils.open_help(data.buf)
+      if utils and utils.open_help then
+         pcall(utils.open_help, data.buf)
+      end
    end,
    group = general,
    desc = "Autocmds Redirect help to floating window",
@@ -70,33 +76,26 @@ vim.api.nvim_create_autocmd('LspAttach', {
    callback = function(event)
       local opts = { buffer = event.buf }
 
-      if vim.fn.has 'nvim-0.11' == 1 then
-         local client = vim.lsp.get_client_by_id(event.data.client_id)
-         local supports_highlight = false
-         if client then
-            if client.supports_method then
-               supports_highlight = client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight, event.buf)
-            else
-               supports_highlight = client.server_capabilities.documentHighlightProvider ~= nil
-            end
-         end
-         if supports_highlight then
-            local highlight_augroup = vim.api.nvim_create_augroup("lsp-highlight", { clear = true })
-            vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
-               group = highlight_augroup,
-               buffer = event.buf,
-               callback = function()
-                  vim.lsp.buf.document_highlight()
-               end,
-            })
-            vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
-               group = highlight_augroup,
-               buffer = event.buf,
-               callback = function()
-                  vim.lsp.buf.clear_references()
-               end,
-            })
-         end
+      -- Backwards compatible document highlighting
+      local ok_client, client = pcall(vim.lsp.get_client_by_id, event.data.client_id)
+      if ok_client and client and client.server_capabilities and client.server_capabilities.documentHighlightProvider then
+         local highlight_augroup = vim.api.nvim_create_augroup("lsp-highlight-" .. event.buf, { clear = true })
+
+         vim.api.nvim_create_autocmd("CursorHold", {
+            group = highlight_augroup,
+            buffer = event.buf,
+            callback = function()
+               pcall(vim.lsp.buf.document_highlight)
+            end,
+         })
+
+         vim.api.nvim_create_autocmd("CursorMoved", {
+            group = highlight_augroup,
+            buffer = event.buf,
+            callback = function()
+               pcall(vim.lsp.buf.clear_references)
+            end,
+         })
       end
 
       vim.keymap.set("n", "gd", function()

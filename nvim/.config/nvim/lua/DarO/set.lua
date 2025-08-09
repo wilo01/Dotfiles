@@ -21,10 +21,9 @@ vim.opt.incsearch = true
 
 -- Spelling
 vim.opt.spelllang = 'en_gb'
-vim.opt.spell = true
-vim.cmd("set spell syntax=off")
+vim.opt.spell = false -- Default off, enable per-filetype in autocmds
 vim.api.nvim_create_user_command('Spellcolor', function()
-   vim.cmd([[highlight SpellBad cterm=underline, bold ctermfg=Red guifg=#ff0000 guibg=NONE gui=underline, bold]])
+   vim.cmd([[highlight SpellBad cterm=underline,bold ctermfg=Red guifg=#ff0000 guibg=NONE gui=underline,bold]])
 end, {})
 
 -- File Handling
