@@ -1,0 +1,6 @@
+[WARN  Wed 23 Jul 2025 08:51:43 AM IST] /home/dariuszw/.local/share/nvim/lazy/null-ls.nvim/lua/null-ls/formatting.lua:58: error in formatting handler: ....local/share/nvim/lazy/null-ls.nvim/lua/null-ls/diff.lua:142: bad argument #1 to 'str_utfindex' (string expected, got nil)
+[WARN  Sat 26 Jul 2025 10:07:28 PM IST] /home/dariuszw/.local/share/nvim/lazy/none-ls.nvim/lua/null-ls/builtins/init.lua:17: failed to load builtin eslint_d for method diagnostics; please check your config
+[WARN  Sat 26 Jul 2025 10:08:36 PM IST] /home/dariuszw/.local/share/nvim/lazy/none-ls.nvim/lua/null-ls/builtins/init.lua:17: failed to load builtin eslint_d for method diagnostics; please check your config
+[WARN  Sat 26 Jul 2025 10:08:58 PM IST] /home/dariuszw/.local/share/nvim/lazy/none-ls.nvim/lua/null-ls/builtins/init.lua:17: failed to load builtin eslint_d for method diagnostics; please check your config
+[WARN  Sat 26 Jul 2025 10:11:52 PM IST] /home/dariuszw/.local/share/nvim/lazy/none-ls.nvim/lua/null-ls/builtins/init.lua:17: failed to load builtin eslint_d for method diagnostics; please check your config
+[WARN  Sat 26 Jul 2025 10:13:39 PM IST] /home/dariuszw/.local/share/nvim/lazy/none-ls.nvim/lua/null-ls/builtins/init.lua:17: failed to load builtin eslint_d for method diagnostics; please check your config

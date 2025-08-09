@@ -1163,6 +1163,10 @@
       "allowedTools": [],
       "history": [
         {
+          "display": "there's other logs that could be also moved and stowed conform.log  CopilotChat.log  hardtime.nvim.log  log  log.backup  lsp.log  luasnip.log  mason.log  mason-registry-update  null-ls.log  render-markdown.log\ncheck  ls ~/.local/state/nvim/ ",
+          "pastedContents": {}
+        },
+        {
           "display": "please add  ~/.local/state/nvim/log into ~/.Dotfiles/nvim/.local/state/nvim/log and stow the file ",
           "pastedContents": {}
         },
@@ -1636,10 +1640,6 @@
               "content": " git push                                                                           took  21s  system  10 at  09:58:26 PM\nEnumerating objects: 132, done.\nCounting objects: 100% (132/132), done.\nDelta compression using up to 4 threads\nCompressing objects: 100% (102/102), done.\nWriting objects: 100% (114/114), 6.48 MiB | 3.81 MiB/s, done.\nTotal 114 (delta 51), reused 0 (delta 0), pack-reused 0 (from 0)\nremote: Resolving deltas: 100% (51/51), completed with 13 local objects.\nremote: error: GH013: Repository rule violations found for refs/heads/Linux.\nremote:\nremote: - GITHUB PUSH PROTECTION\nremote:   —————————————————————————————————————————\nremote:     Resolve the following violations before pushing again\nremote:\nremote:     - Push cannot contain secrets\nremote:\nremote:\nremote:      (?) Learn how to resolve a blocked push\nremote:      https://docs.github.com/code-security/secret-scanning/working-with-secret-scanning-and-push-protection/working-with-push-protection-from-the-command-line#resolving-a-blocked-push\nremote:\nremote:      (?) This repository does not have Secret Scanning enabled, but is eligible. Enable Secret Scanning to view and manage detected secrets.\nremote:      Visit the repository settings page, https://github.com/wilo01/Dotfiles/settings/security_analysis\nremote:\nremote:\nremote:       —— Google OAuth Access Token —————————————————————————\nremote:        locations:\nremote:          - commit: 043e4edb013feabcd552513021e11747af3c4e82\nremote:            path: AI-tools/.gemini/oauth_creds.json:2\nremote:\nremote:        (?) To push, remove secret from commit(s) or follow this URL to allow the secret.\nremote:        https://github.com/wilo01/Dotfiles/security/secret-scanning/unblock-secret/30WGb8AYvatNsPa2UVxbOj3aiBM\nremote:\nremote:\nremote:       —— Google OAuth Refresh Token ————————————————————————\nremote:        locations:\nremote:          - commit: 043e4edb013feabcd552513021e11747af3c4e82\nremote:            path: AI-tools/.gemini/oauth_creds.json:3\nremote:\nremote:        (?) To push, remove secret from commit(s) or follow this URL to allow the secret.\nremote:        https://github.com/wilo01/Dotfiles/security/secret-scanning/unblock-secret/30WGb9LlVvK4Nc7ZCN5k1ctxAeL\nremote:\nremote:\nremote:\nTo github-wilo01:wilo01/Dotfiles.git\n ! [remote rejected] Linux -> Linux (push declined due to repository rule violations)\nerror: failed to push some refs to 'github-wilo01:wilo01/Dotfiles.git'\n  ~/.Dotfiles on   Linux ⇡8 *9 !2 ❯ git status                                                                          took  5s  system  10 at  09:58:33 PM\nOn branch Linux\nYour branch is ahead of 'origin/Linux' by 8 commits.\n  (use \"git push\" to publish your local commits)\n\nChanges not staged for commit:\n  (use \"git add <file>...\" to update what will be committed)\n  (use \"git restore <file>...\" to discard changes in working directory)\n        modified:   AI-tools/.claude.json\n        modified:   AI-tools/.claude.json.backup\n\nno changes added to commit (use \"git add\" and/or \"git commit -a\")\n  ~/.Dotfiles on   Linux ⇡8 *9 !2 ❯                               "
             }
           }
-        },
-        {
-          "display": "/clear ",
-          "pastedContents": {}
         }
       ],
       "mcpContextUris": [],
@@ -2256,6 +2256,10 @@
     "/home/dariuszw/Dev/Private/backend": {
       "allowedTools": [],
       "history": [
+        {
+          "display": "continue grab your coffee and move on ",
+          "pastedContents": {}
+        },
         {
           "display": "continue",
           "pastedContents": {}
