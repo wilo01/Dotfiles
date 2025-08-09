@@ -24,7 +24,7 @@
     "custom-agents": 199
   },
   "memoryUsageCount": 13,
-  "promptQueueUseCount": 150,
+  "promptQueueUseCount": 151,
   "projects": {
     "/home/dariuszw/Dev/branch-opener/branches/tds-suite": {
       "allowedTools": [],
@@ -1163,6 +1163,10 @@
       "allowedTools": [],
       "history": [
         {
+          "display": "please add  ~/.local/state/nvim/log into ~/.Dotfiles/nvim/.local/state/nvim/log and stow the file ",
+          "pastedContents": {}
+        },
+        {
           "display": "/clear ",
           "pastedContents": {}
         },
@@ -1635,10 +1639,6 @@
         },
         {
           "display": "/clear ",
-          "pastedContents": {}
-        },
-        {
-          "display": "it works as expected as configured before I am ok with this ",
           "pastedContents": {}
         }
       ],
