@@ -1,6 +1,5 @@
 local M = {}
 
--- Cache for Git status to avoid excessive calls
 local git_cache = {
    branch = '',
    ahead = 0,
@@ -14,7 +13,6 @@ local git_cache = {
 
 local os_icon_cache = nil
 
--- Cache duration in milliseconds
 local CACHE_DURATION = 2000
 
 local icons = {
@@ -42,16 +40,12 @@ local icons = {
 
 local function setup_highlights()
    vim.api.nvim_set_hl(0, 'StatusLineDir', { ctermfg = 39, fg = '#00afff', bold = true })
-
+   vim.api.nvim_set_hl(0, 'StatusLineFile', { ctermfg = 220, fg = '#ffd700', bold = true })
    vim.api.nvim_set_hl(0, 'StatusLineGitClean', { ctermfg = 76, fg = '#5fd700', bold = true })
-
    vim.api.nvim_set_hl(0, 'StatusLineGitDirty', { ctermfg = 178, fg = '#d7af00', bold = true })
-
    vim.api.nvim_set_hl(0, 'StatusLineGitUntracked', { ctermfg = 39, fg = '#00afff', bold = true })
-
    vim.api.nvim_set_hl(0, 'StatusLineSeparator', { ctermfg = 255, fg = '#ffffff' })
    vim.api.nvim_set_hl(0, 'StatusLineInfo', { ctermfg = 255, fg = '#ffffff' })
-
    vim.api.nvim_set_hl(0, 'StatusLineOS', { ctermfg = 255, fg = '#ffffff', bold = true })
 end
 
@@ -91,18 +85,44 @@ local function get_os_icon()
    return os_icon_cache
 end
 
-local function get_current_dir()
-   local cwd = vim.fn.getcwd()
-   local home = vim.fn.expand('~')
 
-   if cwd:sub(1, #home) == home then
-      cwd = '~' .. cwd:sub(#home + 1)
+local function shorten_path(filepath)
+   if filepath == '' or filepath == '[No Name]' then
+      return filepath
    end
 
-   return cwd
+   local home = vim.fn.expand('~')
+   local full_path = vim.fn.expand(filepath)
+
+   if full_path:sub(1, #home) == home then
+      full_path = '~' .. full_path:sub(#home + 1)
+   end
+
+   local parts = {}
+   for part in full_path:gmatch('[^/]+') do
+      table.insert(parts, part)
+   end
+
+   if #parts <= 3 then
+      return full_path
+   end
+
+   local shortened = {}
+
+   table.insert(shortened, parts[1])
+
+   for i = 2, #parts - 2 do
+      table.insert(shortened, parts[i]:sub(1, 1))
+   end
+
+   if #parts > 1 then
+      table.insert(shortened, parts[#parts - 1])
+      table.insert(shortened, parts[#parts])
+   end
+
+   return table.concat(shortened, '/')
 end
 
--- Function to get Git branch
 local function get_git_branch()
    local handle = io.popen('git branch --show-current 2>/dev/null')
    if not handle then return '' end
@@ -112,7 +132,6 @@ local function get_git_branch()
    return branch ~= '' and branch or ''
 end
 
--- Function to get commits ahead/behind
 local function get_git_ahead_behind()
    local handle = io.popen('git rev-list --count --left-right @{upstream}...HEAD 2>/dev/null')
    if not handle then return 0, 0 end
@@ -169,7 +188,6 @@ local function get_git_stash_count()
    return tonumber(count) or 0
 end
 
--- Function to update Git cache
 local function update_git_cache()
    local current_time = vim.loop.now()
 
@@ -177,7 +195,6 @@ local function update_git_cache()
       return
    end
 
-   -- Check if we're in a Git repository
    local handle = io.popen('git rev-parse --is-inside-work-tree 2>/dev/null')
    if not handle then return end
 
@@ -253,20 +270,40 @@ local function format_git_status()
    return git_status, branch_is_dirty
 end
 
--- Function to get file info
-local function get_file_info()
-   local filename = vim.fn.expand('%:t')
-   if filename == '' then
-      filename = '[No Name]'
+local function get_file_path()
+   local filepath = vim.fn.expand('%')
+   if filepath == '' then
+      return '[No Name]'
    end
 
-   local modified = vim.bo.modified and '[+]' or ''
-   local readonly = vim.bo.readonly and '[RO]' or ''
+   local cwd = vim.fn.getcwd()
+   local full_path = vim.fn.expand('%:p')
+   local home = vim.fn.expand('~')
 
-   return filename .. modified .. readonly
+   if cwd:sub(1, #home) == home then
+      cwd = '~' .. cwd:sub(#home + 1)
+   end
+   if full_path:sub(1, #home) == home then
+      full_path = '~' .. full_path:sub(#home + 1)
+   end
+
+   local display_path
+
+   if full_path:sub(1, #cwd) == cwd then
+      display_path = full_path:sub(#cwd + 2)
+      if display_path == '' then
+         display_path = vim.fn.expand('%:t')
+      end
+   else
+      display_path = shorten_path(filepath)
+   end
+
+   local modified = vim.bo.modified and ' [+]' or ''
+   local readonly = vim.bo.readonly and ' [RO]' or ''
+
+   return display_path .. modified .. readonly
 end
 
--- Function to get cursor position
 local function get_cursor_position()
    local line = vim.fn.line('.')
    local col = vim.fn.col('.')
@@ -274,13 +311,11 @@ local function get_cursor_position()
    return string.format('%d:%d/%d', line, col, total_lines)
 end
 
--- Function to get file type
 local function get_filetype()
    local ft = vim.bo.filetype
    return ft ~= '' and ft or 'no ft'
 end
 
--- Function to get file encoding
 local function get_file_encoding()
    local encoding = vim.bo.fileencoding
    if encoding == '' then
@@ -289,20 +324,19 @@ local function get_file_encoding()
    return encoding
 end
 
--- Main statusline function
 function M.statusline()
-   local git_status, git_dirty = format_git_status()
+   local git_status = format_git_status()
    local cursor_pos = get_cursor_position()
    local filetype = get_filetype()
    local encoding = get_file_encoding()
-   local current_dir = get_current_dir()
+   local file_path = get_file_path()
    local os_icon = get_os_icon()
 
    local left_parts = {}
 
    table.insert(left_parts, '%#StatusLineOS#' .. os_icon .. '%*')
 
-   table.insert(left_parts, '%#StatusLineDir#' .. icons.folder .. ' ' .. current_dir .. '%*')
+   table.insert(left_parts, '%#StatusLineDir#' .. icons.folder .. ' ' .. file_path .. '%*')
 
    if git_status ~= '' then
       table.insert(left_parts, '%#StatusLineSeparator#on%* ' .. git_status)
@@ -322,18 +356,14 @@ function M.statusline()
    return left .. '%=' .. right
 end
 
--- Set up the statusline
 function M.setup()
    setup_highlights()
 
-   -- Set the statusline to use our custom function
    vim.o.statusline = '%!v:lua.require("DarO.statusline").statusline()'
 
-   -- Auto-refresh statusline more frequently for Git updates
    vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWrite', 'FocusGained', 'VimResume' }, {
       group = vim.api.nvim_create_augroup('CustomStatuslineRefresh', { clear = true }),
       callback = function()
-         -- Force cache refresh on these events
          git_cache.last_update = 0
          vim.cmd('redrawstatus')
       end
@@ -344,10 +374,9 @@ function M.setup()
       callback = setup_highlights
    })
 
-   -- Periodic refresh for Git status (every 5 seconds when idle)
    local timer = vim.loop.new_timer()
    timer:start(5000, 5000, vim.schedule_wrap(function()
-      if vim.api.nvim_get_mode().mode == 'n' then -- Only in normal mode
+      if vim.api.nvim_get_mode().mode == 'n' then
          git_cache.last_update = 0
          vim.cmd('redrawstatus')
       end
