@@ -242,6 +242,8 @@ vim.keymap.set("n", "<leader>vt", "<CMD>Gitsigns toggle_deleted<CR>", { desc = "
 vim.keymap.set("n", "<leader>vb", "<CMD>Gitsigns blame_line<CR>", { desc = "Gitsigns Blame current line" })
 vim.keymap.set("n", "<leader>rg", "<CMD>Gitsigns reset_hunk<CR>", { desc = "Gitsigns Reset Hunk (Reset git, diff)" })
 vim.keymap.set("n", "<leader>sh", "<CMD>Gitsigns stage_hunk<CR>", { desc = "Gitsigns Stage Hunk" })
+vim.keymap.set("n", "<leader>sf", "<CMD>Gitsigns stage_buffer<CR>", { desc = "Gitsigns Stage entire File/Buffer" })
+vim.keymap.set("n", "<leader>uf", "<CMD>Gitsigns reset_buffer_index<CR>", { desc = "Gitsigns Unstage entire File/Buffer" }) -- [ ] TODO: Toggle Unstage entire File/Buffer
 vim.keymap.set("n", "J", "<CMD>Gitsigns next_hunk<CR>zz", { desc = "Gitsigns go to next Git hunk and jump to center" })
 vim.keymap.set("n", "K", "<CMD>Gitsigns prev_hunk<CR>zz",
    { desc = "Gitsigns go to previous Git hunk and jump to center" })
@@ -403,7 +405,7 @@ vim.keymap.set("n", "<leader>og", open_git_online, { desc = "Open current file i
 
 -- CSV editing format (Auto close on save in -> autocmds.lua)
 vim.g.is_csv_prettified = false
-vim.keymap.set("n", "<leader>tc", function()
+vim.keymap.set("n", "<leader>t", function()
    local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
 
    if vim.g.is_csv_prettified then
@@ -415,12 +417,19 @@ vim.keymap.set("n", "<leader>tc", function()
       vim.api.nvim_buf_set_lines(0, 0, -1, false, cleaned_lines)
       print("CSV prettification disabled.")
    else
+      -- Configuration constants
+      local MAX_COLUMN_WIDTH = 100 -- Maximum width for any column
+      local ELLIPSIS = "..."
+      local MAX_FORMAT_WIDTH = 144 -- Lua string.format limitation
+
       local max_lengths = {}
 
+      -- Calculate maximum lengths for each column with limits
       for _, line in ipairs(lines) do
          local cols = vim.split(line, ",", { plain = true })
          for i, col in ipairs(cols) do
-            max_lengths[i] = math.max(max_lengths[i] or 0, #col)
+            local col_length = math.min(#col, MAX_COLUMN_WIDTH)
+            max_lengths[i] = math.max(max_lengths[i] or 0, col_length)
          end
       end
 
@@ -428,7 +437,29 @@ vim.keymap.set("n", "<leader>tc", function()
       for _, line in ipairs(lines) do
          local cols = vim.split(line, ",", { plain = true })
          for i, col in ipairs(cols) do
-            cols[i] = string.format("%-" .. max_lengths[i] .. "s", col)
+            local max_len = max_lengths[i] or 0
+
+            -- Ensure we don't exceed format limits
+            if max_len > MAX_FORMAT_WIDTH then
+               max_len = MAX_FORMAT_WIDTH
+            end
+
+            -- Truncate long fields with ellipsis
+            local formatted_col = col
+            if #col > MAX_COLUMN_WIDTH then
+               formatted_col = col:sub(1, MAX_COLUMN_WIDTH - #ELLIPSIS) .. ELLIPSIS
+            end
+
+            -- Safe string formatting with error handling
+            local success, result = pcall(string.format, "%-" .. max_len .. "s", formatted_col)
+            if success then
+               cols[i] = result
+            else
+               -- Fallback: just pad manually if string.format fails
+               cols[i] = formatted_col .. string.rep(" ", math.max(0, max_len - #formatted_col))
+               vim.notify("Warning: String format failed for column " .. i .. ", using fallback padding",
+                  vim.log.levels.WARN)
+            end
          end
          table.insert(prettified_lines, table.concat(cols, " , "))
       end

@@ -28300,3 +28300,91 @@ cache_loader_lib: module lspconfig.server_configurations.omnisharp not found
 [ERROR Sun 10 Aug 2025 10:38:34 AM IST] ...al/share/nvim/lazy/mason.nvim/lua/mason-core/process.lua:226: Failed to spawn process. cmd="composer", err="ENOENT: no such file or directory"
 [ERROR Sun 10 Aug 2025 10:38:34 AM IST] ...al/share/nvim/lazy/mason.nvim/lua/mason-core/process.lua:226: Failed to spawn process. cmd="php", err="ENOENT: no such file or directory"
 [ERROR Sun 10 Aug 2025 10:38:34 AM IST] ...al/share/nvim/lazy/mason.nvim/lua/mason-core/process.lua:226: Failed to spawn process. cmd="julia", err="ENOENT: no such file or directory"
+[INFO  Sun 10 Aug 2025 06:40:38 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=csharp-language-server) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[ERROR Sun 10 Aug 2025 06:40:38 PM IST] ...al/share/nvim/lazy/mason.nvim/lua/mason-core/process.lua:226: Failed to spawn process. cmd="dotnet", err="ENOENT: no such file or directory"
+[ERROR Sun 10 Aug 2025 06:40:38 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=csharp-language-server) error=spawn: dotnet failed with exit code - and signal -. Could not find executable "dotnet" in PATH.
+
+[INFO  Sun 10 Aug 2025 06:50:19 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=csharp-language-server) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[ERROR Sun 10 Aug 2025 06:50:19 PM IST] ...al/share/nvim/lazy/mason.nvim/lua/mason-core/process.lua:226: Failed to spawn process. cmd="dotnet", err="ENOENT: no such file or directory"
+[ERROR Sun 10 Aug 2025 06:50:19 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=csharp-language-server) error=spawn: dotnet failed with exit code - and signal -. Could not find executable "dotnet" in PATH.
+
+[INFO  Mon 11 Aug 2025 08:04:31 AM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=csharp-language-server) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[ERROR Mon 11 Aug 2025 08:04:31 AM IST] ...al/share/nvim/lazy/mason.nvim/lua/mason-core/process.lua:226: Failed to spawn process. cmd="dotnet", err="ENOENT: no such file or directory"
+[ERROR Mon 11 Aug 2025 08:04:31 AM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=csharp-language-server) error=spawn: dotnet failed with exit code - and signal -. Could not find executable "dotnet" in PATH.
+
+[INFO  Mon 11 Aug 2025 08:05:19 AM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=csharp-language-server) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[ERROR Mon 11 Aug 2025 08:05:19 AM IST] ...al/share/nvim/lazy/mason.nvim/lua/mason-core/process.lua:226: Failed to spawn process. cmd="dotnet", err="ENOENT: no such file or directory"
+[ERROR Mon 11 Aug 2025 08:05:19 AM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=csharp-language-server) error=spawn: dotnet failed with exit code - and signal -. Could not find executable "dotnet" in PATH.
+
+[INFO  Mon 11 Aug 2025 08:08:33 AM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=csharp-language-server) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[ERROR Mon 11 Aug 2025 08:08:33 AM IST] ...al/share/nvim/lazy/mason.nvim/lua/mason-core/process.lua:226: Failed to spawn process. cmd="dotnet", err="ENOENT: no such file or directory"
+[ERROR Mon 11 Aug 2025 08:08:33 AM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=csharp-language-server) error=spawn: dotnet failed with exit code - and signal -. Could not find executable "dotnet" in PATH.
+
+[INFO  Mon 11 Aug 2025 08:11:51 AM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=csharp-language-server) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[ERROR Mon 11 Aug 2025 08:11:51 AM IST] ...al/share/nvim/lazy/mason.nvim/lua/mason-core/process.lua:226: Failed to spawn process. cmd="dotnet", err="ENOENT: no such file or directory"
+[ERROR Mon 11 Aug 2025 08:11:51 AM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=csharp-language-server) error=spawn: dotnet failed with exit code - and signal -. Could not find executable "dotnet" in PATH.
+
+[INFO  Mon 11 Aug 2025 08:13:18 AM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=csharp-language-server) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[ERROR Mon 11 Aug 2025 08:13:18 AM IST] ...al/share/nvim/lazy/mason.nvim/lua/mason-core/process.lua:226: Failed to spawn process. cmd="dotnet", err="ENOENT: no such file or directory"
+[ERROR Mon 11 Aug 2025 08:13:18 AM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=csharp-language-server) error=spawn: dotnet failed with exit code - and signal -. Could not find executable "dotnet" in PATH.
+
+[INFO  Mon 11 Aug 2025 08:14:59 AM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=csharp-language-server) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[ERROR Mon 11 Aug 2025 08:14:59 AM IST] ...al/share/nvim/lazy/mason.nvim/lua/mason-core/process.lua:226: Failed to spawn process. cmd="dotnet", err="ENOENT: no such file or directory"
+[ERROR Mon 11 Aug 2025 08:14:59 AM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=csharp-language-server) error=spawn: dotnet failed with exit code - and signal -. Could not find executable "dotnet" in PATH.
+
+[INFO  Mon 11 Aug 2025 08:17:56 AM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=csharp-language-server) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[ERROR Mon 11 Aug 2025 08:17:56 AM IST] ...al/share/nvim/lazy/mason.nvim/lua/mason-core/process.lua:226: Failed to spawn process. cmd="dotnet", err="ENOENT: no such file or directory"
+[ERROR Mon 11 Aug 2025 08:17:56 AM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=csharp-language-server) error=spawn: dotnet failed with exit code - and signal -. Could not find executable "dotnet" in PATH.
+
+[INFO  Mon 11 Aug 2025 08:18:14 AM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=csharp-language-server) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[ERROR Mon 11 Aug 2025 08:18:14 AM IST] ...al/share/nvim/lazy/mason.nvim/lua/mason-core/process.lua:226: Failed to spawn process. cmd="dotnet", err="ENOENT: no such file or directory"
+[ERROR Mon 11 Aug 2025 08:18:14 AM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=csharp-language-server) error=spawn: dotnet failed with exit code - and signal -. Could not find executable "dotnet" in PATH.
+
+[INFO  Mon 11 Aug 2025 08:19:06 AM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=csharp-language-server) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[ERROR Mon 11 Aug 2025 08:19:06 AM IST] ...al/share/nvim/lazy/mason.nvim/lua/mason-core/process.lua:226: Failed to spawn process. cmd="dotnet", err="ENOENT: no such file or directory"
+[ERROR Mon 11 Aug 2025 08:19:07 AM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=csharp-language-server) error=spawn: dotnet failed with exit code - and signal -. Could not find executable "dotnet" in PATH.
+
