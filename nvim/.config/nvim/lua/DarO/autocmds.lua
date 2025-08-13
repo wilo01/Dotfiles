@@ -19,10 +19,12 @@ autocmd("BufEnter", {
    callback = function(opts)
       if vim.bo[opts.buf].filetype == "bicep" then
          vim.bo.commentstring = "// %s"
+      elseif vim.bo[opts.buf].filetype == "sql" then
+         vim.bo.commentstring = "-- %s"
       end
    end,
    group = general,
-   desc = "Autocmds Set Bicep Comment String",
+   desc = "Autocmds Set Bicep and SQL Comment String",
 })
 
 autocmd("BufEnter", {

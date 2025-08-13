@@ -6,7 +6,7 @@
 
 The TDS Suite uses Oracle Database running in Docker container 'trunk'.
 
-**Connection Details:**
+**Default Connection Details:**
 - **Container Name**: `trunk`
 - **Database User**: `some_user`
 - **Password**: `some_pass`
