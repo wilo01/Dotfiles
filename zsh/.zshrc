@@ -241,3 +241,5 @@ alias clauded='claude --dangerously-skip-permissions'
 
 # File path alias - get absolute path of a file
 alias filepath='realpath'
+
+# Tig with delta integration - press 'd' in tig to view diffs with delta

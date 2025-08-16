@@ -28,5 +28,99 @@ jiraTag=$(git symbolic-ref --short HEAD | cut -d'-' -f1,2)
 firstLine=$(head -n1 "$1")
 
 if [ -z "$firstLine" ]; then
-   sed -i.bak "1s/^/$jiraTag\n\n$branchFullName\n\nLogs:\n-/" "$1"
+   # Check if AI commit generation is enabled
+   enable_ai_commit=$(git config --local hooks.enableAiCommit)
+   
+   if [ "$enable_ai_commit" == "true" ]; then
+      echo "Generating AI commit message..."
+      
+      # Get the diff information
+      diff_stat=$(git diff --staged --stat 2>/dev/null)
+      diff_names=$(git diff --staged --name-status 2>/dev/null)
+      
+      # Create a simplified prompt for AI
+      ai_prompt="Generate commit message bullet points for these git changes:
+$diff_names
+
+Output exactly 2-4 bullet points starting with '- ' describing what was modified:"
+
+      # Try Claude first (with 10 second timeout and simpler processing)
+      log_points=$(echo "$ai_prompt" | timeout 10 claude --print 2>/dev/null | grep "^- " | head -5)
+      
+      # If Claude fails or returns empty, try Gemini
+      if [ -z "$log_points" ]; then
+         echo "Claude failed, trying Gemini..."
+         # Gemini needs the prompt as an argument, not stdin
+         log_points=$(timeout 10 gemini -p "$ai_prompt" 2>/dev/null | grep "^- " | head -5)
+      fi
+      
+      # If still no points, try a more intelligent basic approach
+      if [ -z "$log_points" ]; then
+         echo "AI failed, generating intelligent fallback points..."
+         # Generate more intelligent points from file names
+         log_points=$(echo "$diff_names" | while read -r line; do
+            if [ -n "$line" ]; then
+               status=$(echo "$line" | cut -c1)
+               file=$(echo "$line" | cut -c3-)
+               filename=$(basename "$file")
+               
+               # Smart descriptions based on file patterns
+               case "$file" in
+                  *"lazy-lock.json")
+                     [ "$status" = "M" ] && echo "- Updated neovim plugin versions"
+                     ;;
+                  *".zshrc")
+                     [ "$status" = "M" ] && echo "- Modified zsh shell configuration"
+                     ;;
+                  *"lsp.log")
+                     [ "$status" = "M" ] && echo "- Updated LSP server logs"
+                     ;;
+                  *"prepare-commit-msg")
+                     [ "$status" = "M" ] && echo "- Enhanced git commit hook with AI support"
+                     ;;
+                  *"nvim/"*".lua")
+                     [ "$status" = "M" ] && echo "- Updated neovim lua configuration"
+                     ;;
+                  *"tmux.conf"*)
+                     [ "$status" = "M" ] && echo "- Modified tmux configuration"
+                     ;;
+                  *".gitconfig")
+                     [ "$status" = "M" ] && echo "- Updated git configuration"
+                     ;;
+                  *)
+                     case "$status" in
+                        M) echo "- Modified $filename" ;;
+                        A) echo "- Added new file: $filename" ;;
+                        D) echo "- Removed $filename" ;;
+                     esac
+                     ;;
+               esac
+            fi
+         done | head -5)
+      fi
+      
+      # Use AI-generated points if we got them
+      if [ -n "$log_points" ]; then
+         echo "AI-generated commit points ready"
+         # Format the commit message with AI-generated points
+         {
+            echo "$jiraTag"
+            echo ""
+            echo "$branchFullName"
+            echo ""
+            echo "Logs:"
+            echo "$log_points"
+         } > "$1"
+      else
+         # Fallback to original behavior if both AIs fail
+         echo "AI generation failed, using default template"
+         sed -i.bak "1s/^/$jiraTag\n\n$branchFullName\n\nLogs:\n- /" "$1"
+      fi
+   else
+      # Original behavior when AI commit is disabled
+      sed -i.bak "1s/^/$jiraTag\n\n$branchFullName\n\nLogs:\n- /" "$1"
+   fi
+else
+   # If there's already content, don't modify
+   :
 fi
