@@ -115535,3 +115535,6 @@
 [WARN][2025-08-16 11:58:50] ...lsp/handlers.lua:564	"10:58:50.639 WARNING ⛔️ Error while parsing file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg: syntax error"
 [WARN][2025-08-16 11:58:50] ...lsp/handlers.lua:564	"10:58:50.864 WARNING ⛔️ Error while parsing file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg: syntax error"
 [WARN][2025-08-16 11:59:47] ...lsp/handlers.lua:564	"10:59:47.595 WARNING ⛔️ Shfmt: disabling formatting as no executable was found at path 'shfmt'"
+[START][2025-08-16 12:08:06] LSP logging initiated
+[WARN][2025-08-16 12:08:06] ...lsp/handlers.lua:564	"11:08:06.199 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[WARN][2025-08-16 12:08:10] ...lsp/handlers.lua:564	"11:08:10.012 WARNING ⛔️ Shfmt: disabling formatting as no executable was found at path 'shfmt'"

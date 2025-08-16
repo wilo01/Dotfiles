@@ -34,14 +34,23 @@ if [ -z "$firstLine" ]; then
    if [ "$enable_ai_commit" == "true" ]; then
       echo "Generating AI commit message..."
 
-      # Get the diff information  
+      # Get the diff information
       diff_stat=$(git diff --staged --stat 2>/dev/null)
       diff_names=$(git diff --staged --name-status 2>/dev/null)
-      # Get actual diff content (first 100 lines to avoid huge prompts)
-      diff_content=$(git diff --staged --unified=3 2>/dev/null | head -100)
+      
+      # Get MORE actual diff content (up to 500 lines for better context)
+      # Use unified=2 for more compact diff while still showing context
+      diff_content=$(git diff --staged --unified=2 2>/dev/null | head -500)
+      
+      # Count changes for additional context
+      files_changed=$(echo "$diff_names" | wc -l)
+      lines_added=$(git diff --staged --numstat 2>/dev/null | awk '{sum+=$1} END {print sum}')
+      lines_deleted=$(git diff --staged --numstat 2>/dev/null | awk '{sum+=$2} END {print sum}')
 
       # Create a comprehensive prompt for AI
       ai_prompt="Analyze these git changes and generate commit message bullet points.
+
+Summary: $files_changed files changed, +$lines_added lines added, -$lines_deleted lines deleted
 
 Files changed:
 $diff_names
@@ -49,22 +58,28 @@ $diff_names
 Diff statistics:
 $diff_stat
 
-Actual changes (truncated):
+Actual diff content (showing what was changed):
 $diff_content
 
-Generate 2-5 concise bullet points describing what was actually changed.
-Output ONLY bullet points starting with '- '. Be specific about the changes, not just file names."
+Based on the actual diff above, generate 2-5 concise bullet points describing what was ACTUALLY changed.
+Focus on:
+- What functionality was added/modified/removed
+- What configuration or settings were changed
+- What bugs were fixed or features implemented
+- The actual code changes, not just file names
 
-      # Try Claude first (with 15 second timeout and better error handling)
+Output ONLY bullet points starting with '- '. Be specific and technical about the actual changes."
+
+      # Try Claude first (with 20 second timeout for larger diffs)
       # Debug: Save prompt for troubleshooting
       # echo "$ai_prompt" > /tmp/git-ai-prompt.txt
-      log_points=$(echo "$ai_prompt" | timeout 15 /usr/local/bin/claude --print 2>&1 | grep "^- " | head -5)
+      log_points=$(echo "$ai_prompt" | timeout 20 /usr/local/bin/claude --print 2>&1 | grep "^- " | head -5)
 
       # If Claude fails or returns empty, try Gemini
       if [ -z "$log_points" ]; then
          echo "Claude failed, trying Gemini..."
          # Gemini needs the prompt as an argument, not stdin
-         log_points=$(timeout 15 /usr/local/bin/gemini -p "$ai_prompt" 2>/dev/null | grep "^- " | head -5)
+         log_points=$(timeout 20 /usr/local/bin/gemini -p "$ai_prompt" 2>/dev/null | grep "^- " | head -5)
       fi
 
       # Use AI-generated points if we got them
