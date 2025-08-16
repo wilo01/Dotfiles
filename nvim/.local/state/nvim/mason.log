@@ -28388,3 +28388,22 @@ cache_loader_lib: module lspconfig.server_configurations.omnisharp not found
 [ERROR Mon 11 Aug 2025 08:19:06 AM IST] ...al/share/nvim/lazy/mason.nvim/lua/mason-core/process.lua:226: Failed to spawn process. cmd="dotnet", err="ENOENT: no such file or directory"
 [ERROR Mon 11 Aug 2025 08:19:07 AM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=csharp-language-server) error=spawn: dotnet failed with exit code - and signal -. Could not find executable "dotnet" in PATH.
 
+[INFO  Fri 15 Aug 2025 11:32:04 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=vtsls) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Fri 15 Aug 2025 11:32:04 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=vue-language-server) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Fri 15 Aug 2025 11:32:10 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:86: Installation succeeded for Package(name=vtsls)
+[INFO  Fri 15 Aug 2025 11:32:20 PM IST] .../mason.nvim/lua/mason-core/installer/UninstallRunner.lua:37: Executing uninstaller for Package(name=vue-language-server) {
+  bypass_permit = true
+}
+[INFO  Fri 15 Aug 2025 11:32:20 PM IST] .../mason.nvim/lua/mason-core/installer/UninstallRunner.lua:61: Uninstallation succeeded for Package(name=vue-language-server)
+[INFO  Fri 15 Aug 2025 11:32:20 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:86: Installation succeeded for Package(name=vue-language-server)
+[ERROR Sat 16 Aug 2025 09:48:05 AM IST] ...al/share/nvim/lazy/mason.nvim/lua/mason-core/process.lua:226: Failed to spawn process. cmd="composer", err="ENOENT: no such file or directory"
+[ERROR Sat 16 Aug 2025 09:48:05 AM IST] ...al/share/nvim/lazy/mason.nvim/lua/mason-core/process.lua:226: Failed to spawn process. cmd="php", err="ENOENT: no such file or directory"
+[ERROR Sat 16 Aug 2025 09:48:05 AM IST] ...al/share/nvim/lazy/mason.nvim/lua/mason-core/process.lua:226: Failed to spawn process. cmd="julia", err="ENOENT: no such file or directory"
