@@ -37,11 +37,11 @@ if [ -z "$firstLine" ]; then
       # Get the diff information
       diff_stat=$(git diff --staged --stat 2>/dev/null)
       diff_names=$(git diff --staged --name-status 2>/dev/null)
-      
+
       # Get MORE actual diff content (up to 500 lines for better context)
       # Use unified=2 for more compact diff while still showing context
       diff_content=$(git diff --staged --unified=2 2>/dev/null | head -500)
-      
+
       # Count changes for additional context
       files_changed=$(echo "$diff_names" | wc -l)
       lines_added=$(git diff --staged --numstat 2>/dev/null | awk '{sum+=$1} END {print sum}')
