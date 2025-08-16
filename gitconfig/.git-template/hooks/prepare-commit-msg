@@ -44,14 +44,16 @@ $diff_names
 
 Output exactly 2-4 bullet points starting with '- ' describing what was modified:"
 
-      # Try Claude first (with 10 second timeout and simpler processing)
-      log_points=$(echo "$ai_prompt" | timeout 10 claude --print 2>/dev/null | grep "^- " | head -5)
+      # Try Claude first (with 15 second timeout and better error handling)
+      # Debug: Save prompt for troubleshooting
+      # echo "$ai_prompt" > /tmp/git-ai-prompt.txt
+      log_points=$(echo "$ai_prompt" | timeout 15 /usr/local/bin/claude --print 2>&1 | grep "^- " | head -5)
       
       # If Claude fails or returns empty, try Gemini
       if [ -z "$log_points" ]; then
          echo "Claude failed, trying Gemini..."
          # Gemini needs the prompt as an argument, not stdin
-         log_points=$(timeout 10 gemini -p "$ai_prompt" 2>/dev/null | grep "^- " | head -5)
+         log_points=$(timeout 15 /usr/local/bin/gemini -p "$ai_prompt" 2>/dev/null | grep "^- " | head -5)
       fi
       
       # If still no points, try a more intelligent basic approach
