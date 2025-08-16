@@ -34,16 +34,26 @@ if [ -z "$firstLine" ]; then
    if [ "$enable_ai_commit" == "true" ]; then
       echo "Generating AI commit message..."
 
-      # Get the diff information
+      # Get the diff information  
       diff_stat=$(git diff --staged --stat 2>/dev/null)
       diff_names=$(git diff --staged --name-status 2>/dev/null)
+      # Get actual diff content (first 100 lines to avoid huge prompts)
+      diff_content=$(git diff --staged --unified=3 2>/dev/null | head -100)
 
-      # Create a simplified prompt for AI
-      ai_prompt="Generate commit message bullet points for these git changes:
+      # Create a comprehensive prompt for AI
+      ai_prompt="Analyze these git changes and generate commit message bullet points.
+
+Files changed:
 $diff_names
 
-Write commit message for the change with commitizen convention. Keep the title under 50 characters and wrap message at 72 characters. Format as a gitcommit code block.
-Output exactly in bullet points starting with '- ' describing what was modified:"
+Diff statistics:
+$diff_stat
+
+Actual changes (truncated):
+$diff_content
+
+Generate 2-5 concise bullet points describing what was actually changed.
+Output ONLY bullet points starting with '- '. Be specific about the changes, not just file names."
 
       # Try Claude first (with 15 second timeout and better error handling)
       # Debug: Save prompt for troubleshooting
@@ -55,56 +65,6 @@ Output exactly in bullet points starting with '- ' describing what was modified:
          echo "Claude failed, trying Gemini..."
          # Gemini needs the prompt as an argument, not stdin
          log_points=$(timeout 15 /usr/local/bin/gemini -p "$ai_prompt" 2>/dev/null | grep "^- " | head -5)
-      fi
-      
-      # If still no points, try intelligent fallback based on file patterns
-      if [ -z "$log_points" ]; then
-         echo "AI failed, generating intelligent fallback points..."
-         log_points=$(echo "$diff_names" | while read -r line; do
-            if [ -n "$line" ]; then
-               status=$(echo "$line" | cut -c1)
-               file=$(echo "$line" | cut -c3-)
-               filename=$(basename "$file")
-               
-               # Smart descriptions based on file patterns
-               case "$file" in
-                  *"lazy-lock.json")
-                     [ "$status" = "M" ] && echo "- Updated neovim plugin versions"
-                     ;;
-                  *".zshrc")
-                     [ "$status" = "M" ] && echo "- Modified zsh shell configuration"
-                     ;;
-                  *"lsp.log"|*"nvim/log")
-                     [ "$status" = "M" ] && echo "- Updated nvim/LSP logs"
-                     ;;
-                  *"prepare-commit-msg")
-                     [ "$status" = "M" ] && echo "- Enhanced git commit hook"
-                     ;;
-                  *"Stash_list.md")
-                     [ "$status" = "M" ] && echo "- Updated stash list"
-                     ;;
-                  *"nvim/"*".lua")
-                     [ "$status" = "M" ] && echo "- Updated neovim lua configuration"
-                     ;;
-                  *"tmux.conf"*)
-                     [ "$status" = "M" ] && echo "- Modified tmux configuration"
-                     ;;
-                  *".gitconfig")
-                     [ "$status" = "M" ] && echo "- Updated git configuration"
-                     ;;
-                  *".gitignore")
-                     [ "$status" = "M" ] && echo "- Updated gitignore patterns"
-                     ;;
-                  *)
-                     case "$status" in
-                        M) echo "- Modified $filename" ;;
-                        A) echo "- Added new file: $filename" ;;
-                        D) echo "- Removed $filename" ;;
-                     esac
-                     ;;
-               esac
-            fi
-         done | head -5)
       fi
 
       # Use AI-generated points if we got them
