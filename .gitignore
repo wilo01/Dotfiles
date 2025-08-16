@@ -56,3 +56,10 @@ AI-tools/.gemini/oauth_creds.json
 # Task files
 # tasks.json
 # tasks/ 
+AI-tools/.claude.json.backup
+# Claude config backups and sensitive files
+AI-tools/.claude.json*
+*.backup
+**/oauth_creds.json
+**/*api_key*
+**/*API_KEY*
