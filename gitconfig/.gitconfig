@@ -19,7 +19,7 @@
 [maintenance]
 	repo =/home/dariuszw/Dev/branch-opener/branches/tds-suite/
 [init]
-   templateDir = /home/dariusz/.git-template/
+	templatedir = /home/dariuszw/.git-template
 [git-hooks]
    append-branch-name = true
    commit-on-master = false
