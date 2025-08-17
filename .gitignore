@@ -63,3 +63,4 @@ AI-tools/.claude.json*
 **/oauth_creds.json
 **/*api_key*
 **/*API_KEY*
+nvim/.local/state/nvim/lsp.log
