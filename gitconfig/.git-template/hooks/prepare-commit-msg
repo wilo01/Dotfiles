@@ -52,7 +52,8 @@ if [ -z "$firstLine" ]; then
          echo "Large changeset detected ($files_changed files, +$lines_added/-$lines_deleted lines), using structured analysis"
          
          # Create structured change data (JSON-like format for AI)
-         change_summary=$(git diff --staged --name-status | grep -vE '\.(lock|log|tmp|cache|min\.js|min\.css|bundle\.js|dist/|build/|node_modules/|\.git/)' | awk '
+         # Filter out noise files: logs, caches, generated files, etc.
+         change_summary=$(git diff --staged --name-status | grep -vE '\.(lock|log|tmp|cache|min\.js|min\.css|bundle\.js)$|/(dist|build|node_modules|\.git|\.cache|logs?)/' | awk '
             BEGIN { 
                new_count=0; mod_count=0; del_count=0
                dirs[""]=0; types[""]=0
