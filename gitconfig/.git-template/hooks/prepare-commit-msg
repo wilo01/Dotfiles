@@ -38,17 +38,22 @@ if [ -z "$firstLine" ]; then
       diff_stat=$(git diff --staged --stat 2>/dev/null)
       diff_names=$(git diff --staged --name-status 2>/dev/null)
 
-      # Get MORE actual diff content (up to 500 lines for better context)
-      # Use unified=2 for more compact diff while still showing context
-      diff_content=$(git diff --staged --unified=2 2>/dev/null | head -1000)
+      # Get actual diff content (limited for AI processing)
+      # Use unified=1 for compact diff, limit to 200 lines
+      diff_content=$(git diff --staged --unified=1 2>/dev/null | head -200)
 
       # Count changes for additional context
       files_changed=$(echo "$diff_names" | wc -l)
       lines_added=$(git diff --staged --numstat 2>/dev/null | awk '{sum+=$1} END {print sum}')
       lines_deleted=$(git diff --staged --numstat 2>/dev/null | awk '{sum+=$2} END {print sum}')
-
-      # Create a comprehensive prompt for AI
-      ai_prompt="Analyze these git changes and generate commit message bullet points.
+      
+      # Skip AI generation for very large changes (>20 files or >500 lines)
+      if [ "$files_changed" -gt 20 ] || [ "$lines_added" -gt 500 ]; then
+         echo "Large changeset detected ($files_changed files, +$lines_added/-$lines_deleted lines), skipping AI generation"
+         log_points=""
+      else
+         # Create a comprehensive prompt for AI
+         ai_prompt="Analyze these git changes and generate commit message bullet points.
 
 Summary: $files_changed files changed, +$lines_added lines added, -$lines_deleted lines deleted
 
@@ -71,16 +76,17 @@ Focus on:
 IMPORTANT: Keep each bullet point under 72 characters. Break long changes into multiple shorter points.
 Output ONLY bullet points starting with '- '. Be specific and technical about the actual changes."
 
-      # Try Claude first (with 20 second timeout for larger diffs)
-      # Debug: Save prompt for troubleshooting
-      # echo "$ai_prompt" > /tmp/git-ai-prompt.txt
-      log_points=$(echo "$ai_prompt" | timeout 20 /usr/local/bin/claude --print 2>&1 | grep "^- ")
+         # Try Claude first (with 10 second timeout for larger diffs)
+         # Debug: Save prompt for troubleshooting
+         # echo "$ai_prompt" > /tmp/git-ai-prompt.txt
+         log_points=$(echo "$ai_prompt" | timeout 10 /usr/local/bin/claude --print 2>/dev/null | grep "^- " || true)
 
-      # If Claude fails or returns empty, try Gemini
-      if [ -z "$log_points" ]; then
-         echo "Claude failed, trying Gemini..."
-         # Gemini needs the prompt as an argument, not stdin
-         log_points=$(timeout 20 /usr/local/bin/gemini -p "$ai_prompt" 2>/dev/null | grep "^- ")
+         # If Claude fails or returns empty, try Gemini
+         if [ -z "$log_points" ]; then
+            echo "Claude failed, trying Gemini..."
+            # Gemini needs the prompt as an argument, not stdin
+            log_points=$(timeout 10 /usr/local/bin/gemini -p "$ai_prompt" 2>/dev/null | grep "^- " || true)
+         fi
       fi
 
       # Use AI-generated points if we got them
