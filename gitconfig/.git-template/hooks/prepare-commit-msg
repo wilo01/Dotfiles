@@ -76,11 +76,11 @@ Focus on:
 IMPORTANT: Keep each bullet point under 72 characters. Break long changes into multiple shorter points.
 Output ONLY bullet points starting with '- '. Be specific and technical about the actual changes."
 
-         # Try Claude first (wait for full response)
+         # Try Claude first (wait for full response, max 60 seconds)
          # Debug: Save prompt for troubleshooting
          # echo "$ai_prompt" > /tmp/git-ai-prompt.txt
-         echo "Calling Claude AI..."
-         claude_response=$(echo "$ai_prompt" | /usr/local/bin/claude --print 2>/dev/null || true)
+         echo "Calling Claude AI (this may take a moment)..."
+         claude_response=$(echo "$ai_prompt" | timeout 60 /usr/local/bin/claude -p 2>/dev/null || true)
          log_points=$(echo "$claude_response" | grep "^- " || true)
 
          # Check if Claude response contains proper bullet points
@@ -88,7 +88,7 @@ Output ONLY bullet points starting with '- '. Be specific and technical about th
             echo "Claude generated commit points successfully"
          else
             echo "Claude response didn't contain bullet points, trying Gemini..."
-            gemini_response=$(/usr/local/bin/gemini -p "$ai_prompt" 2>/dev/null || true)
+            gemini_response=$(timeout 60 /usr/local/bin/gemini -p "$ai_prompt" 2>/dev/null || true)
             log_points=$(echo "$gemini_response" | grep "^- " || true)
             
             # Check if Gemini response contains proper bullet points
