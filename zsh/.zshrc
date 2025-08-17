@@ -238,8 +238,16 @@ command -v pyenv >/dev/null 2>&1 && eval "$(pyenv virtualenv-init -)"
 alias tm='task-master'
 alias taskmaster='task-master'
 alias clauded='claude --dangerously-skip-permissions'
+alias claude-sonnet='claude --model claude-sonnet-4-20250514'
+alias claude-opus='claude --model claude-opus-4-1-20250805'
+alias cs='claude --model claude-sonnet-4-20250514'  # Quick sonnet mode
+alias co='claude --model claude-opus-4-1-20250805'   # Quick opus mode
 
 # File path alias - get absolute path of a file
 alias filepath='realpath'
 
 # Tig with delta integration - press 'd' in tig to view diffs with delta
+
+# Claude Smart Model Switcher
+alias claude-auto='/home/dariuszw/.Dotfiles/bin/claude-smart'
+test change
