@@ -83,23 +83,22 @@ Output ONLY bullet points starting with '- '. Be specific and technical about th
          claude_response=$(echo "$ai_prompt" | /usr/local/bin/claude --print 2>/dev/null || true)
          log_points=$(echo "$claude_response" | grep "^- " || true)
 
-         # If Claude fails or returns empty, try Gemini
-         if [ -z "$log_points" ]; then
+         # Check if Claude response contains proper bullet points
+         if [ -n "$log_points" ]; then
+            echo "Claude generated commit points successfully"
+         else
             echo "Claude response didn't contain bullet points, trying Gemini..."
             gemini_response=$(/usr/local/bin/gemini -p "$ai_prompt" 2>/dev/null || true)
             log_points=$(echo "$gemini_response" | grep "^- " || true)
             
-            # If Gemini also fails, provide debug info
-            if [ -z "$log_points" ]; then
-               echo "Gemini also failed to generate bullet points"
-               # Uncomment for debugging:
-               # echo "Claude response: $claude_response" > /tmp/git-claude-debug.txt
-               # echo "Gemini response: $gemini_response" > /tmp/git-gemini-debug.txt
-            else
+            # Check if Gemini response contains proper bullet points
+            if [ -n "$log_points" ]; then
                echo "Gemini generated commit points successfully"
+            else
+               echo "AI responses didn't contain proper bullet points, using fallback template"
+               # Clear log_points to trigger fallback
+               log_points=""
             fi
-         else
-            echo "Claude generated commit points successfully"
          fi
       fi
 
