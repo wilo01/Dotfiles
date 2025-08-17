@@ -40,7 +40,7 @@ if [ -z "$firstLine" ]; then
 
       # Get MORE actual diff content (up to 500 lines for better context)
       # Use unified=2 for more compact diff while still showing context
-      diff_content=$(git diff --staged --unified=2 2>/dev/null | head -500)
+      diff_content=$(git diff --staged --unified=2 2>/dev/null | head -1000)
 
       # Count changes for additional context
       files_changed=$(echo "$diff_names" | wc -l)
@@ -61,25 +61,26 @@ $diff_stat
 Actual diff content (showing what was changed):
 $diff_content
 
-Based on the actual diff above, generate 2-5 concise bullet points describing what was ACTUALLY changed.
+Based on the actual diff above, generate bullet points describing what was ACTUALLY changed. Use as many points as needed to cover all significant changes.
 Focus on:
 - What functionality was added/modified/removed
 - What configuration or settings were changed
 - What bugs were fixed or features implemented
 - The actual code changes, not just file names
 
+IMPORTANT: Keep each bullet point under 72 characters. Break long changes into multiple shorter points.
 Output ONLY bullet points starting with '- '. Be specific and technical about the actual changes."
 
       # Try Claude first (with 20 second timeout for larger diffs)
       # Debug: Save prompt for troubleshooting
       # echo "$ai_prompt" > /tmp/git-ai-prompt.txt
-      log_points=$(echo "$ai_prompt" | timeout 20 /usr/local/bin/claude --print 2>&1 | grep "^- " | head -5)
+      log_points=$(echo "$ai_prompt" | timeout 20 /usr/local/bin/claude --print 2>&1 | grep "^- ")
 
       # If Claude fails or returns empty, try Gemini
       if [ -z "$log_points" ]; then
          echo "Claude failed, trying Gemini..."
          # Gemini needs the prompt as an argument, not stdin
-         log_points=$(timeout 20 /usr/local/bin/gemini -p "$ai_prompt" 2>/dev/null | grep "^- " | head -5)
+         log_points=$(timeout 20 /usr/local/bin/gemini -p "$ai_prompt" 2>/dev/null | grep "^- ")
       fi
 
       # Use AI-generated points if we got them
@@ -97,11 +98,25 @@ Output ONLY bullet points starting with '- '. Be specific and technical about th
       else
          # Fallback to original behavior if both AIs fail
          echo "AI generation failed, using default template"
-         sed -i.bak "1s/^/$jiraTag\n\n$branchFullName\n\nLogs:\n- /" "$1"
+         {
+            echo "$jiraTag"
+            echo ""
+            echo "$branchFullName"
+            echo ""
+            echo "Logs:"
+            echo "- "
+         } > "$1"
       fi
    else
       # Original behavior when AI commit is disabled
-      sed -i.bak "1s/^/$jiraTag\n\n$branchFullName\n\nLogs:\n- /" "$1"
+      {
+         echo "$jiraTag"
+         echo ""
+         echo "$branchFullName"
+         echo ""
+         echo "Logs:"
+         echo "- "
+      } > "$1"
    fi
 else
    # If there's already content, don't modify
