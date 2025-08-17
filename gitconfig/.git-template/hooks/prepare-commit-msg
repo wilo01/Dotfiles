@@ -34,9 +34,13 @@ if [ -z "$firstLine" ]; then
    if [ "$enable_ai_commit" == "true" ]; then
       echo "Generating AI commit message..."
 
-      # Get the diff information
+      # Get the diff information (ONLY staged changes)
       diff_stat=$(git diff --staged --stat 2>/dev/null)
       diff_names=$(git diff --staged --name-status 2>/dev/null)
+      
+      # Debug: Show what files are being analyzed
+      echo "DEBUG: Analyzing staged files:"
+      echo "$diff_names" | head -10
 
       # Get actual diff content (limited for AI processing)
       # Use unified=1 for compact diff, limit to 200 lines
