@@ -76,16 +76,30 @@ Focus on:
 IMPORTANT: Keep each bullet point under 72 characters. Break long changes into multiple shorter points.
 Output ONLY bullet points starting with '- '. Be specific and technical about the actual changes."
 
-         # Try Claude first (with 10 second timeout for larger diffs)
+         # Try Claude first (wait for full response)
          # Debug: Save prompt for troubleshooting
          # echo "$ai_prompt" > /tmp/git-ai-prompt.txt
-         log_points=$(echo "$ai_prompt" | timeout 10 /usr/local/bin/claude --print 2>/dev/null | grep "^- " || true)
+         echo "Calling Claude AI..."
+         claude_response=$(echo "$ai_prompt" | /usr/local/bin/claude --print 2>/dev/null || true)
+         log_points=$(echo "$claude_response" | grep "^- " || true)
 
          # If Claude fails or returns empty, try Gemini
          if [ -z "$log_points" ]; then
-            echo "Claude failed, trying Gemini..."
-            # Gemini needs the prompt as an argument, not stdin
-            log_points=$(timeout 10 /usr/local/bin/gemini -p "$ai_prompt" 2>/dev/null | grep "^- " || true)
+            echo "Claude response didn't contain bullet points, trying Gemini..."
+            gemini_response=$(/usr/local/bin/gemini -p "$ai_prompt" 2>/dev/null || true)
+            log_points=$(echo "$gemini_response" | grep "^- " || true)
+            
+            # If Gemini also fails, provide debug info
+            if [ -z "$log_points" ]; then
+               echo "Gemini also failed to generate bullet points"
+               # Uncomment for debugging:
+               # echo "Claude response: $claude_response" > /tmp/git-claude-debug.txt
+               # echo "Gemini response: $gemini_response" > /tmp/git-gemini-debug.txt
+            else
+               echo "Gemini generated commit points successfully"
+            fi
+         else
+            echo "Claude generated commit points successfully"
          fi
       fi
 
