@@ -47,12 +47,56 @@ if [ -z "$firstLine" ]; then
       lines_added=$(git diff --staged --numstat 2>/dev/null | awk '{sum+=$1} END {print sum}')
       lines_deleted=$(git diff --staged --numstat 2>/dev/null | awk '{sum+=$2} END {print sum}')
       
-      # Skip AI generation for very large changes (>50 files or >2000 lines)
+      # For large changesets, use structured JSON approach
       if [ "$files_changed" -gt 50 ] || [ "$lines_added" -gt 2000 ]; then
-         echo "Large changeset detected ($files_changed files, +$lines_added/-$lines_deleted lines), skipping AI generation"
-         log_points=""
+         echo "Large changeset detected ($files_changed files, +$lines_added/-$lines_deleted lines), using structured analysis"
+         
+         # Create structured change data (JSON-like format for AI)
+         change_summary=$(git diff --staged --name-status | grep -vE '\.(lock|log|tmp|cache|min\.js|min\.css|bundle\.js|dist/|build/|node_modules/|\.git/)' | awk '
+            BEGIN { 
+               new_count=0; mod_count=0; del_count=0
+               dirs[""]=0; types[""]=0
+            }
+            /^A/ { new_files[++new_count]=$2; dirs[gensub(/\/[^\/]*$/, "", 1, $2)]++; types[gensub(/.*\./, "", 1, $2)]++ }
+            /^M/ { mod_files[++mod_count]=$2; dirs[gensub(/\/[^\/]*$/, "", 1, $2)]++; types[gensub(/.*\./, "", 1, $2)]++ }
+            /^D/ { del_files[++del_count]=$2; dirs[gensub(/\/[^\/]*$/, "", 1, $2)]++; types[gensub(/.*\./, "", 1, $2)]++ }
+            /^R/ { 
+               split($0, parts, /\t/)
+               ren_files[++ren_count]=parts[2] " -> " parts[3]
+               dirs[gensub(/\/[^\/]*$/, "", 1, parts[3])]++
+               types[gensub(/.*\./, "", 1, parts[3])]++
+            }
+            END {
+               print "SUMMARY: " new_count " new, " mod_count " modified, " del_count " deleted, " ren_count " renamed files"
+               print "DIRECTORIES:"
+               for (d in dirs) if (d != "" && dirs[d] > 0) print "  " d ": " dirs[d] " files"
+               print "FILE_TYPES:"
+               for (t in types) if (t != "" && types[t] > 0) print "  ." t ": " types[t] " files"
+               print "KEY_CHANGES:"
+               for (i=1; i<=new_count && i<=5; i++) print "  NEW: " new_files[i]
+               for (i=1; i<=mod_count && i<=5; i++) print "  MOD: " mod_files[i]
+               for (i=1; i<=del_count && i<=3; i++) print "  DEL: " del_files[i]
+               for (i=1; i<=ren_count && i<=3; i++) print "  REN: " ren_files[i]
+            }
+         ')
+         
+         # Create compact prompt for large changes
+         ai_prompt="Generate commit bullet points for this large changeset:
+
+$change_summary
+
+Total: $files_changed files, +$lines_added/-$lines_deleted lines
+
+Based on the structured change summary above, generate bullet points that:
+- Summarize the main areas of change (by directory/component)
+- Highlight key new features or files added
+- Note major modifications or refactoring
+- Mention important deletions or renames
+
+IMPORTANT: Keep each bullet point under 72 characters. Focus on high-level changes.
+Output ONLY bullet points starting with '- '. Be concise but informative."
       else
-         # Create a comprehensive prompt for AI
+         # For smaller changes, use detailed diff approach
          ai_prompt="Analyze these git changes and generate commit message bullet points.
 
 Summary: $files_changed files changed, +$lines_added lines added, -$lines_deleted lines deleted
@@ -75,30 +119,30 @@ Focus on:
 
 IMPORTANT: Keep each bullet point under 72 characters. Break long changes into multiple shorter points.
 Output ONLY bullet points starting with '- '. Be specific and technical about the actual changes."
+      fi
 
-         # Try Claude first (wait for full response, max 30 seconds)
-         # Debug: Save prompt for troubleshooting
-         # echo "$ai_prompt" > /tmp/git-ai-prompt.txt
-         echo "Calling Claude AI (this may take a moment)..."
-         claude_response=$(echo "$ai_prompt" | timeout 30 /usr/local/bin/claude -p 2>/dev/null || true)
-         log_points=$(echo "$claude_response" | grep "^- " || true)
+      # Try Claude first (wait for full response, max 30 seconds)
+      # Debug: Save prompt for troubleshooting
+      # echo "$ai_prompt" > /tmp/git-ai-prompt.txt
+      echo "Calling Claude AI (this may take a moment)..."
+      claude_response=$(echo "$ai_prompt" | timeout 30 /usr/local/bin/claude -p 2>/dev/null || true)
+      log_points=$(echo "$claude_response" | grep "^- " || true)
 
-         # Check if Claude response contains proper bullet points
+      # Check if Claude response contains proper bullet points
+      if [ -n "$log_points" ]; then
+         echo "Claude generated commit points successfully"
+      else
+         echo "Claude response didn't contain bullet points, trying Gemini..."
+         gemini_response=$(timeout 30 /usr/local/bin/gemini -p "$ai_prompt" 2>/dev/null || true)
+         log_points=$(echo "$gemini_response" | grep "^- " || true)
+         
+         # Check if Gemini response contains proper bullet points
          if [ -n "$log_points" ]; then
-            echo "Claude generated commit points successfully"
+            echo "Gemini generated commit points successfully"
          else
-            echo "Claude response didn't contain bullet points, trying Gemini..."
-            gemini_response=$(timeout 30 /usr/local/bin/gemini -p "$ai_prompt" 2>/dev/null || true)
-            log_points=$(echo "$gemini_response" | grep "^- " || true)
-            
-            # Check if Gemini response contains proper bullet points
-            if [ -n "$log_points" ]; then
-               echo "Gemini generated commit points successfully"
-            else
-               echo "AI responses didn't contain proper bullet points, using fallback template"
-               # Clear log_points to trigger fallback
-               log_points=""
-            fi
+            echo "AI responses didn't contain proper bullet points, using fallback template"
+            # Clear log_points to trigger fallback
+            log_points=""
          fi
       fi
 
