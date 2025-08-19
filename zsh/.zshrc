@@ -199,6 +199,11 @@ alias claude-sonnet='claude --model claude-sonnet-4-20250514'
 alias claude-opus='claude --model claude-opus-4-1-20250805'
 alias filepath='realpath'
 # alias xsave="echo '$(xclip -selection clipboard -o)' >> ~/.clipboard_history ; cat ~/.clipboard_history"
+
+# lazygit and lazydocker aliases
+alias lg="lazygit"
+alias ld="lazydocker"
+
 # Other exports
 export MANPAGER='nvim +Man!'
 export USE_BUILTIN_RIPGREP=1
