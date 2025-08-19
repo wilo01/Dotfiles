@@ -192,9 +192,16 @@ alias gnome-terminal='gnome-terminal --full-screen'
 alias zshrc="echo sudo nvim ~/.zshrc ; sudo nvim ~/.zshrc "
 alias recat="echo ~/recatest/recatest_run.sh ; ~/recatest/recatest_run.sh"
 alias clear_cashe="echo free -h ; echo ; echo Before clean:; free -h ; echo ; echo After clean: ; echo sync \&\& echo 3 \| sudo tee /proc/sys/vm/drop_caches \&\& free -h ; sync && echo 3 | sudo tee /proc/sys/vm/drop_caches && free -h"
+alias tm='task-master'
+alias taskmaster='task-master'
+alias clauded='claude --dangerously-skip-permissions'
+alias claude-sonnet='claude --model claude-sonnet-4-20250514'
+alias claude-opus='claude --model claude-opus-4-1-20250805'
+alias filepath='realpath'
 # alias xsave="echo '$(xclip -selection clipboard -o)' >> ~/.clipboard_history ; cat ~/.clipboard_history"
 # Other exports
 export MANPAGER='nvim +Man!'
+export USE_BUILTIN_RIPGREP=1
 # export MANWIDTH=999
 # export JAVA_HOME="/usr/lib/jvm/java-11-openjdk/"
 export JAVA_HOME="/usr/lib/jvm/java-1.8.0-openjdk"
@@ -233,21 +240,3 @@ export PYENV_ROOT="$HOME/.pyenv"
 command -v pyenv >/dev/null 2>&1 && eval "$(pyenv init --path)"
 command -v pyenv >/dev/null 2>&1 && eval "$(pyenv init -)"
 command -v pyenv >/dev/null 2>&1 && eval "$(pyenv virtualenv-init -)"
-
-# Task Master aliases added on 7/15/2025
-alias tm='task-master'
-alias taskmaster='task-master'
-alias clauded='claude --dangerously-skip-permissions'
-alias claude-sonnet='claude --model claude-sonnet-4-20250514'
-alias claude-opus='claude --model claude-opus-4-1-20250805'
-alias cs='claude --model claude-sonnet-4-20250514'  # Quick sonnet mode
-alias co='claude --model claude-opus-4-1-20250805'   # Quick opus mode
-
-# File path alias - get absolute path of a file
-alias filepath='realpath'
-
-# Tig with delta integration - press 'd' in tig to view diffs with delta
-
-# Claude Smart Model Switcher
-alias claude-auto='/home/dariuszw/.Dotfiles/bin/claude-smart'
-test change

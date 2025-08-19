@@ -23,7 +23,7 @@ DIR_COLOR=$'\033[38;5;39m'       # Color 39 - bright cyan (POWERLEVEL9K_DIR_ANCH
 DIR_ANCHOR_COLOR=$'\033[38;5;39m' # Color 39 - bright cyan (POWERLEVEL9K_DIR_ANCHOR_FOREGROUND=39)
 GIT_CLEAN=$'\033[38;5;76m'       # Color 76 - bright green (VCS_CLEAN_FOREGROUND=76)
 GIT_MODIFIED=$'\033[38;5;178m'   # Color 178 - yellow/gold (VCS_MODIFIED_FOREGROUND=178)
-GIT_UNTRACKED=$'\033[38;5;76m'   # Color 76 - bright green (VCS_UNTRACKED_FOREGROUND=76)
+GIT_UNTRACKED=$'\033[38;5;39m' # Color 39 - bright cyan (POWERLEVEL9K_DIR_ANCHOR_FOREGROUND=39)
 BRIGHT_CYAN=$'\033[1;36m'        # Bright cyan for version
 BRIGHT_BLUE=$'\033[1;34m'        # Bright blue for model
 BRIGHT_WHITE=$'\033[1;37m'       # Bright white for commit and separators
