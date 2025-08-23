@@ -7,8 +7,19 @@ return {
       bigfile = { enabled = true },
       dashboard = {
          sections = {
-            { section = "header" },
-            { section = "startup", padding = 1 },
+            {
+               section = "header",
+               enabled = function()
+                  return not vim.g.hide_startup_info
+               end,
+            },
+            {
+               section = "startup",
+               padding = 1,
+               enabled = function()
+                  return not vim.g.hide_startup_info
+               end,
+            },
             { icon = " ", title = "Keymaps", section = "keys", indent = 3 },
             {
                icon = " ",
@@ -31,7 +42,7 @@ return {
                   -- Use git command for Neovim v0.11.3+ (Flatpak compatible), hub for older versions
                   local version = vim.version()
                   if version.major > 0 or (version.major == 0 and version.minor > 11) or
-                     (version.major == 0 and version.minor == 11 and version.patch >= 3) then
+                      (version.major == 0 and version.minor == 11 and version.patch >= 3) then
                      return "git --no-pager diff --stat -B -M -C"
                   else
                      return "hub --no-pager diff --stat -B -M -C"
