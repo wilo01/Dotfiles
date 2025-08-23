@@ -128,17 +128,19 @@ Output ONLY bullet points starting with '- '. Be specific and technical."
 run_ai_sequential() {
     local prompt="$1"
     local log_points=""
+    local total_start=$(date +%s)
     
     # Try Claude first
     log_info "🤖 Calling Claude AI..."
     local claude_response
     claude_response=$(echo "$prompt" | monitor_process_with_timeout "/usr/local/bin/claude -p" "Claude AI")
     local claude_exit=$?
+    local claude_time=$PROCESS_ELAPSED_TIME
     
     if [[ $claude_exit -eq 0 ]]; then
         log_points=$(echo "$claude_response" | grep "^- " || true)
         if [[ -n "$log_points" ]]; then
-            log_success "Claude generated commit points successfully"
+            log_success "Claude generated commit points successfully in ${claude_time}s ⏱️"
             echo "$log_points"
             return 0
         fi
@@ -146,29 +148,32 @@ run_ai_sequential() {
     
     # Fallback to Gemini
     if [[ $claude_exit -ne 0 ]]; then
-        log_warning "Claude failed or timed out, trying Gemini as fallback..."
+        log_warning "Claude failed or timed out after ${claude_time}s, trying Gemini as fallback..."
     else
-        log_warning "Claude response didn't contain bullet points, trying Gemini..."
+        log_warning "Claude response didn't contain bullet points (${claude_time}s), trying Gemini..."
     fi
     
     log_info "🤖 Calling Gemini AI..."
     local gemini_response
     gemini_response=$(echo "$prompt" | monitor_process_with_timeout "/usr/local/bin/gemini -p" "Gemini AI")
     local gemini_exit=$?
+    local gemini_time=$PROCESS_ELAPSED_TIME
     
     if [[ $gemini_exit -eq 0 ]]; then
         log_points=$(echo "$gemini_response" | grep "^- " || true)
         if [[ -n "$log_points" ]]; then
-            log_success "Gemini generated commit points successfully"
+            log_success "Gemini generated commit points successfully in ${gemini_time}s ⏱️"
+            local total_time=$(($(date +%s) - total_start))
+            log_info "⏱️  Total sequential time: ${total_time}s (Claude: ${claude_time}s, Gemini: ${gemini_time}s)"
             echo "$log_points"
             return 0
         fi
     fi
     
     if [[ $gemini_exit -ne 0 ]]; then
-        log_warning "Both AI services failed or timed out"
+        log_warning "Both AI services failed or timed out (Claude: ${claude_time}s, Gemini: ${gemini_time}s)"
     else
-        log_warning "AI responses didn't contain proper bullet points"
+        log_warning "AI responses didn't contain proper bullet points (Claude: ${claude_time}s, Gemini: ${gemini_time}s)"
     fi
     
     return 1
@@ -188,26 +193,38 @@ run_ai_race() {
     local claude_temp=$(mktemp)
     local gemini_temp=$(mktemp)
     local winner_file=$(mktemp)
+    local claude_time_file=$(mktemp)
+    local gemini_time_file=$(mktemp)
     
     # Cleanup on exit
-    trap "rm -f '$claude_temp' '$gemini_temp' '$winner_file'" RETURN
+    trap "rm -f '$claude_temp' '$gemini_temp' '$winner_file' '$claude_time_file' '$gemini_time_file'" RETURN
     
     # Start Claude in background
     (
+        local start=$(date +%s)
         if echo "$prompt" | monitor_process_with_timeout "/usr/local/bin/claude -p" "Claude AI" > "$claude_temp" 2>&1; then
+            local end=$(date +%s)
+            echo $((end - start)) > "$claude_time_file"
             if grep -q "^- " "$claude_temp"; then
                 echo "claude" > "$winner_file"
             fi
+        else
+            echo "$PROCESS_ELAPSED_TIME" > "$claude_time_file"
         fi
     ) &
     local claude_pid=$!
     
     # Start Gemini in background
     (
+        local start=$(date +%s)
         if echo "$prompt" | monitor_process_with_timeout "/usr/local/bin/gemini -p" "Gemini AI" > "$gemini_temp" 2>&1; then
+            local end=$(date +%s)
+            echo $((end - start)) > "$gemini_time_file"
             if grep -q "^- " "$gemini_temp"; then
                 echo "gemini" > "$winner_file"
             fi
+        else
+            echo "$PROCESS_ELAPSED_TIME" > "$gemini_time_file"
         fi
     ) &
     local gemini_pid=$!
@@ -216,6 +233,8 @@ run_ai_race() {
     local start_time=$(date +%s)
     local race_timeout=60
     local check_interval=0.2  # Check every 200ms
+    local winner_time=""
+    local loser_ai=""
     
     while true; do
         local current_time=$(date +%s)
@@ -242,15 +261,20 @@ run_ai_race() {
         # Check for winner
         if [[ -s "$winner_file" ]]; then
             local winner=$(cat "$winner_file")
+            winner_time=$(($(date +%s) - start_time))
             clear_progress
             
             if [[ "$winner" == "claude" ]]; then
-                log_info "🏆 Claude wins the race!"
+                loser_ai="Gemini"
+                local claude_response_time=$(cat "$claude_time_file" 2>/dev/null || echo "unknown")
+                log_info "🏆 Claude wins the race in ${claude_response_time}s! ⏱️"
                 log_points=$(grep "^- " "$claude_temp" || true)
                 kill_process_tree "$gemini_pid"
                 break
             elif [[ "$winner" == "gemini" ]]; then
-                log_info "🏆 Gemini wins the race!"
+                loser_ai="Claude"
+                local gemini_response_time=$(cat "$gemini_time_file" 2>/dev/null || echo "unknown")
+                log_info "🏆 Gemini wins the race in ${gemini_response_time}s! ⏱️"
                 log_points=$(grep "^- " "$gemini_temp" || true)
                 kill_process_tree "$claude_pid"
                 break
@@ -261,18 +285,22 @@ run_ai_race() {
         if ! kill -0 "$claude_pid" 2>/dev/null && ! kill -0 "$gemini_pid" 2>/dev/null; then
             clear_progress
             
+            # Get completion times
+            local claude_time=$(cat "$claude_time_file" 2>/dev/null || echo "failed")
+            local gemini_time=$(cat "$gemini_time_file" 2>/dev/null || echo "failed")
+            
             # Check for partial outputs
             local claude_points=$(grep "^- " "$claude_temp" 2>/dev/null || true)
             local gemini_points=$(grep "^- " "$gemini_temp" 2>/dev/null || true)
             
             if [[ -n "$claude_points" ]]; then
-                log_success "Claude provided partial output"
+                log_success "Claude provided partial output (${claude_time}s)"
                 log_points="$claude_points"
             elif [[ -n "$gemini_points" ]]; then
-                log_success "Gemini provided partial output"
+                log_success "Gemini provided partial output (${gemini_time}s)"
                 log_points="$gemini_points"
             else
-                log_warning "Both AI services failed to generate valid bullet points"
+                log_warning "Both AI services failed (Claude: ${claude_time}s, Gemini: ${gemini_time}s)"
             fi
             break
         fi
@@ -285,6 +313,15 @@ run_ai_race() {
     kill_process_tree "$gemini_pid" 2>/dev/null
     wait "$claude_pid" 2>/dev/null
     wait "$gemini_pid" 2>/dev/null
+    
+    # Calculate time saved if we have a winner
+    if [[ -n "$winner_time" ]] && [[ -n "$loser_ai" ]]; then
+        # Estimate time saved (assuming loser would have taken full timeout or more)
+        local time_saved=$((AI_INACTIVITY_TIMEOUT - winner_time))
+        if (( time_saved > 0 )); then
+            log_info "💨 Race mode saved ~${time_saved}s by not waiting for $loser_ai"
+        fi
+    fi
     
     if [[ -n "$log_points" ]]; then
         echo "$log_points"
@@ -334,15 +371,18 @@ main() {
             
             # Run AI to generate commit points
             local log_points=""
+            local ai_start_time=$(date +%s)
             if [[ "$AI_PARALLEL_MODE" == "true" ]]; then
                 log_points=$(run_ai_race "$ai_prompt")
             else
                 log_points=$(run_ai_sequential "$ai_prompt")
             fi
+            local ai_end_time=$(date +%s)
+            local total_ai_time=$((ai_end_time - ai_start_time))
             
             # Format commit message
             if [[ -n "$log_points" ]]; then
-                log_info "✨ AI-generated commit points ready"
+                log_info "✨ AI-generated commit points ready (Total time: ${total_ai_time}s)"
                 {
                     echo "$jira_tag"
                     echo ""
