@@ -89,7 +89,10 @@ Based on the summary above, generate bullet points that:
 - Mention important deletions or renames
 
 IMPORTANT: Keep each bullet point under 72 characters.
-Output ONLY bullet points starting with '- '. Be concise but informative."
+Output ONLY bullet points starting with '- '. Be concise but informative.
+DO NOT include semantic commit prefixes like 'feat:', 'fix:', 'docs:', 'refactor:', 'chore:', 'build:', etc.
+DO NOT include scope in parentheses like '(hooks)', '(git)', '(api)', etc.
+Just write clear, direct descriptions of what changed."
     else
         local diff_names=$(git diff --staged --name-status 2>/dev/null)
         local diff_stat=$(git diff --staged --stat 2>/dev/null)
@@ -115,7 +118,10 @@ Focus on:
 - The actual code changes, not just file names
 
 IMPORTANT: Keep each bullet point under 72 characters.
-Output ONLY bullet points starting with '- '. Be specific and technical."
+Output ONLY bullet points starting with '- '. Be specific and technical.
+DO NOT include semantic commit prefixes like 'feat:', 'fix:', 'docs:', 'refactor:', 'chore:', 'build:', etc.
+DO NOT include scope in parentheses like '(hooks)', '(git)', '(api)', etc.
+Just write clear, direct descriptions of what changed."
     fi
     
     echo "$prompt"
@@ -130,50 +136,88 @@ run_ai_sequential() {
     local log_points=""
     local total_start=$(date +%s)
     
-    # Try Claude first
-    log_info "🤖 Calling Claude AI..."
-    local claude_response
-    claude_response=$(echo "$prompt" | monitor_process_with_timeout "/usr/local/bin/claude -p" "Claude AI")
-    local claude_exit=$?
-    local claude_time=$PROCESS_ELAPSED_TIME
+    # Determine AI order based on performance
+    local best_ai=$(get_best_ai)
+    local first_ai="claude"
+    local second_ai="gemini"
     
-    if [[ $claude_exit -eq 0 ]]; then
-        log_points=$(echo "$claude_response" | grep "^- " || true)
-        if [[ -n "$log_points" ]]; then
-            log_success "Claude generated commit points successfully in ${claude_time}s ⏱️"
-            echo "$log_points"
-            return 0
+    if [[ "$best_ai" == "gemini" ]]; then
+        first_ai="gemini"
+        second_ai="claude"
+        log_debug "Using Gemini first based on performance history"
+    fi
+    
+    # Check if first AI is disabled
+    if is_ai_disabled "$first_ai"; then
+        log_warning "⚠️  $first_ai is temporarily disabled due to recent failures"
+        first_ai="$second_ai"
+        second_ai=""
+    fi
+    
+    # Try first AI
+    if [[ -n "$first_ai" ]]; then
+        local ai_cmd="/usr/local/bin/$first_ai -p"
+        local adaptive_timeout=$(get_adaptive_timeout "$first_ai" "$AI_INACTIVITY_TIMEOUT")
+        log_info "🤖 Calling ${first_ai^} AI (timeout: ${adaptive_timeout}s)..."
+        
+        local response
+        response=$(echo "$prompt" | monitor_process_with_timeout "$ai_cmd" "${first_ai^} AI" "$AI_MAX_TIMEOUT" "$adaptive_timeout")
+        local exit_code=$?
+        local response_time=$PROCESS_ELAPSED_TIME
+        
+        if [[ $exit_code -eq 0 ]]; then
+            log_points=$(echo "$response" | grep "^- " || true)
+            if [[ -n "$log_points" ]]; then
+                log_success "${first_ai^} generated commit points successfully in ${response_time}s ⏱️"
+                record_ai_performance "$first_ai" "true" "$response_time" "false"
+                echo "$log_points"
+                return 0
+            fi
+        fi
+        
+        # Record failure
+        record_ai_performance "$first_ai" "false" "$response_time" "false"
+        
+        if [[ $exit_code -ne 0 ]]; then
+            log_warning "${first_ai^} failed or timed out after ${response_time}s, trying ${second_ai^} as fallback..."
+        else
+            log_warning "${first_ai^} response didn't contain bullet points (${response_time}s), trying ${second_ai^}..."
         fi
     fi
     
-    # Fallback to Gemini
-    if [[ $claude_exit -ne 0 ]]; then
-        log_warning "Claude failed or timed out after ${claude_time}s, trying Gemini as fallback..."
-    else
-        log_warning "Claude response didn't contain bullet points (${claude_time}s), trying Gemini..."
-    fi
-    
-    log_info "🤖 Calling Gemini AI..."
-    local gemini_response
-    gemini_response=$(echo "$prompt" | monitor_process_with_timeout "/usr/local/bin/gemini -p" "Gemini AI")
-    local gemini_exit=$?
-    local gemini_time=$PROCESS_ELAPSED_TIME
-    
-    if [[ $gemini_exit -eq 0 ]]; then
-        log_points=$(echo "$gemini_response" | grep "^- " || true)
-        if [[ -n "$log_points" ]]; then
-            log_success "Gemini generated commit points successfully in ${gemini_time}s ⏱️"
-            local total_time=$(($(date +%s) - total_start))
-            log_info "⏱️  Total sequential time: ${total_time}s (Claude: ${claude_time}s, Gemini: ${gemini_time}s)"
-            echo "$log_points"
-            return 0
+    # Try second AI if available
+    if [[ -n "$second_ai" ]] && ! is_ai_disabled "$second_ai"; then
+        local ai_cmd="/usr/local/bin/$second_ai -p"
+        local adaptive_timeout=$(get_adaptive_timeout "$second_ai" "$AI_INACTIVITY_TIMEOUT")
+        log_info "🤖 Calling ${second_ai^} AI (timeout: ${adaptive_timeout}s)..."
+        
+        local response
+        response=$(echo "$prompt" | monitor_process_with_timeout "$ai_cmd" "${second_ai^} AI" "$AI_MAX_TIMEOUT" "$adaptive_timeout")
+        local exit_code=$?
+        local response_time=$PROCESS_ELAPSED_TIME
+        
+        if [[ $exit_code -eq 0 ]]; then
+            log_points=$(echo "$response" | grep "^- " || true)
+            if [[ -n "$log_points" ]]; then
+                log_success "${second_ai^} generated commit points successfully in ${response_time}s ⏱️"
+                record_ai_performance "$second_ai" "true" "$response_time" "false"
+                local total_time=$(($(date +%s) - total_start))
+                log_info "⏱️  Total sequential time: ${total_time}s"
+                echo "$log_points"
+                return 0
+            fi
         fi
-    fi
-    
-    if [[ $gemini_exit -ne 0 ]]; then
-        log_warning "Both AI services failed or timed out (Claude: ${claude_time}s, Gemini: ${gemini_time}s)"
-    else
-        log_warning "AI responses didn't contain proper bullet points (Claude: ${claude_time}s, Gemini: ${gemini_time}s)"
+        
+        # Record failure
+        record_ai_performance "$second_ai" "false" "$response_time" "false"
+        
+        if [[ $exit_code -ne 0 ]]; then
+            log_warning "Both AI services failed or timed out"
+        else
+            log_warning "AI responses didn't contain proper bullet points"
+        fi
+    elif is_ai_disabled "$second_ai"; then
+        log_warning "⚠️  $second_ai is also disabled due to recent failures"
     fi
     
     return 1
@@ -265,17 +309,19 @@ run_ai_race() {
             clear_progress
             
             if [[ "$winner" == "claude" ]]; then
-                loser_ai="Gemini"
+                loser_ai="gemini"
                 local claude_response_time=$(cat "$claude_time_file" 2>/dev/null || echo "unknown")
                 log_info "🏆 Claude wins the race in ${claude_response_time}s! ⏱️"
                 log_points=$(grep "^- " "$claude_temp" || true)
+                record_ai_performance "claude" "true" "$claude_response_time" "true"
                 kill_process_tree "$gemini_pid"
                 break
             elif [[ "$winner" == "gemini" ]]; then
-                loser_ai="Claude"
+                loser_ai="claude"
                 local gemini_response_time=$(cat "$gemini_time_file" 2>/dev/null || echo "unknown")
                 log_info "🏆 Gemini wins the race in ${gemini_response_time}s! ⏱️"
                 log_points=$(grep "^- " "$gemini_temp" || true)
+                record_ai_performance "gemini" "true" "$gemini_response_time" "true"
                 kill_process_tree "$claude_pid"
                 break
             fi
@@ -296,11 +342,17 @@ run_ai_race() {
             if [[ -n "$claude_points" ]]; then
                 log_success "Claude provided partial output (${claude_time}s)"
                 log_points="$claude_points"
+                record_ai_performance "claude" "true" "$claude_time" "false"
+                record_ai_performance "gemini" "false" "$gemini_time" "false"
             elif [[ -n "$gemini_points" ]]; then
                 log_success "Gemini provided partial output (${gemini_time}s)"
                 log_points="$gemini_points"
+                record_ai_performance "gemini" "true" "$gemini_time" "false"
+                record_ai_performance "claude" "false" "$claude_time" "false"
             else
                 log_warning "Both AI services failed (Claude: ${claude_time}s, Gemini: ${gemini_time}s)"
+                record_ai_performance "claude" "false" "$claude_time" "false"
+                record_ai_performance "gemini" "false" "$gemini_time" "false"
             fi
             break
         fi
@@ -316,10 +368,13 @@ run_ai_race() {
     
     # Calculate time saved if we have a winner
     if [[ -n "$winner_time" ]] && [[ -n "$loser_ai" ]]; then
+        # Record that loser didn't finish (use timeout as time)
+        record_ai_performance "$loser_ai" "false" "$AI_INACTIVITY_TIMEOUT" "false"
+        
         # Estimate time saved (assuming loser would have taken full timeout or more)
         local time_saved=$((AI_INACTIVITY_TIMEOUT - winner_time))
         if (( time_saved > 0 )); then
-            log_info "💨 Race mode saved ~${time_saved}s by not waiting for $loser_ai"
+            log_info "💨 Race mode saved ~${time_saved}s by not waiting for ${loser_ai^}"
         fi
     fi
     
