@@ -216,4 +216,19 @@ function M.is_git_repo()
    return is_git_repo
 end
 
+--- Print startup time information
+function M.print_startup_time()
+   -- Check if startup info should be hidden
+   if vim.g.hide_startup_info then
+      return
+   end
+   
+   local elapsed_time = (vim.loop.hrtime() - vim.g.startup_time) / 1e6
+   local v = vim.version()
+   print(string.format("Hello DarO, Neovim v%d.%d.%d startup time: %.2f ms", v.major, v.minor, v.patch, elapsed_time))
+   vim.defer_fn(function()
+      vim.cmd('messages')
+   end, 50)
+end
+
 return M
