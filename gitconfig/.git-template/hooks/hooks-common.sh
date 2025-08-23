@@ -106,6 +106,7 @@ clear_progress() {
 
 # Monitor a process with activity timeout
 # Usage: monitor_process_with_timeout cmd description [max_timeout] [inactivity_timeout]
+# Outputs: Process output to stdout, timing info to stderr via PROCESS_ELAPSED_TIME variable
 monitor_process_with_timeout() {
     local cmd="$1"
     local description="${2:-Process}"
@@ -135,6 +136,7 @@ monitor_process_with_timeout() {
         if (( elapsed > max_timeout )); then
             kill_process_tree "$pid"
             log_warning "$description exceeded maximum timeout (${max_timeout}s)"
+            PROCESS_ELAPSED_TIME=$elapsed
             return 124  # timeout exit code
         fi
         
@@ -147,6 +149,7 @@ monitor_process_with_timeout() {
             if (( inactive_time > inactivity_timeout )); then
                 kill_process_tree "$pid"
                 log_warning "$description timed out after ${inactivity_timeout}s of inactivity"
+                PROCESS_ELAPSED_TIME=$elapsed
                 return 124  # timeout exit code
             fi
         fi
@@ -160,6 +163,10 @@ monitor_process_with_timeout() {
     # Wait for process and get exit code
     wait "$pid" 2>/dev/null
     local exit_code=$?
+    
+    # Calculate final elapsed time
+    local end_time=$(date +%s)
+    PROCESS_ELAPSED_TIME=$((end_time - start_time))
     
     # Show errors if any
     if [[ -s "$error_file" ]] && [[ "$AI_DEBUG" == "true" ]]; then
