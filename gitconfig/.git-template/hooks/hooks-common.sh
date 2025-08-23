@@ -583,6 +583,97 @@ get_adaptive_timeout() {
     fi
 }
 
+# Display brief statistics summary
+show_brief_stats() {
+    init_analytics
+    
+    if command_exists jq; then
+        echo ""
+        echo "📊 Quick Stats:"
+        
+        # Claude stats
+        local claude_stats=$(jq -r '
+            .claude |
+            "  Claude: " + 
+            (if .total_calls > 0 then 
+                ((.successful_calls / .total_calls * 100) | floor | tostring) + "% success (" + 
+                (.successful_calls | tostring) + "/" + (.total_calls | tostring) + "), "
+            else 
+                "No calls, "
+            end) +
+            "Avg: " + 
+            (if .successful_calls > 0 then 
+                ((.total_time / .successful_calls) | floor | tostring) + "s"
+            else 
+                "N/A"
+            end) +
+            ", Wins: " + (.wins | tostring) +
+            (if .disabled_until then " ⚠️ DISABLED" else "" end)
+        ' "$ANALYTICS_FILE")
+        
+        # Gemini stats
+        local gemini_stats=$(jq -r '
+            .gemini |
+            "  Gemini: " + 
+            (if .total_calls > 0 then 
+                ((.successful_calls / .total_calls * 100) | floor | tostring) + "% success (" + 
+                (.successful_calls | tostring) + "/" + (.total_calls | tostring) + "), "
+            else 
+                "No calls, "
+            end) +
+            "Avg: " + 
+            (if .successful_calls > 0 then 
+                ((.total_time / .successful_calls) | floor | tostring) + "s"
+            else 
+                "N/A"
+            end) +
+            ", Wins: " + (.wins | tostring) +
+            (if .disabled_until then " ⚠️ DISABLED" else "" end)
+        ' "$ANALYTICS_FILE")
+        
+        echo "$claude_stats"
+        echo "$gemini_stats"
+        
+        # Best performer
+        local best=$(get_best_ai)
+        if [[ -n "$best" ]]; then
+            echo "  Best performer: ${best^}"
+        fi
+        echo ""
+    elif command_exists python3; then
+        python3 -c "
+import json
+try:
+    with open('$ANALYTICS_FILE') as f:
+        data = json.load(f)
+    
+    print()
+    print('📊 Quick Stats:')
+    
+    for ai in ['claude', 'gemini']:
+        stats = data[ai]
+        if stats['total_calls'] > 0:
+            success_rate = int(stats['successful_calls'] / stats['total_calls'] * 100)
+            success_str = f\"{success_rate}% success ({stats['successful_calls']}/{stats['total_calls']})\"
+        else:
+            success_str = 'No calls'
+        
+        if stats['successful_calls'] > 0:
+            avg_time = int(stats['total_time'] / stats['successful_calls'])
+            avg_str = f'{avg_time}s'
+        else:
+            avg_str = 'N/A'
+        
+        disabled = ' ⚠️ DISABLED' if stats.get('disabled_until') else ''
+        print(f\"  {ai.capitalize()}: {success_str}, Avg: {avg_str}, Wins: {stats['wins']}{disabled}\")
+    
+    print()
+except:
+    pass
+"
+    fi
+}
+
 # -----------------------------------------------------------------------------
 # Export Functions
 # -----------------------------------------------------------------------------
@@ -596,4 +687,4 @@ export -f get_current_branch get_jira_tag get_project_root has_staged_changes ge
 export -f safe_write_file safe_read_file
 export -f command_exists validate_commands
 export -f shell_escape trim
-export -f init_analytics record_ai_performance get_ai_stats is_ai_disabled get_best_ai get_adaptive_timeout
+export -f init_analytics record_ai_performance get_ai_stats is_ai_disabled get_best_ai get_adaptive_timeout show_brief_stats

@@ -438,6 +438,10 @@ main() {
             # Format commit message
             if [[ -n "$log_points" ]]; then
                 log_info "✨ AI-generated commit points ready (Total time: ${total_ai_time}s)"
+                
+                # Show brief statistics
+                show_brief_stats
+                
                 {
                     echo "$jira_tag"
                     echo ""
@@ -448,6 +452,9 @@ main() {
                 } > "$commit_msg_file"
             else
                 log_warning "AI generation failed, using default template"
+                
+                # Show brief statistics even on failure
+                show_brief_stats
                 {
                     echo "$jira_tag"
                     echo ""
