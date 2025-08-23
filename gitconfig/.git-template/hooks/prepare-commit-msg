@@ -1,93 +1,100 @@
 #!/bin/bash
+# Git prepare-commit-msg hook - AI-powered commit message generation
 
-enable_local_hooks=$(git config --local hooks.enableLocalHooks)
-PROJECT_ROOT=$(git rev-parse --show-toplevel)
-if [ "$enable_local_hooks" == true ] && [ -e "$PROJECT_ROOT/.githooks/pre-commit" ]; then
-   echo "Run local pre-commit hook"
-   "$PROJECT_ROOT/.githooks/pre-commit" "$@"
+# Source common functions
+HOOKS_DIR=$(dirname "$0")
+source "${HOOKS_DIR}/hooks-common.sh" || {
+    echo "❌ Failed to load hooks-common.sh" >&2
+    exit 1
+}
 
-   exit_status=$?
-   if [ $exit_status -ne 0 ]; then
-      echo "Local pre-commit hook failed with exit code $exit_status"
-      exit $exit_status
-   fi
-   echo "End of local pre-commit hook"
-fi
+# -----------------------------------------------------------------------------
+# Configuration
+# -----------------------------------------------------------------------------
 
-enable_global_hooks=$(git config --local hooks.enableGlobalHooks)
-if [ "$enable_global_hooks" != true ]; then
-   echo "Global git prepare-commit-msg is disabled via Git config."
-   exit 0
-fi
+load_hook_config
+debug_config
 
-echo "Global git prepare-commit-msg run"
-branchFullName=$(git symbolic-ref --short HEAD)
-jiraTag=$(git symbolic-ref --short HEAD | cut -d'-' -f1,2)
+# -----------------------------------------------------------------------------
+# Local Hook Integration
+# -----------------------------------------------------------------------------
 
-firstLine=$(head -n1 "$1")
+run_local_hooks() {
+    if [[ "$ENABLE_LOCAL_HOOKS" == "true" ]]; then
+        local project_root=$(get_project_root)
+        local local_hook="${project_root}/.githooks/prepare-commit-msg"
+        
+        if [[ -x "$local_hook" ]]; then
+            log_info "🔄 Running local prepare-commit-msg hook"
+            "$local_hook" "$@"
+            local exit_status=$?
+            
+            if [[ $exit_status -ne 0 ]]; then
+                log_error "Local prepare-commit-msg hook failed with exit code $exit_status"
+                return $exit_status
+            fi
+            log_success "Local prepare-commit-msg hook completed"
+        fi
+    fi
+    return 0
+}
 
-if [ -z "$firstLine" ]; then
-   enable_ai_commit=$(git config --local hooks.enableAiCommit)
+# -----------------------------------------------------------------------------
+# AI Prompt Generation
+# -----------------------------------------------------------------------------
 
-   if [ "$enable_ai_commit" == "true" ]; then
-      echo "Generating AI commit message..."
-
-      diff_stat=$(git diff --staged --stat 2>/dev/null)
-      diff_names=$(git diff --staged --name-status 2>/dev/null)
-
-      diff_content=$(git diff --staged --unified=1 2>/dev/null | head -200)
-
-      files_changed=$(echo "$diff_names" | wc -l)
-      lines_added=$(git diff --staged --numstat 2>/dev/null | awk '{sum+=$1} END {print sum}')
-      lines_deleted=$(git diff --staged --numstat 2>/dev/null | awk '{sum+=$2} END {print sum}')
-
-      if [ "$files_changed" -gt 50 ] || [ "$lines_added" -gt 2000 ]; then
-         echo "Large changeset detected ($files_changed files, +$lines_added/-$lines_deleted lines), using structured analysis"
-
-         change_summary=$(git diff --staged --name-status | grep -vE '\.(lock|log|tmp|cache|min\.js|min\.css|bundle\.js)$|/(dist|build|node_modules|\.git|\.cache|logs?)/' | awk '
-            BEGIN {
-               new_count=0; mod_count=0; del_count=0
-               dirs[""]=0; types[""]=0
-            }
-            /^A/ { new_files[++new_count]=$2; dirs[gensub(/\/[^\/]*$/, "", 1, $2)]++; types[gensub(/.*\./, "", 1, $2)]++ }
-            /^M/ { mod_files[++mod_count]=$2; dirs[gensub(/\/[^\/]*$/, "", 1, $2)]++; types[gensub(/.*\./, "", 1, $2)]++ }
-            /^D/ { del_files[++del_count]=$2; dirs[gensub(/\/[^\/]*$/, "", 1, $2)]++; types[gensub(/.*\./, "", 1, $2)]++ }
-            /^R/ {
-               split($0, parts, /\t/)
-               ren_files[++ren_count]=parts[2] " -> " parts[3]
-               dirs[gensub(/\/[^\/]*$/, "", 1, parts[3])]++
-               types[gensub(/.*\./, "", 1, parts[3])]++
-            }
-            END {
-               print "SUMMARY: " new_count " new, " mod_count " modified, " del_count " deleted, " ren_count " renamed files"
-               print "DIRECTORIES:"
-               for (d in dirs) if (d != "" && dirs[d] > 0) print "  " d ": " dirs[d] " files"
-               print "FILE_TYPES:"
-               for (t in types) if (t != "" && types[t] > 0) print "  ." t ": " types[t] " files"
-               print "KEY_CHANGES:"
-               for (i=1; i<=new_count && i<=5; i++) print "  NEW: " new_files[i]
-               for (i=1; i<=mod_count && i<=5; i++) print "  MOD: " mod_files[i]
-               for (i=1; i<=del_count && i<=3; i++) print "  DEL: " del_files[i]
-               for (i=1; i<=ren_count && i<=3; i++) print "  REN: " ren_files[i]
-            }
-         ')
-
-         ai_prompt="Generate commit bullet points for this large changeset:
+generate_ai_prompt() {
+    local diff_content="$1"
+    local files_changed="$2"
+    local lines_added="$3"
+    local lines_deleted="$4"
+    
+    local prompt=""
+    
+    if (( files_changed > 50 || lines_added > 2000 )); then
+        log_info "📊 Large changeset detected ($files_changed files, +$lines_added/-$lines_deleted lines)"
+        
+        # Generate structured summary for large changes
+        local change_summary
+        change_summary=$(git diff --staged --name-status | \
+            grep -vE '\.(lock|log|tmp|cache|min\.js|min\.css|bundle\.js)$|/(dist|build|node_modules|\.git|\.cache|logs?)/' | \
+            awk '
+                BEGIN {
+                    new_count=0; mod_count=0; del_count=0; ren_count=0
+                }
+                /^A/ { new_files[++new_count]=$2 }
+                /^M/ { mod_files[++mod_count]=$2 }
+                /^D/ { del_files[++del_count]=$2 }
+                /^R/ { ren_files[++ren_count]=$0 }
+                END {
+                    print "SUMMARY: " new_count " new, " mod_count " modified, " del_count " deleted, " ren_count " renamed files"
+                    print "KEY_CHANGES:"
+                    for (i=1; i<=new_count && i<=5; i++) print "  NEW: " new_files[i]
+                    for (i=1; i<=mod_count && i<=5; i++) print "  MOD: " mod_files[i]
+                    for (i=1; i<=del_count && i<=3; i++) print "  DEL: " del_files[i]
+                    for (i=1; i<=ren_count && i<=3; i++) print "  REN: " ren_files[i]
+                }
+            ')
+        
+        prompt="Generate commit bullet points for this large changeset:
 
 $change_summary
 
 Total: $files_changed files, +$lines_added/-$lines_deleted lines
 
-Based on the structured change summary above, generate bullet points that:
-- Summarize the main areas of change (by directory/component)
+Based on the summary above, generate bullet points that:
+- Summarize the main areas of change
 - Highlight key new features or files added
 - Note major modifications or refactoring
 - Mention important deletions or renames
 
-IMPORTANT: Keep each bullet point under 72 characters. Focus on high-level changes.
+IMPORTANT: Keep each bullet point under 72 characters.
 Output ONLY bullet points starting with '- '. Be concise but informative."
-      else
-         ai_prompt="Analyze these git changes and generate commit message bullet points.
+    else
+        local diff_names=$(git diff --staged --name-status 2>/dev/null)
+        local diff_stat=$(git diff --staged --stat 2>/dev/null)
+        
+        prompt="Analyze these git changes and generate commit message bullet points.
 
 Summary: $files_changed files changed, +$lines_added lines added, -$lines_deleted lines deleted
 
@@ -100,67 +107,274 @@ $diff_stat
 Actual diff content (showing what was changed):
 $diff_content
 
-Based on the actual diff above, generate bullet points describing what was ACTUALLY changed. Use as many points as needed to cover all significant changes.
+Based on the actual diff above, generate bullet points describing what was ACTUALLY changed.
 Focus on:
 - What functionality was added/modified/removed
 - What configuration or settings were changed
 - What bugs were fixed or features implemented
 - The actual code changes, not just file names
 
-IMPORTANT: Keep each bullet point under 72 characters. Break long changes into multiple shorter points.
-Output ONLY bullet points starting with '- '. Be specific and technical about the actual changes."
-      fi
+IMPORTANT: Keep each bullet point under 72 characters.
+Output ONLY bullet points starting with '- '. Be specific and technical."
+    fi
+    
+    echo "$prompt"
+}
 
-      echo "Calling Claude AI (this may take a moment)..."
-      claude_response=$(echo "$ai_prompt" | timeout 30 /usr/local/bin/claude -p 2>/dev/null || true)
-      log_points=$(echo "$claude_response" | grep "^- " || true)
+# -----------------------------------------------------------------------------
+# AI Execution - Sequential Mode
+# -----------------------------------------------------------------------------
 
-      if [ -n "$log_points" ]; then
-         echo "Claude generated commit points successfully"
-      else
-         echo "Claude response didn't contain bullet points, trying Gemini..."
-         gemini_response=$(timeout 30 /usr/local/bin/gemini -p "$ai_prompt" 2>/dev/null || true)
-         log_points=$(echo "$gemini_response" | grep "^- " || true)
-
-         if [ -n "$log_points" ]; then
-            echo "Gemini generated commit points successfully"
-         else
-            echo "AI responses didn't contain proper bullet points, using fallback template"
-            log_points=""
-         fi
-      fi
-
-      if [ -n "$log_points" ]; then
-         echo "AI-generated commit points ready"
-         {
-            echo "$jiraTag"
-            echo ""
-            echo "$branchFullName"
-            echo ""
-            echo "Logs:"
+run_ai_sequential() {
+    local prompt="$1"
+    local log_points=""
+    
+    # Try Claude first
+    log_info "🤖 Calling Claude AI..."
+    local claude_response
+    claude_response=$(echo "$prompt" | monitor_process_with_timeout "/usr/local/bin/claude -p" "Claude AI")
+    local claude_exit=$?
+    
+    if [[ $claude_exit -eq 0 ]]; then
+        log_points=$(echo "$claude_response" | grep "^- " || true)
+        if [[ -n "$log_points" ]]; then
+            log_success "Claude generated commit points successfully"
             echo "$log_points"
-         } > "$1"
-      else
-         echo "AI generation failed, using default template"
-         {
-            echo "$jiraTag"
-            echo ""
-            echo "$branchFullName"
-            echo ""
-            echo "Logs:"
-            echo "- "
-         } > "$1"
-      fi
-   else
-      {
-         echo "$jiraTag"
-         echo ""
-         echo "$branchFullName"
-         echo ""
-         echo "Logs:"
-         echo "- "
-      } > "$1"
-   fi
-else
-   :
-fi
+            return 0
+        fi
+    fi
+    
+    # Fallback to Gemini
+    if [[ $claude_exit -ne 0 ]]; then
+        log_warning "Claude failed or timed out, trying Gemini as fallback..."
+    else
+        log_warning "Claude response didn't contain bullet points, trying Gemini..."
+    fi
+    
+    log_info "🤖 Calling Gemini AI..."
+    local gemini_response
+    gemini_response=$(echo "$prompt" | monitor_process_with_timeout "/usr/local/bin/gemini -p" "Gemini AI")
+    local gemini_exit=$?
+    
+    if [[ $gemini_exit -eq 0 ]]; then
+        log_points=$(echo "$gemini_response" | grep "^- " || true)
+        if [[ -n "$log_points" ]]; then
+            log_success "Gemini generated commit points successfully"
+            echo "$log_points"
+            return 0
+        fi
+    fi
+    
+    if [[ $gemini_exit -ne 0 ]]; then
+        log_warning "Both AI services failed or timed out"
+    else
+        log_warning "AI responses didn't contain proper bullet points"
+    fi
+    
+    return 1
+}
+
+# -----------------------------------------------------------------------------
+# AI Execution - Parallel Race Mode
+# -----------------------------------------------------------------------------
+
+run_ai_race() {
+    local prompt="$1"
+    local log_points=""
+    
+    log_info "🏁 Racing Claude and Gemini AI - first valid response wins!"
+    
+    # Temp files for outputs
+    local claude_temp=$(mktemp)
+    local gemini_temp=$(mktemp)
+    local winner_file=$(mktemp)
+    
+    # Cleanup on exit
+    trap "rm -f '$claude_temp' '$gemini_temp' '$winner_file'" RETURN
+    
+    # Start Claude in background
+    (
+        if echo "$prompt" | monitor_process_with_timeout "/usr/local/bin/claude -p" "Claude AI" > "$claude_temp" 2>&1; then
+            if grep -q "^- " "$claude_temp"; then
+                echo "claude" > "$winner_file"
+            fi
+        fi
+    ) &
+    local claude_pid=$!
+    
+    # Start Gemini in background
+    (
+        if echo "$prompt" | monitor_process_with_timeout "/usr/local/bin/gemini -p" "Gemini AI" > "$gemini_temp" 2>&1; then
+            if grep -q "^- " "$gemini_temp"; then
+                echo "gemini" > "$winner_file"
+            fi
+        fi
+    ) &
+    local gemini_pid=$!
+    
+    # Race monitoring with proper time tracking
+    local start_time=$(date +%s)
+    local race_timeout=60
+    local check_interval=0.2  # Check every 200ms
+    
+    while true; do
+        local current_time=$(date +%s)
+        local elapsed=$((current_time - start_time))
+        
+        # Check for timeout
+        if (( elapsed >= race_timeout )); then
+            clear_progress
+            log_warning "Race timeout reached (${race_timeout}s)"
+            break
+        fi
+        
+        # Show progress
+        local claude_running=""
+        local gemini_running=""
+        if kill -0 "$claude_pid" 2>/dev/null; then claude_running="Claude"; fi
+        if kill -0 "$gemini_pid" 2>/dev/null; then gemini_running="Gemini"; fi
+        
+        if [[ -n "$claude_running" ]] || [[ -n "$gemini_running" ]]; then
+            local racing="${claude_running}${claude_running:+ vs }${gemini_running}"
+            show_progress "Racing: $racing" "$elapsed"
+        fi
+        
+        # Check for winner
+        if [[ -s "$winner_file" ]]; then
+            local winner=$(cat "$winner_file")
+            clear_progress
+            
+            if [[ "$winner" == "claude" ]]; then
+                log_info "🏆 Claude wins the race!"
+                log_points=$(grep "^- " "$claude_temp" || true)
+                kill_process_tree "$gemini_pid"
+                break
+            elif [[ "$winner" == "gemini" ]]; then
+                log_info "🏆 Gemini wins the race!"
+                log_points=$(grep "^- " "$gemini_temp" || true)
+                kill_process_tree "$claude_pid"
+                break
+            fi
+        fi
+        
+        # Check if both processes finished
+        if ! kill -0 "$claude_pid" 2>/dev/null && ! kill -0 "$gemini_pid" 2>/dev/null; then
+            clear_progress
+            
+            # Check for partial outputs
+            local claude_points=$(grep "^- " "$claude_temp" 2>/dev/null || true)
+            local gemini_points=$(grep "^- " "$gemini_temp" 2>/dev/null || true)
+            
+            if [[ -n "$claude_points" ]]; then
+                log_success "Claude provided partial output"
+                log_points="$claude_points"
+            elif [[ -n "$gemini_points" ]]; then
+                log_success "Gemini provided partial output"
+                log_points="$gemini_points"
+            else
+                log_warning "Both AI services failed to generate valid bullet points"
+            fi
+            break
+        fi
+        
+        sleep "$check_interval"
+    done
+    
+    # Clean up any remaining processes
+    kill_process_tree "$claude_pid" 2>/dev/null
+    kill_process_tree "$gemini_pid" 2>/dev/null
+    wait "$claude_pid" 2>/dev/null
+    wait "$gemini_pid" 2>/dev/null
+    
+    if [[ -n "$log_points" ]]; then
+        echo "$log_points"
+        return 0
+    fi
+    
+    return 1
+}
+
+# -----------------------------------------------------------------------------
+# Main Logic
+# -----------------------------------------------------------------------------
+
+main() {
+    local commit_msg_file="$1"
+    local commit_source="${2:-}"
+    local sha="${3:-}"
+    
+    # Check if global hooks are enabled
+    if [[ "$ENABLE_GLOBAL_HOOKS" != "true" ]]; then
+        log_warning "Global git prepare-commit-msg is disabled via Git config."
+        exit 0
+    fi
+    
+    log_info "🚀 Global git prepare-commit-msg run"
+    
+    # Run local hooks first
+    run_local_hooks "$@" || exit $?
+    
+    # Get branch information
+    local branch_name=$(get_current_branch)
+    local jira_tag=$(get_jira_tag)
+    
+    # Check if commit message is empty
+    local first_line=$(head -n1 "$commit_msg_file")
+    
+    if [[ -z "$first_line" ]]; then
+        if [[ "$ENABLE_AI_COMMIT" == "true" ]] && has_staged_changes; then
+            log_info "🤔 Generating AI commit message..."
+            
+            # Get diff information
+            read -r files_changed lines_added lines_deleted <<< $(get_diff_stats)
+            local diff_content=$(git diff --staged --unified=1 2>/dev/null | head -200)
+            
+            # Generate AI prompt
+            local ai_prompt=$(generate_ai_prompt "$diff_content" "$files_changed" "$lines_added" "$lines_deleted")
+            
+            # Run AI to generate commit points
+            local log_points=""
+            if [[ "$AI_PARALLEL_MODE" == "true" ]]; then
+                log_points=$(run_ai_race "$ai_prompt")
+            else
+                log_points=$(run_ai_sequential "$ai_prompt")
+            fi
+            
+            # Format commit message
+            if [[ -n "$log_points" ]]; then
+                log_info "✨ AI-generated commit points ready"
+                {
+                    echo "$jira_tag"
+                    echo ""
+                    echo "$branch_name"
+                    echo ""
+                    echo "Logs:"
+                    echo "$log_points"
+                } > "$commit_msg_file"
+            else
+                log_warning "AI generation failed, using default template"
+                {
+                    echo "$jira_tag"
+                    echo ""
+                    echo "$branch_name"
+                    echo ""
+                    echo "Logs:"
+                    echo "- "
+                } > "$commit_msg_file"
+            fi
+        else
+            # No AI, use default template
+            {
+                echo "$jira_tag"
+                echo ""
+                echo "$branch_name"
+                echo ""
+                echo "Logs:"
+                echo "- "
+            } > "$commit_msg_file"
+        fi
+    fi
+}
+
+# Run main function
+main "$@"
