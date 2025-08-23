@@ -1,0 +1,67 @@
+.taskmaster/
+# changes/
+comms.md
+# figma/
+.github/*
+# .github/instructions/
+Stash_list.md
+Commit_notes.md
+
+# TMP 
+# Directories
+.tmux-orchestrator/
+source/ui/app/view/
+test/Cypress/cypress/e2e/demo/
+
+# Files
+.env.example
+.github/DATABASE_CONNECTION.md
+.github/TDS_SUITE_GUIDE.md
+.github/instructions/dev_workflow.md
+.github/instructions/self_improve.md
+.github/instructions/taskmaster.md
+.github/instructions/vscode_rules.md
+test-api-direct.sh
+test-nda-archive-manual.md
+test/Cypress/.env.example
+test/Cypress/README-Docker.md
+test/Cypress/cypress.config.docker-localhost.js
+test/Cypress/cypress.config.localhost.js
+test/Cypress/cypress/e2e/safe/rt/demo-test.js
+test/Cypress/cypress/e2e/safe/rt/getNdaArchiveList.js
+test/Cypress/cypress/e2e/safe/rt/getNdaArchiveListAdvanced.js
+test/Cypress/cypress/e2e/safe/ui/ndaArchiveIntegration.js
+test/Cypress/cypress/e2e/safe/ui/ndaArchivePopup.js
+test/Cypress/cypress/e2e/safe/ui/ndaArchivePopupAdvanced.js
+test/Cypress/cypress/e2e/safe/ui/ndaArchivePopup_corrected.js
+test/Cypress/cypress/e2e/safe/ui/ndaArchiveWorkflow.js
+test/Cypress/cypress/e2e/safe/ui/ndaArchiveWorkflowComplete.js
+test/Cypress/cypress/e2e/safe/ui/workingHoursSchedule.js
+test/Cypress/docker-compose.yml
+test/Cypress/docker/Dockerfile.simple
+test/Cypress/docker/Dockerfile.ubuntu
+test/Cypress/docker/docker-compose.nda-tests.yml
+test/Cypress/docker/run-cypress-ubuntu.sh
+test/Cypress/docker/run-nda-archive-tests.sh
+test/Cypress/docker/test-mount.sh
+test/Cypress/dry-run-tests.js
+test/Cypress/run-nda-tests-localhost.sh
+test/Cypress/run-tests.sh
+test/Cypress/test-simulator.js
+test/Cypress/validate-tests.js
+test/archive_test_summary.md
+test/validate_archive_api.js
+todo.md
+mcp.json
+.env
+.dbenv
+
+# AI
+.claude/
+.taskmaster
+# CLAUDE.md
+# .cursor/
+# .gemini/
+# GEMINI.md
+# AI_INSTRUCTIONS/
+.serena/

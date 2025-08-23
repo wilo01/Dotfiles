@@ -311,6 +311,279 @@ trim() {
 }
 
 # -----------------------------------------------------------------------------
+# Analytics & Performance Tracking
+# -----------------------------------------------------------------------------
+
+# Analytics file location
+readonly ANALYTICS_FILE="${HOOKS_DIR:-$(dirname "${BASH_SOURCE[0]}")}/.git-hooks-analytics.json"
+readonly ANALYTICS_MAX_ENTRIES=50
+
+# Initialize analytics file if it doesn't exist
+init_analytics() {
+    if [[ ! -f "$ANALYTICS_FILE" ]]; then
+        cat > "$ANALYTICS_FILE" <<EOF
+{
+    "claude": {
+        "total_calls": 0,
+        "successful_calls": 0,
+        "failed_calls": 0,
+        "total_time": 0,
+        "wins": 0,
+        "recent_failures": [],
+        "last_success": null,
+        "disabled_until": null
+    },
+    "gemini": {
+        "total_calls": 0,
+        "successful_calls": 0,
+        "failed_calls": 0,
+        "total_time": 0,
+        "wins": 0,
+        "recent_failures": [],
+        "last_success": null,
+        "disabled_until": null
+    },
+    "history": []
+}
+EOF
+    fi
+}
+
+# Record AI performance
+record_ai_performance() {
+    local ai_name="$1"
+    local success="$2"  # true/false
+    local response_time="$3"
+    local is_winner="${4:-false}"  # true/false for race mode
+    
+    init_analytics
+    
+    # Read current analytics
+    local analytics=$(cat "$ANALYTICS_FILE")
+    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    
+    # Update using jq if available, otherwise use python
+    if command_exists jq; then
+        analytics=$(echo "$analytics" | jq \
+            --arg ai "$ai_name" \
+            --arg success "$success" \
+            --arg time "$response_time" \
+            --arg winner "$is_winner" \
+            --arg ts "$timestamp" \
+            '
+            .[$ai].total_calls += 1 |
+            if $success == "true" then
+                .[$ai].successful_calls += 1 |
+                .[$ai].total_time += ($time | tonumber) |
+                .[$ai].last_success = $ts |
+                .[$ai].recent_failures = []
+            else
+                .[$ai].failed_calls += 1 |
+                .[$ai].recent_failures += [$ts] |
+                .[$ai].recent_failures = .[$ai].recent_failures[-3:]
+            end |
+            if $winner == "true" then
+                .[$ai].wins += 1
+            end |
+            .history += [{
+                "ai": $ai,
+                "success": ($success == "true"),
+                "time": ($time | tonumber),
+                "winner": ($winner == "true"),
+                "timestamp": $ts
+            }] |
+            .history = .history[-50:]
+            ')
+    elif command_exists python3; then
+        analytics=$(python3 -c "
+import json
+import sys
+
+data = json.loads('''$analytics''')
+ai = '$ai_name'
+success = '$success' == 'true'
+time = float('$response_time') if '$response_time' != 'failed' else 0
+winner = '$is_winner' == 'true'
+ts = '$timestamp'
+
+data[ai]['total_calls'] += 1
+if success:
+    data[ai]['successful_calls'] += 1
+    data[ai]['total_time'] += time
+    data[ai]['last_success'] = ts
+    data[ai]['recent_failures'] = []
+else:
+    data[ai]['failed_calls'] += 1
+    data[ai]['recent_failures'].append(ts)
+    data[ai]['recent_failures'] = data[ai]['recent_failures'][-3:]
+
+if winner:
+    data[ai]['wins'] += 1
+
+data['history'].append({
+    'ai': ai,
+    'success': success,
+    'time': time,
+    'winner': winner,
+    'timestamp': ts
+})
+data['history'] = data['history'][-50:]
+
+print(json.dumps(data, indent=2))
+")
+    fi
+    
+    # Check if AI should be disabled (3 consecutive failures)
+    local recent_failures_count=$(echo "$analytics" | grep -o "\"$ai_name\".*recent_failures.*\[.*\]" | grep -o "\"20" | wc -l)
+    if [[ "$recent_failures_count" -ge 3 ]]; then
+        local disable_until=$(date -u -d "+1 hour" +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || date -u -v+1H +"%Y-%m-%dT%H:%M:%SZ")
+        if command_exists jq; then
+            analytics=$(echo "$analytics" | jq --arg ai "$ai_name" --arg until "$disable_until" '.[$ai].disabled_until = $until')
+        fi
+    fi
+    
+    # Save updated analytics
+    echo "$analytics" > "$ANALYTICS_FILE"
+}
+
+# Get AI performance stats
+get_ai_stats() {
+    local ai_name="$1"
+    
+    init_analytics
+    
+    if command_exists jq; then
+        jq -r --arg ai "$ai_name" '.[$ai]' "$ANALYTICS_FILE"
+    elif command_exists python3; then
+        python3 -c "
+import json
+data = json.load(open('$ANALYTICS_FILE'))
+print(json.dumps(data['$ai_name'], indent=2))
+"
+    else
+        cat "$ANALYTICS_FILE"
+    fi
+}
+
+# Check if AI is disabled
+is_ai_disabled() {
+    local ai_name="$1"
+    
+    init_analytics
+    
+    local disabled_until=""
+    if command_exists jq; then
+        disabled_until=$(jq -r --arg ai "$ai_name" '.[$ai].disabled_until // ""' "$ANALYTICS_FILE")
+    elif command_exists python3; then
+        disabled_until=$(python3 -c "
+import json
+data = json.load(open('$ANALYTICS_FILE'))
+print(data['$ai_name'].get('disabled_until', ''))
+")
+    fi
+    
+    if [[ -n "$disabled_until" ]] && [[ "$disabled_until" != "null" ]]; then
+        local current_time=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+        if [[ "$current_time" < "$disabled_until" ]]; then
+            return 0  # AI is disabled
+        else
+            # Re-enable AI
+            if command_exists jq; then
+                local analytics=$(jq --arg ai "$ai_name" '.[$ai].disabled_until = null | .[$ai].recent_failures = []' "$ANALYTICS_FILE")
+                echo "$analytics" > "$ANALYTICS_FILE"
+            fi
+        fi
+    fi
+    
+    return 1  # AI is not disabled
+}
+
+# Get best performing AI
+get_best_ai() {
+    init_analytics
+    
+    local claude_disabled=$(is_ai_disabled "claude" && echo "true" || echo "false")
+    local gemini_disabled=$(is_ai_disabled "gemini" && echo "true" || echo "false")
+    
+    # If both are disabled, return empty
+    if [[ "$claude_disabled" == "true" ]] && [[ "$gemini_disabled" == "true" ]]; then
+        echo ""
+        return
+    fi
+    
+    # If one is disabled, return the other
+    if [[ "$claude_disabled" == "true" ]]; then
+        echo "gemini"
+        return
+    elif [[ "$gemini_disabled" == "true" ]]; then
+        echo "claude"
+        return
+    fi
+    
+    # Calculate performance scores
+    if command_exists jq; then
+        jq -r '
+            if .claude.total_calls == 0 and .gemini.total_calls == 0 then
+                "claude"
+            else
+                [.claude, .gemini] |
+                map({
+                    name: (if . == .claude then "claude" else "gemini" end),
+                    score: (
+                        if .total_calls == 0 then
+                            0
+                        else
+                            (.successful_calls / .total_calls * 100) +
+                            (if .successful_calls > 0 then (50 - (.total_time / .successful_calls)) else 0 end)
+                        end
+                    )
+                }) |
+                max_by(.score) |
+                .name
+            end
+        ' "$ANALYTICS_FILE"
+    else
+        # Default to claude if no json processor available
+        echo "claude"
+    fi
+}
+
+# Calculate adaptive timeout based on historical data
+get_adaptive_timeout() {
+    local ai_name="$1"
+    local default_timeout="${2:-30}"
+    
+    init_analytics
+    
+    if command_exists jq; then
+        local avg_time=$(jq -r --arg ai "$ai_name" '
+            if .[$ai].successful_calls > 0 then
+                (.[$ai].total_time / .[$ai].successful_calls)
+            else
+                0
+            end
+        ' "$ANALYTICS_FILE")
+        
+        if [[ "$avg_time" != "0" ]]; then
+            # Set timeout to 1.5x average + 5s buffer
+            local timeout=$(echo "$avg_time * 1.5 + 5" | bc 2>/dev/null || python3 -c "print(int($avg_time * 1.5 + 5))")
+            # Ensure within bounds (10-60 seconds)
+            if [[ "$timeout" -lt 10 ]]; then
+                echo "10"
+            elif [[ "$timeout" -gt 60 ]]; then
+                echo "60"
+            else
+                echo "$timeout"
+            fi
+        else
+            echo "$default_timeout"
+        fi
+    else
+        echo "$default_timeout"
+    fi
+}
+
+# -----------------------------------------------------------------------------
 # Export Functions
 # -----------------------------------------------------------------------------
 
@@ -323,3 +596,4 @@ export -f get_current_branch get_jira_tag get_project_root has_staged_changes ge
 export -f safe_write_file safe_read_file
 export -f command_exists validate_commands
 export -f shell_escape trim
+export -f init_analytics record_ai_performance get_ai_stats is_ai_disabled get_best_ai get_adaptive_timeout
