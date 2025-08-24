@@ -1,0 +1,29 @@
+#!/bin/bash
+# Quick work log creator - captures recent agent output
+# Usage: quick-log "VIS-<number> description" "agent-name"
+# Then paste the agent output when prompted
+
+if [ $# -lt 2 ]; then
+    echo "Usage: quick-log \"VIS-<number> description\" \"agent-name\""
+    echo "Example: quick-log \"VIS-5187 SWIFT uidtoken validation\" \"manual-tester\""
+    exit 1
+fi
+
+ticket_description="$1"
+agent_name="$2"
+
+echo "📝 Creating work log for: $ticket_description"
+echo "🤖 Agent: $agent_name"
+echo ""
+echo "Please paste the complete agent output below (press Ctrl+D when done):"
+echo "────────────────────────────────────────────────────────────────"
+
+# Read multi-line input until EOF
+agent_output=$(cat)
+
+echo ""
+echo "────────────────────────────────────────────────────────────────"
+echo "🔄 Processing..."
+
+# Call the Python script with the collected input
+python3 /home/dariuszw/.Dotfiles/scripts/manual-work-logger.py "$ticket_description" "$agent_name" "$agent_output"

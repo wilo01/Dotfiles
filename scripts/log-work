@@ -1,0 +1,5 @@
+#!/bin/bash
+# Work log creator - simplified interface
+# Usage: log-work "VIS-<number> description" "agent-name"
+
+python3 /home/dariuszw/.Dotfiles/scripts/manual-work-logger.py "$1" "$2" "$3"
