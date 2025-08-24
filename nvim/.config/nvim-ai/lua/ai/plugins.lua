@@ -67,7 +67,7 @@ local plugins = {
          },
          notifier = { enabled = true },
          quickfile = { enabled = true },
-         statuscolumn = { enabled = false },
+         statuscolumn = { enabled = true },
          words = { enabled = true },
       },
       config = function(_, opts)
@@ -96,17 +96,24 @@ local plugins = {
       end,
    },
 
-   -- Treesitter (lazy-loaded on file read)
+   -- Treesitter (load immediately for proper syntax highlighting)
    {
       "nvim-treesitter/nvim-treesitter",
       build = ":TSUpdate",
-      event = { "BufReadPost", "BufNewFile" },
-      cmd = { "TSUpdate", "TSInstall", "TSBufEnable", "TSBufDisable", "TSModuleInfo" },
+      lazy = false,  -- Load immediately to ensure syntax highlighting works
+      priority = 900,  -- High priority to load early
       config = function()
          require("ai.config.treesitter")
+         -- Ensure highlighting is enabled globally
+         vim.api.nvim_create_autocmd("FileType", {
+            pattern = "*",
+            callback = function()
+               pcall(vim.cmd, "TSBufEnable highlight")
+            end,
+         })
       end,
       dependencies = {
-         -- Treesitter text objects (lazy-loaded with treesitter)
+         -- Treesitter text objects
          {
             "nvim-treesitter/nvim-treesitter-textobjects",
             config = function()
@@ -116,10 +123,11 @@ local plugins = {
       },
    },
 
-   -- LSP Configuration (lazy-loaded on file type)
+   -- LSP Configuration (load immediately for proper language server support)
    {
       "neovim/nvim-lspconfig",
-      event = { "BufReadPost", "BufNewFile" },
+      lazy = false,  -- Load immediately to ensure LSP is available
+      priority = 850,  -- Load after treesitter
       dependencies = {
          -- Mason for LSP server management
          {
@@ -224,56 +232,119 @@ local plugins = {
       end,
    },
 
-   -- Git integration
+   -- Git integration (enhanced configuration)
    {
       "lewis6991/gitsigns.nvim",
       event = { "BufReadPost", "BufNewFile" },
-      opts = {
-         signs = {
-            add = { text = "+" },
-            change = { text = "~" },
-            delete = { text = "_" },
-            topdelete = { text = "‾" },
-            changedelete = { text = "~" },
-         },
-         on_attach = function(bufnr)
-            local gs = package.loaded.gitsigns
-
-            local function map(mode, l, r, opts)
-               opts = opts or {}
-               opts.buffer = bufnr
-               vim.keymap.set(mode, l, r, opts)
-            end
-
-            -- Navigation
-            map("n", "]c", function()
-               if vim.wo.diff then return "]c" end
-               vim.schedule(function() gs.next_hunk() end)
-               return "<Ignore>"
-            end, { expr = true, desc = "Next hunk" })
-
-            map("n", "[c", function()
-               if vim.wo.diff then return "[c" end
-               vim.schedule(function() gs.prev_hunk() end)
-               return "<Ignore>"
-            end, { expr = true, desc = "Previous hunk" })
-
-            -- Actions
-            map("n", "<leader>hs", gs.stage_hunk, { desc = "Stage hunk" })
-            map("n", "<leader>hr", gs.reset_hunk, { desc = "Reset hunk" })
-            map("v", "<leader>hs", function() gs.stage_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, { desc = "Stage hunk" })
-            map("v", "<leader>hr", function() gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, { desc = "Reset hunk" })
-            map("n", "<leader>hS", gs.stage_buffer, { desc = "Stage buffer" })
-            map("n", "<leader>hu", gs.undo_stage_hunk, { desc = "Undo stage hunk" })
-            map("n", "<leader>hR", gs.reset_buffer, { desc = "Reset buffer" })
-            map("n", "<leader>hp", gs.preview_hunk, { desc = "Preview hunk" })
-            map("n", "<leader>hb", function() gs.blame_line({ full = true }) end, { desc = "Blame line" })
-            map("n", "<leader>tb", gs.toggle_current_line_blame, { desc = "Toggle blame" })
-            map("n", "<leader>hd", gs.diffthis, { desc = "Diff this" })
-            map("n", "<leader>hD", function() gs.diffthis("~") end, { desc = "Diff this ~" })
-            map("n", "<leader>td", gs.toggle_deleted, { desc = "Toggle deleted" })
-         end,
-      },
+      config = function()
+         local gitsigns = require("gitsigns")
+         
+         gitsigns.setup({
+            signs = {
+               add = { text = "│" },
+               change = { text = "│" },
+               delete = { text = "_" },
+               topdelete = { text = "‾" },
+               changedelete = { text = "~" },
+               untracked = { text = "┆" },
+            },
+            signcolumn = true, -- Toggle with `:Gitsigns toggle_signs`
+            numhl = false,     -- Toggle with `:Gitsigns toggle_numhl`
+            linehl = false,    -- Toggle with `:Gitsigns toggle_linehl`
+            word_diff = false, -- Toggle with `:Gitsigns toggle_word_diff`
+            watch_gitdir = {
+               interval = 1000,
+               follow_files = true,
+            },
+            attach_to_untracked = true,
+            current_line_blame = true, -- Toggle with `:Gitsigns toggle_current_line_blame`
+            current_line_blame_opts = {
+               virt_text = true,
+               virt_text_pos = "eol", -- 'eol' | 'overlay' | 'right_align'
+               delay = 100,
+               ignore_whitespace = false,
+            },
+            current_line_blame_formatter = "<author>, <author_time:%Y-%m-%d> - <summary>",
+            sign_priority = 6,
+            update_debounce = 100,
+            status_formatter = nil,  -- Use default
+            max_file_length = 40000, -- Disable if file is longer than this (in lines)
+            preview_config = {
+               -- Options passed to nvim_open_win
+               border = "single",
+               style = "minimal",
+               relative = "cursor",
+               row = 0,
+               col = 1,
+            },
+            on_attach = function(bufnr)
+               local gs = package.loaded.gitsigns
+               
+               local function map(mode, l, r, opts)
+                  opts = opts or {}
+                  opts.buffer = bufnr
+                  vim.keymap.set(mode, l, r, opts)
+               end
+               
+               -- Navigation
+               map("n", "]c", function()
+                  if vim.wo.diff then return "]c" end
+                  vim.schedule(function() gs.next_hunk() end)
+                  return "<Ignore>"
+               end, { expr = true, desc = "Next hunk" })
+               
+               map("n", "[c", function()
+                  if vim.wo.diff then return "[c" end
+                  vim.schedule(function() gs.prev_hunk() end)
+                  return "<Ignore>"
+               end, { expr = true, desc = "Previous hunk" })
+               
+               -- Actions
+               map("n", "<leader>hs", gs.stage_hunk, { desc = "Stage hunk" })
+               map("n", "<leader>hr", gs.reset_hunk, { desc = "Reset hunk" })
+               map("v", "<leader>hs", function() gs.stage_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, { desc = "Stage hunk" })
+               map("v", "<leader>hr", function() gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, { desc = "Reset hunk" })
+               map("n", "<leader>hS", gs.stage_buffer, { desc = "Stage buffer" })
+               map("n", "<leader>hu", gs.undo_stage_hunk, { desc = "Undo stage hunk" })
+               map("n", "<leader>hR", gs.reset_buffer, { desc = "Reset buffer" })
+               map("n", "<leader>hp", gs.preview_hunk, { desc = "Preview hunk" })
+               map("n", "<leader>hb", function() gs.blame_line({ full = true }) end, { desc = "Blame line" })
+               map("n", "<leader>tb", gs.toggle_current_line_blame, { desc = "Toggle blame" })
+               map("n", "<leader>hd", gs.diffthis, { desc = "Diff this" })
+               map("n", "<leader>hD", function() gs.diffthis("~") end, { desc = "Diff this ~" })
+               map("n", "<leader>td", gs.toggle_deleted, { desc = "Toggle deleted" })
+            end,
+         })
+         
+         -- Autocmd for removing trailing whitespaces on changed lines
+         local augroup = vim.api.nvim_create_augroup
+         local TheDaroGroup = augroup('TheDarO', {})
+         local autocmd = vim.api.nvim_create_autocmd
+         
+         autocmd({ "BufWritePre" }, {
+            group = TheDaroGroup,
+            pattern = "*",
+            callback = function()
+               local bufnr = vim.api.nvim_get_current_buf()
+               local hunk_lines = gitsigns.get_hunks(bufnr)
+               
+               if hunk_lines and #hunk_lines > 0 then
+                  for _, hunk in ipairs(hunk_lines) do
+                     local start_line = hunk.added and hunk.added.start or nil
+                     local count = hunk.added and hunk.added.count or 0
+                     if start_line and count > 0 then
+                        local end_line = start_line + count - 1
+                        if start_line <= end_line then
+                           vim.api.nvim_buf_call(bufnr, function()
+                              vim.cmd(string.format("%d,%ds/\\s\\+$//e", start_line, end_line))
+                           end)
+                        end
+                     end
+                  end
+               end
+            end,
+         })
+      end,
    },
 
    {
@@ -345,21 +416,107 @@ local plugins = {
       end,
    },
 
-   -- Harpoon (lazy-loaded on key)
+   -- Harpoon (enhanced configuration)
    {
       "ThePrimeagen/harpoon",
       branch = "harpoon2",
       keys = {
-         { "<leader>a", function() require("harpoon"):list():add() end, desc = "Add to Harpoon" },
-         { "<C-e>", function() require("harpoon").ui:toggle_quick_menu(require("harpoon"):list()) end, desc = "Harpoon menu" },
-         { "<C-h>", function() require("harpoon"):list():select(1) end, desc = "Harpoon 1" },
-         { "<C-t>", function() require("harpoon"):list():select(2) end, desc = "Harpoon 2" },
-         { "<C-n>", function() require("harpoon"):list():select(3) end, desc = "Harpoon 3" },
-         { "<C-s>", function() require("harpoon"):list():select(4) end, desc = "Harpoon 4" },
+         { "<leader>a", desc = "Add to Harpoon" },
+         { "<C-e>", desc = "Harpoon menu" },
+         { "<C-t>", desc = "Harpoon telescope" },
+         { "<C-h>", desc = "Previous Harpoon" },
+         { "<C-l>", desc = "Next Harpoon" },
+         { "<leader>1", desc = "Harpoon 1" },
+         { "<leader>2", desc = "Harpoon 2" },
+         { "<leader>3", desc = "Harpoon 3" },
+         { "<leader>4", desc = "Harpoon 4" },
+         { "<leader>5", desc = "Harpoon 5" },
+         { "<leader>6", desc = "Harpoon 6" },
+         { "<leader>7", desc = "Harpoon 7" },
+         { "<leader>8", desc = "Harpoon 8" },
+         { "<leader>9", desc = "Harpoon 9" },
+         { "<leader>0", desc = "Harpoon 10" },
       },
-      dependencies = { "nvim-lua/plenary.nvim" },
+      dependencies = { "nvim-lua/plenary.nvim", "nvim-telescope/telescope.nvim" },
       config = function()
-         require("harpoon"):setup()
+         local harpoon = require("harpoon")
+         local harpoon_auto_add_enabled = false
+         local list = harpoon:list()
+         harpoon:setup()
+         
+         local conf = require("telescope.config").values
+         local extensions = require("harpoon.extensions")
+         
+         harpoon:extend(extensions.builtins.highlight_current_file())
+         harpoon:extend(extensions.builtins.navigate_with_number())
+         
+         local function toggle_telescope(harpoon_files)
+            local file_paths = {}
+            for _, item in ipairs(harpoon_files.items) do
+               table.insert(file_paths, item.value)
+            end
+            
+            require("telescope.pickers").new({}, {
+               prompt_title = "Harpoon",
+               finder = require("telescope.finders").new_table({
+                  results = file_paths,
+               }),
+               previewer = conf.file_previewer({}),
+               sorter = conf.generic_sorter({}),
+            }):find()
+         end
+         
+         vim.keymap.set("n", "<C-t>", function()
+            toggle_telescope(harpoon:list())
+         end, { desc = "Open harpoon window with telescope" })
+         
+         vim.keymap.set("n", "<C-e>", function()
+            harpoon.ui:toggle_quick_menu(list)
+         end, { desc = "Toggle Harpoon quick menu" })
+         
+         vim.keymap.set("n", "<leader>a", function()
+            list:add()
+            local file_name = vim.fn.expand('%:t')
+            vim.notify("File: " .. file_name .. " added to Harpoon", vim.log.levels.INFO)
+         end, { desc = "Add file to Harpoon list and notify" })
+         
+         for i = 1, 10 do
+            vim.keymap.set("n", "<leader>" .. (i % 10), function()
+               list:select(i)
+            end, { desc = "Select " .. i .. " item in Harpoon list" })
+         end
+         
+         vim.keymap.set("n", "<C-h>", function()
+            list:prev()
+         end, { desc = "Go to previous item in Harpoon list" })
+         
+         vim.keymap.set("n", "<C-l>", function()
+            list:next()
+         end, { desc = "Go to next item in Harpoon list" })
+         
+         -- Function to toggle the autocmd
+         function _G.toggle_harpoon_auto_add()
+            if harpoon_auto_add_enabled then
+               vim.cmd [[
+                 augroup HarpoonAutoAdd
+                   autocmd!
+                 augroup END
+               ]]
+               vim.notify("Harpoon auto-add disabled", vim.log.levels.INFO)
+            else
+               vim.cmd [[
+                 augroup HarpoonAutoAdd
+                   autocmd!
+                   autocmd BufWritePost * lua list:add(); vim.notify("File: " .. vim.fn.expand('%:t') .. " added to Harpoon", vim.log.levels.INFO)
+                 augroup END
+               ]]
+               vim.notify("Harpoon auto-add enabled", vim.log.levels.INFO)
+            end
+            harpoon_auto_add_enabled = not harpoon_auto_add_enabled
+         end
+         
+         -- Command to toggle the autocmd
+         vim.api.nvim_create_user_command("HarpoonAutoAdd", toggle_harpoon_auto_add, {})
       end,
    },
 
@@ -392,7 +549,7 @@ local plugins = {
             marks = false,
             registers = false,
             spelling = {
-               enabled = false,
+               enabled = true,
             },
             presets = {
                operators = false,
@@ -540,10 +697,23 @@ local plugins = {
    },
 
    {
-      "norcalli/nvim-colorizer.lua",
-      event = { "BufReadPost", "BufNewFile" },
-      config = function()
-         require("colorizer").setup()
+      "brenoprata10/nvim-highlight-colors",
+      lazy = false,  -- Load immediately for color highlighting
+      priority = 800,  -- Load after LSP
+      opts = {
+         render = "background", -- or "foreground" or "virtual"
+         enable_named_colors = true,
+         enable_tailwind = false,
+         custom_colors = {},
+      },
+      config = function(_, opts)
+         require("nvim-highlight-colors").setup(opts)
+         -- Ensure color highlighting is active for all buffers
+         vim.api.nvim_create_autocmd("BufEnter", {
+            callback = function()
+               require("nvim-highlight-colors").turnOn()
+            end,
+         })
       end,
    },
 
@@ -621,6 +791,56 @@ local plugins = {
          { "<leader>u", "<cmd>UndotreeToggle<CR>", desc = "Toggle undotree" },
       },
    },
+   
+   {
+      "sindrets/diffview.nvim",
+      cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewToggleFiles", "DiffviewFocusFiles" },
+      keys = {
+         { "<leader>dvo", "<cmd>DiffviewOpen<CR>", desc = "Open diff view" },
+         { "<leader>dvc", "<cmd>DiffviewClose<CR>", desc = "Close diff view" },
+      },
+      config = function()
+         require("diffview").setup()
+      end,
+   },
+   
+   {
+      "folke/zen-mode.nvim",
+      cmd = "ZenMode",
+      keys = {
+         { "<leader>zz", "<cmd>ZenMode<CR>", desc = "Toggle Zen Mode" },
+      },
+      opts = {
+         window = {
+            width = 120,
+            options = {
+               signcolumn = "no",
+               number = false,
+               relativenumber = false,
+               cursorline = false,
+               cursorcolumn = false,
+               foldcolumn = "0",
+               list = false,
+            },
+         },
+      },
+   },
+   
+   {
+      "m4xshen/hardtime.nvim",
+      event = "VeryLazy",
+      dependencies = { "MunifTanjim/nui.nvim", "nvim-lua/plenary.nvim" },
+      opts = {
+         max_count = 4,
+         disable_mouse = false,
+         disabled_keys = {
+            ["<Up>"] = {},
+            ["<Down>"] = {},
+            ["<Left>"] = {},
+            ["<Right>"] = {},
+         },
+      },
+   },
 
    {
       "nvim-lua/plenary.nvim",
@@ -659,11 +879,11 @@ require("lazy").setup(plugins, {
       colorscheme = { "tokyonight" },
    },
    checker = {
-      enabled = false,
-      notify = false,
+      enabled = true,
+      notify = true,
    },
    change_detection = {
-      enabled = false,
-      notify = false,
+      enabled = true,
+      notify = true,
    },
 })
