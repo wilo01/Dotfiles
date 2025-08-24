@@ -1,12 +1,18 @@
 #!/bin/bash
 # Git post-commit hook - Save commit history and stash list
 
+# Enable strict error handling
+set -euo pipefail
+
 # Source common functions
 HOOKS_DIR=$(dirname "$0")
 source "${HOOKS_DIR}/hooks-common.sh" || {
     echo "❌ Failed to load hooks-common.sh" >&2
     exit 1
 }
+
+# Set up error trap for debugging
+trap 'log_error "Hook failed at line $LINENO with exit code $?"' ERR
 
 # -----------------------------------------------------------------------------
 # Configuration
@@ -129,10 +135,15 @@ main() {
     
     log_info "🚀 Global git post-commit run"
     
-    # Gather commit information
+    # Gather commit information (safely without eval)
     declare -A commit_info
     while IFS='=' read -r key value; do
-        commit_info[$key]=$(eval echo "$value")
+        # Remove quotes safely without eval
+        value="${value#\"}"
+        value="${value%\"}"
+        value="${value#\'}"
+        value="${value%\'}"
+        commit_info[$key]="$value"
     done < <(gather_commit_info)
     
     # Display commit information

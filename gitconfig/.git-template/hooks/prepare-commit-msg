@@ -1,12 +1,18 @@
 #!/bin/bash
 # Git prepare-commit-msg hook - AI-powered commit message generation
 
+# Enable strict error handling
+set -euo pipefail
+
 # Source common functions
 HOOKS_DIR=$(dirname "$0")
 source "${HOOKS_DIR}/hooks-common.sh" || {
     echo "❌ Failed to load hooks-common.sh" >&2
     exit 1
 }
+
+# Set up error trap for debugging
+trap 'log_error "Hook failed at line $LINENO with exit code $?"' ERR
 
 # -----------------------------------------------------------------------------
 # Configuration
@@ -88,11 +94,30 @@ Based on the summary above, generate bullet points that:
 - Note major modifications or refactoring
 - Mention important deletions or renames
 
+CRITICAL RULES - COMPLETELY IGNORE these changes:
+- Whitespace, indentation, or formatting adjustments
+- Empty line additions or removals
+- Code style changes (spacing, line breaks, trailing whitespace)
+- Comment formatting or reorganization
+- Import/include statement reordering
+- Variable renaming without logic changes
+- Function/method reorganization without behavior changes
+- Bracket or parenthesis style changes
+
+ONLY report changes that:
+- Add or remove actual functionality
+- Fix bugs that change behavior
+- Modify business logic or algorithms
+- Change configuration that affects runtime behavior
+- Add/modify/remove API endpoints or database schemas
+- Improve security or performance in measurable ways
+- Add or remove dependencies
+
 IMPORTANT: Keep each bullet point under 72 characters.
 Output ONLY bullet points starting with '- '. Be concise but informative.
 DO NOT include semantic commit prefixes like 'feat:', 'fix:', 'docs:', 'refactor:', 'chore:', 'build:', etc.
 DO NOT include scope in parentheses like '(hooks)', '(git)', '(api)', etc.
-Just write clear, direct descriptions of what changed."
+Focus on WHAT functionality changed, not HOW the code looks."
     else
         local diff_names=$(git diff --staged --name-status 2>/dev/null)
         local diff_stat=$(git diff --staged --stat 2>/dev/null)
@@ -111,17 +136,36 @@ Actual diff content (showing what was changed):
 $diff_content
 
 Based on the actual diff above, generate bullet points describing what was ACTUALLY changed.
-Focus on:
-- What functionality was added/modified/removed
-- What configuration or settings were changed
-- What bugs were fixed or features implemented
-- The actual code changes, not just file names
+
+CRITICAL: COMPLETELY IGNORE these types of changes:
+- Whitespace changes (spaces, tabs, indentation)
+- Empty lines added or removed
+- Trailing whitespace removal
+- Code formatting or style adjustments
+- Comments that were just reformatted
+- Import statement reordering
+- Closing brace/bracket position changes
+- Line wrapping or unwrapping without logic changes
+- Variable/function renaming without behavior changes
+
+ONLY report:
+- Actual functionality additions or removals
+- Bug fixes that change program behavior
+- New features or capabilities
+- Algorithm or logic modifications
+- Configuration changes affecting runtime
+- API changes, new endpoints, or schema changes
+- Security fixes or performance improvements
+- Dependency additions or removals
+- Error handling improvements
+
+Focus on WHAT the code NOW DOES differently, not formatting.
 
 IMPORTANT: Keep each bullet point under 72 characters.
 Output ONLY bullet points starting with '- '. Be specific and technical.
 DO NOT include semantic commit prefixes like 'feat:', 'fix:', 'docs:', 'refactor:', 'chore:', 'build:', etc.
 DO NOT include scope in parentheses like '(hooks)', '(git)', '(api)', etc.
-Just write clear, direct descriptions of what changed."
+Describe the functional impact, not the cosmetic changes."
     fi
 
     echo "$prompt"
@@ -156,32 +200,41 @@ run_ai_sequential() {
 
     # Try first AI
     if [[ -n "$first_ai" ]]; then
-        local ai_cmd="/usr/local/bin/$first_ai -p"
-        local adaptive_timeout=$(get_adaptive_timeout "$first_ai" "$AI_INACTIVITY_TIMEOUT")
-        log_info "🤖 Calling ${first_ai^} AI (timeout: ${adaptive_timeout}s)..."
+        local ai_cmd="/usr/local/bin/$first_ai"
 
-        local response
-        response=$(echo "$prompt" | monitor_process_with_timeout "$ai_cmd" "${first_ai^} AI" "$AI_MAX_TIMEOUT" "$adaptive_timeout")
-        local exit_code=$?
-        local response_time=$PROCESS_ELAPSED_TIME
-
-        if [[ $exit_code -eq 0 ]]; then
-            log_points=$(echo "$response" | grep "^- " || true)
-            if [[ -n "$log_points" ]]; then
-                log_success "${first_ai^} generated commit points successfully in ${response_time}s ⏱️"
-                record_ai_performance "$first_ai" "true" "$response_time" "false"
-                echo "$log_points"
-                return 0
-            fi
-        fi
-
-        # Record failure
-        record_ai_performance "$first_ai" "false" "$response_time" "false"
-
-        if [[ $exit_code -ne 0 ]]; then
-            log_warning "${first_ai^} failed or timed out after ${response_time}s, trying ${second_ai^} as fallback..."
+        # Validate AI command before execution
+        if ! validate_ai_command "$ai_cmd"; then
+            log_warning "AI command validation failed for $first_ai"
+            first_ai="$second_ai"
+            second_ai=""
         else
-            log_warning "${first_ai^} response didn't contain bullet points (${response_time}s), trying ${second_ai^}..."
+            ai_cmd="$ai_cmd -p"
+            local adaptive_timeout=$(get_adaptive_timeout "$first_ai" "$AI_INACTIVITY_TIMEOUT")
+            log_info "🤖 Calling ${first_ai^} AI (timeout: ${adaptive_timeout}s)..."
+
+            local response
+            response=$(echo "$prompt" | monitor_process_with_timeout "$ai_cmd" "${first_ai^} AI" "$AI_MAX_TIMEOUT" "$adaptive_timeout")
+            local exit_code=$?
+            local response_time=$PROCESS_ELAPSED_TIME
+
+            if [[ $exit_code -eq 0 ]]; then
+                log_points=$(echo "$response" | grep "^- " || true)
+                if [[ -n "$log_points" ]]; then
+                    log_success "${first_ai^} generated commit points successfully in ${response_time}s ⏱️"
+                    record_ai_performance "$first_ai" "true" "$response_time" "false"
+                    echo "$log_points"
+                    return 0
+                fi
+            fi
+
+            # Record failure
+            record_ai_performance "$first_ai" "false" "$response_time" "false"
+
+            if [[ $exit_code -ne 0 ]]; then
+                log_warning "${first_ai^} failed or timed out after ${response_time}s, trying ${second_ai^} as fallback..."
+            else
+                log_warning "${first_ai^} response didn't contain bullet points (${response_time}s), trying ${second_ai^}..."
+            fi
         fi
     fi
 
@@ -233,15 +286,37 @@ run_ai_race() {
 
     log_info "🏁 Racing Claude and Gemini AI - first valid response wins!"
 
-    # Temp files for outputs
-    local claude_temp=$(mktemp)
-    local gemini_temp=$(mktemp)
-    local winner_file=$(mktemp)
-    local claude_time_file=$(mktemp)
-    local gemini_time_file=$(mktemp)
+    # Temp files for outputs (secure creation with error handling)
+    local claude_temp=$(mktemp) || {
+        log_error "Failed to create temp file for Claude"
+        return 1
+    }
+    local gemini_temp=$(mktemp) || {
+        rm -f "$claude_temp"
+        log_error "Failed to create temp file for Gemini"
+        return 1
+    }
+    local winner_file=$(mktemp) || {
+        rm -f "$claude_temp" "$gemini_temp"
+        log_error "Failed to create winner file"
+        return 1
+    }
+    local claude_time_file=$(mktemp) || {
+        rm -f "$claude_temp" "$gemini_temp" "$winner_file"
+        log_error "Failed to create Claude time file"
+        return 1
+    }
+    local gemini_time_file=$(mktemp) || {
+        rm -f "$claude_temp" "$gemini_temp" "$winner_file" "$claude_time_file"
+        log_error "Failed to create Gemini time file"
+        return 1
+    }
+
+    # Set restrictive permissions
+    chmod 600 "$claude_temp" "$gemini_temp" "$winner_file" "$claude_time_file" "$gemini_time_file"
 
     # Cleanup on exit
-    trap "rm -f '$claude_temp' '$gemini_temp' '$winner_file' '$claude_time_file' '$gemini_time_file'" RETURN
+    trap "rm -f '$claude_temp' '$gemini_temp' '$winner_file' '$claude_time_file' '$gemini_time_file'" RETURN INT TERM
 
     # Start Claude in background
     (
