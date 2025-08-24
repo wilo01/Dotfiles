@@ -52,8 +52,7 @@ local on_attach = function(client, bufnr)
    map("i", "<C-k>", vim.lsp.buf.signature_help, "Signature help")
 
    -- Information
-   map("n", "K", vim.lsp.buf.hover, "Hover documentation")
-   map("n", "<leader>k", vim.lsp.buf.hover, "Hover documentation")
+   map("n", "gh", vim.lsp.buf.hover, "Hover documentation")
 
    -- Symbols and navigation
    map("n", "<leader>ss", "<cmd>Telescope lsp_document_symbols<CR>", "Document symbols")
@@ -167,8 +166,20 @@ local servers = {
 
    -- TypeScript/JavaScript
    ts_ls = {
+      filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
       settings = {
          typescript = {
+            inlayHints = {
+               includeInlayParameterNameHints = "all",
+               includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+               includeInlayFunctionParameterTypeHints = true,
+               includeInlayVariableTypeHints = true,
+               includeInlayPropertyDeclarationTypeHints = true,
+               includeInlayFunctionLikeReturnTypeHints = true,
+               includeInlayEnumMemberValueHints = true,
+            },
+         },
+         javascript = {
             inlayHints = {
                includeInlayParameterNameHints = "all",
                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
@@ -263,6 +274,30 @@ local servers = {
 for server, config in pairs(servers) do
    config.on_attach = on_attach
    config.capabilities = capabilities
+   
+   -- Add root_dir with fallback to prevent workspace root errors
+   if not config.root_dir then
+      config.root_dir = function(fname)
+         local util = require("lspconfig.util")
+         -- Try to find a root based on common patterns
+         local root = util.root_pattern(
+            ".git",
+            "package.json",
+            "Cargo.toml",
+            "go.mod",
+            "pyproject.toml",
+            "setup.py",
+            "requirements.txt",
+            "Gemfile",
+            "Makefile",
+            ".root"
+         )(fname)
+         -- Fallback to current working directory or home
+         return root or vim.fn.getcwd() or vim.env.HOME
+      end
+   end
+   
+   -- Setup all servers, lspconfig will handle availability
    lspconfig[server].setup(config)
 end
 
@@ -282,6 +317,24 @@ for _, server in ipairs(additional_servers) do
       lspconfig[server].setup({
          on_attach = on_attach,
          capabilities = capabilities,
+         root_dir = function(fname)
+            local util = require("lspconfig.util")
+            -- Try to find a root based on common patterns
+            local root = util.root_pattern(
+               ".git",
+               "package.json",
+               "Cargo.toml",
+               "go.mod",
+               "pyproject.toml",
+               "setup.py",
+               "requirements.txt",
+               "Gemfile",
+               "Makefile",
+               ".root"
+            )(fname)
+            -- Fallback to current working directory or home
+            return root or vim.fn.getcwd() or vim.env.HOME
+         end,
       })
    end
 end
