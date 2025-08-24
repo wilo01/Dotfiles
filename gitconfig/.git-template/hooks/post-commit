@@ -132,11 +132,22 @@ main() {
     # Gather commit information (safely without eval)
     declare -A commit_info
     while IFS='=' read -r key value; do
-        # Remove quotes safely without eval
-        value="${value#\"}"
-        value="${value%\"}"
-        value="${value#\'}"
-        value="${value%\'}"
+        # Unescape the value properly using printf
+        # This handles escaped characters like \n, \t, etc.
+        if [[ "$value" =~ ^\$\' ]]; then
+            # Handle $'...' style quoting
+            value="${value:2:-1}"  # Remove $' and trailing '
+            value=$(printf "%b" "$value")
+        elif [[ "$value" =~ ^\" ]]; then
+            # Handle double quotes
+            value="${value#\"}"
+            value="${value%\"}"
+            value=$(printf "%b" "$value")
+        elif [[ "$value" =~ ^\' ]]; then
+            # Handle single quotes (no escaping needed)
+            value="${value#\'}"
+            value="${value%\'}"
+        fi
         commit_info[$key]="$value"
     done < <(gather_commit_info)
     
