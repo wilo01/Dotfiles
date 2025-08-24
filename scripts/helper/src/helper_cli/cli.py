@@ -7,9 +7,11 @@ from rich.panel import Panel
 from rich.table import Table
 
 from .core import HelperCore
+from .domain_checker import DomainChecker
 
 console = Console()
 helper = HelperCore()
+checker = DomainChecker()
 
 
 @click.group()
@@ -319,6 +321,122 @@ def log(ticket_text, agent_name, output, auto, append):
         console.print(f"❌ Error creating work log: [bold red]{result}[/bold red]")
 
 
+@main.command('check-domain')
+@click.argument('domain')
+@click.option('--copy', '-c', is_flag=True, help='Copy result to clipboard')
+def check_domain(domain, copy):
+    """Check availability of a specific domain (e.g., cargolink.pl)"""
+    available = checker.check_single_domain(domain)
+    
+    if available is True:
+        console.print(f"✅ {domain} is [bold green]AVAILABLE[/bold green]")
+        if copy:
+            pyperclip.copy(f"{domain} - available")
+            console.print("📋 Result copied to clipboard")
+    elif available is False:
+        console.print(f"❌ {domain} is [bold red]TAKEN[/bold red]")
+        if copy:
+            pyperclip.copy(f"{domain} - taken")
+    else:
+        console.print(f"⚠️ Cannot check {domain} - verify whois is installed")
+
+
+@main.command('check-domains')
+@click.argument('name')
+def check_domains(name):
+    """Check name across all popular TLDs (.pl, .com, .app, .io)"""
+    table = checker.check_all_tlds(name)
+    console.print(table)
+
+
+@main.command('check-github')
+@click.argument('username')
+def check_github(username):
+    """Check GitHub username availability"""
+    status = checker.check_github(username)
+    
+    if status is True:
+        console.print(f"✅ GitHub: [bold green]{username}[/bold green] is available")
+        console.print(f"   URL would be: github.com/{username}")
+    elif status is False:
+        console.print(f"❌ GitHub: [bold red]{username}[/bold red] is taken")
+    else:
+        console.print(f"⚠️ Could not check GitHub availability")
+
+
+@main.command('check-npm')
+@click.argument('package_name')
+def check_npm(package_name):
+    """Check npm package name availability"""
+    status = checker.check_npm(package_name)
+    
+    if status is True:
+        console.print(f"✅ npm: [bold green]{package_name}[/bold green] is available")
+        console.print(f"   Package would be: npmjs.com/package/{package_name}")
+    elif status is False:
+        console.print(f"❌ npm: [bold red]{package_name}[/bold red] is taken")
+    else:
+        console.print(f"⚠️ Could not check npm availability")
+
+
+@main.command('check-trademark')
+@click.argument('name')
+@click.option('--open', '-o', is_flag=True, help='Open URLs in browser')
+def check_trademark(name, open):
+    """Search trademark databases for a name"""
+    uprp_url, euipo_url = checker.generate_trademark_urls(name)
+    
+    console.print(f"🔍 Check '[bold cyan]{name}[/bold cyan]' in trademark databases:\n")
+    console.print(f"  🇵🇱 UP RP: {uprp_url}")
+    console.print(f"  🇪🇺 EUIPO: {euipo_url}")
+    
+    if open:
+        import webbrowser
+        console.print("\n🌐 Opening in browser...")
+        webbrowser.open(uprp_url)
+        webbrowser.open(euipo_url)
+
+
+@main.command('name-finder')
+@click.argument('names', nargs=-1, required=True)
+@click.option('--output', '-o', default='naming-report.md', help='Output file for report')
+def name_finder(names, output):
+    """Find and verify the best name for your project"""
+    console.print(f"🔍 [bold blue]Name Finder[/bold blue] - Analyzing {len(names)} name{'s' if len(names) > 1 else ''}...")
+    
+    # Check each name with live progress
+    all_results = []
+    for name in names:
+        results = checker.check_name_with_progress(name)
+        all_results.append(results)
+    
+    # Find best option
+    if all_results:
+        best_name = max(all_results, key=lambda x: x['score_percent'])
+        
+        console.print("\n" + "="*50)
+        if best_name['score_percent'] >= 80:
+            console.print(f"🏆 [bold green]Best option: {best_name['name']} ({best_name['score_percent']:.0f}% availability)[/bold green]")
+        elif best_name['score_percent'] >= 50:
+            console.print(f"🏆 [bold yellow]Best option: {best_name['name']} ({best_name['score_percent']:.0f}% availability)[/bold yellow]")
+        else:
+            console.print(f"⚠️ [bold red]Best option: {best_name['name']} ({best_name['score_percent']:.0f}% availability)[/bold red]")
+        
+        # Provide recommendations
+        if best_name['platforms'].get('npm') is True:
+            console.print("💡 [dim]npm package available - claim it quickly![/dim]")
+        if best_name['platforms'].get('github') is False:
+            console.print("💡 [dim]GitHub taken - consider variations like {}-app or {}-io[/dim]".format(
+                best_name['name'], best_name['name']
+            ))
+    
+    # Generate the report
+    if checker.generate_report(list(names), output):
+        console.print(f"📄 Full report saved to: [bold green]{output}[/bold green]")
+    else:
+        console.print(f"❌ Failed to generate report")
+
+
 @main.command()
 def interactive():
     """Interactive mode for helper commands."""
@@ -340,6 +458,12 @@ def interactive():
         ("vsc <url>", "Generate QR code for VSC URL"),
         ("rt <name>", "Setup RT directory"),
         ("apex <file> <port> <auth>", "Generate APEX upload command"),
+        ("check-domain <domain>", "Check domain availability"),
+        ("check-domains <name>", "Check all TLDs for a name"),
+        ("check-github <username>", "Check GitHub username"),
+        ("check-npm <package>", "Check npm package name"),
+        ("check-trademark <name>", "Search trademark databases"),
+        ("name-finder <names...>", "Comprehensive name verification"),
     ]
 
     for cmd, desc in commands:
