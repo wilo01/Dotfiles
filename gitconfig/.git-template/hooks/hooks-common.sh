@@ -12,18 +12,18 @@ load_hook_config() {
     AI_MAX_TIMEOUT=$(git config --local hooks.aiMaxTimeout || echo "${AI_MAX_TIMEOUT:-60}")
     AI_INACTIVITY_TIMEOUT=$(git config --local hooks.aiInactivityTimeout || echo "${AI_INACTIVITY_TIMEOUT:-30}")
     AI_SHOW_PROGRESS=$(git config --local hooks.aiShowProgress || echo "${AI_SHOW_PROGRESS:-true}")
-    AI_PARALLEL_MODE=$(git config --local hooks.aiParallelMode || echo "${AI_PARALLEL_MODE:-false}")
+    AI_PARALLEL_MODE=$(git config --local hooks.aiParallelMode || echo "${AI_PARALLEL_MODE:-true}")
     AI_DEBUG=$(git config --local hooks.aiDebug || echo "${AI_DEBUG:-false}")
-    
+
     # Hook Settings
     ENABLE_GLOBAL_HOOKS=$(git config --local hooks.enableGlobalHooks || echo "true")
     ENABLE_LOCAL_HOOKS=$(git config --local hooks.enableLocalHooks || echo "false")
     ENABLE_AI_COMMIT=$(git config --local hooks.enableAiCommit || echo "false")
-    
+
     # File Paths
     HOOKS_LOCAL_PATH=$(git config --local hooks.hooksLocalPath | sed "s|^~|$HOME|")
     HOOKS_LOCAL_FILENAME=$(git config --local hooks.hooksLocalFilename)
-    
+
     export AI_MAX_TIMEOUT AI_INACTIVITY_TIMEOUT AI_SHOW_PROGRESS AI_PARALLEL_MODE AI_DEBUG
     export ENABLE_GLOBAL_HOOKS ENABLE_LOCAL_HOOKS ENABLE_AI_COMMIT
     export HOOKS_LOCAL_PATH HOOKS_LOCAL_FILENAME
@@ -87,7 +87,7 @@ show_progress() {
     local message="$1"
     local elapsed="${2:-0}"
     local spinner_index=$(( elapsed % 8 ))
-    
+
     if [[ "$AI_SHOW_PROGRESS" == "true" ]]; then
         printf "\r${SPINNER_CHARS:$spinner_index:1} %s... (%ds)" "$message" "$elapsed" >&2
     fi
@@ -112,26 +112,26 @@ monitor_process_with_timeout() {
     local description="${2:-Process}"
     local max_timeout="${3:-$AI_MAX_TIMEOUT}"
     local inactivity_timeout="${4:-$AI_INACTIVITY_TIMEOUT}"
-    
+
     local temp_file=$(mktemp)
     local error_file=$(mktemp)
     local last_size=0
     local last_activity=$(date +%s)
     local start_time=$(date +%s)
-    
+
     # Clean up temp files on exit
     trap "rm -f '$temp_file' '$error_file'" RETURN
-    
+
     # Start command in background
     eval "$cmd" > "$temp_file" 2>"$error_file" &
     local pid=$!
-    
+
     # Monitor loop
     while kill -0 "$pid" 2>/dev/null; do
         local current_size=$(stat -f%z "$temp_file" 2>/dev/null || stat -c%s "$temp_file" 2>/dev/null || echo 0)
         local current_time=$(date +%s)
         local elapsed=$((current_time - start_time))
-        
+
         # Check max timeout
         if (( elapsed > max_timeout )); then
             kill_process_tree "$pid"
@@ -139,7 +139,7 @@ monitor_process_with_timeout() {
             PROCESS_ELAPSED_TIME=$elapsed
             return 124  # timeout exit code
         fi
-        
+
         # Check activity
         if [[ "$current_size" != "$last_size" ]]; then
             last_activity=$current_time
@@ -153,30 +153,30 @@ monitor_process_with_timeout() {
                 return 124  # timeout exit code
             fi
         fi
-        
+
         show_progress "Waiting for $description" "$elapsed"
         sleep 0.2
     done
-    
+
     clear_progress
-    
+
     # Wait for process and get exit code
     wait "$pid" 2>/dev/null
     local exit_code=$?
-    
+
     # Calculate final elapsed time
     local end_time=$(date +%s)
     PROCESS_ELAPSED_TIME=$((end_time - start_time))
-    
+
     # Show errors if any
     if [[ -s "$error_file" ]] && [[ "$AI_DEBUG" == "true" ]]; then
         log_warning "$description error output:"
         cat "$error_file" >&2
     fi
-    
+
     # Output result
     cat "$temp_file"
-    
+
     return $exit_code
 }
 
@@ -184,12 +184,12 @@ monitor_process_with_timeout() {
 kill_process_tree() {
     local pid="$1"
     local signal="${2:-TERM}"
-    
+
     if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
         # Try graceful termination first
         kill -"$signal" "$pid" 2>/dev/null
         sleep 0.5
-        
+
         # Force kill if still running
         if kill -0 "$pid" 2>/dev/null; then
             kill -KILL "$pid" 2>/dev/null
@@ -227,7 +227,7 @@ get_diff_stats() {
     local files_changed=$(git diff --staged --name-status 2>/dev/null | wc -l)
     local lines_added=$(git diff --staged --numstat 2>/dev/null | awk '{sum+=$1} END {print sum+0}')
     local lines_deleted=$(git diff --staged --numstat 2>/dev/null | awk '{sum+=$2} END {print sum+0}')
-    
+
     echo "$files_changed $lines_added $lines_deleted"
 }
 
@@ -239,16 +239,16 @@ get_diff_stats() {
 safe_write_file() {
     local file="$1"
     local content="$2"
-    
+
     # Create directory if it doesn't exist
     local dir=$(dirname "$file")
     [[ -d "$dir" ]] || mkdir -p "$dir"
-    
+
     # Backup existing file
     if [[ -f "$file" ]]; then
         cp "$file" "${file}.bak"
     fi
-    
+
     # Write new content
     echo "$content" > "$file"
 }
@@ -257,7 +257,7 @@ safe_write_file() {
 safe_read_file() {
     local file="$1"
     local default="${2:-}"
-    
+
     if [[ -f "$file" ]] && [[ -r "$file" ]]; then
         cat "$file"
     else
@@ -278,18 +278,18 @@ command_exists() {
 validate_commands() {
     local commands=("$@")
     local missing=()
-    
+
     for cmd in "${commands[@]}"; do
         if ! command_exists "$cmd"; then
             missing+=("$cmd")
         fi
     done
-    
+
     if [[ ${#missing[@]} -gt 0 ]]; then
         log_error "Missing required commands: ${missing[*]}"
         return 1
     fi
-    
+
     return 0
 }
 
@@ -355,13 +355,13 @@ record_ai_performance() {
     local success="$2"  # true/false
     local response_time="$3"
     local is_winner="${4:-false}"  # true/false for race mode
-    
+
     init_analytics
-    
+
     # Read current analytics
     local analytics=$(cat "$ANALYTICS_FILE")
     local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-    
+
     # Update using jq if available, otherwise use python
     if command_exists jq; then
         analytics=$(echo "$analytics" | jq \
@@ -432,7 +432,7 @@ data['history'] = data['history'][-50:]
 print(json.dumps(data, indent=2))
 ")
     fi
-    
+
     # Check if AI should be disabled (3 consecutive failures)
     local recent_failures_count=$(echo "$analytics" | grep -o "\"$ai_name\".*recent_failures.*\[.*\]" | grep -o "\"20" | wc -l)
     if [[ "$recent_failures_count" -ge 3 ]]; then
@@ -441,7 +441,7 @@ print(json.dumps(data, indent=2))
             analytics=$(echo "$analytics" | jq --arg ai "$ai_name" --arg until "$disable_until" '.[$ai].disabled_until = $until')
         fi
     fi
-    
+
     # Save updated analytics
     echo "$analytics" > "$ANALYTICS_FILE"
 }
@@ -449,9 +449,9 @@ print(json.dumps(data, indent=2))
 # Get AI performance stats
 get_ai_stats() {
     local ai_name="$1"
-    
+
     init_analytics
-    
+
     if command_exists jq; then
         jq -r --arg ai "$ai_name" '.[$ai]' "$ANALYTICS_FILE"
     elif command_exists python3; then
@@ -468,9 +468,9 @@ print(json.dumps(data['$ai_name'], indent=2))
 # Check if AI is disabled
 is_ai_disabled() {
     local ai_name="$1"
-    
+
     init_analytics
-    
+
     local disabled_until=""
     if command_exists jq; then
         disabled_until=$(jq -r --arg ai "$ai_name" '.[$ai].disabled_until // ""' "$ANALYTICS_FILE")
@@ -481,7 +481,7 @@ data = json.load(open('$ANALYTICS_FILE'))
 print(data['$ai_name'].get('disabled_until', ''))
 ")
     fi
-    
+
     if [[ -n "$disabled_until" ]] && [[ "$disabled_until" != "null" ]]; then
         local current_time=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
         if [[ "$current_time" < "$disabled_until" ]]; then
@@ -494,23 +494,23 @@ print(data['$ai_name'].get('disabled_until', ''))
             fi
         fi
     fi
-    
+
     return 1  # AI is not disabled
 }
 
 # Get best performing AI
 get_best_ai() {
     init_analytics
-    
+
     local claude_disabled=$(is_ai_disabled "claude" && echo "true" || echo "false")
     local gemini_disabled=$(is_ai_disabled "gemini" && echo "true" || echo "false")
-    
+
     # If both are disabled, return empty
     if [[ "$claude_disabled" == "true" ]] && [[ "$gemini_disabled" == "true" ]]; then
         echo ""
         return
     fi
-    
+
     # If one is disabled, return the other
     if [[ "$claude_disabled" == "true" ]]; then
         echo "gemini"
@@ -519,27 +519,46 @@ get_best_ai() {
         echo "claude"
         return
     fi
-    
-    # Calculate performance scores
+
+    # Calculate performance scores and check for draw
     if command_exists jq; then
         jq -r '
             if .claude.total_calls == 0 and .gemini.total_calls == 0 then
                 "claude"
             else
-                [.claude, .gemini] |
-                map({
-                    name: (if . == .claude then "claude" else "gemini" end),
-                    score: (
-                        if .total_calls == 0 then
-                            0
-                        else
-                            (.successful_calls / .total_calls * 100) +
-                            (if .successful_calls > 0 then (50 - (.total_time / .successful_calls)) else 0 end)
-                        end
-                    )
-                }) |
-                max_by(.score) |
-                .name
+                def calc_success_rate(ai):
+                    if ai.total_calls > 0 then (ai.successful_calls / ai.total_calls * 100) | floor else 0 end;
+                def calc_avg_time(ai):
+                    if ai.successful_calls > 0 then (ai.total_time / ai.successful_calls) | floor else 0 end;
+
+                # Calculate metrics for both
+                (.claude | {
+                    name: "claude",
+                    success_rate: calc_success_rate(.),
+                    avg_time: calc_avg_time(.),
+                    wins: .wins
+                }) as $claude_stats |
+                (.gemini | {
+                    name: "gemini",
+                    success_rate: calc_success_rate(.),
+                    avg_time: calc_avg_time(.),
+                    wins: .wins
+                }) as $gemini_stats |
+
+                # Check for draw condition
+                if $claude_stats.success_rate == $gemini_stats.success_rate and
+                   $claude_stats.avg_time == $gemini_stats.avg_time then
+                    "draw"
+                # Otherwise compare scores
+                else
+                    [$claude_stats, $gemini_stats] |
+                    map({
+                        name: .name,
+                        score: (.success_rate + (if .avg_time > 0 then (50 - .avg_time) else 0 end))
+                    }) |
+                    max_by(.score) |
+                    .name
+                end
             end
         ' "$ANALYTICS_FILE"
     else
@@ -552,9 +571,9 @@ get_best_ai() {
 get_adaptive_timeout() {
     local ai_name="$1"
     local default_timeout="${2:-30}"
-    
+
     init_analytics
-    
+
     if command_exists jq; then
         local avg_time=$(jq -r --arg ai "$ai_name" '
             if .[$ai].successful_calls > 0 then
@@ -563,10 +582,12 @@ get_adaptive_timeout() {
                 0
             end
         ' "$ANALYTICS_FILE")
-        
+
         if [[ "$avg_time" != "0" ]]; then
             # Set timeout to 1.5x average + 5s buffer
             local timeout=$(echo "$avg_time * 1.5 + 5" | bc 2>/dev/null || python3 -c "print(int($avg_time * 1.5 + 5))")
+            # Convert to integer for comparison
+            timeout=${timeout%.*}
             # Ensure within bounds (10-60 seconds)
             if [[ "$timeout" -lt 10 ]]; then
                 echo "10"
@@ -586,58 +607,71 @@ get_adaptive_timeout() {
 # Display brief statistics summary
 show_brief_stats() {
     init_analytics
-    
+
     if command_exists jq; then
         echo ""
         echo "📊 Quick Stats:"
-        
+
         # Claude stats
         local claude_stats=$(jq -r '
             .claude |
-            "  Claude: " + 
-            (if .total_calls > 0 then 
-                ((.successful_calls / .total_calls * 100) | floor | tostring) + "% success (" + 
+            "  Claude: " +
+            (if .total_calls > 0 then
+                ((.successful_calls / .total_calls * 100) | floor | tostring) + "% success (" +
                 (.successful_calls | tostring) + "/" + (.total_calls | tostring) + "), "
-            else 
+            else
                 "No calls, "
             end) +
-            "Avg: " + 
-            (if .successful_calls > 0 then 
+            "Avg: " +
+            (if .successful_calls > 0 then
                 ((.total_time / .successful_calls) | floor | tostring) + "s"
-            else 
+            else
                 "N/A"
             end) +
             ", Wins: " + (.wins | tostring) +
             (if .disabled_until then " ⚠️ DISABLED" else "" end)
         ' "$ANALYTICS_FILE")
-        
+
         # Gemini stats
         local gemini_stats=$(jq -r '
             .gemini |
-            "  Gemini: " + 
-            (if .total_calls > 0 then 
-                ((.successful_calls / .total_calls * 100) | floor | tostring) + "% success (" + 
+            "  Gemini: " +
+            (if .total_calls > 0 then
+                ((.successful_calls / .total_calls * 100) | floor | tostring) + "% success (" +
                 (.successful_calls | tostring) + "/" + (.total_calls | tostring) + "), "
-            else 
+            else
                 "No calls, "
             end) +
-            "Avg: " + 
-            (if .successful_calls > 0 then 
+            "Avg: " +
+            (if .successful_calls > 0 then
                 ((.total_time / .successful_calls) | floor | tostring) + "s"
-            else 
+            else
                 "N/A"
             end) +
             ", Wins: " + (.wins | tostring) +
             (if .disabled_until then " ⚠️ DISABLED" else "" end)
         ' "$ANALYTICS_FILE")
-        
+
         echo "$claude_stats"
         echo "$gemini_stats"
-        
+
         # Best performer
         local best=$(get_best_ai)
         if [[ -n "$best" ]]; then
-            echo "  Best performer: ${best^}"
+            if [[ "$best" == "draw" ]]; then
+                # Check who has more wins in draw scenario
+                local claude_wins=$(jq -r '.claude.wins' "$ANALYTICS_FILE")
+                local gemini_wins=$(jq -r '.gemini.wins' "$ANALYTICS_FILE")
+                if [[ "$claude_wins" -gt "$gemini_wins" ]]; then
+                    echo "  Best performer: Draw (Claude leads with $claude_wins wins)"
+                elif [[ "$gemini_wins" -gt "$claude_wins" ]]; then
+                    echo "  Best performer: Draw (Gemini leads with $gemini_wins wins)"
+                else
+                    echo "  Best performer: Draw"
+                fi
+            else
+                echo "  Best performer: ${best^}"
+            fi
         fi
         echo ""
     elif command_exists python3; then
@@ -646,10 +680,10 @@ import json
 try:
     with open('$ANALYTICS_FILE') as f:
         data = json.load(f)
-    
+
     print()
     print('📊 Quick Stats:')
-    
+
     for ai in ['claude', 'gemini']:
         stats = data[ai]
         if stats['total_calls'] > 0:
@@ -657,16 +691,16 @@ try:
             success_str = f\"{success_rate}% success ({stats['successful_calls']}/{stats['total_calls']})\"
         else:
             success_str = 'No calls'
-        
+
         if stats['successful_calls'] > 0:
             avg_time = int(stats['total_time'] / stats['successful_calls'])
             avg_str = f'{avg_time}s'
         else:
             avg_str = 'N/A'
-        
+
         disabled = ' ⚠️ DISABLED' if stats.get('disabled_until') else ''
         print(f\"  {ai.capitalize()}: {success_str}, Avg: {avg_str}, Wins: {stats['wins']}{disabled}\")
-    
+
     print()
 except:
     pass

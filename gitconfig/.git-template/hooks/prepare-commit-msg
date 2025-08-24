@@ -23,12 +23,12 @@ run_local_hooks() {
     if [[ "$ENABLE_LOCAL_HOOKS" == "true" ]]; then
         local project_root=$(get_project_root)
         local local_hook="${project_root}/.githooks/prepare-commit-msg"
-        
+
         if [[ -x "$local_hook" ]]; then
             log_info "🔄 Running local prepare-commit-msg hook"
             "$local_hook" "$@"
             local exit_status=$?
-            
+
             if [[ $exit_status -ne 0 ]]; then
                 log_error "Local prepare-commit-msg hook failed with exit code $exit_status"
                 return $exit_status
@@ -48,12 +48,12 @@ generate_ai_prompt() {
     local files_changed="$2"
     local lines_added="$3"
     local lines_deleted="$4"
-    
+
     local prompt=""
-    
+
     if (( files_changed > 50 || lines_added > 2000 )); then
         log_info "📊 Large changeset detected ($files_changed files, +$lines_added/-$lines_deleted lines)"
-        
+
         # Generate structured summary for large changes
         local change_summary
         change_summary=$(git diff --staged --name-status | \
@@ -75,7 +75,7 @@ generate_ai_prompt() {
                     for (i=1; i<=ren_count && i<=3; i++) print "  REN: " ren_files[i]
                 }
             ')
-        
+
         prompt="Generate commit bullet points for this large changeset:
 
 $change_summary
@@ -96,7 +96,7 @@ Just write clear, direct descriptions of what changed."
     else
         local diff_names=$(git diff --staged --name-status 2>/dev/null)
         local diff_stat=$(git diff --staged --stat 2>/dev/null)
-        
+
         prompt="Analyze these git changes and generate commit message bullet points.
 
 Summary: $files_changed files changed, +$lines_added lines added, -$lines_deleted lines deleted
@@ -123,7 +123,7 @@ DO NOT include semantic commit prefixes like 'feat:', 'fix:', 'docs:', 'refactor
 DO NOT include scope in parentheses like '(hooks)', '(git)', '(api)', etc.
 Just write clear, direct descriptions of what changed."
     fi
-    
+
     echo "$prompt"
 }
 
@@ -135,36 +135,36 @@ run_ai_sequential() {
     local prompt="$1"
     local log_points=""
     local total_start=$(date +%s)
-    
+
     # Determine AI order based on performance
     local best_ai=$(get_best_ai)
     local first_ai="claude"
     local second_ai="gemini"
-    
+
     if [[ "$best_ai" == "gemini" ]]; then
         first_ai="gemini"
         second_ai="claude"
         log_debug "Using Gemini first based on performance history"
     fi
-    
+
     # Check if first AI is disabled
     if is_ai_disabled "$first_ai"; then
         log_warning "⚠️  $first_ai is temporarily disabled due to recent failures"
         first_ai="$second_ai"
         second_ai=""
     fi
-    
+
     # Try first AI
     if [[ -n "$first_ai" ]]; then
         local ai_cmd="/usr/local/bin/$first_ai -p"
         local adaptive_timeout=$(get_adaptive_timeout "$first_ai" "$AI_INACTIVITY_TIMEOUT")
         log_info "🤖 Calling ${first_ai^} AI (timeout: ${adaptive_timeout}s)..."
-        
+
         local response
         response=$(echo "$prompt" | monitor_process_with_timeout "$ai_cmd" "${first_ai^} AI" "$AI_MAX_TIMEOUT" "$adaptive_timeout")
         local exit_code=$?
         local response_time=$PROCESS_ELAPSED_TIME
-        
+
         if [[ $exit_code -eq 0 ]]; then
             log_points=$(echo "$response" | grep "^- " || true)
             if [[ -n "$log_points" ]]; then
@@ -174,28 +174,28 @@ run_ai_sequential() {
                 return 0
             fi
         fi
-        
+
         # Record failure
         record_ai_performance "$first_ai" "false" "$response_time" "false"
-        
+
         if [[ $exit_code -ne 0 ]]; then
             log_warning "${first_ai^} failed or timed out after ${response_time}s, trying ${second_ai^} as fallback..."
         else
             log_warning "${first_ai^} response didn't contain bullet points (${response_time}s), trying ${second_ai^}..."
         fi
     fi
-    
+
     # Try second AI if available
     if [[ -n "$second_ai" ]] && ! is_ai_disabled "$second_ai"; then
         local ai_cmd="/usr/local/bin/$second_ai -p"
         local adaptive_timeout=$(get_adaptive_timeout "$second_ai" "$AI_INACTIVITY_TIMEOUT")
         log_info "🤖 Calling ${second_ai^} AI (timeout: ${adaptive_timeout}s)..."
-        
+
         local response
         response=$(echo "$prompt" | monitor_process_with_timeout "$ai_cmd" "${second_ai^} AI" "$AI_MAX_TIMEOUT" "$adaptive_timeout")
         local exit_code=$?
         local response_time=$PROCESS_ELAPSED_TIME
-        
+
         if [[ $exit_code -eq 0 ]]; then
             log_points=$(echo "$response" | grep "^- " || true)
             if [[ -n "$log_points" ]]; then
@@ -207,10 +207,10 @@ run_ai_sequential() {
                 return 0
             fi
         fi
-        
+
         # Record failure
         record_ai_performance "$second_ai" "false" "$response_time" "false"
-        
+
         if [[ $exit_code -ne 0 ]]; then
             log_warning "Both AI services failed or timed out"
         else
@@ -219,7 +219,7 @@ run_ai_sequential() {
     elif is_ai_disabled "$second_ai"; then
         log_warning "⚠️  $second_ai is also disabled due to recent failures"
     fi
-    
+
     return 1
 }
 
@@ -230,19 +230,19 @@ run_ai_sequential() {
 run_ai_race() {
     local prompt="$1"
     local log_points=""
-    
+
     log_info "🏁 Racing Claude and Gemini AI - first valid response wins!"
-    
+
     # Temp files for outputs
     local claude_temp=$(mktemp)
     local gemini_temp=$(mktemp)
     local winner_file=$(mktemp)
     local claude_time_file=$(mktemp)
     local gemini_time_file=$(mktemp)
-    
+
     # Cleanup on exit
     trap "rm -f '$claude_temp' '$gemini_temp' '$winner_file' '$claude_time_file' '$gemini_time_file'" RETURN
-    
+
     # Start Claude in background
     (
         local start=$(date +%s)
@@ -257,7 +257,7 @@ run_ai_race() {
         fi
     ) &
     local claude_pid=$!
-    
+
     # Start Gemini in background
     (
         local start=$(date +%s)
@@ -272,42 +272,42 @@ run_ai_race() {
         fi
     ) &
     local gemini_pid=$!
-    
+
     # Race monitoring with proper time tracking
     local start_time=$(date +%s)
     local race_timeout=60
     local check_interval=0.2  # Check every 200ms
     local winner_time=""
     local loser_ai=""
-    
+
     while true; do
         local current_time=$(date +%s)
         local elapsed=$((current_time - start_time))
-        
+
         # Check for timeout
         if (( elapsed >= race_timeout )); then
             clear_progress
             log_warning "Race timeout reached (${race_timeout}s)"
             break
         fi
-        
+
         # Show progress
         local claude_running=""
         local gemini_running=""
         if kill -0 "$claude_pid" 2>/dev/null; then claude_running="Claude"; fi
         if kill -0 "$gemini_pid" 2>/dev/null; then gemini_running="Gemini"; fi
-        
+
         if [[ -n "$claude_running" ]] || [[ -n "$gemini_running" ]]; then
             local racing="${claude_running}${claude_running:+ vs }${gemini_running}"
             show_progress "Racing: $racing" "$elapsed"
         fi
-        
+
         # Check for winner
         if [[ -s "$winner_file" ]]; then
             local winner=$(cat "$winner_file")
             winner_time=$(($(date +%s) - start_time))
             clear_progress
-            
+
             if [[ "$winner" == "claude" ]]; then
                 loser_ai="gemini"
                 local claude_response_time=$(cat "$claude_time_file" 2>/dev/null || echo "unknown")
@@ -326,19 +326,19 @@ run_ai_race() {
                 break
             fi
         fi
-        
+
         # Check if both processes finished
         if ! kill -0 "$claude_pid" 2>/dev/null && ! kill -0 "$gemini_pid" 2>/dev/null; then
             clear_progress
-            
+
             # Get completion times
             local claude_time=$(cat "$claude_time_file" 2>/dev/null || echo "failed")
             local gemini_time=$(cat "$gemini_time_file" 2>/dev/null || echo "failed")
-            
+
             # Check for partial outputs
             local claude_points=$(grep "^- " "$claude_temp" 2>/dev/null || true)
             local gemini_points=$(grep "^- " "$gemini_temp" 2>/dev/null || true)
-            
+
             if [[ -n "$claude_points" ]]; then
                 log_success "Claude provided partial output (${claude_time}s)"
                 log_points="$claude_points"
@@ -356,33 +356,27 @@ run_ai_race() {
             fi
             break
         fi
-        
+
         sleep "$check_interval"
     done
-    
+
     # Clean up any remaining processes
     kill_process_tree "$claude_pid" 2>/dev/null
     kill_process_tree "$gemini_pid" 2>/dev/null
     wait "$claude_pid" 2>/dev/null
     wait "$gemini_pid" 2>/dev/null
-    
-    # Calculate time saved if we have a winner
+
+    # Record performance for loser if we have a winner
     if [[ -n "$winner_time" ]] && [[ -n "$loser_ai" ]]; then
         # Record that loser didn't finish (use timeout as time)
         record_ai_performance "$loser_ai" "false" "$AI_INACTIVITY_TIMEOUT" "false"
-        
-        # Estimate time saved (assuming loser would have taken full timeout or more)
-        local time_saved=$((AI_INACTIVITY_TIMEOUT - winner_time))
-        if (( time_saved > 0 )); then
-            log_info "💨 Race mode saved ~${time_saved}s by not waiting for ${loser_ai^}"
-        fi
     fi
-    
+
     if [[ -n "$log_points" ]]; then
         echo "$log_points"
         return 0
     fi
-    
+
     return 1
 }
 
@@ -394,54 +388,53 @@ main() {
     local commit_msg_file="$1"
     local commit_source="${2:-}"
     local sha="${3:-}"
-    
+
     # Check if global hooks are enabled
     if [[ "$ENABLE_GLOBAL_HOOKS" != "true" ]]; then
         log_warning "Global git prepare-commit-msg is disabled via Git config."
         exit 0
     fi
-    
+
     log_info "🚀 Global git prepare-commit-msg run"
-    
+
     # Run local hooks first
     run_local_hooks "$@" || exit $?
-    
+
     # Get branch information
     local branch_name=$(get_current_branch)
     local jira_tag=$(get_jira_tag)
-    
+
     # Check if commit message is empty
     local first_line=$(head -n1 "$commit_msg_file")
-    
+
     if [[ -z "$first_line" ]]; then
         if [[ "$ENABLE_AI_COMMIT" == "true" ]] && has_staged_changes; then
             log_info "🤔 Generating AI commit message..."
-            
+
             # Get diff information
             read -r files_changed lines_added lines_deleted <<< $(get_diff_stats)
             local diff_content=$(git diff --staged --unified=1 2>/dev/null | head -200)
-            
+
             # Generate AI prompt
             local ai_prompt=$(generate_ai_prompt "$diff_content" "$files_changed" "$lines_added" "$lines_deleted")
-            
+
             # Run AI to generate commit points
             local log_points=""
             local ai_start_time=$(date +%s)
-            if [[ "$AI_PARALLEL_MODE" == "true" ]]; then
+            if [[ "$AI_PARALLEL_MODE" != "false" ]]; then
                 log_points=$(run_ai_race "$ai_prompt")
             else
                 log_points=$(run_ai_sequential "$ai_prompt")
             fi
             local ai_end_time=$(date +%s)
             local total_ai_time=$((ai_end_time - ai_start_time))
-            
+
             # Format commit message
             if [[ -n "$log_points" ]]; then
-                log_info "✨ AI-generated commit points ready (Total time: ${total_ai_time}s)"
-                
+
                 # Show brief statistics
                 show_brief_stats
-                
+
                 {
                     echo "$jira_tag"
                     echo ""
@@ -452,7 +445,7 @@ main() {
                 } > "$commit_msg_file"
             else
                 log_warning "AI generation failed, using default template"
-                
+
                 # Show brief statistics even on failure
                 show_brief_stats
                 {
