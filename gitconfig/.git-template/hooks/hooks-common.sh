@@ -20,8 +20,16 @@ load_hook_config() {
     ENABLE_LOCAL_HOOKS=$(git config --local hooks.enableLocalHooks || echo "false")
     ENABLE_AI_COMMIT=$(git config --local hooks.enableAiCommit || echo "false")
 
-    # File Paths
-    HOOKS_LOCAL_PATH=$(git config --local hooks.hooksLocalPath | sed "s|^~|$HOME|")
+    # File Paths (with validation)
+    local raw_path=$(git config --local hooks.hooksLocalPath | sed "s|^~|$HOME|")
+    if [[ -n "$raw_path" ]]; then
+        HOOKS_LOCAL_PATH=$(validate_safe_path "$raw_path") || {
+            log_warning "Invalid hooks local path: $raw_path"
+            HOOKS_LOCAL_PATH=""
+        }
+    else
+        HOOKS_LOCAL_PATH=""
+    fi
     HOOKS_LOCAL_FILENAME=$(git config --local hooks.hooksLocalFilename)
 
     export AI_MAX_TIMEOUT AI_INACTIVITY_TIMEOUT AI_SHOW_PROGRESS AI_PARALLEL_MODE AI_DEBUG
@@ -113,17 +121,30 @@ monitor_process_with_timeout() {
     local max_timeout="${3:-$AI_MAX_TIMEOUT}"
     local inactivity_timeout="${4:-$AI_INACTIVITY_TIMEOUT}"
 
-    local temp_file=$(mktemp)
-    local error_file=$(mktemp)
+    # Create temp files securely with error handling
+    local temp_file=$(mktemp) || {
+        log_error "Failed to create temp file for $description"
+        return 1
+    }
+    local error_file=$(mktemp) || {
+        rm -f "$temp_file"
+        log_error "Failed to create error file for $description"
+        return 1
+    }
+
+    # Set restrictive permissions on temp files
+    chmod 600 "$temp_file" "$error_file"
+
     local last_size=0
     local last_activity=$(date +%s)
     local start_time=$(date +%s)
 
     # Clean up temp files on exit
-    trap "rm -f '$temp_file' '$error_file'" RETURN
+    trap "rm -f '$temp_file' '$error_file'" RETURN INT TERM
 
-    # Start command in background
-    eval "$cmd" > "$temp_file" 2>"$error_file" &
+    # Start command in background (safely without eval)
+    # Note: This expects $cmd to be a simple command, not a complex shell expression
+    $cmd > "$temp_file" 2>"$error_file" &
     local pid=$!
 
     # Monitor loop
@@ -269,6 +290,62 @@ safe_read_file() {
 # Validation Utilities
 # -----------------------------------------------------------------------------
 
+# Validate that a path is safe (no traversal attempts)
+validate_safe_path() {
+    local path="$1"
+
+    # Reject empty paths
+    if [[ -z "$path" ]]; then
+        return 1
+    fi
+
+    # Reject paths with directory traversal
+    if [[ "$path" =~ \.\. ]]; then
+        log_debug "Path validation failed: contains .."
+        return 1
+    fi
+
+    # Reject paths with null bytes
+    if [[ "$path" =~ $'\0' ]]; then
+        log_debug "Path validation failed: contains null byte"
+        return 1
+    fi
+
+    # Make path absolute if relative
+    if [[ "$path" != /* ]]; then
+        path="$(pwd)/$path"
+    fi
+
+    # Verify path exists and is readable (optional check)
+    # Uncomment if you want to enforce existence
+    # if [[ ! -e "$path" ]]; then
+    #     log_debug "Path validation failed: does not exist"
+    #     return 1
+    # fi
+
+    echo "$path"
+    return 0
+}
+
+# Validate AI command is safe to execute
+validate_ai_command() {
+    local cmd="$1"
+
+    # Check if command exists
+    if [[ ! -x "$cmd" ]]; then
+        log_debug "AI command validation failed: not executable"
+        return 1
+    fi
+
+    # Check if command is in expected location
+    if [[ "$cmd" != /usr/local/bin/* ]] && [[ "$cmd" != /usr/bin/* ]]; then
+        log_debug "AI command validation failed: unexpected location"
+        return 1
+    fi
+
+    return 0
+}
+
 # Check if a command exists
 command_exists() {
     command -v "$1" >/dev/null 2>&1
@@ -349,7 +426,7 @@ EOF
     fi
 }
 
-# Record AI performance
+# Record AI performance with file locking
 record_ai_performance() {
     local ai_name="$1"
     local success="$2"  # true/false
@@ -357,6 +434,30 @@ record_ai_performance() {
     local is_winner="${4:-false}"  # true/false for race mode
 
     init_analytics
+
+    # Use file locking to prevent race conditions
+    local lock_file="${ANALYTICS_FILE}.lock"
+    local lock_acquired=false
+
+    # Try to acquire lock with timeout
+    local max_wait=5
+    local waited=0
+    while [[ $waited -lt $max_wait ]]; do
+        if mkdir "$lock_file" 2>/dev/null; then
+            lock_acquired=true
+            break
+        fi
+        sleep 0.1
+        waited=$((waited + 1))
+    done
+
+    if [[ "$lock_acquired" != "true" ]]; then
+        log_debug "Failed to acquire analytics lock after ${max_wait}s"
+        return 1
+    fi
+
+    # Ensure lock is released on exit
+    trap "rmdir '$lock_file' 2>/dev/null" RETURN
 
     # Read current analytics
     local analytics=$(cat "$ANALYTICS_FILE")
