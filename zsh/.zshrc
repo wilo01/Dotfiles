@@ -115,6 +115,34 @@ fi
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
+# nvim switcher
+alias nvim-vimscript="NVIM_APPNAME=nvim-vimscript nvim"
+alias nvim-reddit="NVIM_APPNAME=nvim-reddit nvim"
+
+function nvims() {
+    # Generate a list of configurations dynamically
+    local config_path="$HOME/.config"
+    local items=()
+    for config_dir in "$config_path"/nv*; do
+        if [[ -d $config_dir ]]; then
+            items+=("${config_dir##*/}")
+        fi
+    done
+    # Add the default nvim as an option
+    # items+=("nvim")
+
+    local config=$(printf "%s\n" "${items[@]}" | fzf --prompt=" Neovim Config  " --height=50% --layout=reverse --border --exit-0)
+    if [[ -z $config ]]; then
+        echo "Nothing selected"
+        return 0
+    elif [[ $config == "nvim" ]]; then
+        config=""
+    fi
+    NVIM_APPNAME=$config nvim $@
+}
+
+bindkey -s ^a "nvims\n"
+
 bindkey "^[[1;2C" forward-word
 bindkey "^[[1;2D" backward-word
 
