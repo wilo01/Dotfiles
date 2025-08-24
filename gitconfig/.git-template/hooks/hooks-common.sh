@@ -20,16 +20,8 @@ load_hook_config() {
     ENABLE_LOCAL_HOOKS=$(git config --local hooks.enableLocalHooks || echo "false")
     ENABLE_AI_COMMIT=$(git config --local hooks.enableAiCommit || echo "false")
 
-    # File Paths (with validation)
-    local raw_path=$(git config --local hooks.hooksLocalPath | sed "s|^~|$HOME|")
-    if [[ -n "$raw_path" ]]; then
-        HOOKS_LOCAL_PATH=$(validate_safe_path "$raw_path") || {
-            log_warning "Invalid hooks local path: $raw_path"
-            HOOKS_LOCAL_PATH=""
-        }
-    else
-        HOOKS_LOCAL_PATH=""
-    fi
+    # File Paths (validation will be done later if validate_safe_path is available)
+    HOOKS_LOCAL_PATH=$(git config --local hooks.hooksLocalPath | sed "s|^~|$HOME|")
     HOOKS_LOCAL_FILENAME=$(git config --local hooks.hooksLocalFilename)
 
     export AI_MAX_TIMEOUT AI_INACTIVITY_TIMEOUT AI_SHOW_PROGRESS AI_PARALLEL_MODE AI_DEBUG

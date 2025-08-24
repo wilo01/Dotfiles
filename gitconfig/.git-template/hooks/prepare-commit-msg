@@ -1,18 +1,12 @@
 #!/bin/bash
 # Git prepare-commit-msg hook - AI-powered commit message generation
 
-# Enable strict error handling
-set -euo pipefail
-
 # Source common functions
 HOOKS_DIR=$(dirname "$0")
 source "${HOOKS_DIR}/hooks-common.sh" || {
     echo "❌ Failed to load hooks-common.sh" >&2
     exit 1
 }
-
-# Set up error trap for debugging
-trap 'log_error "Hook failed at line $LINENO with exit code $?"' ERR
 
 # -----------------------------------------------------------------------------
 # Configuration
