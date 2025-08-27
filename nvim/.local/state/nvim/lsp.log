@@ -139430,3 +139430,5 @@
 [WARN][2025-08-27 08:31:48] ...lsp/handlers.lua:564	"Diagnostics Done took 560ms"
 [START][2025-08-27 08:47:15] LSP logging initiated
 [WARN][2025-08-27 08:47:15] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-08-27 22:30:43] LSP logging initiated
+[ERROR][2025-08-27 22:30:43] ...p/_transport.lua:36	"rpc"	"lua-language-server"	"stderr"	"NMD, WSM `endLine > #rows` ?\nstack traceback:\n\tscript/text-merger.lua:71: in upvalue 'mergeRows'\n\tscript/text-merger.lua:105: in function 'text-merger'\n\tscript/provider/provider.lua:314: in function <script/provider/provider.lua:301>\n\t[C]: in function 'xpcall'\n\tscript/proto/proto.lua:202: in function <script/proto/proto.lua:177>\n"
