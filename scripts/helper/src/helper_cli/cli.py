@@ -8,10 +8,13 @@ from rich.table import Table
 
 from .core import HelperCore
 from .domain_checker import DomainChecker
+from .name_checker import NameAvailabilityChecker
+from pathlib import Path
 
 console = Console()
 helper = HelperCore()
 checker = DomainChecker()
+name_checker = NameAvailabilityChecker()
 
 
 @click.group()
@@ -324,21 +327,18 @@ def log(ticket_text, agent_name, output, auto, append):
 @main.command('check-domain')
 @click.argument('domain')
 @click.option('--copy', '-c', is_flag=True, help='Copy result to clipboard')
-def check_domain(domain, copy):
+@click.option('--verbose', '-v', is_flag=True, help='Show detailed output from each check')
+def check_domain(domain, copy, verbose):
     """Check availability of a specific domain (e.g., cargolink.pl)"""
-    available = checker.check_single_domain(domain)
+    available = checker.check_single_domain(domain, verbose=verbose)
     
-    if available is True:
-        console.print(f"✅ {domain} is [bold green]AVAILABLE[/bold green]")
-        if copy:
+    if copy:
+        if available is True:
             pyperclip.copy(f"{domain} - available")
-            console.print("📋 Result copied to clipboard")
-    elif available is False:
-        console.print(f"❌ {domain} is [bold red]TAKEN[/bold red]")
-        if copy:
+            console.print("\n📋 Result copied to clipboard")
+        elif available is False:
             pyperclip.copy(f"{domain} - taken")
-    else:
-        console.print(f"⚠️ Cannot check {domain} - verify whois is installed")
+            console.print("\n📋 Result copied to clipboard")
 
 
 @main.command('check-domains')
@@ -399,42 +399,87 @@ def check_trademark(name, open):
 
 @main.command('name-finder')
 @click.argument('names', nargs=-1, required=True)
-@click.option('--output', '-o', default='naming-report.md', help='Output file for report')
-def name_finder(names, output):
-    """Find and verify the best name for your project"""
+@click.option('--output', '-o', default='naming-report', help='Base filename for exports (without extension)')
+@click.option('--format', '-f', multiple=True, default=['table'], 
+              type=click.Choice(['table', 'csv', 'markdown', 'json', 'all']), 
+              help='Export formats (can specify multiple)')
+@click.option('--no-social', is_flag=True, help='Skip social media checks for faster results')
+@click.option('--no-cache', is_flag=True, help='Disable caching for fresh results')
+@click.option('--workers', '-w', default=10, type=int, help='Number of parallel workers')
+@click.option('--verbose', '-v', is_flag=True, help='Show detailed debug information')
+def name_finder(names, output, format, no_social, no_cache, workers, verbose):
+    """Find and verify the best name for your project with comprehensive checking"""
     console.print(f"🔍 [bold blue]Name Finder[/bold blue] - Analyzing {len(names)} name{'s' if len(names) > 1 else ''}...")
+    console.print(f"[dim]Checking domains, platforms{', and social media' if not no_social else ''}...[/dim]\n")
     
-    # Check each name with live progress
-    all_results = []
-    for name in names:
-        results = checker.check_name_with_progress(name)
-        all_results.append(results)
+    # Use the new refactored checker
+    checker = NameAvailabilityChecker(cache_enabled=not no_cache, parallel_workers=workers, verbose=verbose)
     
-    # Find best option
-    if all_results:
-        best_name = max(all_results, key=lambda x: x['score_percent'])
+    try:
+        # Determine what to check
+        social_platforms = None if no_social else ['instagram', 'twitter', 'linkedin', 'reddit']
         
-        console.print("\n" + "="*50)
-        if best_name['score_percent'] >= 80:
-            console.print(f"🏆 [bold green]Best option: {best_name['name']} ({best_name['score_percent']:.0f}% availability)[/bold green]")
-        elif best_name['score_percent'] >= 50:
-            console.print(f"🏆 [bold yellow]Best option: {best_name['name']} ({best_name['score_percent']:.0f}% availability)[/bold yellow]")
-        else:
-            console.print(f"⚠️ [bold red]Best option: {best_name['name']} ({best_name['score_percent']:.0f}% availability)[/bold red]")
+        # Check names
+        results = checker.check_names(
+            list(names),
+            domains=['.com', '.org', '.net', '.io', '.dev', '.eu'],
+            platforms=['npm', 'github', 'gitlab', 'pypi', 'dockerhub'],
+            social=social_platforms,
+            show_progress=True
+        )
         
-        # Provide recommendations
-        if best_name['platforms'].get('npm') is True:
-            console.print("💡 [dim]npm package available - claim it quickly![/dim]")
-        if best_name['platforms'].get('github') is False:
-            console.print("💡 [dim]GitHub taken - consider variations like {}-app or {}-io[/dim]".format(
-                best_name['name'], best_name['name']
-            ))
+        # Display table if requested
+        if 'table' in format or not format:
+            console.print()
+            checker.display_table(results)
+        
+        # Calculate best option
+        if results:
+            best_score = 0
+            best_name = None
+            
+            for name, services in results.items():
+                available = sum(1 for r in services.values() if r.is_available)
+                total = len(services)
+                score = (available / total * 100) if total > 0 else 0
+                
+                if score > best_score:
+                    best_score = score
+                    best_name = name
+            
+            if best_name:
+                console.print("\n" + "="*50)
+                if best_score >= 80:
+                    console.print(f"🏆 [bold green]Best option: {best_name} ({best_score:.0f}% availability)[/bold green]")
+                elif best_score >= 50:
+                    console.print(f"🏆 [bold yellow]Best option: {best_name} ({best_score:.0f}% availability)[/bold yellow]")
+                else:
+                    console.print(f"⚠️ [bold red]Best option: {best_name} ({best_score:.0f}% availability)[/bold red]")
+        
+        # Export in requested formats
+        export_formats = list(format)
+        if 'all' in export_formats:
+            export_formats = ['csv', 'markdown', 'json']
+        
+        if any(f in export_formats for f in ['csv', 'markdown', 'json']):
+            console.print(f"\n[bold]Exporting results...[/bold]")
+            
+            for fmt in export_formats:
+                if fmt == 'csv':
+                    filepath = Path(f"{output}.csv")
+                    checker.export_csv(results, filepath)
+                    console.print(f"📄 CSV saved to: [bold green]{filepath}[/bold green]")
+                elif fmt == 'markdown':
+                    filepath = Path(f"{output}.md")
+                    checker.export_markdown(results, filepath)
+                    console.print(f"📄 Markdown saved to: [bold green]{filepath}[/bold green]")
+                elif fmt == 'json':
+                    filepath = Path(f"{output}.json")
+                    checker.export_json(results, filepath)
+                    console.print(f"📄 JSON saved to: [bold green]{filepath}[/bold green]")
     
-    # Generate the report
-    if checker.generate_report(list(names), output):
-        console.print(f"📄 Full report saved to: [bold green]{output}[/bold green]")
-    else:
-        console.print(f"❌ Failed to generate report")
+    finally:
+        checker.close()
 
 
 @main.command()
