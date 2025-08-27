@@ -120,43 +120,37 @@ alias nvim-vimscript="NVIM_APPNAME=nvim-vimscript nvim"
 alias nvim-reddit="NVIM_APPNAME=nvim-reddit nvim"
 
 function nvims() {
-    # Generate a list of configurations dynamically
     local config_path="$HOME/.config"
     local items=()
     local numbered_items=()
-    
-    # Collect all nvim configs and sort them
     local configs=()
+
     for config_dir in "$config_path"/nv*; do
         if [[ -d $config_dir ]]; then
             configs+=("${config_dir##*/}")
         fi
     done
-    
-    # Sort configs alphabetically
+
     IFS=$'\n' configs=($(sort <<<"${configs[*]}"))
     unset IFS
-    
-    # Build numbered list and create binding string
+
     local i=1
     local bind_cmds=""
     for name in "${configs[@]}"; do
         items+=("$name")
         numbered_items+=("$i) $name")
-        # Create fzf binding to jump to line and accept
+
         if [[ $i -le 9 ]]; then
             if [[ -n "$bind_cmds" ]]; then
                 bind_cmds+=","
             fi
-            # Calculate position (fzf uses 0-based index)
+
             local pos=$((i - 1))
-            # Move to specific position and accept
             bind_cmds+="$i:pos($i)+accept"
         fi
         ((i++))
     done
-    
-    # Use fzf with custom key bindings
+
     local selected
     selected=$(printf "%s\n" "${numbered_items[@]}" | \
         fzf --prompt=" Neovim Config  " \
@@ -165,16 +159,14 @@ function nvims() {
             --border \
             --exit-0 \
             --bind="$bind_cmds")
-    
+
     if [[ -z "$selected" ]]; then
         echo "Nothing selected"
         return 0
     fi
-    
-    # Extract config name from "N) config_name" format
+
     local config=$(echo "$selected" | sed 's/^[0-9]*) //')
-    
-    # Launch nvim with selected config
+
     if [[ "$config" == "nvim" ]]; then
         NVIM_APPNAME="" nvim $@
     else
