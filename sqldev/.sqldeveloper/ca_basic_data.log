@@ -415,17 +415,7 @@ SQL> insert into ca_user_access_group (
   7     access_group_code
   8  from ca_access_group;
 
-Error starting at line : 167 in command -
-insert into ca_user_access_group (
-   username,
-   access_group_code
-)
-select 
-   user,
-   access_group_code
-from ca_access_group
-Error report -
-ORA-00001: unique constraint (COREACCESS.CA_USER_ACCESS_GROUP_1) violated
+1 row inserted.
 
 SQL> 
 SQL> insert into ca_user_access_time (
