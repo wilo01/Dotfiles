@@ -6,7 +6,7 @@ return {
    },
    enabled = true,
    build = "make tiktoken", -- Only on MacOS or Linux
-   event = "VeryLazy",      -- or use cmd = "CopilotChat" to load on first use
+   cmd = { "CopilotChat", "CopilotChatOpen", "CopilotChatToggle", "CopilotChatModels" },
    keys = {
       { "<c-s>",     "<CR>", ft = "copilot-chat", desc = "Submit Prompt", remap = true },
       { "<leader>A", "",     desc = "+ai",        mode = { "n", "v" } },
