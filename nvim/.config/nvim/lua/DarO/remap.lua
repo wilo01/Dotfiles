@@ -1,12 +1,5 @@
 vim.g.mapleader = " "
 
--- Built-in Commenting (Neovim 0.10+)
-vim.keymap.set("n", "<leader>/", "gcc", { desc = "Toggle comment for current line", remap = true })
-vim.keymap.set("x", "<leader>/", "gc", { desc = "Toggle comment for visual selection", remap = true })
--- Keep Ctrl+/ as alternative (terminal sends Ctrl+_ for Ctrl+/)
-vim.keymap.set("n", "<C-_>", "gcc", { desc = "Toggle comment for current line", remap = true })
-vim.keymap.set("x", "<C-_>", "gc", { desc = "Toggle comment for visual selection", remap = true })
-
 -- Text Actions
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selected text down" })
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selected text up" })
@@ -26,6 +19,8 @@ vim.keymap.set("v", "<leader>(", "c(<C-r>\")<Esc>", { desc = "Wrap text with ( )
 vim.keymap.set("v", "<leader>)", "c(<C-r>\")<Esc>", { desc = "Wrap text with ( )" })
 vim.keymap.set("v", '<leader>"', 'c"<C-r>""<Esc>', { desc = 'Wrap text with " "' })
 vim.keymap.set("v", "<leader>'", "c'<C-r>\"'<Esc>", { desc = "Wrap text with ' '" })
+vim.keymap.set("n", "<C-_>", "gcc", { desc = "Toggle comment for current line" })
+vim.keymap.set("x", "<C-_>", "gc", { desc = "Toggle comment for visual selection" })
 
 -- Escape Mode
 vim.keymap.set({ "n", "i", "v" }, "qq", "<Esc>", { desc = "Escape with qq" })
@@ -50,6 +45,9 @@ vim.keymap.set("x", "<leader>-", 'g<C-x>', { desc = "Decrement numbers across se
 vim.keymap.set({ "n", "v" }, "yc", "yy<cmd>normal gcc<CR>p", { desc = "Duplicate a line and comment out the first line" })
 vim.keymap.set("n", "<leader>oc", function()
    local filenameAndLine = vim.fn.expand("%:t") .. ":" .. vim.fn.line(".")
+   local escaped = filenameAndLine:gsub([[\]], [[\\]])
+       :gsub([["]], [[\\"]])
+       :gsub([[']], [[\']])
    local script = [[
     tell application "Google Chrome"
       activate
@@ -62,7 +60,8 @@ vim.keymap.set("n", "<leader>oc", function()
       end tell
     end tell
   ]]
-   script = script:gsub("<<filenameAndLine>>", filenameAndLine)
+
+   script = script:gsub("<<filenameAndLine>>", escaped)
    vim.print("Running script: " .. script)
    vim.system({
       "osascript",
@@ -156,8 +155,9 @@ vim.keymap.set("n", "<leader>*", function()
                   table.insert(lines_to_delete, line_idx)
                   removed_count = removed_count + 1
                else
-                  local updated_line = original_line:gsub("%s*" .. pattern .. ".*", "")
+                  local updated_line = original_line:gsub("%s+" .. pattern .. ".*$", "")
                   if original_line ~= updated_line then
+                     updated_line = updated_line:gsub("%s+$", "")
                      vim.api.nvim_buf_set_lines(bufnr, line_idx, line_idx + 1, false, { updated_line })
                      removed_count = removed_count + 1
                   end
@@ -178,7 +178,7 @@ vim.keymap.set("n", "<leader>*", function()
       msg = msg .. string.format(" (deleted %d empty lines)", deleted_lines)
    end
    vim.notify(msg, vim.log.levels.INFO)
-end, { desc = "Remove comments from git-changed lines and delete empty comment lines" })
+end, { desc = "Remove comments from git-changed lines (removes Standalone and Trailing comments)" })
 
 -- Clipboard Operations
 vim.keymap.set("x", "p", "\"_dP", { desc = "Replace with yanked text, and keep yanked" })
