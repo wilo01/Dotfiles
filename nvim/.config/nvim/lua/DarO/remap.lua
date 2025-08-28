@@ -510,3 +510,9 @@ vim.keymap.set("n", "<leader>t", function()
 
    vim.g.is_csv_prettified = not vim.g.is_csv_prettified
 end, { desc = "Toggle CSV formatting for csv edit", noremap = true, silent = true })
+
+-- Quickfix Navigation
+vim.keymap.set("n", "<C-w>p", "<C-w>p", { desc = "Toggle between quickfix and file (previous window)" })
+vim.keymap.set("n", "<C-w>w", "<C-w>w", { desc = "Cycle through all windows with quickfix" })
+vim.keymap.set("n", "<C-w>j", "<C-w>j", { desc = "Jump down to window quickfix" })
+vim.keymap.set("n", "<C-w>k", "<C-w>k", { desc = "Jump up to window from quickfix" })
