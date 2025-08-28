@@ -88,17 +88,13 @@ function M.open_help(buf)
       local help_win = vim.api.nvim_get_current_win()
       local new_win = M.open_centered_float(0.6, 0.7, buf)
 
-      -- set keymap 'q' to close the help window
       vim.api.nvim_buf_set_keymap(buf, "n", "q", ":q!<CR>", {
          nowait = true,
          noremap = true,
          silent = true,
       })
 
-      -- set scroll position
       vim.wo[help_win].scroll = vim.wo[new_win].scroll
-
-      -- close the help window
       vim.api.nvim_win_close(help_win, true)
    end
 end
@@ -113,20 +109,26 @@ function M.get_cmd_output(cmd, cwd)
       return {}
    end
 
-   local command = table.remove(cmd, 1)
-   local stderr = {}
-   local stdout, ret = require("plenary.job")
-       :new({
-          command = command,
-          args = cmd,
-          cwd = cwd,
-          on_stderr = function(_, data)
-             table.insert(stderr, data)
-          end,
-       })
-       :sync()
+   local result = vim.system(cmd, {
+      cwd = cwd,
+      text = true
+   }):wait()
 
-   return stdout, ret, stderr
+   local stdout = {}
+   if result.stdout then
+      for line in result.stdout:gmatch("[^\r\n]+") do
+         table.insert(stdout, line)
+      end
+   end
+
+   local stderr = {}
+   if result.stderr then
+      for line in result.stderr:gmatch("[^\r\n]+") do
+         table.insert(stderr, line)
+      end
+   end
+
+   return stdout, result.code, stderr
 end
 
 --- Write a table of lines to a file
@@ -172,7 +174,6 @@ function M.diff_file_from_history(commit, file_path)
    M.diff_file(temp_file_path)
 end
 
---- Open a telescope picker to select a file to diff against the current buffer
 function M.telescope_diff_file()
    require("telescope.builtin").find_files({
       prompt_title = "Select File to Compare",
@@ -190,7 +191,6 @@ function M.telescope_diff_file()
    })
 end
 
---- Open a telescope picker to select a commit to diff against the current buffer
 function M.telescope_diff_from_history()
    local current_file = vim.fn.fnamemodify(vim.fn.expand("%:p"), ":~:."):gsub("\\", "/")
    require("telescope.builtin").git_commits({
@@ -210,20 +210,18 @@ function M.telescope_diff_from_history()
 end
 
 function M.is_git_repo()
-   local git_path    = vim.loop.cwd() .. "/.git"
-   local is_git_repo = vim.loop.fs_stat(git_path)
+   local git_path    = vim.uv.cwd() .. "/.git"
+   local is_git_repo = vim.uv.fs_stat(git_path)
 
    return is_git_repo
 end
 
---- Print startup time information
 function M.print_startup_time()
-   -- Check if startup info should be hidden
    if vim.g.hide_startup_info then
       return
    end
-   
-   local elapsed_time = (vim.loop.hrtime() - vim.g.startup_time) / 1e6
+
+   local elapsed_time = (vim.uv.hrtime() - vim.g.startup_time) / 1e6
    local v = vim.version()
    print(string.format("Hello DarO, Neovim v%d.%d.%d startup time: %.2f ms", v.major, v.minor, v.patch, elapsed_time))
    vim.defer_fn(function()

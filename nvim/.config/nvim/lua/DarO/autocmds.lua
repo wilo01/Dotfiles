@@ -15,16 +15,38 @@ autocmd("BufEnter", {
    desc = "Autocmds Disable New Line Comment",
 })
 
-autocmd("BufEnter", {
+autocmd("FileType", {
+   pattern = "*",
    callback = function(opts)
-      if vim.bo[opts.buf].filetype == "bicep" then
-         vim.bo.commentstring = "// %s"
-      elseif vim.bo[opts.buf].filetype == "sql" then
-         vim.bo.commentstring = "-- %s"
+      local ft = vim.bo[opts.buf].filetype
+      local commentstrings = {
+         bicep = "// %s",
+         sql = "-- %s",
+         lua = "-- %s",
+         python = "# %s",
+         bash = "# %s",
+         sh = "# %s",
+         zsh = "# %s",
+         vim = '" %s',
+         javascript = "// %s",
+         typescript = "// %s",
+         c = "// %s",
+         cpp = "// %s",
+         go = "// %s",
+         rust = "// %s",
+         yaml = "# %s",
+         toml = "# %s",
+         css = "/* %s */",
+         html = "<!-- %s -->",
+         xml = "<!-- %s -->",
+      }
+
+      if commentstrings[ft] then
+         vim.bo[opts.buf].commentstring = commentstrings[ft]
       end
    end,
    group = general,
-   desc = "Autocmds Set Bicep and SQL Comment String",
+   desc = "Set appropriate commentstring for each filetype",
 })
 
 autocmd("BufEnter", {
@@ -47,7 +69,9 @@ autocmd("BufWinEnter", {
 })
 
 function R(name)
-   require("plenary.reload").reload_module(name)
+   -- Native module reloading without plenary
+   package.loaded[name] = nil
+   return require(name)
 end
 
 vim.filetype.add({

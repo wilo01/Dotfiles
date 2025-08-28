@@ -89,11 +89,11 @@ return {
          },
          yank_diff = {
             normal = 'gy',
-            register = '"', -- Default register to use for yanking
+            register = '"',
          },
          show_diff = {
             normal = 'gd',
-            full_diff = false, -- Show full diff instead of unified diff when showing diff window
+            full_diff = false,
          },
          show_info = {
             normal = 'gi',
@@ -106,56 +106,49 @@ return {
          },
       },
 
-      -- Shared config starts here (can be passed to functions at runtime and configured via setup function)
+      system_prompt = 'COPILOT_INSTRUCTIONS',
+      context = nil,
+      sticky = nil,
 
-      system_prompt = 'COPILOT_INSTRUCTIONS', -- System prompt to use (can be specified manually in prompt via /).
-
-      context = nil,                          -- Default context or array of contexts to use (can be specified manually in prompt via #).
-      sticky = nil,                           -- Default sticky prompt or array of sticky prompts to use at start of every new chat.
-
-      temperature = 0.1,                      -- GPT result temperature
-      headless = false,                       -- Do not write to chat buffer and use history (useful for using custom processing)
-      stream = nil,                           -- Function called when receiving stream updates (returned string is appended to the chat buffer)
-      callback = nil,                         -- Function called when full response is received (retuned string is stored to history)
-
-      -- default window options
+      temperature = 0.1,
+      headless = false,
+      stream = nil,
+      callback = nil,
       window = {
-         layout = 'float',       -- 'vertical', 'horizontal', 'float', 'replace', or a function that returns the layout
-         width = 0.8,            -- fractional width of parent, or absolute width in columns when > 1
-         height = 0.8,           -- fractional height of parent, or absolute height in rows when > 1
-         -- Options below only apply to floating windows
-         relative = 'editor',    -- 'editor', 'win', 'cursor', 'mouse'
-         border = 'single',      -- 'none', single', 'double', 'rounded', 'solid', 'shadow'
-         row = nil,              -- row position of the window, default is centered
-         col = nil,              -- column position of the window, default is centered
-         title = 'Copilot Chat', -- title of chat window
-         footer = nil,           -- footer of chat window
-         zindex = 1,             -- determines if window is on top or below other floating windows
+         layout = 'float',
+         width = 0.8,
+         height = 0.8,
+
+         relative = 'editor',
+         border = 'single',
+         row = nil,
+         col = nil,
+         title = 'Copilot Chat',
+         footer = nil,
+         zindex = 1,
       },
 
-      show_help = true,                 -- Shows help message as virtual lines when waiting for user input
-      highlight_selection = true,       -- Highlight selection
-      highlight_headers = true,         -- Highlight headers in chat, disable if using markdown renderers (like render-markdown.nvim)
-      references_display = 'virtual',   -- 'virtual', 'write', Display references in chat as virtual text or write to buffer
-      auto_follow_cursor = true,        -- Auto-follow cursor in chat
-      clear_chat_on_new_prompt = false, -- Clears chat on every new prompt
+      show_help = true,
+      highlight_selection = true,
+      highlight_headers = true,
+      references_display = 'virtual',
+      auto_follow_cursor = true,
+      clear_chat_on_new_prompt = false,
 
-      -- Static config starts here (can be configured only via setup function)
-
-      debug = false, -- Enable debug logging (same as 'log_level = 'debug')
+      debug = false,
       log_level = 'info', -- Log level to use, 'trace', 'debug', 'info', 'warn', 'error', 'fatal'
-      proxy = nil, -- [protocol://]host[:port] Use this proxy
-      allow_insecure = false, -- Allow insecure server connections
+      proxy = nil,        -- [protocol://]host[:port] Use this proxy
+      allow_insecure = false,
 
-      chat_autocomplete = false, -- Enable chat autocompletion (when disabled, requires manual `mappings.complete` trigger)
+      chat_autocomplete = false,
 
-      log_path = vim.fn.stdpath('state') .. '/CopilotChat.log', -- Default path to log file
-      history_path = vim.fn.stdpath('data') .. '/copilotchat_history', -- Default path to stored history
+      log_path = vim.fn.stdpath('state') .. '/CopilotChat.log',
+      history_path = vim.fn.stdpath('data') .. '/copilotchat_history',
 
-      question_header = '# User ', -- Header to use for user questions
-      answer_header = '# Copilot ', -- Header to use for AI answers
-      error_header = '# Error ', -- Header to use for errors
-      separator = '───', -- Separator to use in chat
+      question_header = '# User ',
+      answer_header = '# Copilot ',
+      error_header = '# Error ',
+      separator = '───',
 
       -- -- default providers
       -- -- see config/providers.lua for implementation

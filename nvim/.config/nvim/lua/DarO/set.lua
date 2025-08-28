@@ -29,7 +29,7 @@ end, {})
 -- File Handling
 vim.opt.swapfile = false
 vim.opt.backup = false
-vim.opt.undodir = os.getenv("HOME") .. "/.vim/undodir"
+vim.opt.undodir = vim.fn.stdpath("state") .. "/undo"
 vim.opt.undofile = true
 
 -- Visual Settings
@@ -41,8 +41,6 @@ vim.o.cursorcolumn = true
 vim.opt.scrolloff = 8
 vim.opt.signcolumn = "yes"
 vim.opt.isfname:append("@-@")
-
--- Update Time
 vim.opt.updatetime = 50
 
 -- Netrw Configuration
@@ -58,3 +56,6 @@ vim.g.netrw_keepdir = 1
 vim.g.loaded_perl_provider = 0
 vim.g.csv_prettify_ind = true
 vim.g.hide_startup_info = false
+
+-- Set default commentstring for built-in commenting (gcc/gc)
+vim.opt.commentstring = "// %s" -- Default to C-style comments
