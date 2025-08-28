@@ -19,8 +19,8 @@ vim.keymap.set("v", "<leader>(", "c(<C-r>\")<Esc>", { desc = "Wrap text with ( )
 vim.keymap.set("v", "<leader>)", "c(<C-r>\")<Esc>", { desc = "Wrap text with ( )" })
 vim.keymap.set("v", '<leader>"', 'c"<C-r>""<Esc>', { desc = 'Wrap text with " "' })
 vim.keymap.set("v", "<leader>'", "c'<C-r>\"'<Esc>", { desc = "Wrap text with ' '" })
-vim.keymap.set("n", "<C-_>", "gcc", { desc = "Toggle comment for current line" })
-vim.keymap.set("x", "<C-_>", "gc", { desc = "Toggle comment for visual selection" })
+vim.keymap.set("n", "<C-_>", "gcc", { desc = "Toggle comment for current line", remap = true })
+vim.keymap.set("x", "<C-_>", "gc", { desc = "Toggle comment for visual selection", remap = true })
 
 -- Escape Mode
 vim.keymap.set({ "n", "i", "v" }, "qq", "<Esc>", { desc = "Escape with qq" })
