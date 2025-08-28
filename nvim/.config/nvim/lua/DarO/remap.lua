@@ -1,5 +1,12 @@
 vim.g.mapleader = " "
 
+-- Built-in Commenting (Neovim 0.10+)
+vim.keymap.set("n", "<leader>/", "gcc", { desc = "Toggle comment for current line", remap = true })
+vim.keymap.set("x", "<leader>/", "gc", { desc = "Toggle comment for visual selection", remap = true })
+-- Keep Ctrl+/ as alternative (terminal sends Ctrl+_ for Ctrl+/)
+vim.keymap.set("n", "<C-_>", "gcc", { desc = "Toggle comment for current line", remap = true })
+vim.keymap.set("x", "<C-_>", "gc", { desc = "Toggle comment for visual selection", remap = true })
+
 -- Text Actions
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selected text down" })
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selected text up" })
@@ -308,7 +315,7 @@ vim.keymap.set("v", "<leader>ch", function()
    vim.api.nvim_put(snippet, 'l', true, true)
 end, { desc = "Insert DBMS_OUTPUT snippet with clipboard content (log, debugger)" })
 
--- Other useful actions with description
+-- Spellinguseful actions with description
 vim.keymap.set("n", "z=", "z=", { desc = "Spelling suggestions" })
 vim.keymap.set("n", "zg", "zg", { desc = "Spelling add word to spellfile as good word" })
 vim.keymap.set("n", "zG", "zG", { desc = "Spelling add word to internal word list as good word" })
