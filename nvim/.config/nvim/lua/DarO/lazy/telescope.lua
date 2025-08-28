@@ -95,11 +95,38 @@ return {
 
       local delta = previewers.new_termopen_previewer({
          get_command = function(entry)
-            if entry.status == '??' or 'A ' then
-               return { 'git', 'diff', entry.value }
+            local status = entry.status or ""
+
+            local function get_git_command()
+               if status:match("^[AMD]") then
+                  return { 'git', 'diff', '--cached', '--color=always', '--', entry.value }
+               end
+
+               if status:match("^.[MD]") then
+                  return { 'git', 'diff', '--color=always', '--', entry.value }
+               end
+
+               if status == '??' then
+                  return { 'git', 'diff', '--no-index', '--color=always', '/dev/null', entry.value }
+               end
+
+               return { 'git', 'diff', '--color=always', 'HEAD', '--', entry.value }
             end
 
-            return { 'git', 'diff', entry.value .. '^!' }
+            local cmd = get_git_command()
+
+            if status == '??' and vim.fn.executable('delta') ~= 1 then
+               if vim.fn.executable('bat') == 1 then
+                  return { 'bat', '--style=numbers', '--color=always', entry.value }
+               end
+               return { 'cat', entry.value }
+            end
+
+            if vim.fn.executable('delta') == 1 then
+               return { 'sh', '-c', table.concat(cmd, ' ') .. ' | delta' }
+            end
+
+            return cmd
          end
       })
 
