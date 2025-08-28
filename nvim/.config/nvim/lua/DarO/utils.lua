@@ -105,30 +105,45 @@ end
 --- @return table stdout, number? return_code, table? stderr
 function M.get_cmd_output(cmd, cwd)
    if type(cmd) ~= "table" then
-      vim.notify("Command must be a table", 3, { title = "Error" })
-      return {}
+      vim.notify("Command must be a table", vim.log.levels.ERROR, { title = "Error" })
+      return {}, -1, {}
    end
 
    local result = vim.system(cmd, {
       cwd = cwd,
-      text = true
+      text = true,
+      timeout = 30000
    }):wait()
+
+   if result.signal == 2 then
+      vim.notify("Command interrupted by user", vim.log.levels.WARN)
+   elseif result.code and result.code ~= 0 then
+      local cmd_str = table.concat(cmd, " ")
+      if #cmd_str > 50 then
+         cmd_str = cmd_str:sub(1, 47) .. "..."
+      end
+      vim.notify(string.format("Command failed: %s (exit code: %d)", cmd_str, result.code), vim.log.levels.ERROR)
+   end
 
    local stdout = {}
    if result.stdout then
-      for line in result.stdout:gmatch("[^\r\n]+") do
-         table.insert(stdout, line)
+      for line in (result.stdout .. "\n"):gmatch("([^\r\n]*)\r?\n") do
+         if line ~= "" then
+            table.insert(stdout, line)
+         end
       end
    end
 
    local stderr = {}
    if result.stderr then
-      for line in result.stderr:gmatch("[^\r\n]+") do
-         table.insert(stderr, line)
+      for line in (result.stderr .. "\n"):gmatch("([^\r\n]*)\r?\n") do
+         if line ~= "" then
+            table.insert(stderr, line)
+         end
       end
    end
 
-   return stdout, result.code, stderr
+   return stdout, result.code or -1, stderr
 end
 
 --- Write a table of lines to a file
