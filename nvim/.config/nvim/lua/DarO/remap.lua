@@ -141,6 +141,36 @@ vim.keymap.set("n", "<leader>*", function()
    local deleted_lines = 0
    local lines_to_delete = {}
 
+   local function find_trailing_comment(line, comment_pattern)
+      local in_string = false
+      local string_char = nil
+      local escaped = false
+
+      for i = 1, #line do
+         local char = line:sub(i, i)
+         local next_chars = line:sub(i, math.min(i + #comment_pattern - 1, #line))
+
+         if escaped then
+            escaped = false
+         elseif char == "\\" and in_string then
+            escaped = true
+         elseif not in_string and (char == '"' or char == "'") then
+            in_string = true
+            string_char = char
+         elseif in_string and char == string_char and not escaped then
+            in_string = false
+            string_char = nil
+         elseif not in_string and next_chars == comment_pattern then
+            local before = line:sub(1, i - 1)
+            if before:match("[%s,;%)%}%]%>]$") or before:match("^%s*$") then
+               return i
+            end
+         end
+      end
+
+      return nil
+   end
+
    for _, hunk in ipairs(hunks) do
       if hunk.added and hunk.added.start and hunk.added.count > 0 then
          local start_line = hunk.added.start - 1 -- Convert to 0-based
@@ -155,9 +185,9 @@ vim.keymap.set("n", "<leader>*", function()
                   table.insert(lines_to_delete, line_idx)
                   removed_count = removed_count + 1
                else
-                  local updated_line = original_line:gsub("%s+" .. pattern .. ".*$", "")
-                  if original_line ~= updated_line then
-                     updated_line = updated_line:gsub("%s+$", "")
+                  local comment_pos = find_trailing_comment(original_line, pattern:gsub("%%", ""))
+                  if comment_pos then
+                     local updated_line = original_line:sub(1, comment_pos - 1):gsub("%s+$", "")
                      vim.api.nvim_buf_set_lines(bufnr, line_idx, line_idx + 1, false, { updated_line })
                      removed_count = removed_count + 1
                   end
