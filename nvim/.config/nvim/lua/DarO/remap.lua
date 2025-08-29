@@ -246,6 +246,48 @@ vim.keymap.set("n", "<C-k>", "<cmd>cprev<CR>zz", { desc = "Previous quickfix ite
 vim.keymap.set("n", "<leader>k", "<cmd>lnext<CR>zz", { desc = "Next location list item" })
 vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz", { desc = "Previous location list item" })
 
+-- Quickfix Preview: Use <C-CR> in quickfix window to preview without switching
+vim.api.nvim_create_autocmd("FileType", {
+   pattern = "qf",
+   callback = function()
+      -- Map Ctrl+Enter to preview current quickfix item without leaving quickfix window
+      vim.keymap.set("n", "<C-CR>", function()
+         -- Get current quickfix entry
+         local qf_idx = vim.fn.line('.')
+         local qf_list = vim.fn.getqflist()
+         
+         if qf_idx > 0 and qf_idx <= #qf_list then
+            local entry = qf_list[qf_idx]
+            
+            -- Find the main window (not quickfix)
+            local main_win = nil
+            for _, win in ipairs(vim.api.nvim_list_wins()) do
+               local buf = vim.api.nvim_win_get_buf(win)
+               local ft = vim.api.nvim_buf_get_option(buf, 'filetype')
+               if ft ~= 'qf' then
+                  main_win = win
+                  break
+               end
+            end
+            
+            if main_win and entry.bufnr > 0 then
+               -- Switch to main window temporarily
+               vim.api.nvim_set_current_win(main_win)
+               -- Load the buffer
+               vim.api.nvim_win_set_buf(main_win, entry.bufnr)
+               -- Jump to the line
+               vim.api.nvim_win_set_cursor(main_win, {entry.lnum, entry.col - 1})
+               -- Center the screen
+               vim.cmd('normal! zz')
+               -- Switch back to quickfix window
+               vim.cmd('wincmd p')
+            end
+         end
+      end, { buffer = true, desc = "Preview quickfix item without switching (stay in quickfix)" })
+   end,
+   desc = "Setup quickfix preview keymaps"
+})
+
 -- File Operations / File Navigation
 vim.keymap.set("n", "<leader>v", vim.cmd.Ex, { desc = "Open Netrw" })
 vim.keymap.set("n", "gb", "<C-o>zz", { desc = "Go back, and center" })
