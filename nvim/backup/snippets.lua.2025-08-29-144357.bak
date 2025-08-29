@@ -1,0 +1,320 @@
+local M = {}
+
+M.registry = {
+   all = {},
+   javascript = {},
+   typescript = {},
+   javascriptreact = {},
+   typescriptreact = {},
+   sh = {},
+   python = {},
+   lua = {},
+   markdown = {},
+   sql = {},
+   plsql = {},
+}
+
+local function snip(filetype, trigger, body, description)
+   if not M.registry[filetype] then
+      M.registry[filetype] = {}
+   end
+   M.registry[filetype][trigger] = {
+      trigger = trigger,
+      body = body,
+      description = description or trigger,
+   }
+end
+
+local function get_date()
+   local ok, result = pcall(os.date, "%d.%m.%Y")
+   return ok and result or ""
+end
+
+local function get_timestamp()
+   local ok, result = pcall(os.date, "%d.%m.%Y %H:%M:%S")
+   return ok and result or ""
+end
+
+local function get_filename()
+   local ok, result = pcall(vim.fn.expand, "%:p")
+   return ok and result or ""
+end
+
+local function get_pwd()
+   local cwd = vim.fn.getcwd()
+   return cwd:gsub("([\\$`])", "\\%1")
+end
+
+local function setup_snippets()
+   snip("all", "todo", "[ ] TODO: $0")
+   snip("all", "todo-", "- [ ] TODO: $0")
+   snip("all", "todo--", "-- [ ] TODO: $0")
+   snip("all", "datetime", get_timestamp, "Insert current date and time")
+   snip("all", "timestamp", get_timestamp, "Insert current timestamp")
+   snip("all", "date", get_date, "Insert current date")
+   snip("all", "pwd", get_pwd, "Insert current working directory")
+   snip("all", "filename", get_filename, "Insert current filename with path")
+
+   snip("sql", "log_dbms", "DBMS_OUTPUT.PUT_LINE('Dwdw ${1}: ' || ${1});$0")
+   snip("sql", "log_pak", "ca_log_pak.log_warning('Dwdw', '${1}: ' || ${1});$0")
+   snip("plsql", "log_dbms", "DBMS_OUTPUT.PUT_LINE('Dwdw ${1}: ' || ${1});$0")
+   snip("plsql", "log_pak", "ca_log_pak.log_warning('Dwdw', '${1}: ' || ${1});$0")
+
+   local js_filetypes = { "javascript", "typescript", "javascriptreact", "typescriptreact" }
+   for _, ft in ipairs(js_filetypes) do
+      snip(ft, "clwo", "console.warn('', {\n\t'${1}': ${1}\n});$0")
+      snip(ft, "clw", "console.warn('${1}', ${1})")
+      snip(ft, "clg", "console.log('${1}');$0")
+      snip(ft, "clo", "console.log('${1}Obj', ${2}Obj);$0")
+      snip(ft, "ccl", "console.clear();$0")
+      snip(ft, "cer", "console.error('${1}');$0")
+      snip(ft, "ctr", "console.trace();$0")
+      snip(ft, "clt", "console.table('${1}');$0")
+      snip(ft, "cin", "console.info('${1}');$0")
+      snip(ft, "cco", "console.count('${1}');$0")
+      snip(ft, "db", "debugger;$0")
+      snip(ft, "deb", "debugger;$0")
+      snip(ft, "if", "if (${1}) {\n\t$0\n}")
+      snip(ft, "log_warn", "console.warn('${1}', ${1})")
+      snip(ft, "log_warn_obj", "console.warn({\n\t'${1}': ${1}\n});$0")
+      snip(ft, "tryc", "try {\n\t${1}\n} catch (error) {\n\tconsole.error('An error occurred:', error);\n}")
+   end
+
+   snip("sh", "shebang", "#!/bin/sh\n$0")
+   snip("python", "shebang", "#!/usr/bin/env python3\n\n$0")
+
+   snip("lua", "shebang", "#!/usr/bin/lua\n\n$0")
+   snip("lua", "req", "require('${1:Module-name}')\n$0")
+   snip("lua", "func", "function(${1:Arguments})\n\t${2}\nend\n$0")
+   snip("lua", "forp", "for ${1:k}, ${2:v} in pairs(${3:table}) do\n\t${4}\nend\n$0")
+   snip("lua", "fori", "for ${1:k}, ${2:v} in ipairs(${3:table}) do\n\t${4}\nend\n$0")
+   snip("lua", "if", "if ${1} then\n\t${2}\nend\n$0")
+   snip("lua", "M", "local M = {}\n$0\nreturn M")
+
+   snip("markdown", "img", "![${2:alt text}](${1:})$0")
+   snip("markdown", "image", "![${2:alt text}](${1:})$0")
+   snip("markdown", "link", "[${2:link text}](${1:})$0")
+   snip("markdown", "url", "[${2:link text}](${1:})$0")
+   snip("markdown", "codewrap", "```${1:Language}\n${2}\n```\n$0")
+   snip("markdown", "code", "```${2:Language}\n${1:}\n```\n$0")
+end
+
+local function get_buf_snips()
+   local ft = vim.bo.filetype
+   local snips = {}
+
+   if M.registry.all then
+      for _, snippet in pairs(M.registry.all) do
+         table.insert(snips, snippet)
+      end
+   end
+
+   if ft and M.registry[ft] then
+      for _, snippet in pairs(M.registry[ft]) do
+         table.insert(snips, snippet)
+      end
+   end
+
+   return snips
+end
+
+function M.register_cmp_source()
+   local cmp_source = {}
+   local cache = {}
+
+   function cmp_source.complete(_, _, callback)
+      local bufnr = vim.api.nvim_get_current_buf()
+      if not cache[bufnr] then
+         local completion_items = vim.tbl_map(function(s)
+            local body = s.body
+            if type(body) == "function" then
+               body = body()
+            end
+
+            local item = {
+               word = s.trigger,
+               label = s.trigger,
+               kind = vim.lsp.protocol.CompletionItemKind.Snippet,
+               insertText = body,
+               insertTextFormat = vim.lsp.protocol.InsertTextFormat.Snippet,
+            }
+            return item
+         end, get_buf_snips())
+
+         cache[bufnr] = completion_items
+      end
+
+      callback(cache[bufnr])
+   end
+
+   vim.api.nvim_create_autocmd({ "BufEnter", "FileType" }, {
+      callback = function(args)
+         cache[args.buf] = nil
+      end,
+   })
+
+   vim.api.nvim_create_autocmd("BufDelete", {
+      callback = function(args)
+         cache[args.buf] = nil
+      end,
+   })
+
+   require("cmp").register_source("native_snippets", cmp_source)
+end
+
+return {
+   {
+      "hrsh7th/nvim-cmp",
+      event = "InsertEnter",
+      dependencies = {
+         { "hrsh7th/cmp-buffer" },
+         { "hrsh7th/cmp-path" },
+         { "hrsh7th/cmp-nvim-lsp" },
+      },
+      config = function()
+         vim.opt.completeopt = { "menu", "menuone", "noselect" }
+
+         local cmp = require("cmp")
+         local select_opts = { behavior = cmp.SelectBehavior.Insert }
+
+         setup_snippets()
+
+         M.register_cmp_source()
+
+         cmp.setup({
+            snippet = {
+               expand = function(args)
+                  vim.snippet.expand(args.body)
+               end,
+            },
+            sources = {
+               { name = "path" },
+               { name = "nvim_lsp",        keyword_length = 3 },
+               { name = "buffer",          keyword_length = 3 },
+               { name = "native_snippets", keyword_length = 1 },
+            },
+            window = {
+               documentation = cmp.config.window.bordered(),
+            },
+            formatting = {
+               fields = { "menu", "abbr", "kind" },
+               format = function(entry, item)
+                  local menu_icon = {
+                     nvim_lsp = "",
+                     native_snippets = "",
+                     buffer = "",
+                     path = "",
+                  }
+                  item.menu = menu_icon[entry.source.name]
+                  return item
+               end,
+            },
+            mapping = {
+               ["<Up>"] = cmp.mapping.select_prev_item(select_opts),
+               ["<Down>"] = cmp.mapping.select_next_item(select_opts),
+               ["<C-k>"] = cmp.mapping.select_prev_item(select_opts),
+               ["<C-j>"] = cmp.mapping.select_next_item(select_opts),
+               ["<C-u>"] = cmp.mapping.scroll_docs(-4),
+               ["<C-f>"] = cmp.mapping.scroll_docs(4),
+               ["<C-e>"] = cmp.mapping.abort(),
+               ["<CR>"] = cmp.mapping.confirm({ select = false }),
+
+               ["<C-d>"] = cmp.mapping(function(fallback)
+                  if vim.snippet.active({ direction = 1 }) then
+                     vim.snippet.jump(1)
+                  else
+                     fallback()
+                  end
+               end, { "i", "s" }),
+
+               ["<C-b>"] = cmp.mapping(function(fallback)
+                  if vim.snippet.active({ direction = -1 }) then
+                     vim.snippet.jump(-1)
+                  else
+                     fallback()
+                  end
+               end, { "i", "s" }),
+
+               ["<Tab>"] = cmp.mapping(function(fallback)
+                  local col = vim.fn.col(".") - 1
+                  if cmp.visible() then
+                     cmp.select_next_item(select_opts)
+                  elseif vim.snippet.active({ direction = 1 }) then
+                     vim.snippet.jump(1)
+                  elseif col == 0 or vim.fn.getline("."):sub(col, col):match("%s") then
+                     fallback()
+                  else
+                     cmp.complete()
+                  end
+               end, { "i", "s" }),
+
+               ["<S-Tab>"] = cmp.mapping(function(fallback)
+                  if cmp.visible() then
+                     cmp.select_prev_item(select_opts)
+                  elseif vim.snippet.active({ direction = -1 }) then
+                     vim.snippet.jump(-1)
+                  else
+                     fallback()
+                  end
+               end, { "i", "s" }),
+            },
+         })
+
+         vim.keymap.set({ "i" }, "<C-s>e", function()
+            local cursor = vim.api.nvim_win_get_cursor(0)
+            local line = vim.api.nvim_get_current_line()
+            local col = cursor[2]
+
+            local word_start = col
+            while word_start > 0 and line:sub(word_start, word_start):match("%w") do
+               word_start = word_start - 1
+            end
+            word_start = word_start + 1
+
+            local word_end = col + 1
+            while word_end <= #line and line:sub(word_end, word_end):match("%w") do
+               word_end = word_end + 1
+            end
+
+            local current_word = line:sub(word_start, word_end - 1)
+            local filetype = vim.bo.filetype
+            local snippet = nil
+
+            if M.registry[filetype] and M.registry[filetype][current_word] then
+               snippet = M.registry[filetype][current_word]
+            elseif M.registry.all[current_word] then
+               snippet = M.registry.all[current_word]
+            end
+
+            if snippet then
+               vim.api.nvim_buf_set_text(0, cursor[1] - 1, word_start - 1, cursor[1] - 1, word_end - 1, {})
+               local body = snippet.body
+               if type(body) == "function" then
+                  body = body()
+               end
+               vim.snippet.expand(body)
+            else
+               vim.notify("No snippet found for: " .. current_word, vim.log.levels.INFO)
+            end
+         end, { desc = "Expand snippet under cursor", silent = true })
+
+         vim.keymap.set({ "i", "s" }, "<C-s>;", function()
+            if vim.snippet.active({ direction = 1 }) then
+               vim.snippet.jump(1)
+            end
+         end, { desc = "Jump forward in snippet", silent = true })
+
+         vim.keymap.set({ "i", "s" }, "<C-s>,", function()
+            if vim.snippet.active({ direction = -1 }) then
+               vim.snippet.jump(-1)
+            end
+         end, { desc = "Jump backward in snippet", silent = true })
+
+         vim.keymap.set({ "i", "s" }, "<C-l>", function()
+            if vim.snippet.active() then
+               vim.snippet.stop()
+            end
+         end, { desc = "Stop snippet", silent = true })
+      end,
+   },
+}
