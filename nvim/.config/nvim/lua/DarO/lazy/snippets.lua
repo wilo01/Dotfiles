@@ -36,7 +36,8 @@ return {
       local function bash(_, _, command)
          local file = io.popen(command, "r")
          local res = {}
-         for line in file:lines() do
+
+         for line in file:lines() do -- TODO: Need check nil
             table.insert(res, line)
          end
          return res
@@ -44,7 +45,7 @@ return {
 
       --- TODO: What is expand?
       vim.keymap.set({ "i" }, "<C-s>e", function()
-         ls.expand()
+         ls.expand() -- TODO: This function requires 1 argument(s) but instead it is receiving 0.
       end, { desc = "Expand snippet", silent = true })
 
       vim.keymap.set({ "i", "s" }, "<C-s>;", function()
@@ -139,12 +140,12 @@ return {
             ls.parser.parse_snippet("M", "local M = {}\n${0}\nreturn M"),
          },
          markdown = {
-            ls.parser.parse_snippet("img", "![${1:alt text}](${2:image_url})\n${0}"),
-            ls.parser.parse_snippet("image", "![${1:alt text}](${2:image_url})\n${0}"),
-            ls.parser.parse_snippet("link", "[${1:link text}](${2:url})\n${0}"),
-            ls.parser.parse_snippet("url", "[${1:link text}](${2:url})\n${0}"),
+            ls.parser.parse_snippet("img", "- ![${2:alt text}](${1:})\n${0}"),
+            ls.parser.parse_snippet("image", "- ![${2:alt text}](${1:})\n${0}"),
+            ls.parser.parse_snippet("link", "- [${2:link text}](${1:})\n${0}"),
+            ls.parser.parse_snippet("url", "- [${2:link text}](${1:})\n${0}"),
             ls.parser.parse_snippet("codewrap", "```${1:Language}\n${2}\n```\n${0}"),
-            ls.parser.parse_snippet("code", "```${1:Language}\n${2:Content}\n```\n${0}"),
+            ls.parser.parse_snippet("code", "```${2:Language}\n${1:}\n```\n${0}"),
          }
       })
    end,
