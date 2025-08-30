@@ -141593,3 +141593,17 @@
 [WARN][2025-08-29 15:52:34] ...lsp/handlers.lua:564	"Completions Started"
 [WARN][2025-08-29 15:52:34] ...lsp/handlers.lua:564	"Completions Done took 0ms"
 [WARN][2025-08-29 15:52:35] ...lsp/handlers.lua:564	"Semantic Tokens Done took 457ms"
+[START][2025-08-29 19:21:20] LSP logging initiated
+[WARN][2025-08-29 19:21:20] ...lsp/handlers.lua:564	'Settings: Settings { dailynote: "%Y-%m-%d", new_file_folder_path: "", daily_notes_folder: "", heading_completions: true, title_headings: true, unresolved_diagnostics: true, semantic_tokens: true, tags_in_codeblocks: false, references_in_codeblocks: false, include_md_extension_md_link: false, include_md_extension_wikilink: false, hover: true, case_matching: Smart, inlay_hints: true, block_transclusion: true, block_transclusion_length: Full, link_filenames_only: false }'
+[ERROR][2025-08-29 19:21:20] ...lsp/handlers.lua:562	"FILES Lock is good"
+[WARN][2025-08-29 19:21:20] ...lsp/handlers.lua:564	"Update Vault Started"
+[ERROR][2025-08-29 19:21:20] ...lsp/handlers.lua:562	"VAULT Lock is good"
+[WARN][2025-08-29 19:21:20] ...lsp/handlers.lua:564	"Update Vault Done"
+[WARN][2025-08-29 19:21:20] ...lsp/handlers.lua:564	"Diagnostics Started"
+[WARN][2025-08-29 19:21:20] ...lsp/handlers.lua:564	"Diagnostics Done"
+[WARN][2025-08-29 19:21:20] ...lsp/handlers.lua:564	"Diagnostics Done took 144ms"
+[WARN][2025-08-29 19:21:20] ...lsp/handlers.lua:564	"Semantic Tokens Done took 141ms"
+[WARN][2025-08-29 19:21:20] ...lsp/handlers.lua:564	"Semantic Tokens Done took 145ms"
+[WARN][2025-08-29 19:21:20] ...lsp/handlers.lua:564	"Diagnostics Started"
+[WARN][2025-08-29 19:21:20] ...lsp/handlers.lua:564	"Diagnostics Done"
+[WARN][2025-08-29 19:21:20] ...lsp/handlers.lua:564	"Diagnostics Done took 149ms"
