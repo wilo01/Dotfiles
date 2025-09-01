@@ -350,10 +350,10 @@ return {
 
             local text_filetypes = { "markdown", "text" }
             for _, ft in ipairs(text_filetypes) do
-               snip(ft, "img", "![${2:alt text}](${1:})$0")
-               snip(ft, "image", "![${2:alt text}](${1:})$0")
-               snip(ft, "link", "[${2:link text}](${1:})$0")
-               snip(ft, "url", "[${2:link text}](${1:})$0")
+               snip(ft, "img", "- ![${2:alt text}](${1:})$0")
+               snip(ft, "image", "- ![${2:alt text}](${1:})$0")
+               snip(ft, "link", "- [${2:link text}](${1:})$0")
+               snip(ft, "url", "- [${2:link text}](${1:})$0")
                snip(ft, "codewrap", "```${1:Language}\n${2}\n```\n$0")
                snip(ft, "code", "```${2:Language}\n${1:}\n```\n$0")
                snip(ft, "notes", "### NOTES: $0")
@@ -714,10 +714,32 @@ return {
                end,
             },
             sources = {
-               { name = "path" },
-               { name = "nvim_lsp",        keyword_length = 3 },
-               { name = "buffer",          keyword_length = 3 },
-               { name = "native_snippets", keyword_length = 1 },
+               { name = "native_snippets", keyword_length = 1, priority = 1000,    max_item_count = 5,  group_index = 1 },
+               { name = "nvim_lsp",        keyword_length = 3, priority = 900,     max_item_count = 10, group_index = 2 },
+               { name = "path",            priority = 800,     max_item_count = 5, group_index = 3 },
+               { name = "buffer",          keyword_length = 3, priority = 700,     max_item_count = 5,  group_index = 3 },
+            },
+            sorting = {
+               priority_weight = 2,
+               comparators = {
+                  cmp.config.compare.exact,
+                  cmp.config.compare.score,
+                  cmp.config.compare.recently_used,
+                  cmp.config.compare.locality,
+                  cmp.config.compare.kind,
+                  cmp.config.compare.sort_text,
+                  cmp.config.compare.length,
+                  cmp.config.compare.order,
+               },
+            },
+            performance = {
+               max_view_entries = 15,
+               debounce = 30,
+               throttle = 15,
+               fetching_timeout = 200,
+               filtering_context_budget = 3,
+               confirm_resolve_timeout = 80,
+               async_budget = 1,
             },
             window = {
                documentation = cmp.config.window.bordered(),

@@ -306,3 +306,5 @@ export PYENV_ROOT="$HOME/.pyenv"
 command -v pyenv >/dev/null 2>&1 && eval "$(pyenv init --path)"
 command -v pyenv >/dev/null 2>&1 && eval "$(pyenv init -)"
 command -v pyenv >/dev/null 2>&1 && eval "$(pyenv virtualenv-init -)"
+
+export BROWSER="google-chrome --profile-directory=Default"
