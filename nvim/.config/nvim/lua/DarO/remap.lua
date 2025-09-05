@@ -255,28 +255,28 @@ vim.api.nvim_create_autocmd("FileType", {
          -- Get current quickfix entry
          local qf_idx = vim.fn.line('.')
          local qf_list = vim.fn.getqflist()
-         
+
          if qf_idx > 0 and qf_idx <= #qf_list then
             local entry = qf_list[qf_idx]
-            
+
             -- Find the main window (not quickfix)
             local main_win = nil
             for _, win in ipairs(vim.api.nvim_list_wins()) do
                local buf = vim.api.nvim_win_get_buf(win)
-               local ft = vim.api.nvim_buf_get_option(buf, 'filetype')
+               local ft = vim.api.nvim_buf_get_option(buf, 'filetype') -- [ ] TODO: Deprecated
                if ft ~= 'qf' then
                   main_win = win
                   break
                end
             end
-            
+
             if main_win and entry.bufnr > 0 then
                -- Switch to main window temporarily
                vim.api.nvim_set_current_win(main_win)
                -- Load the buffer
                vim.api.nvim_win_set_buf(main_win, entry.bufnr)
                -- Jump to the line
-               vim.api.nvim_win_set_cursor(main_win, {entry.lnum, entry.col - 1})
+               vim.api.nvim_win_set_cursor(main_win, { entry.lnum, entry.col - 1 })
                -- Center the screen
                vim.cmd('normal! zz')
                -- Switch back to quickfix window
@@ -445,18 +445,20 @@ local function open_git_online()
    }
 
    local detected_host = nil
+   local detected_host_name = nil
    for host_name, host_config in pairs(git_hosts) do
       if remote_url:find(host_config.pattern) then
+         detected_host_name = host_name
          detected_host = host_config
          break
       end
    end
 
-   if not detected_host then
+   if not detected_host or not detected_host_name then
       print("Error: Unsupported remote host!")
       return
    end
-
+   -- [ ] TODO: Need checks for nil
    repo_path = remote_url:match(detected_host.ssh_pattern) or remote_url:match(detected_host.https_pattern)
    base_url = detected_host.base_url
 
@@ -486,6 +488,7 @@ end
 vim.keymap.set("n", "<leader>og", open_git_online, { desc = "Open current file in GitHub or GitLab at cursor" })
 
 -- CSV editing format (Auto close on save in -> autocmds.lua)
+-- [ ] TODO: Remove comments and please restrict this keymap to be used only in .csv files
 vim.g.is_csv_prettified = false
 vim.keymap.set("n", "<leader>t", function()
    local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
