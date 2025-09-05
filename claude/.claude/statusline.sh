@@ -76,62 +76,62 @@ if [ -n "$current_dir" ]; then
     else
         display_path="$current_dir"
     fi
-    
+
     # Check if we're in a git repo to combine filepath and git info
     if [ -d "$current_dir/.git" ] || git -C "$current_dir" rev-parse --git-dir > /dev/null 2>&1; then
         # Get current branch name
         branch=$(git -C "$current_dir" branch --show-current 2>/dev/null)
-        
+
         if [ -z "$branch" ]; then
             # Handle detached HEAD or other cases
             branch="HEAD"
         fi
-        
+
         # Combine filepath and git section without separator: OS_ICON + DIR_COLOR + FOLDER_ICON + filepath + " on" (default) + git_text (green) + branch (green)
         combined_section="${OS_ICON}${DIR_COLOR}${FOLDER_ICON}${display_path}${RESET} on ${GIT_CLEAN}${GIT_BRANCH_TEXT}${branch}${RESET}"
-        
+
         # Get commits ahead/behind (using P10k logic)
         upstream=$(git -C "$current_dir" rev-parse --abbrev-ref @{upstream} 2>/dev/null)
         if [ -n "$upstream" ]; then
             # P10k uses different logic: behind = commits to pull, ahead = commits to push
             behind=$(git -C "$current_dir" rev-list --count HEAD..@{upstream} 2>/dev/null)
             ahead=$(git -C "$current_dir" rev-list --count @{upstream}..HEAD 2>/dev/null)
-            
+
             # ⇣ for commits behind (to pull) - green like P10k
             if [ "$behind" -gt 0 ]; then
                 combined_section+=" ${GIT_CLEAN}⇣${behind}${RESET}"
             fi
-            
-            # ⇡ for commits ahead (to push) - green like P10k  
+
+            # ⇡ for commits ahead (to push) - green like P10k
             if [ "$ahead" -gt 0 ]; then
                 combined_section+=" ${GIT_CLEAN}⇡${ahead}${RESET}"
             fi
         fi
-        
+
         # Get git stash count (*) - green like P10k (color 76)
         stash_count=$(git -C "$current_dir" stash list 2>/dev/null | wc -l)
         if [ "$stash_count" -gt 0 ]; then
             combined_section+=" ${GIT_CLEAN}*${stash_count}${RESET}"
         fi
-        
-        # Get unstaged files count (!) - yellow like P10k
-        unstaged=$(git -C "$current_dir" diff --name-only 2>/dev/null | wc -l)
-        if [ "$unstaged" -gt 0 ]; then
-            combined_section+=" ${GIT_MODIFIED}!${unstaged}${RESET}"
-        fi
-        
-        # Get untracked files count (?) - green like P10k (color 76)
-        untracked=$(git -C "$current_dir" ls-files --others --exclude-standard 2>/dev/null | wc -l)
-        if [ "$untracked" -gt 0 ]; then
-            combined_section+=" ${GIT_UNTRACKED}?${untracked}${RESET}"
-        fi
-        
+
         # Get staged files count (+) - yellow like P10k
         staged=$(git -C "$current_dir" diff --cached --name-only 2>/dev/null | wc -l)
         if [ "$staged" -gt 0 ]; then
             combined_section+=" ${GIT_MODIFIED}+${staged}${RESET}"
         fi
-        
+
+        # Get unstaged files count (!) - yellow like P10k
+        unstaged=$(git -C "$current_dir" diff --name-only 2>/dev/null | wc -l)
+        if [ "$unstaged" -gt 0 ]; then
+            combined_section+=" ${GIT_MODIFIED}!${unstaged}${RESET}"
+        fi
+
+        # Get untracked files count (?) - green like P10k (color 76)
+        untracked=$(git -C "$current_dir" ls-files --others --exclude-standard 2>/dev/null | wc -l)
+        if [ "$untracked" -gt 0 ]; then
+            combined_section+=" ${GIT_UNTRACKED}?${untracked}${RESET}"
+        fi
+
         status_components+=("$combined_section")
     else
         # No git repo - just add filepath
