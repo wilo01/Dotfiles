@@ -145697,3 +145697,31 @@
 [WARN][2025-09-05 09:34:04] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
 [START][2025-09-05 11:10:47] LSP logging initiated
 [ERROR][2025-09-05 11:10:47] ...m/lsp/client.lua:620	"LSP[lua_ls]"	"Cannot find request with id 368 whilst attempting to cancel"
+[START][2025-09-05 14:53:32] LSP logging initiated
+[WARN][2025-09-05 14:53:32] ...lsp/handlers.lua:564	'Settings: Settings { dailynote: "%Y-%m-%d", new_file_folder_path: "", daily_notes_folder: "", heading_completions: true, title_headings: true, unresolved_diagnostics: true, semantic_tokens: true, tags_in_codeblocks: false, references_in_codeblocks: false, include_md_extension_md_link: false, include_md_extension_wikilink: false, hover: true, case_matching: Smart, inlay_hints: true, block_transclusion: true, block_transclusion_length: Full, link_filenames_only: false }'
+[ERROR][2025-09-05 14:53:32] ...lsp/handlers.lua:562	"FILES Lock is good"
+[WARN][2025-09-05 14:53:32] ...lsp/handlers.lua:564	"Update Vault Started"
+[ERROR][2025-09-05 14:53:32] ...lsp/handlers.lua:562	"VAULT Lock is good"
+[WARN][2025-09-05 14:53:32] ...lsp/handlers.lua:564	"Update Vault Done"
+[WARN][2025-09-05 14:53:32] ...lsp/handlers.lua:564	"Diagnostics Started"
+[WARN][2025-09-05 14:53:32] ...lsp/handlers.lua:564	"Diagnostics Done"
+[WARN][2025-09-05 14:53:32] ...lsp/handlers.lua:564	"Diagnostics Done took 0ms"
+[WARN][2025-09-05 14:53:32] ...lsp/handlers.lua:564	"Semantic Tokens Done took 0ms"
+[WARN][2025-09-05 14:53:32] ...lsp/handlers.lua:564	"Semantic Tokens Done took 0ms"
+[WARN][2025-09-05 14:53:32] ...lsp/handlers.lua:564	"Diagnostics Started"
+[WARN][2025-09-05 14:53:32] ...lsp/handlers.lua:564	"Diagnostics Done"
+[WARN][2025-09-05 14:53:32] ...lsp/handlers.lua:564	"Diagnostics Done took 0ms"
+[WARN][2025-09-05 14:53:34] ...lsp/handlers.lua:564	"Update Vault Started"
+[ERROR][2025-09-05 14:53:34] ...lsp/handlers.lua:562	"VAULT Lock is good"
+[WARN][2025-09-05 14:53:34] ...lsp/handlers.lua:564	"Update Vault Done"
+[WARN][2025-09-05 14:53:34] ...lsp/handlers.lua:564	"Diagnostics Started"
+[WARN][2025-09-05 14:53:34] ...lsp/handlers.lua:564	"Diagnostics Done"
+[WARN][2025-09-05 14:53:34] ...lsp/handlers.lua:564	"Diagnostics Done took 0ms"
+[WARN][2025-09-05 14:53:34] ...lsp/handlers.lua:564	"Semantic Tokens Done took 0ms"
+[START][2025-09-05 14:58:47] LSP logging initiated
+[WARN][2025-09-05 14:58:47] ...lsp/handlers.lua:564	"13:58:47.827 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-09-05 14:59:02] LSP logging initiated
+[WARN][2025-09-05 14:59:02] ...lsp/handlers.lua:564	"13:59:02.077 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-09-05 15:24:49] LSP logging initiated
+[WARN][2025-09-05 15:24:49] ...lsp/handlers.lua:564	"14:24:49.799 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[WARN][2025-09-05 15:24:56] ...lsp/handlers.lua:564	"14:24:56.134 WARNING ⛔️ Shfmt: disabling formatting as no executable was found at path 'shfmt'"
