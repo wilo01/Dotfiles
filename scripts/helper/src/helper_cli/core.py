@@ -24,21 +24,21 @@ class HelperCore:
         """Lazy load keyboard controller."""
         if self.keyboard is None:
             import os
-            
+
             # Check if we're on Wayland (pynput doesn't work well on Wayland)
             if os.environ.get('XDG_SESSION_TYPE') == 'wayland':
                 # Wayland doesn't support pynput properly
                 return None
-            
+
             try:
                 # Suppress Xlib warnings
                 import warnings
                 warnings.filterwarnings("ignore", category=UserWarning)
-                
+
                 # Set display if not set (helps with SSH sessions)
                 if not os.environ.get('DISPLAY'):
                     os.environ['DISPLAY'] = ':0'
-                
+
                 from pynput.keyboard import Controller
                 self.keyboard = Controller()
             except ImportError as e:
@@ -52,11 +52,11 @@ class HelperCore:
         import os
         import subprocess
         import shutil
-        
+
         # Check if we're on Wayland and try Wayland-compatible tools
         if os.environ.get('XDG_SESSION_TYPE') == 'wayland':
             time.sleep(delay)
-            
+
             # Try wtype first (Wayland native)
             if shutil.which('wtype'):
                 try:
@@ -64,7 +64,7 @@ class HelperCore:
                     return
                 except subprocess.CalledProcessError:
                     pass
-            
+
             # Try ydotool (requires ydotoold daemon)
             if shutil.which('ydotool'):
                 try:
@@ -72,11 +72,11 @@ class HelperCore:
                     return
                 except subprocess.CalledProcessError:
                     pass
-            
+
             # Fallback to clipboard if no Wayland tools available
             pyperclip.copy(string)
             return
-        
+
         # Use pynput for X11
         keyboard = self._get_keyboard()
         if keyboard is None:
@@ -159,15 +159,23 @@ class HelperCore:
     def generate_ngrok_qr(self, ngrok_url: str) -> tuple[str, str]:
         """Generate QR code command for NGROK URL."""
         full_url = f'{ngrok_url}/i/source/ui-kiosk/index.html'
-        short_url = self.type_tiny.tinyurl.short(full_url)
-        qr_command = f'segno --compact {short_url}'
+        try:
+            short_url = self.type_tiny.tinyurl.short(full_url)
+        except Exception:
+            # If shortening fails, use the full URL
+            short_url = full_url
+        qr_command = f'segno --compact "{short_url}"'
         return full_url, qr_command
 
     def generate_vsc_qr(self, vsc_url: str) -> tuple[str, str]:
         """Generate QR code command for VSC URL."""
         full_url = f'{vsc_url}i/source/ui-kiosk/index.html'
-        short_url = self.type_tiny.tinyurl.short(full_url)
-        qr_command = f'segno --compact {short_url}'
+        try:
+            short_url = self.type_tiny.tinyurl.short(full_url)
+        except Exception:
+            # If shortening fails, use the full URL
+            short_url = full_url
+        qr_command = f'segno --compact "{short_url}"'
         return full_url, qr_command
 
     def generate_apex_upload_command(self, apex_file: str, port: str, auth: str) -> str:
