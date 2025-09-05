@@ -314,7 +314,7 @@ local function format_git_status()
    end
 
    if git_cache.staged > 0 then
-      table.insert(parts, '%#StatusLineGitClean#' .. icons.git_indicators.staged .. git_cache.staged .. '%*')
+      table.insert(parts, '%#StatusLineGitDirty#' .. icons.git_indicators.staged .. git_cache.staged .. '%*')
    end
 
    if git_cache.modified > 0 then
