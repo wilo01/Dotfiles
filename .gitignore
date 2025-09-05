@@ -1,66 +1,127 @@
-# Ignore all files and directories by default
-*
-
-# Allow specific files and directories
-!~/.config/nvim/*
-!~/.config/nvim-vimscript/*
-!~/.config/regolith/*
-!~/bin/.local/scripts/*
-!~/.vim/
-!/etc/regolith/i3/*
-!Dotfiles.code-workspace
-!settings (work copy).json
-!settings.json
-!README.md
-!~/.gitconfig
-!~/.tmux.conf
-!~/.zshrc
-!~/helper.py
-!~/recatest/*
-!sqldev/.sqldeveloper/system23*
-!sqldev/.sqldeveloper/SqlHistory/*
-!Browser/
-!Browser/**
-
-# Logs
-logs
+# Development and cache files
+__pycache__/
+*.pyc
+node_modules/
+.env
 *.log
+logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 dev-debug.log
-# Dependency directories
-node_modules/
-# Environment variables
-.env
-# Editor directories and files
-.idea
-.vscode
+
+# Editor and IDE files
+.idea/
+.vscode/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+.cursor/
+.windsurf/
+.zed/
+.clinerules/
+.kiro/
+.roo/
+.roomodes
+.rules
+.trae/
+
 # OS specific
 .DS_Store
+
+# Sensitive files and backups
+**/oauth_creds.json
+**/*api_key*
+**/*API_KEY*
+*.backup
+.gitignore-backup
+
+# AI tool configs
+AI-tools/.claude.json*
+AI-tools/.gemini/
+AI-tools/AI/tds-suite/context/
+AI-tools/test_mkdir.js
+.gemini/
+
+# Temporary files
+tmp/
+*.tmp
+task_description.txt
+test_statusline.vim
+tmux_env_output.txt
+xauthority_popup.txt
+display_output.txt
+naming-report.csv
+naming-report.md
+Checkout
+Text
+
+# Task and cache directories
+.task/
+taskwarrior/.task/
+.oh-my-zsh/cache/
+zsh/.oh-my-zsh/cache/
+
+# SQL Developer files
+sqldev/.sqldeveloper/tmp/
+sqldev/.sqldeveloper/*.log
+sqldev/.sqldeveloper/24.3.1/
+sqldev/.sqldeveloper/system24.3.1.347.1826/
+sqldev/.sqldeveloper/system23.1.1.345.2114/
+sqldev/.sqldeveloper/SqlHistory/
 
 # Large binary files
 Browser/chrome-linux.zip
 Browser/chrome-linux/
 
-__pycache__
-
-# OAuth credentials and sensitive files
-AI-tools/.gemini/oauth_creds.json 
-
-# Task files
-# tasks.json
-# tasks/ 
-AI-tools/.claude.json.backup
-# Claude config backups and sensitive files
-AI-tools/.claude.json*
-*.backup
-**/oauth_creds.json
-**/*api_key*
-**/*API_KEY*
+# Nvim state files
 nvim/.local/state/nvim/lsp.log
+
+# Scripts and utilities (add selectively as needed)
+scripts/helper/test*.csv
+scripts/helper/test*.py
+scripts/helper/README_JIRA.md
+scripts/helper/naming-report.json
+scripts/helper/prd-jira-workflow-extension.json
+scripts/helper/prd-jira-workflow-extension.md
+scripts/helper/src/helper_cli/analytics_db.py
+scripts/helper/src/helper_cli/cache_manager.py
+scripts/helper/src/helper_cli/checkers/
+scripts/helper/src/helper_cli/config/
+scripts/helper/src/helper_cli/domain_checker*.py
+scripts/helper/src/helper_cli/models/
+scripts/helper/src/helper_cli/name_*.py
+scripts/helper/src/helper_cli/naming_analytics.py
+scripts/helper/src/helper_cli/robust_checker.py
+scripts/helper/src/helper_cli/services/
+scripts/helper/src/helper_cli/social_checker.py
+scripts/helper/src/helper_cli/utils/
+
+# Tmux/bin scripts
+tmux/bin/Sencha/.bkp/
+tmux/bin/Sencha/Cmd/repo/
+
+# Documentation and project files (temporary)
+AGENT.md
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+agents.json
+opencode.json
+prd.json
+prd.md
+docker-nvim.sh
+nvim/upgrade-to-0.11.4.sh
+
+# Git configs
+gitconfig/github
+gitconfig/github.pub
+gitconfig/.git-template/hooks/.git-hooks-analytics*.json
+
+# Claude specific directories
+claude/
+
+# Bin directory (seems to be new utilities)
+bin/
