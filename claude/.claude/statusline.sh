@@ -126,6 +126,12 @@ if [ -n "$current_dir" ]; then
             combined_section+=" ${GIT_UNTRACKED}?${untracked}${RESET}"
         fi
         
+        # Get staged files count (+) - yellow like P10k
+        staged=$(git -C "$current_dir" diff --cached --name-only 2>/dev/null | wc -l)
+        if [ "$staged" -gt 0 ]; then
+            combined_section+=" ${GIT_MODIFIED}+${staged}${RESET}"
+        fi
+        
         status_components+=("$combined_section")
     else
         # No git repo - just add filepath

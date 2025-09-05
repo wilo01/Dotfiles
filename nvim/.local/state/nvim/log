@@ -202,3 +202,8 @@ stack traceback:
 	...al/share/nvim/runtime/lua/vim/treesitter/highlighter.lua:411: in function <...al/share/nvim/runtime/lua/vim/treesitter/highlighter.lua:405>
 ERR 2025-08-29T01:40:14.140 ui.1737393 tui_stop:615: TUI already stopped (race?)
 ERR 2025-08-29T01:40:14.223 ui.1421668 tui_stop:615: TUI already stopped (race?)
+ERR 2025-09-01T09:49:37.404 ui.2902772 tui_stop:641: TUI already stopped (race?)
+ERR 2025-09-03T12:52:25.154 ui.1342721 tui_stop:641: TUI already stopped (race?)
+ERR 2025-09-03T12:52:25.493 ui.1311386 tui_stop:641: TUI already stopped (race?)
+ERR 2025-09-05T08:23:16.781 ui.779884  tui_stop:641: TUI already stopped (race?)
+ERR 2025-09-05T08:23:16.873 ui.641805  tui_stop:641: TUI already stopped (race?)
