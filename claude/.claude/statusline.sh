@@ -127,7 +127,7 @@ if [ -n "$current_dir" ]; then
         fi
 
         # Get untracked files count (?) - green like P10k (color 76)
-        untracked=$(git -C "$current_dir" ls-files --others --exclude-standard 2>/dev/null | wc -l)
+        untracked=$(git -C "$current_dir" status --porcelain 2>/dev/null | grep '^??' | wc -l)
         if [ "$untracked" -gt 0 ]; then
             combined_section+=" ${GIT_UNTRACKED}?${untracked}${RESET}"
         fi
