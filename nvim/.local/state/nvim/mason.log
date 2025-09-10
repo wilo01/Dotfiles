@@ -28419,3 +28419,666 @@ cache_loader_lib: module lspconfig.server_configurations.omnisharp not found
 [ERROR Fri 29 Aug 2025 02:46:34 PM IST] ...al/share/nvim/lazy/mason.nvim/lua/mason-core/process.lua:226: Failed to spawn process. cmd="composer", err="ENOENT: no such file or directory"
 [ERROR Fri 29 Aug 2025 02:46:34 PM IST] ...al/share/nvim/lazy/mason.nvim/lua/mason-core/process.lua:226: Failed to spawn process. cmd="php", err="ENOENT: no such file or directory"
 [ERROR Fri 29 Aug 2025 02:46:34 PM IST] ...al/share/nvim/lazy/mason.nvim/lua/mason-core/process.lua:226: Failed to spawn process. cmd="julia", err="ENOENT: no such file or directory"
+[ERROR Wed 10 Sep 2025 11:07:06 PM IST] ...al/share/nvim/lazy/mason.nvim/lua/mason-core/process.lua:226: Failed to spawn process. cmd="composer", err="ENOENT: no such file or directory"
+[ERROR Wed 10 Sep 2025 11:07:06 PM IST] ...al/share/nvim/lazy/mason.nvim/lua/mason-core/process.lua:226: Failed to spawn process. cmd="php", err="ENOENT: no such file or directory"
+[ERROR Wed 10 Sep 2025 11:07:07 PM IST] ...al/share/nvim/lazy/mason.nvim/lua/mason-core/process.lua:226: Failed to spawn process. cmd="julia", err="ENOENT: no such file or directory"
+[INFO  Wed 10 Sep 2025 11:08:30 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=pyright) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:08:30 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=ruff) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[ERROR Wed 10 Sep 2025 11:08:35 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=ruff) error="Installation was aborted."
+[ERROR Wed 10 Sep 2025 11:08:37 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=pyright) error="Installation was aborted."
+[INFO  Wed 10 Sep 2025 11:08:40 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=pyright) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:08:40 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=ruff) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:08:47 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:86: Installation succeeded for Package(name=pyright)
+[INFO  Wed 10 Sep 2025 11:09:12 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:86: Installation succeeded for Package(name=ruff)
+[INFO  Wed 10 Sep 2025 11:43:28 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=sqlls) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:43:28 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=html-lsp) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:43:28 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=css-lsp) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:43:28 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=marksman) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:43:28 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=lemminx) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:43:28 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=solargraph) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:43:28 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=jdtls) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:43:28 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=tailwindcss-language-server) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:43:28 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=prisma-language-server) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:43:28 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=ruby-lsp) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:43:28 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=emmet-ls) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:43:30 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:86: Installation succeeded for Package(name=marksman)
+[INFO  Wed 10 Sep 2025 11:43:36 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:86: Installation succeeded for Package(name=html-lsp)
+[INFO  Wed 10 Sep 2025 11:43:36 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:86: Installation succeeded for Package(name=css-lsp)
+[INFO  Wed 10 Sep 2025 11:43:39 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:86: Installation succeeded for Package(name=lemminx)
+[ERROR Wed 10 Sep 2025 11:43:40 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=prisma-language-server) error="Installation was aborted."
+[ERROR Wed 10 Sep 2025 11:43:40 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=ruby-lsp) error="Installation was aborted."
+[ERROR Wed 10 Sep 2025 11:43:40 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=emmet-ls) error="Installation was aborted."
+[ERROR Wed 10 Sep 2025 11:43:40 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=jdtls) error="Installation was aborted."
+[ERROR Wed 10 Sep 2025 11:43:40 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=tailwindcss-language-server) error="Installation was aborted."
+[ERROR Wed 10 Sep 2025 11:43:40 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=solargraph) error="Installation was aborted."
+[ERROR Wed 10 Sep 2025 11:43:40 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=sqlls) error="Installation was aborted."
+[INFO  Wed 10 Sep 2025 11:43:43 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=sqlls) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:43:43 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=solargraph) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:43:43 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=jdtls) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:43:43 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=tailwindcss-language-server) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:43:43 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=prisma-language-server) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:43:43 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=ruby-lsp) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:43:43 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=emmet-ls) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:43:46 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:86: Installation succeeded for Package(name=tailwindcss-language-server)
+[ERROR Wed 10 Sep 2025 11:43:49 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=solargraph) error=spawn: gem failed with exit code 1 and signal 0. ERROR:  Error installing solargraph:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/solargraph/gems/prism-1.4.0/ext/prism
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/solargraph/gems/prism-1.4.0 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/solargraph/extensions/x86_64-linux/3.3.0/prism-1.4.0/gem_make.out
+
+[ERROR Wed 10 Sep 2025 11:43:53 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=ruby-lsp) error=spawn: gem failed with exit code 1 and signal 0. ERROR:  Error installing ruby-lsp:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5/ext/rbs_extension
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/extensions/x86_64-linux/3.3.0/rbs-3.9.5/gem_make.out
+ERROR:  Error installing ruby-lsp-rails:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5/ext/rbs_extension
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/extensions/x86_64-linux/3.3.0/rbs-3.9.5/gem_make.out
+
+[INFO  Wed 10 Sep 2025 11:43:55 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:86: Installation succeeded for Package(name=prisma-language-server)
+[INFO  Wed 10 Sep 2025 11:43:59 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:86: Installation succeeded for Package(name=emmet-ls)
+[INFO  Wed 10 Sep 2025 11:44:14 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:86: Installation succeeded for Package(name=sqlls)
+[INFO  Wed 10 Sep 2025 11:44:22 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:86: Installation succeeded for Package(name=jdtls)
+[INFO  Wed 10 Sep 2025 11:45:38 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=solargraph) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:45:38 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=ruby-lsp) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[ERROR Wed 10 Sep 2025 11:45:41 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=ruby-lsp) error=spawn: gem failed with exit code 1 and signal 0. ERROR:  Error installing ruby-lsp:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5/ext/rbs_extension
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/extensions/x86_64-linux/3.3.0/rbs-3.9.5/gem_make.out
+ERROR:  Error installing ruby-lsp-rails:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5/ext/rbs_extension
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/extensions/x86_64-linux/3.3.0/rbs-3.9.5/gem_make.out
+
+[ERROR Wed 10 Sep 2025 11:45:42 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=solargraph) error=spawn: gem failed with exit code 1 and signal 0. ERROR:  Error installing solargraph:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/solargraph/gems/prism-1.4.0/ext/prism
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/solargraph/gems/prism-1.4.0 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/solargraph/extensions/x86_64-linux/3.3.0/prism-1.4.0/gem_make.out
+
+[INFO  Wed 10 Sep 2025 11:53:32 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=solargraph) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:53:32 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=ruby-lsp) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[ERROR Wed 10 Sep 2025 11:53:35 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=ruby-lsp) error=spawn: gem failed with exit code 1 and signal 0. ERROR:  Error installing ruby-lsp:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5/ext/rbs_extension
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/extensions/x86_64-linux/3.3.0/rbs-3.9.5/gem_make.out
+ERROR:  Error installing ruby-lsp-rails:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5/ext/rbs_extension
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/extensions/x86_64-linux/3.3.0/rbs-3.9.5/gem_make.out
+
+[ERROR Wed 10 Sep 2025 11:53:36 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=solargraph) error=spawn: gem failed with exit code 1 and signal 0. ERROR:  Error installing solargraph:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/solargraph/gems/prism-1.4.0/ext/prism
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/solargraph/gems/prism-1.4.0 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/solargraph/extensions/x86_64-linux/3.3.0/prism-1.4.0/gem_make.out
+
+[INFO  Wed 10 Sep 2025 11:54:07 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=solargraph) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:54:07 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=ruby-lsp) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[ERROR Wed 10 Sep 2025 11:54:10 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=ruby-lsp) error=spawn: gem failed with exit code 1 and signal 0. ERROR:  Error installing ruby-lsp:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5/ext/rbs_extension
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/extensions/x86_64-linux/3.3.0/rbs-3.9.5/gem_make.out
+ERROR:  Error installing ruby-lsp-rails:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5/ext/rbs_extension
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/extensions/x86_64-linux/3.3.0/rbs-3.9.5/gem_make.out
+
+[ERROR Wed 10 Sep 2025 11:54:10 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=solargraph) error=spawn: gem failed with exit code 1 and signal 0. ERROR:  Error installing solargraph:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/solargraph/gems/prism-1.4.0/ext/prism
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/solargraph/gems/prism-1.4.0 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/solargraph/extensions/x86_64-linux/3.3.0/prism-1.4.0/gem_make.out
+
+[INFO  Wed 10 Sep 2025 11:55:02 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=solargraph) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:55:02 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=ruby-lsp) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[ERROR Wed 10 Sep 2025 11:55:05 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=ruby-lsp) error=spawn: gem failed with exit code 1 and signal 0. ERROR:  Error installing ruby-lsp:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5/ext/rbs_extension
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/extensions/x86_64-linux/3.3.0/rbs-3.9.5/gem_make.out
+ERROR:  Error installing ruby-lsp-rails:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5/ext/rbs_extension
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/extensions/x86_64-linux/3.3.0/rbs-3.9.5/gem_make.out
+
+[ERROR Wed 10 Sep 2025 11:55:05 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=solargraph) error=spawn: gem failed with exit code 1 and signal 0. ERROR:  Error installing solargraph:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/solargraph/gems/prism-1.4.0/ext/prism
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/solargraph/gems/prism-1.4.0 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/solargraph/extensions/x86_64-linux/3.3.0/prism-1.4.0/gem_make.out
+
+[INFO  Wed 10 Sep 2025 11:55:54 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=solargraph) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:55:54 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=ruby-lsp) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[ERROR Wed 10 Sep 2025 11:55:57 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=ruby-lsp) error=spawn: gem failed with exit code 1 and signal 0. ERROR:  Error installing ruby-lsp:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5/ext/rbs_extension
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/extensions/x86_64-linux/3.3.0/rbs-3.9.5/gem_make.out
+ERROR:  Error installing ruby-lsp-rails:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5/ext/rbs_extension
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/extensions/x86_64-linux/3.3.0/rbs-3.9.5/gem_make.out
+
+[ERROR Wed 10 Sep 2025 11:55:58 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=solargraph) error=spawn: gem failed with exit code 1 and signal 0. ERROR:  Error installing solargraph:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/solargraph/gems/prism-1.4.0/ext/prism
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/solargraph/gems/prism-1.4.0 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/solargraph/extensions/x86_64-linux/3.3.0/prism-1.4.0/gem_make.out
+
+[INFO  Wed 10 Sep 2025 11:56:28 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=solargraph) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:56:28 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=ruby-lsp) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[ERROR Wed 10 Sep 2025 11:56:30 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=ruby-lsp) error=spawn: gem failed with exit code 1 and signal 0. ERROR:  Error installing ruby-lsp:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5/ext/rbs_extension
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/extensions/x86_64-linux/3.3.0/rbs-3.9.5/gem_make.out
+ERROR:  Error installing ruby-lsp-rails:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5/ext/rbs_extension
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/extensions/x86_64-linux/3.3.0/rbs-3.9.5/gem_make.out
+
+[ERROR Wed 10 Sep 2025 11:56:32 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=solargraph) error=spawn: gem failed with exit code 1 and signal 0. ERROR:  Error installing solargraph:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/solargraph/gems/prism-1.4.0/ext/prism
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/solargraph/gems/prism-1.4.0 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/solargraph/extensions/x86_64-linux/3.3.0/prism-1.4.0/gem_make.out
+
+[INFO  Wed 10 Sep 2025 11:57:32 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=solargraph) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:57:32 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=ruby-lsp) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[ERROR Wed 10 Sep 2025 11:57:35 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=ruby-lsp) error=spawn: gem failed with exit code 1 and signal 0. ERROR:  Error installing ruby-lsp:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5/ext/rbs_extension
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/extensions/x86_64-linux/3.3.0/rbs-3.9.5/gem_make.out
+ERROR:  Error installing ruby-lsp-rails:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5/ext/rbs_extension
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/extensions/x86_64-linux/3.3.0/rbs-3.9.5/gem_make.out
+
+[ERROR Wed 10 Sep 2025 11:57:36 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=solargraph) error=spawn: gem failed with exit code 1 and signal 0. ERROR:  Error installing solargraph:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/solargraph/gems/prism-1.4.0/ext/prism
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/solargraph/gems/prism-1.4.0 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/solargraph/extensions/x86_64-linux/3.3.0/prism-1.4.0/gem_make.out
+
+[INFO  Wed 10 Sep 2025 11:59:38 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=solargraph) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:59:38 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=ruby-lsp) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[ERROR Wed 10 Sep 2025 11:59:40 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=ruby-lsp) error=spawn: gem failed with exit code 1 and signal 0. ERROR:  Error installing ruby-lsp:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5/ext/rbs_extension
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/extensions/x86_64-linux/3.3.0/rbs-3.9.5/gem_make.out
+ERROR:  Error installing ruby-lsp-rails:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5/ext/rbs_extension
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/extensions/x86_64-linux/3.3.0/rbs-3.9.5/gem_make.out
+
+[ERROR Wed 10 Sep 2025 11:59:41 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=solargraph) error=spawn: gem failed with exit code 1 and signal 0. ERROR:  Error installing solargraph:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/solargraph/gems/prism-1.4.0/ext/prism
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/solargraph/gems/prism-1.4.0 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/solargraph/extensions/x86_64-linux/3.3.0/prism-1.4.0/gem_make.out
+
+[INFO  Wed 10 Sep 2025 11:59:47 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=solargraph) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[INFO  Wed 10 Sep 2025 11:59:47 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:40: Executing installer for Package(name=ruby-lsp) {
+  debug = false,
+  force = false,
+  strict = false
+}
+[ERROR Wed 10 Sep 2025 11:59:50 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=ruby-lsp) error=spawn: gem failed with exit code 1 and signal 0. ERROR:  Error installing ruby-lsp:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5/ext/rbs_extension
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/extensions/x86_64-linux/3.3.0/rbs-3.9.5/gem_make.out
+ERROR:  Error installing ruby-lsp-rails:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5/ext/rbs_extension
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/gems/rbs-3.9.5 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/ruby-lsp/extensions/x86_64-linux/3.3.0/rbs-3.9.5/gem_make.out
+
+[ERROR Wed 10 Sep 2025 11:59:51 PM IST] ...zy/mason.nvim/lua/mason-core/installer/InstallRunner.lua:93: Installation failed for Package(name=solargraph) error=spawn: gem failed with exit code 1 and signal 0. ERROR:  Error installing solargraph:
+	ERROR: Failed to build gem native extension.
+
+    current directory: /home/dariuszw/.local/share/nvim/mason/staging/solargraph/gems/prism-1.4.0/ext/prism
+/usr/bin/ruby -I/usr/share/rubygems extconf.rb
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h
+
+You might have to install separate package for the ruby development
+environment, ruby-dev or ruby-devel for example.
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/dariuszw/.local/share/nvim/mason/staging/solargraph/gems/prism-1.4.0 for inspection.
+Results logged to /home/dariuszw/.local/share/nvim/mason/staging/solargraph/extensions/x86_64-linux/3.3.0/prism-1.4.0/gem_make.out
+
