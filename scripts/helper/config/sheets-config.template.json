@@ -1,0 +1,71 @@
+{
+   "sheet_id": "YOUR_GOOGLE_SHEET_ID_HERE",
+   "credentials_path": "~/.config/helper-cli/google-credentials.json",
+   "sync_settings": {
+      "interval_seconds": 60,
+      "conflict_resolution": "local_wins",
+      "offline_mode": true,
+      "max_retries": 3,
+      "retry_delay_seconds": 5
+   },
+   "jira_integration": {
+      "enabled": true,
+      "auto_populate": true,
+      "default_duration": "1h",
+      "fetch_on_startup": true,
+      "activity_types": [
+         "ticket_work",
+         "code_review",
+         "meeting",
+         "testing",
+         "documentation"
+      ]
+   },
+   "ui_settings": {
+      "theme": "default",
+      "show_weekends": true,
+      "highlight_today": true,
+      "date_format": "%B %d, %Y",
+      "time_format": "%H:%M",
+      "truncate_length": 50
+   },
+   "calendar_settings": {
+      "week_starts_on": "monday",
+      "working_days": [
+         "monday",
+         "tuesday",
+         "wednesday",
+         "thursday",
+         "friday"
+      ],
+      "default_work_hours": {
+         "start": "09:00",
+         "end": "17:00"
+      }
+   },
+   "sheets_structure": {
+      "sheet_name_format": "%B %Y",
+      "headers": [
+         "Week #",
+         "MONDAY",
+         "TUESDAY",
+         "WEDNESDAY",
+         "THURSDAY",
+         "FRIDAY",
+         "SATURDAY",
+         "SUNDAY"
+      ],
+      "cell_format": "{ticket} ({duration}) - {description}"
+   },
+   "cache_settings": {
+      "database_path": "~/.config/helper-cli/sheets_sync.db",
+      "cache_expiry_hours": 24,
+      "max_cache_size_mb": 50
+   },
+   "logging": {
+      "level": "INFO",
+      "file": "~/.config/helper-cli/logs/sheets-tui.log",
+      "max_size_mb": 10,
+      "backup_count": 3
+   }
+}

@@ -1,48 +1,50 @@
 [user]
-	name = Dariusz Wilk
-	email = dariuszwilk@acresecurity.com
+   name = Dariusz Wilk
+   email = dariuszwilk@acresecurity.com
    signingkey = 4C4330CC1E4BA6DA
 [commit]
    gpgSign = true
 [branch]
    sort = -committerdate
+[pull]
+   rebase = false
 [push]
    autoSetupRemote = true
 [core]
-	editor = nvim
-	hooksPath = /home/dariuszw/.git-template/hooks
-	pager = delta
-	excludesfile = /home/dariuszw/gitconfig/gitignore/.gitignore
+   editor = nvim
+   hooksPath = /home/dariuszw/.git-template/hooks
+   pager = delta
+   excludesfile = /home/dariuszw/gitconfig/gitignore/.gitignore
 [safe]
-	directory = /home/dariuszw/.local/share/nvim/site/pack/packer/start/packer.nvim
-	directory = /home/dariuszw/Dev/branch-opener/branches/tds-suite/
+   directory = /home/dariuszw/.local/share/nvim/site/pack/packer/start/packer.nvim
+   directory = /home/dariuszw/Dev/branch-opener/branches/tds-suite/
 [maintenance]
-	repo =/home/dariuszw/Dev/branch-opener/branches/tds-suite/
+   repo =/home/dariuszw/Dev/branch-opener/branches/tds-suite/
 [init]
-	templatedir = /home/dariuszw/.Dotfiles/gitconfig/.git-template
+   templatedir = /home/dariuszw/.Dotfiles/gitconfig/.git-template
 [git-hooks]
    append-branch-name = true
    commit-on-master = false
 [alias]
-	stauts = status
+   stauts = status
 [interactive]
-    diffFilter = delta --color-only
+   diffFilter = delta --color-only
 [delta]
-    navigate = true
-    dark = true
-    line-numbers = true
-    syntax-theme = None
-    side-by-side = false
+   navigate = true
+   dark = true
+   line-numbers = true
+   syntax-theme = None
+   side-by-side = false
 [delta "features"]
-    line-numbers = true
-    side-by-side = false
+   line-numbers = true
+   side-by-side = false
 [delta "colors"]
-    plus-line = "rgb:87ceeb"
-    minus-line = "rgb:dc143c"
-    plus-emph = "rgb:00ff7f"
-    minus-emph = "rgb:ff4500"
-    syntax = "rgb:ffffff"
-    line-numbers = "rgb:737aa2"
-    commit = "rgb:ffb86c"
-    file-meta = "rgb:565f89"
-    hunk-header = "rgb:bb9af7"
+   plus-line = "rgb:87ceeb"
+   minus-line = "rgb:dc143c"
+   plus-emph = "rgb:00ff7f"
+   minus-emph = "rgb:ff4500"
+   syntax = "rgb:ffffff"
+   line-numbers = "rgb:737aa2"
+   commit = "rgb:ffb86c"
+   file-meta = "rgb:565f89"
+   hunk-header = "rgb:bb9af7"
