@@ -129,6 +129,52 @@ local function get_server_configs(capabilities)
          root_markers = { ".git" },
          capabilities = capabilities,
       },
+      pyright = {
+         root_markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile", ".git" },
+         settings = {
+            python = {
+               analysis = {
+                  autoImportCompletions = true,
+                  typeCheckingMode = "standard",
+                  diagnosticMode = "workspace",
+                  useLibraryCodeForTypes = true,
+                  autoSearchPaths = true,
+                  diagnosticSeverityOverrides = {
+                     reportMissingImports = "error",
+                     reportUndefinedVariable = "error",
+                     reportGeneralTypeIssues = "warning",
+                     reportOptionalMemberAccess = "warning",
+                     reportOptionalSubscript = "warning",
+                     reportPrivateUsage = "warning",
+                     reportUnusedImport = "information",
+                     reportUnusedVariable = "information",
+                  }
+               }
+            }
+         },
+         capabilities = capabilities,
+      },
+      ruff = {
+         root_markers = { "pyproject.toml", "ruff.toml", ".ruff.toml", "setup.py", "setup.cfg", "requirements.txt", ".git" },
+         settings = {
+            init_options = {
+               settings = {
+                  args = {},
+                  lint = {
+                     enable = true,
+                     run = "onType",
+                  },
+                  format = {
+                     enable = true,
+                  },
+                  organizeImports = {
+                     enable = true,
+                  },
+               }
+            }
+         },
+         capabilities = capabilities,
+      },
    }
 end
 
@@ -139,13 +185,16 @@ local function setup_format_on_save()
          vim.lsp.buf.format({
             async = false,
             filter = function(client)
-               -- Prefer ESLint for JS/TS files, others for everything else
                local filetype = vim.bo.filetype
                if filetype == "javascript" or filetype == "typescript" or
                    filetype == "javascriptreact" or filetype == "typescriptreact" then
                   return client.name == "eslint"
                end
-               return client.name ~= "eslint"
+
+               if filetype == "python" then
+                  return client.name == "ruff"
+               end
+               return client.name ~= "eslint" and client.name ~= "ruff-lsp"
             end
          })
       end,
@@ -163,7 +212,7 @@ return {
       config = function()
          require("mason-lspconfig").setup({
             ensure_installed = {
-               "ts_ls", "eslint", "lua_ls", "bashls", "gopls", "dockerls", "yamlls", "zls"
+               "ts_ls", "eslint", "lua_ls", "bashls", "gopls", "dockerls", "yamlls", "zls", "pyright", "ruff"
             },
             automatic_installation = true,
          })
@@ -197,7 +246,10 @@ return {
             vim.lsp.config[server] = config
          end
 
-         local servers = { 'gopls', 'lua_ls', 'eslint', 'ts_ls', 'dockerls', 'yamlls', 'zls', 'bashls' }
+         local servers = {
+            'gopls', 'lua_ls', 'eslint', 'ts_ls', 'dockerls',
+            'yamlls', 'zls', 'bashls', 'pyright', 'ruff'
+         }
          local ok_enable, err = pcall(vim.lsp.enable, servers)
          if not ok_enable then
             vim.notify("Failed to enable LSP servers: " .. tostring(err), vim.log.levels.WARN)
