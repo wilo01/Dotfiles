@@ -1,0 +1,3 @@
+[START][2025-09-11 00:39:43] LSP logging initiated
+[ERROR][2025-09-11 00:39:43] ...p/_transport.lua:36	"rpc"	"ruff"	"stderr"	"2025-09-11 00:39:43.784575366  INFO No workspace options found for file:///home/dariuszw/.Dotfiles, using default options\n"
+[ERROR][2025-09-11 00:39:43] ...p/_transport.lua:36	"rpc"	"ruff"	"stderr"	"2025-09-11 00:39:43.836784073  INFO Registering workspace: /home/dariuszw/.Dotfiles\n2025-09-11 00:39:43.837049240  WARN LSP client does not support dynamic capability registration - automatic configuration reloading will not be available.\n"
