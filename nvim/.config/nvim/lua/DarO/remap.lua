@@ -237,8 +237,19 @@ vim.keymap.set({ "n", "v" }, "<leader>f", function()
    vim.cmd("write")
 end, { desc = "Format and save with LSP" })
 vim.keymap.set("n", "<leader>d", function()
+   local diagnostics = vim.diagnostic.get(0, { lnum = vim.fn.line('.') - 1 })
+
    vim.diagnostic.open_float(nil, { focusable = false, source = "if_many" })
-end, { desc = "Show diagnostic errors and warnings in a floating window" })
+
+   if diagnostics and #diagnostics > 0 then
+      local message = diagnostics[1].message
+      vim.fn.setreg('+', message)
+      vim.fn.setreg('"', message)
+      vim.notify(message, vim.log.levels.INFO)
+   else
+      vim.notify('No diagnostic found at cursor', vim.log.levels.WARN)
+   end
+end, { desc = "Show diagnostic in floating window and copy message to clipboard" })
 
 -- Quickfix and Location List Navigation
 vim.keymap.set("n", "<C-j>", "<cmd>cnext<CR>zz", { desc = "Next quickfix item" })
