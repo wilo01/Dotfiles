@@ -245,7 +245,7 @@ function git() {
     fi
     command git "$@"
 }
-# Ubuntu Setup
+# Linux Setup
 alias sshkey="echo cat ~/.ssh/id_ed25519.pub ; cat ~/.ssh/id_ed25519.pub"
 alias ssh_key="echo cat ~/.ssh/id_ed25519.pub ; cat ~/.ssh/id_ed25519.pub"
 alias open="echo xdg-open; xdg-open"
@@ -259,6 +259,7 @@ alias clauded='claude --dangerously-skip-permissions'
 alias claude-sonnet='claude --model claude-sonnet-4-20250514'
 alias claude-opus='claude --model claude-opus-4-1-20250805'
 alias filepath='realpath'
+alias rm="sudo rm"
 # alias xsave="echo '$(xclip -selection clipboard -o)' >> ~/.clipboard_history ; cat ~/.clipboard_history"
 
 # lazygit and lazydocker aliases
