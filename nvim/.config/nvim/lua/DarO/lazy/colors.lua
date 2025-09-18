@@ -11,6 +11,11 @@ return {
             sidebars = "dark",
             floats = "dark",
          },
+         on_colors = function(colors)
+         end,
+         on_highlights = function(hl, colors)
+            hl.GitSignsCurrentLineBlame = { fg = "#7dcfff", italic = true }
+         end,
       })
       vim.cmd.colorscheme('tokyonight')
    end

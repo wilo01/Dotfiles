@@ -2338,3 +2338,23 @@
 [WARN][2025-09-13 22:24:04] ...lsp/handlers.lua:564	"Semantic Tokens Done took 217ms"
 [WARN][2025-09-13 22:24:04] ...lsp/handlers.lua:564	"Diagnostics Done"
 [WARN][2025-09-13 22:24:04] ...lsp/handlers.lua:564	"Diagnostics Done took 430ms"
+[START][2025-09-18 09:48:22] LSP logging initiated
+[WARN][2025-09-18 09:48:22] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-09-18 09:50:45] LSP logging initiated
+[WARN][2025-09-18 09:50:45] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-09-18 09:51:11] LSP logging initiated
+[WARN][2025-09-18 09:51:11] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-09-18 09:51:58] LSP logging initiated
+[WARN][2025-09-18 09:51:58] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-09-18 09:53:32] LSP logging initiated
+[WARN][2025-09-18 09:53:32] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-09-18 10:42:06] LSP logging initiated
+[WARN][2025-09-18 10:42:06] ...lsp/handlers.lua:564	"09:42:06.151 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-09-18 10:44:56] LSP logging initiated
+[WARN][2025-09-18 10:44:56] ...lsp/handlers.lua:564	"09:44:56.421 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-09-18 11:05:09] LSP logging initiated
+[WARN][2025-09-18 11:05:09] ...lsp/handlers.lua:564	"10:05:09.595 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-09-18 11:46:23] LSP logging initiated
+[WARN][2025-09-18 11:46:23] ...lsp/handlers.lua:564	"10:46:23.973 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-09-18 13:37:02] LSP logging initiated
+[WARN][2025-09-18 13:37:02] ...lsp/handlers.lua:564	"12:37:02.686 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
