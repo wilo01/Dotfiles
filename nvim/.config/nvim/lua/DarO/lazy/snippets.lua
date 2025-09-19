@@ -79,6 +79,74 @@ return {
             }
          end
 
+         local code_languages = {
+            javascript = "javascript",
+            js = "javascript",
+            typescript = "typescript",
+            ts = "typescript",
+            html = "html",
+            css = "css",
+            scss = "scss",
+            sass = "sass",
+            jsx = "jsx",
+            tsx = "tsx",
+            python = "python",
+            py = "python",
+            java = "java",
+            go = "go",
+            rust = "rust",
+            rs = "rust",
+            c = "c",
+            cpp = "cpp",
+            csharp = "csharp",
+            cs = "csharp",
+            ruby = "ruby",
+            rb = "ruby",
+            php = "php",
+            kotlin = "kotlin",
+            swift = "swift",
+            scala = "scala",
+            sql = "sql",
+            plsql = "plsql",
+            mysql = "mysql",
+            postgresql = "postgresql",
+            postgres = "postgresql",
+            bash = "bash",
+            sh = "bash",
+            zsh = "zsh",
+            powershell = "powershell",
+            ps1 = "powershell",
+            lua = "lua",
+            vim = "vim",
+            perl = "perl",
+            json = "json",
+            yml = "yaml",
+            xml = "xml",
+            toml = "toml",
+            ini = "ini",
+            env = "env",
+            dockerfile = "dockerfile",
+            docker = "dockerfile",
+            nginx = "nginx",
+            apache = "apache",
+            terraform = "terraform",
+            tf = "terraform",
+            markdown = "markdown",
+            md = "markdown",
+            latex = "latex",
+            tex = "latex",
+            apex = "apex",
+            oracle = "sql",
+            r = "r",
+            matlab = "matlab",
+            julia = "julia",
+            haskell = "haskell",
+            elixir = "elixir",
+            erlang = "erlang",
+            clojure = "clojure",
+            dart = "dart",
+         }
+
          local function setup_snippets()
             snip("all", "todo", "[ ] TODO: $0")
             snip("all", "todo-", "- [ ] TODO: $0")
@@ -397,6 +465,10 @@ return {
                snip(ft, "important", "> [!IMPORTANT]\n> ${2:content}$0")
                snip(ft, "tip", "> [!TIP]\n> ${2:content}$0")
                snip(ft, "caution", "> [!CAUTION]\n> ${2:content}$0")
+
+               for trigger, language in pairs(code_languages) do
+                  snip(ft, trigger, "```" .. language .. "\n${1}\n```$0")
+               end
             end
 
             local css_filetypes = { "css", "scss" }
