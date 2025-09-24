@@ -2358,3 +2358,416 @@
 [WARN][2025-09-18 11:46:23] ...lsp/handlers.lua:564	"10:46:23.973 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
 [START][2025-09-18 13:37:02] LSP logging initiated
 [WARN][2025-09-18 13:37:02] ...lsp/handlers.lua:564	"12:37:02.686 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-09-19 12:46:55] LSP logging initiated
+[WARN][2025-09-19 12:46:55] ...lsp/handlers.lua:564	"11:46:55.573 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-19 12:46:56] ...lsp/handlers.lua:564	"11:46:56.084 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[WARN][2025-09-19 12:47:34] ...lsp/handlers.lua:564	"11:47:34.766 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/post-commit line 5: non-constant source not supported"
+[WARN][2025-09-19 12:47:37] ...lsp/handlers.lua:564	"11:47:37.258 WARNING ⛔️ Shfmt: disabling formatting as no executable was found at path 'shfmt'"
+[WARN][2025-09-19 12:47:39] ...lsp/handlers.lua:564	"11:47:39.636 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/post-commit line 5: non-constant source not supported"
+[WARN][2025-09-19 12:47:40] ...lsp/handlers.lua:564	"11:47:40.864 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/post-commit line 5: non-constant source not supported"
+[WARN][2025-09-19 12:47:40] ...lsp/handlers.lua:564	"11:47:40.870 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/post-commit line 5: non-constant source not supported"
+[WARN][2025-09-19 12:47:43] ...lsp/handlers.lua:564	"11:47:43.754 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/post-commit line 5: non-constant source not supported"
+[START][2025-09-22 21:39:04] LSP logging initiated
+[WARN][2025-09-22 21:39:04] ...lsp/handlers.lua:564	"20:39:04.693 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/post-commit line 5: non-constant source not supported"
+[WARN][2025-09-22 21:39:05] ...lsp/handlers.lua:564	"20:39:05.204 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[WARN][2025-09-22 21:39:07] ...lsp/handlers.lua:564	"20:39:07.073 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/post-commit line 5: non-constant source not supported"
+[WARN][2025-09-22 21:39:08] ...lsp/handlers.lua:564	"20:39:08.264 WARNING ⛔️ Shfmt: disabling formatting as no executable was found at path 'shfmt'"
+[WARN][2025-09-22 21:39:13] ...lsp/handlers.lua:564	"20:39:13.424 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/post-commit line 5: non-constant source not supported"
+[START][2025-09-22 21:40:05] LSP logging initiated
+[WARN][2025-09-22 21:40:05] ...lsp/handlers.lua:564	"20:40:05.864 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-09-22 22:11:22] LSP logging initiated
+[WARN][2025-09-22 22:11:22] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-09-22 22:26:14] LSP logging initiated
+[WARN][2025-09-22 22:26:14] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-22 22:26:15] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-09-22 22:27:32] LSP logging initiated
+[WARN][2025-09-22 22:27:32] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-22 22:27:32] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-22 22:27:32] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-22 22:28:43] LSP logging initiated
+[WARN][2025-09-22 22:28:43] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-22 22:28:44] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-09-22 22:29:38] LSP logging initiated
+[WARN][2025-09-22 22:29:38] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-22 22:29:38] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-09-22 22:30:00] LSP logging initiated
+[WARN][2025-09-22 22:30:00] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-22 22:30:00] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-09-22 22:31:00] LSP logging initiated
+[WARN][2025-09-22 22:31:00] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-22 22:31:01] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-09-22 22:43:00] LSP logging initiated
+[WARN][2025-09-22 22:43:00] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-22 22:43:00] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-22 22:45:52] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-22 22:50:07] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-22 22:50:58] LSP logging initiated
+[WARN][2025-09-22 22:50:58] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-22 22:50:58] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-22 22:54:32] LSP logging initiated
+[WARN][2025-09-22 22:54:32] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-22 22:54:32] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-22 22:59:01] LSP logging initiated
+[WARN][2025-09-22 22:59:01] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-22 22:59:01] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-22 23:02:52] LSP logging initiated
+[WARN][2025-09-22 23:02:52] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-22 23:02:52] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-22 23:08:20] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-22 23:14:11] LSP logging initiated
+[WARN][2025-09-22 23:14:11] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-22 23:14:11] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-23 08:09:03] LSP logging initiated
+[WARN][2025-09-23 08:09:03] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-23 08:25:59] LSP logging initiated
+[WARN][2025-09-23 08:25:59] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-23 08:25:59] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-23 08:25:59] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-23 08:26:43] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-23 08:27:15] LSP logging initiated
+[WARN][2025-09-23 08:27:15] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-23 08:27:39] LSP logging initiated
+[WARN][2025-09-23 08:27:39] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-23 08:28:59] LSP logging initiated
+[WARN][2025-09-23 08:28:59] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-23 08:30:31] LSP logging initiated
+[WARN][2025-09-23 08:30:31] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-23 08:43:22] LSP logging initiated
+[WARN][2025-09-23 08:43:22] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-23 08:43:54] LSP logging initiated
+[WARN][2025-09-23 08:43:54] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-23 08:45:28] LSP logging initiated
+[WARN][2025-09-23 08:45:28] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-23 08:45:42] LSP logging initiated
+[WARN][2025-09-23 08:45:42] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-23 08:46:40] LSP logging initiated
+[WARN][2025-09-23 08:46:40] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-23 08:59:39] LSP logging initiated
+[WARN][2025-09-23 08:59:39] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-23 08:59:40] ...lsp/handlers.lua:564	"07:59:40.390 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 08:59:40] ...lsp/handlers.lua:564	"07:59:40.903 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-09-23 08:59:43] LSP logging initiated
+[WARN][2025-09-23 08:59:43] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-23 09:00:03] ...lsp/handlers.lua:564	"08:00:03.672 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:04] ...lsp/handlers.lua:564	"08:00:04.003 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:04] ...lsp/handlers.lua:564	"08:00:04.826 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:06] ...lsp/handlers.lua:564	"08:00:06.262 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:07] ...lsp/handlers.lua:564	"08:00:07.060 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:07] ...lsp/handlers.lua:564	"08:00:07.260 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:07] ...lsp/handlers.lua:564	"08:00:07.813 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:07] ...lsp/handlers.lua:564	"08:00:07.957 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:08] ...lsp/handlers.lua:564	"08:00:08.854 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:09] ...lsp/handlers.lua:564	"08:00:09.013 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:09] ...lsp/handlers.lua:564	"08:00:09.189 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:09] ...lsp/handlers.lua:564	"08:00:09.473 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:09] ...lsp/handlers.lua:564	"08:00:09.721 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:09] ...lsp/handlers.lua:564	"08:00:09.850 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:10] ...lsp/handlers.lua:564	"08:00:10.352 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:10] ...lsp/handlers.lua:564	"08:00:10.455 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:10] ...lsp/handlers.lua:564	"08:00:10.600 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:10] ...lsp/handlers.lua:564	"08:00:10.784 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:10] ...lsp/handlers.lua:564	"08:00:10.924 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:11] ...lsp/handlers.lua:564	"08:00:11.048 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:11] ...lsp/handlers.lua:564	"08:00:11.212 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:11] ...lsp/handlers.lua:564	"08:00:11.371 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:15] ...lsp/handlers.lua:564	"08:00:15.321 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:16] ...lsp/handlers.lua:564	"08:00:16.127 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:16] ...lsp/handlers.lua:564	"08:00:16.227 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:16] ...lsp/handlers.lua:564	"08:00:16.828 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:16] ...lsp/handlers.lua:564	"08:00:16.923 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:17] ...lsp/handlers.lua:564	"08:00:17.308 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:17] ...lsp/handlers.lua:564	"08:00:17.818 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:18] ...lsp/handlers.lua:564	"08:00:18.027 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:18] ...lsp/handlers.lua:564	"08:00:18.100 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:18] ...lsp/handlers.lua:564	"08:00:18.351 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:18] ...lsp/handlers.lua:564	"08:00:18.468 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:19] ...lsp/handlers.lua:564	"08:00:19.589 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:19] ...lsp/handlers.lua:564	"08:00:19.710 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:20] ...lsp/handlers.lua:564	"08:00:20.234 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:20] ...lsp/handlers.lua:564	"08:00:20.364 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:20] ...lsp/handlers.lua:564	"08:00:20.597 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:20] ...lsp/handlers.lua:564	"08:00:20.723 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:21] ...lsp/handlers.lua:564	"08:00:21.055 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:21] ...lsp/handlers.lua:564	"08:00:21.224 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:21] ...lsp/handlers.lua:564	"08:00:21.486 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:22] ...lsp/handlers.lua:564	"08:00:21.805 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:22] ...lsp/handlers.lua:564	"08:00:22.017 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:22] ...lsp/handlers.lua:564	"08:00:22.174 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:22] ...lsp/handlers.lua:564	"08:00:22.471 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:22] ...lsp/handlers.lua:564	"08:00:22.628 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:22] ...lsp/handlers.lua:564	"08:00:22.937 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:23] ...lsp/handlers.lua:564	"08:00:23.824 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:23] ...lsp/handlers.lua:564	"08:00:23.974 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:24] ...lsp/handlers.lua:564	"08:00:24.142 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:24] ...lsp/handlers.lua:564	"08:00:24.265 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:24] ...lsp/handlers.lua:564	"08:00:24.559 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:24] ...lsp/handlers.lua:564	"08:00:24.608 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:24] ...lsp/handlers.lua:564	"08:00:24.764 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:24] ...lsp/handlers.lua:564	"08:00:24.912 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:25] ...lsp/handlers.lua:564	"08:00:25.073 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:25] ...lsp/handlers.lua:564	"08:00:25.217 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:25] ...lsp/handlers.lua:564	"08:00:25.355 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:26] ...lsp/handlers.lua:564	"08:00:26.320 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:26] ...lsp/handlers.lua:564	"08:00:26.336 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:26] ...lsp/handlers.lua:564	"08:00:26.479 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:32] ...lsp/handlers.lua:564	"08:00:32.592 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:32] ...lsp/handlers.lua:564	"08:00:32.621 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:00:32] ...lsp/handlers.lua:564	"08:00:32.763 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[START][2025-09-23 09:01:19] LSP logging initiated
+[WARN][2025-09-23 09:01:19] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-23 09:05:54] LSP logging initiated
+[WARN][2025-09-23 09:05:54] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-23 09:05:54] ...lsp/handlers.lua:564	"08:05:54.721 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-23 09:05:55] ...lsp/handlers.lua:564	"08:05:55.236 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-09-23 09:07:51] LSP logging initiated
+[WARN][2025-09-23 09:07:51] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-23 09:11:26] LSP logging initiated
+[WARN][2025-09-23 09:11:26] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-23 09:12:33] LSP logging initiated
+[WARN][2025-09-23 09:12:33] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-23 09:13:51] LSP logging initiated
+[WARN][2025-09-23 09:13:51] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-23 09:13:51] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-23 09:13:51] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-23 09:18:57] LSP logging initiated
+[WARN][2025-09-23 09:18:57] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-23 09:20:15] LSP logging initiated
+[WARN][2025-09-23 09:20:15] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-23 09:44:31] LSP logging initiated
+[WARN][2025-09-23 09:44:31] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-23 09:44:36] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-23 09:44:36] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-23 09:44:36] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-23 09:44:53] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-23 09:45:01] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-23 09:45:09] LSP logging initiated
+[WARN][2025-09-23 09:45:09] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-23 09:51:12] LSP logging initiated
+[WARN][2025-09-23 09:51:12] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-23 09:51:12] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-23 09:51:12] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-23 10:48:52] LSP logging initiated
+[WARN][2025-09-23 10:48:52] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-23 10:48:53] ...lsp/handlers.lua:564	"09:48:53.594 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-09-23 10:49:00] LSP logging initiated
+[WARN][2025-09-23 10:49:00] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-23 10:49:01] ...lsp/handlers.lua:564	"09:49:01.729 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-09-23 11:06:47] LSP logging initiated
+[WARN][2025-09-23 11:06:47] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-23 11:06:48] ...lsp/handlers.lua:564	"10:06:48.521 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[WARN][2025-09-23 14:39:17] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-23 14:55:56] LSP logging initiated
+[WARN][2025-09-23 14:55:56] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-23 15:00:52] LSP logging initiated
+[WARN][2025-09-23 15:00:52] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-23 15:01:04] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-23 15:25:55] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-23 15:26:09] LSP logging initiated
+[WARN][2025-09-23 15:26:09] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-23 15:38:18] LSP logging initiated
+[WARN][2025-09-23 15:38:18] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-23 18:18:16] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 08:11:40] LSP logging initiated
+[WARN][2025-09-24 08:11:40] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 08:13:09] LSP logging initiated
+[WARN][2025-09-24 08:13:09] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 08:16:56] LSP logging initiated
+[WARN][2025-09-24 08:16:56] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 08:17:40] LSP logging initiated
+[WARN][2025-09-24 08:17:40] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 08:21:08] LSP logging initiated
+[WARN][2025-09-24 08:21:08] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 08:25:53] LSP logging initiated
+[WARN][2025-09-24 08:25:53] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 08:36:59] LSP logging initiated
+[WARN][2025-09-24 08:36:59] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 08:44:58] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 08:46:51] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 08:49:05] LSP logging initiated
+[WARN][2025-09-24 08:49:05] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 08:52:35] LSP logging initiated
+[WARN][2025-09-24 08:52:35] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 08:56:22] LSP logging initiated
+[WARN][2025-09-24 08:56:22] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 09:08:44] LSP logging initiated
+[WARN][2025-09-24 09:08:44] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 09:08:55] LSP logging initiated
+[WARN][2025-09-24 09:08:55] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 09:09:27] LSP logging initiated
+[WARN][2025-09-24 09:09:27] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 09:09:31] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 09:09:52] LSP logging initiated
+[WARN][2025-09-24 09:09:52] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 09:12:23] LSP logging initiated
+[WARN][2025-09-24 09:12:23] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 09:15:59] LSP logging initiated
+[WARN][2025-09-24 09:15:59] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 09:18:24] LSP logging initiated
+[WARN][2025-09-24 09:18:24] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 09:22:37] LSP logging initiated
+[WARN][2025-09-24 09:22:37] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 09:23:06] LSP logging initiated
+[WARN][2025-09-24 09:23:06] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 09:24:16] LSP logging initiated
+[WARN][2025-09-24 09:24:16] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 09:26:32] LSP logging initiated
+[WARN][2025-09-24 09:26:32] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 09:29:06] LSP logging initiated
+[WARN][2025-09-24 09:29:06] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 09:30:43] LSP logging initiated
+[WARN][2025-09-24 09:30:43] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 09:32:12] LSP logging initiated
+[WARN][2025-09-24 09:32:12] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 09:33:05] LSP logging initiated
+[WARN][2025-09-24 09:33:05] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 09:33:09] LSP logging initiated
+[WARN][2025-09-24 09:33:09] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 09:34:08] LSP logging initiated
+[WARN][2025-09-24 09:34:08] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 09:34:16] LSP logging initiated
+[WARN][2025-09-24 09:34:16] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 09:34:55] LSP logging initiated
+[WARN][2025-09-24 09:34:55] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 09:36:04] LSP logging initiated
+[WARN][2025-09-24 09:36:04] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 09:38:24] LSP logging initiated
+[WARN][2025-09-24 09:38:24] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 09:39:01] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 09:41:05] LSP logging initiated
+[WARN][2025-09-24 09:41:05] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 09:45:02] LSP logging initiated
+[WARN][2025-09-24 09:45:02] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 09:47:04] LSP logging initiated
+[WARN][2025-09-24 09:47:04] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 09:56:38] LSP logging initiated
+[WARN][2025-09-24 09:56:38] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 10:05:16] LSP logging initiated
+[WARN][2025-09-24 10:05:16] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 10:05:16] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[WARN][2025-09-24 10:08:13] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 10:17:59] LSP logging initiated
+[WARN][2025-09-24 10:17:59] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 10:18:30] LSP logging initiated
+[WARN][2025-09-24 10:18:30] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 10:41:56] LSP logging initiated
+[WARN][2025-09-24 10:41:56] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 10:42:59] LSP logging initiated
+[WARN][2025-09-24 10:42:59] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 10:50:29] LSP logging initiated
+[WARN][2025-09-24 10:50:29] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 11:12:34] LSP logging initiated
+[WARN][2025-09-24 11:12:34] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 11:12:35] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[WARN][2025-09-24 11:12:36] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 11:12:38] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 11:12:40] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 11:12:46] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 11:12:55] LSP logging initiated
+[WARN][2025-09-24 11:12:55] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 11:12:56] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[WARN][2025-09-24 11:12:57] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 11:12:59] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 11:13:01] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 11:13:02] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 12:03:05] LSP logging initiated
+[WARN][2025-09-24 12:03:05] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 12:05:21] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 12:05:45] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 12:14:42] LSP logging initiated
+[WARN][2025-09-24 12:14:42] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 12:14:50] LSP logging initiated
+[WARN][2025-09-24 12:14:50] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 12:14:50] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 12:15:05] LSP logging initiated
+[WARN][2025-09-24 12:15:05] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 12:15:05] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 12:16:17] LSP logging initiated
+[WARN][2025-09-24 12:16:17] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 12:45:04] LSP logging initiated
+[WARN][2025-09-24 12:45:04] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 12:46:38] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 12:47:28] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 12:47:28] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 12:47:29] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 12:47:36] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 12:47:37] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 12:47:41] LSP logging initiated
+[WARN][2025-09-24 12:47:41] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 12:47:41] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 12:47:43] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 12:47:45] LSP logging initiated
+[WARN][2025-09-24 12:47:45] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 12:49:54] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 15:27:16] LSP logging initiated
+[WARN][2025-09-24 15:27:16] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 15:28:31] LSP logging initiated
+[WARN][2025-09-24 15:28:31] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 15:38:59] LSP logging initiated
+[WARN][2025-09-24 15:38:59] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 15:40:47] LSP logging initiated
+[WARN][2025-09-24 15:40:47] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 22:35:11] LSP logging initiated
+[WARN][2025-09-24 22:35:11] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 22:37:45] LSP logging initiated
+[WARN][2025-09-24 22:37:45] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 22:38:08] LSP logging initiated
+[WARN][2025-09-24 22:38:08] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 22:39:24] LSP logging initiated
+[WARN][2025-09-24 22:39:24] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 22:43:06] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 22:43:06] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 22:43:07] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 22:46:10] LSP logging initiated
+[WARN][2025-09-24 22:46:10] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 22:50:04] LSP logging initiated
+[WARN][2025-09-24 22:50:04] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 22:52:31] LSP logging initiated
+[WARN][2025-09-24 22:52:31] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 22:56:05] LSP logging initiated
+[WARN][2025-09-24 22:56:05] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 23:11:56] LSP logging initiated
+[WARN][2025-09-24 23:11:56] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 23:12:05] LSP logging initiated
+[WARN][2025-09-24 23:12:05] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 23:12:19] LSP logging initiated
+[WARN][2025-09-24 23:12:19] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-24 23:51:08] LSP logging initiated
+[WARN][2025-09-24 23:51:08] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 23:51:09] ...lsp/handlers.lua:564	"22:51:09.362 WARNING ⛔️ Error while parsing file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/hooks-common.sh: syntax error"
+[WARN][2025-09-24 23:51:10] ...lsp/handlers.lua:564	"22:51:09.874 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[WARN][2025-09-24 23:51:10] ...lsp/handlers.lua:564	"22:51:10.075 WARNING ⛔️ Error while parsing file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/hooks-common.sh: syntax error"
+[WARN][2025-09-24 23:51:10] ...lsp/handlers.lua:564	"22:51:10.213 WARNING ⛔️ Error while parsing file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/hooks-common.sh: syntax error"
+[WARN][2025-09-24 23:51:37] ...lsp/handlers.lua:564	"22:51:37.185 WARNING ⛔️ Error while parsing file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/hooks-common.sh: syntax error"
+[WARN][2025-09-24 23:51:37] ...lsp/handlers.lua:564	"22:51:37.209 WARNING ⛔️ Error while parsing file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/hooks-common.sh: syntax error"
+[WARN][2025-09-24 23:51:37] ...lsp/handlers.lua:564	"22:51:37.355 WARNING ⛔️ Error while parsing file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/hooks-common.sh: syntax error"
+[WARN][2025-09-24 23:51:52] ...lsp/handlers.lua:564	"22:51:52.331 WARNING ⛔️ Error while parsing file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/hooks-common.sh: syntax error"
+[WARN][2025-09-24 23:51:52] ...lsp/handlers.lua:564	"22:51:52.357 WARNING ⛔️ Error while parsing file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/hooks-common.sh: syntax error"
+[WARN][2025-09-24 23:51:52] ...lsp/handlers.lua:564	"22:51:52.500 WARNING ⛔️ Error while parsing file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/hooks-common.sh: syntax error"
+[START][2025-09-24 23:52:39] LSP logging initiated
+[WARN][2025-09-24 23:52:39] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 23:52:40] ...lsp/handlers.lua:564	"22:52:40.543 WARNING ⛔️ Error while parsing file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/hooks-common.sh: syntax error"
+[WARN][2025-09-24 23:52:41] ...lsp/handlers.lua:564	"22:52:41.053 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[WARN][2025-09-24 23:52:43] ...lsp/handlers.lua:564	"22:52:43.689 WARNING ⛔️ Error while parsing file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/hooks-common.sh: syntax error"
+[WARN][2025-09-24 23:52:45] ...lsp/handlers.lua:564	"22:52:45.238 WARNING ⛔️ Error while parsing file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/hooks-common.sh: syntax error"
+[WARN][2025-09-24 23:52:45] ...lsp/handlers.lua:564	"22:52:45.247 WARNING ⛔️ Error while parsing file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/hooks-common.sh: syntax error"
+[WARN][2025-09-24 23:52:45] ...lsp/handlers.lua:564	"22:52:45.364 WARNING ⛔️ Error while parsing file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/hooks-common.sh: syntax error"
+[WARN][2025-09-24 23:52:51] ...lsp/handlers.lua:564	"22:52:51.104 WARNING ⛔️ Error while parsing file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/hooks-common.sh: syntax error"
+[WARN][2025-09-24 23:52:54] ...lsp/handlers.lua:564	"22:52:54.105 WARNING ⛔️ Error while parsing file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/hooks-common.sh: syntax error"
+[WARN][2025-09-24 23:52:54] ...lsp/handlers.lua:564	"22:52:54.114 WARNING ⛔️ Error while parsing file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/hooks-common.sh: syntax error"
+[WARN][2025-09-24 23:52:54] ...lsp/handlers.lua:564	"22:52:54.253 WARNING ⛔️ Error while parsing file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/hooks-common.sh: syntax error"
+[WARN][2025-09-24 23:52:56] ...lsp/handlers.lua:564	"22:52:56.426 WARNING ⛔️ Error while parsing file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/hooks-common.sh: syntax error"
+[WARN][2025-09-24 23:52:56] ...lsp/handlers.lua:564	"22:52:56.546 WARNING ⛔️ Error while parsing file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/hooks-common.sh: syntax error"
+[WARN][2025-09-24 23:53:29] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-09-24 23:53:29] ...lsp/handlers.lua:564	"22:53:29.304 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-24 23:53:30] ...lsp/handlers.lua:564	"22:53:30.451 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-24 23:53:30] ...lsp/handlers.lua:564	"22:53:30.658 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-24 23:53:49] ...lsp/handlers.lua:564	"22:53:49.162 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-24 23:53:49] ...lsp/handlers.lua:564	"22:53:49.186 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-24 23:53:49] ...lsp/handlers.lua:564	"22:53:49.408 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-24 23:54:10] ...lsp/handlers.lua:564	"22:54:10.133 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-24 23:54:10] ...lsp/handlers.lua:564	"22:54:10.145 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[WARN][2025-09-24 23:54:10] ...lsp/handlers.lua:564	"22:54:10.263 WARNING ⛔️ file:///home/dariuszw/.Dotfiles/gitconfig/.git-template/hooks/prepare-commit-msg line 5: non-constant source not supported"
+[START][2025-09-24 23:55:40] LSP logging initiated
+[WARN][2025-09-24 23:55:40] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-09-25 00:04:38] LSP logging initiated
+[WARN][2025-09-25 00:04:38] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"

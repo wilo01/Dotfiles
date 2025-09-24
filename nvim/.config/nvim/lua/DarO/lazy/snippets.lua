@@ -276,6 +276,8 @@ return {
                snip(ft, "lbsqlfile",
                   "--changeset ${1:author}:${2:id} runOnChange:true\n--sqlFile path:${3:file.sql} splitStatements:${4:true} stripComments:${5:true} endDelimiter:${6:;}$0")
                snip(ft, "lbformatted", "--liquibase formatted sql\n\n${1:-- changesets}$0")
+               snip(ft, "comment", "--comment: ${1:Add description here}$0")
+               snip(ft, "todo-liqui", "--comment: TODO: ${1:Add description here}$0")
 
                snip(ft, "changelog",
                   "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<databaseChangeLog\n\txmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\"\n\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n\txsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog\n\thttp://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd\">\n\n\t<includeAll path=\"${1:tables}/\" relativeToChangelogFile=\"true\" />\n\n</databaseChangeLog>$0")

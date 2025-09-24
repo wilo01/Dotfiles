@@ -40,7 +40,7 @@ get_stash_file_path() {
 
 gather_commit_info() {
     local -A info
-    
+
     info[date]=$(date +%Y-%m-%d)
     info[time]=$(date +%H:%M)
     info[message]=$(git log -1 --format=%B)
@@ -49,13 +49,13 @@ gather_commit_info() {
     info[previous_branch]=$(git rev-parse --abbrev-ref "@{-1}" 2>/dev/null || echo "${info[branch]}")
     info[changed_files]=$(git diff --name-only HEAD~1 HEAD 2>/dev/null | tr '\n' ' ')
     info[stash_list]=$(git stash list --format="%H %gd: %gs")
-    
+
     # Validate previous branch
     if [[ -z "${info[previous_branch]}" ]] || [[ "${info[previous_branch]}" == "@{-1}" ]]; then
         info[previous_branch]=${info[branch]}
         log_debug "No previous branch found, using current: ${info[branch]}"
     fi
-    
+
     # Print as associative array declaration for caller
     for key in "${!info[@]}"; do
         printf "%s=%q\n" "$key" "${info[$key]}"
@@ -75,11 +75,11 @@ save_commit_notes() {
     local changed_files="$6"
     local hash="$7"
     local branch="$8"
-    
+
     # Create directory if needed
     local dir=$(dirname "$notes_file")
     [[ -d "$dir" ]] || mkdir -p "$dir"
-    
+
     # Format and save commit notes
     local note_content="
 # $date $time
@@ -88,12 +88,12 @@ $message
 
 Changed files: $changed_files
 - Commit branch HASH [$hash]($branch)"
-    
+
     if ! echo "$note_content" >> "$notes_file"; then
         log_error "Failed to save commit notes to $notes_file"
         return 1
     fi
-    
+
     log_info "📝 Commit saved to: $notes_file"
     return 0
 }
@@ -101,17 +101,17 @@ Changed files: $changed_files
 save_stash_list() {
     local stash_file="$1"
     local stash_list="$2"
-    
+
     # Create directory if needed
     local dir=$(dirname "$stash_file")
     [[ -d "$dir" ]] || mkdir -p "$dir"
-    
+
     # Save stash list
     if ! echo "$stash_list" > "$stash_file"; then
         log_error "Failed to save stash list to $stash_file"
         return 1
     fi
-    
+
     log_info "📦 Stashes saved to: $stash_file"
     return 0
 }
@@ -126,9 +126,9 @@ main() {
         log_warning "Global git post-commit is disabled via Git config."
         exit 0
     fi
-    
+
     log_info "🚀 Global git post-commit run"
-    
+
     # Gather commit information (safely without eval)
     declare -A commit_info
     while IFS='=' read -r key value; do
@@ -150,18 +150,18 @@ main() {
         fi
         commit_info[$key]="$value"
     done < <(gather_commit_info)
-    
+
     # Display commit information
     log_info "🌿 Previous branch: ${commit_info[previous_branch]}"
     log_info "💬 Commit message:"
     echo ""
     echo "${commit_info[message]}"
     echo ""
-    
+
     # Get file paths
     local notes_file=$(get_notes_file_path)
     local stash_file=$(get_stash_file_path)
-    
+
     # Save commit notes
     if ! save_commit_notes \
         "$notes_file" \
@@ -174,7 +174,7 @@ main() {
         "${commit_info[branch]}"; then
         log_warning "Failed to save commit notes"
     fi
-    
+
     # Save stash list
     if [[ -n "${commit_info[stash_list]}" ]]; then
         if ! save_stash_list "$stash_file" "${commit_info[stash_list]}"; then
