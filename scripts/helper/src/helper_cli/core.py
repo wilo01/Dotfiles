@@ -16,8 +16,8 @@ class HelperCore:
 
     def __init__(self):
         self.type_tiny = pyshorteners.Shortener()
-        self.rfid_badge_default = '@4324325553#'
-        self.qr_badge_default = '$4324325553#'
+        self.rfid_badge_default = "@4324325553#"
+        self.qr_badge_default = "$4324325553#"
         self.keyboard = None
 
     def _get_keyboard(self):
@@ -26,20 +26,22 @@ class HelperCore:
             import os
 
             # Check if we're on Wayland (pynput doesn't work well on Wayland)
-            if os.environ.get('XDG_SESSION_TYPE') == 'wayland':
+            if os.environ.get("XDG_SESSION_TYPE") == "wayland":
                 # Wayland doesn't support pynput properly
                 return None
 
             try:
                 # Suppress Xlib warnings
                 import warnings
+
                 warnings.filterwarnings("ignore", category=UserWarning)
 
                 # Set display if not set (helps with SSH sessions)
-                if not os.environ.get('DISPLAY'):
-                    os.environ['DISPLAY'] = ':0'
+                if not os.environ.get("DISPLAY"):
+                    os.environ["DISPLAY"] = ":0"
 
                 from pynput.keyboard import Controller
+
                 self.keyboard = Controller()
             except ImportError as e:
                 print(f"Error: Cannot use keyboard automation: {e}")
@@ -54,21 +56,23 @@ class HelperCore:
         import shutil
 
         # Check if we're on Wayland and try Wayland-compatible tools
-        if os.environ.get('XDG_SESSION_TYPE') == 'wayland':
+        if os.environ.get("XDG_SESSION_TYPE") == "wayland":
             time.sleep(delay)
 
             # Try wtype first (Wayland native)
-            if shutil.which('wtype'):
+            if shutil.which("wtype"):
                 try:
-                    subprocess.run(['wtype', string], check=True, capture_output=True)
+                    subprocess.run(["wtype", string], check=True, capture_output=True)
                     return
                 except subprocess.CalledProcessError:
                     pass
 
             # Try ydotool (requires ydotoold daemon)
-            if shutil.which('ydotool'):
+            if shutil.which("ydotool"):
                 try:
-                    subprocess.run(['ydotool', 'type', string], check=True, capture_output=True)
+                    subprocess.run(
+                        ["ydotool", "type", string], check=True, capture_output=True
+                    )
                     return
                 except subprocess.CalledProcessError:
                     pass
@@ -107,7 +111,14 @@ class HelperCore:
         except (OSError, IOError) as e:
             print(f"Error copying files: {e}")
 
-    def format_string(self, text: str, mode: str = 'standard', uppercase_tags: bool = True, clean_dashes: bool = True, strip_edges: bool = True) -> str:
+    def format_string(
+        self,
+        text: str,
+        mode: str = "standard",
+        uppercase_tags: bool = True,
+        clean_dashes: bool = True,
+        strip_edges: bool = True,
+    ) -> str:
         """Unified string formatting function with configurable options.
 
         Args:
@@ -123,42 +134,50 @@ class HelperCore:
         text = text.strip()
 
         # Convert to lowercase and replace special chars with dashes
-        formatted = re.sub(r"[ !+@#$%^&*(),_.'/:;>\[\]\\-]", "-", text.lower().replace('\n', '-'))
+        formatted = re.sub(
+            r"[ !+@#$%^&*(),_.'/:;>\[\]\\-]", "-", text.lower().replace("\n", "-")
+        )
 
         if uppercase_tags:
+
             def uppercase_tag_match(match):
                 tag = match.group(1).upper()
                 number = match.group(2)
                 return f"{tag}-{number}"
 
-            formatted = re.sub(r'\b([a-zA-Z]+)-(\d+)\b', uppercase_tag_match, formatted, flags=re.IGNORECASE)
+            formatted = re.sub(
+                r"\b([a-zA-Z]+)-(\d+)\b",
+                uppercase_tag_match,
+                formatted,
+                flags=re.IGNORECASE,
+            )
 
         if clean_dashes:
-            formatted = re.sub(r'-+', '-', formatted)
+            formatted = re.sub(r"-+", "-", formatted)
 
         if strip_edges:
-            formatted = formatted.strip('-')
+            formatted = formatted.strip("-")
 
-        if mode == 'jira':
-            return f'git checkout -b {formatted}'
-        elif mode == 'stash':
-            return f'git stash push -u -m {formatted}'
-        elif mode == 'dash':
+        if mode == "jira":
+            return f"git checkout -b {formatted}"
+        elif mode == "stash":
+            return f"git stash push -u -m {formatted}"
+        elif mode == "dash":
             return formatted
         else:
             return formatted
 
     def generate_jira_branch_name(self, text: str) -> str:
         """Generate JIRA branch name from text."""
-        return self.format_string(text, mode='jira')
+        return self.format_string(text, mode="jira")
 
     def generate_stash_command(self, text: str) -> str:
         """Generate git stash command with formatted message."""
-        return self.format_string(text, mode='stash')
+        return self.format_string(text, mode="stash")
 
     def generate_ngrok_qr(self, ngrok_url: str) -> tuple[str, str]:
         """Generate QR code command for NGROK URL."""
-        full_url = f'{ngrok_url}/i/source/ui-kiosk/index.html'
+        full_url = f"{ngrok_url}/i/source/ui-kiosk/index.html"
         try:
             short_url = self.type_tiny.tinyurl.short(full_url)
         except Exception:
@@ -169,7 +188,7 @@ class HelperCore:
 
     def generate_vsc_qr(self, vsc_url: str) -> tuple[str, str]:
         """Generate QR code command for VSC URL."""
-        full_url = f'{vsc_url}i/source/ui-kiosk/index.html'
+        full_url = f"{vsc_url}i/source/ui-kiosk/index.html"
         try:
             short_url = self.type_tiny.tinyurl.short(full_url)
         except Exception:
@@ -181,45 +200,48 @@ class HelperCore:
     def generate_apex_upload_command(self, apex_file: str, port: str, auth: str) -> str:
         """Generate APEX upload curl command."""
         command = (
-            f'curl -v --request POST --url http://127.0.0.1:{port}/apex/_/resources.zip '
+            f"curl -v --request POST --url http://127.0.0.1:{port}/apex/_/resources.zip "
             f'--header "Authorization: Basic {auth}" '
-            f'--form name==file '
+            f"--form name==file "
             f'--form "filename=@{apex_file}.zip;type=application/zip" | > {apex_file}.html'
         )
         return command
 
     def setup_rt_temp_directory(self, rt_name: str):
         """Set up temporary RT directory with file copying."""
-        path_to_temp_dir = f'~/Dev/branch-opener2/{rt_name}'
-        source_dir1 = '~/Dev/branch-opener2/branches/safe/source/server/rt'
-        source_dir2 = '~/Dev/branch-opener2/branches/safe/source/server/rtsp'
+        path_to_temp_dir = f"~/Dev/branch-opener2/{rt_name}"
+        source_dir1 = "~/Dev/branch-opener2/branches/safe/source/server/rt"
+        source_dir2 = "~/Dev/branch-opener2/branches/safe/source/server/rtsp"
 
         temp_dir = self.create_temp_dir(path_to_temp_dir)
         self.copy_and_override_files(source_dir1, source_dir2, temp_dir)
-        print(f'Created RT directory: {temp_dir}')
+        print(f"Created RT directory: {temp_dir}")
 
     def convert_to_dash_format(self, text: str) -> str:
         """Convert text to dash-separated format for filenames."""
-        return self.format_string(text, mode='dash', uppercase_tags=False)
+        return self.format_string(text, mode="dash", uppercase_tags=False)
 
     def generate_pr_title(self, text: str) -> str:
         """Generate PR title with TAG-NUMBER uppercased but preserving spaces.
         Example: 'vis-1234 add new feature' -> 'VIS-1234 add new feature'
         """
         text = text.strip()
+
         def uppercase_tag_match(match):
             tag = match.group(1).upper()
             number = match.group(2)
             return f"{tag}-{number}"
 
-        formatted = re.sub(r'\b([a-zA-Z]+)-(\d+)\b', uppercase_tag_match, text, flags=re.IGNORECASE)
+        formatted = re.sub(
+            r"\b([a-zA-Z]+)-(\d+)\b", uppercase_tag_match, text, flags=re.IGNORECASE
+        )
         return formatted
 
     def generate_filename(self, text: str) -> str:
         """Generate clean filename without tag uppercasing.
         Example: 'VIS-1234 My Report' -> 'vis-1234-my-report.md'
         """
-        formatted = self.format_string(text, mode='dash', uppercase_tags=False)
+        formatted = self.format_string(text, mode="dash", uppercase_tags=False)
         return f"{formatted}.md"
 
     def detect_vis_ticket_from_context(self) -> tuple[str, str]:
@@ -230,15 +252,15 @@ class HelperCore:
 
         cwd = os.getcwd()
 
-        vis_match = re.search(r'(vis-\d+)', cwd, re.IGNORECASE)
+        vis_match = re.search(r"(vis-\d+)", cwd, re.IGNORECASE)
         if vis_match:
             ticket_number = vis_match.group(1).upper()
-            path_parts = cwd.split('/')
+            path_parts = cwd.split("/")
             for part in reversed(path_parts):
-                if vis_match := re.search(r'(vis-\d+)(?:-(.+))?', part, re.IGNORECASE):
+                if vis_match := re.search(r"(vis-\d+)(?:-(.+))?", part, re.IGNORECASE):
                     description = vis_match.group(2) or ""
                     if description:
-                        description = description.replace('-', ' ').title()
+                        description = description.replace("-", " ").title()
                         return f"{ticket_number} {description}", ticket_number
             return ticket_number, ticket_number
 
@@ -249,35 +271,41 @@ class HelperCore:
                 if vis_files:
                     recent_file = max(vis_files, key=os.path.getmtime)
                     filename = os.path.basename(recent_file)
-                    vis_match = re.search(r'(VIS-\d+)(?:-(.+?))?(?:-\d{8}-\d{6})?\.md', filename)
+                    vis_match = re.search(
+                        r"(VIS-\d+)(?:-(.+?))?(?:-\d{8}-\d{6})?\.md", filename
+                    )
                     if vis_match:
                         ticket_number = vis_match.group(1)
                         description = vis_match.group(2) or ""
                         if description:
-                            description = description.replace('-', ' ').title()
+                            description = description.replace("-", " ").title()
                             return f"{ticket_number} {description}", ticket_number
                         return ticket_number, ticket_number
         except (OSError, ValueError):
             pass
 
-        for env_var in ['CLAUDE_PROJECT_DIR', 'PWD', 'OLDPWD']:
-            path = os.environ.get(env_var, '')
-            vis_match = re.search(r'(vis-\d+)', path, re.IGNORECASE)
+        for env_var in ["CLAUDE_PROJECT_DIR", "PWD", "OLDPWD"]:
+            path = os.environ.get(env_var, "")
+            vis_match = re.search(r"(vis-\d+)", path, re.IGNORECASE)
             if vis_match:
                 ticket_number = vis_match.group(1).upper()
                 return ticket_number, ticket_number
 
         try:
-            result = subprocess.run(['git', 'branch', '--show-current'],
-                                  capture_output=True, text=True, check=True)
+            result = subprocess.run(
+                ["git", "branch", "--show-current"],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
             branch_name = result.stdout.strip()
 
-            vis_match = re.search(r'(vis-\d+)(?:-(.+))?', branch_name, re.IGNORECASE)
+            vis_match = re.search(r"(vis-\d+)(?:-(.+))?", branch_name, re.IGNORECASE)
             if vis_match:
                 ticket_number = vis_match.group(1).upper()
                 description = vis_match.group(2) or ""
                 if description:
-                    description = description.replace('-', ' ').title()
+                    description = description.replace("-", " ").title()
                     return f"{ticket_number} {description}", ticket_number
                 return ticket_number, ticket_number
         except (subprocess.CalledProcessError, FileNotFoundError):
@@ -285,7 +313,14 @@ class HelperCore:
 
         return "", ""
 
-    def create_work_log(self, ticket_text: str, agent_name: str, agent_output: str, auto_timestamp: bool = True, append: bool = False) -> tuple[bool, str]:
+    def create_work_log(
+        self,
+        ticket_text: str,
+        agent_name: str,
+        agent_output: str,
+        auto_timestamp: bool = True,
+        append: bool = False,
+    ) -> tuple[bool, str]:
         """Create work log file with agent output."""
         try:
             from datetime import datetime
@@ -305,7 +340,9 @@ class HelperCore:
                 existing_files = glob.glob(pattern)
 
                 if existing_files:
-                    existing_files.sort(key=lambda x: Path(x).stat().st_mtime, reverse=True)
+                    existing_files.sort(
+                        key=lambda x: Path(x).stat().st_mtime, reverse=True
+                    )
                     file_path = Path(existing_files[0])
 
                     agent_section = f"""
@@ -320,7 +357,7 @@ class HelperCore:
 {agent_output}
 """
 
-                    with open(file_path, 'a', encoding='utf-8') as f:
+                    with open(file_path, "a", encoding="utf-8") as f:
                         f.write(agent_section)
 
                     return True, f"{file_path} (appended)"
@@ -339,7 +376,7 @@ class HelperCore:
 {agent_output}
 """
 
-                    with open(file_path, 'w', encoding='utf-8') as f:
+                    with open(file_path, "w", encoding="utf-8") as f:
                         f.write(content)
 
                     return True, str(file_path)
@@ -365,10 +402,49 @@ class HelperCore:
 {agent_output}
 """
 
-                with open(file_path, 'w', encoding='utf-8') as f:
+                with open(file_path, "w", encoding="utf-8") as f:
                     f.write(content)
 
                 return True, str(file_path)
 
         except Exception as e:
             return False, str(e)
+
+    def custom_default_data(self) -> tuple[bool, str, Optional[int]]:
+        """Sync custom_default_data.sql from private DB-Scripts to TDS Suite Liquibase directory.
+
+        Returns:
+            tuple: (success: bool, message: str, file_size: Optional[int])
+        """
+        from pathlib import Path
+
+        SOURCE_PATH = (
+            Path.home() / "Dev" / "Private" / "DB-Scripts" / "custom_default_data.sql"
+        )
+        TARGET_DIR = (
+            Path.home()
+            / "Dev"
+            / "branch-opener"
+            / "branches"
+            / "tds-suite"
+            / "source"
+            / "server"
+            / "database"
+            / "sql"
+            / "safe"
+            / "after-install"
+        )
+        TARGET_PATH = TARGET_DIR / "custom_default_data.sql"
+
+        if not SOURCE_PATH.exists():
+            return False, f"Source file not found: {SOURCE_PATH}", None
+
+        if not TARGET_DIR.exists():
+            return False, f"Target directory not found: {TARGET_DIR}", None
+
+        try:
+            shutil.copy2(SOURCE_PATH, TARGET_PATH)
+            file_size = SOURCE_PATH.stat().st_size
+            return True, f"Synced {SOURCE_PATH.name} → {TARGET_PATH}", file_size
+        except Exception as e:
+            return False, f"Copy failed: {e}", None

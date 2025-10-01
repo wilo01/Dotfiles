@@ -65,3 +65,6 @@ mcp.json
 # GEMINI.md
 # AI_INSTRUCTIONS/
 .serena/
+
+# Project-specific absolute paths
+source/server/database/sql/safe/after-install/custom_default_data.sql
