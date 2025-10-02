@@ -426,7 +426,9 @@ return {
                snip(ft, "url", "- [${2:link text}](${1:})$0")
                snip(ft, "codewrap", "```${1:Language}\n${2}\n```\n$0")
                snip(ft, "code", "```${2:Language}\n${1:}\n```\n$0")
-               snip(ft, "notes", "### NOTES: $0")
+               snip(ft, "notes", function()
+                  return "## " .. get_timestamp() .. "\n### NOTES: $0"
+               end, "Insert timestamp heading with NOTES")
                snip(ft, "todo-list",
                   "## TODO\n\n- [ ] ${1:First task}\n- [ ] ${2:Second task}\n- [ ] ${3:Third task}\n$0")
                snip(ft, "table",

@@ -3167,3 +3167,79 @@
 [WARN][2025-10-01 15:24:35] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
 [WARN][2025-10-01 15:24:35] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
 [WARN][2025-10-01 15:24:35] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-10-01 15:27:39] LSP logging initiated
+[WARN][2025-10-01 15:27:39] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-10-01 15:27:40] LSP logging initiated
+[WARN][2025-10-01 15:27:40] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-10-01 15:28:26] LSP logging initiated
+[WARN][2025-10-01 15:28:26] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-10-01 15:44:48] LSP logging initiated
+[WARN][2025-10-01 15:44:48] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-01 15:44:50] ...lsp/handlers.lua:564	"14:44:50.174 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-10-01 15:45:10] LSP logging initiated
+[WARN][2025-10-01 15:45:10] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-01 15:45:11] ...lsp/handlers.lua:564	"14:45:11.879 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-10-01 15:48:27] LSP logging initiated
+[WARN][2025-10-01 15:48:27] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-01 15:50:35] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-01 15:50:52] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-01 15:51:03] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-01 15:51:08] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-01 15:53:20] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-01 15:53:54] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-01 15:55:12] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-01 15:55:49] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-10-02 08:30:38] LSP logging initiated
+[WARN][2025-10-02 08:30:38] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 08:31:26] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 08:32:14] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 08:35:08] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 08:35:08] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[WARN][2025-10-02 08:40:05] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-10-02 08:41:34] LSP logging initiated
+[WARN][2025-10-02 08:41:34] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 08:43:31] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-10-02 08:53:14] LSP logging initiated
+[WARN][2025-10-02 08:53:14] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 08:53:14] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 08:53:14] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 09:00:03] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 09:11:26] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 09:11:27] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[WARN][2025-10-02 09:15:26] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 09:40:34] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 09:40:49] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 09:42:38] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 09:56:00] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-10-02 10:11:25] LSP logging initiated
+[WARN][2025-10-02 10:11:25] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 10:11:25] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-10-02 10:20:47] LSP logging initiated
+[WARN][2025-10-02 10:20:47] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 10:23:54] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-10-02 10:30:39] LSP logging initiated
+[WARN][2025-10-02 10:30:39] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 10:30:39] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 10:30:39] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 10:33:20] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 10:33:20] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[WARN][2025-10-02 10:33:24] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 10:42:45] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-10-02 13:14:11] LSP logging initiated
+[WARN][2025-10-02 13:14:11] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 13:14:11] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 13:14:11] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-10-02 13:18:43] LSP logging initiated
+[WARN][2025-10-02 13:18:43] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 13:18:43] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 13:18:43] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-10-02 13:25:24] LSP logging initiated
+[WARN][2025-10-02 13:25:24] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-10-02 14:07:24] LSP logging initiated
+[WARN][2025-10-02 14:07:24] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 14:07:40] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 14:08:26] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[START][2025-10-02 14:14:41] LSP logging initiated
+[WARN][2025-10-02 14:14:41] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 14:19:44] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
+[WARN][2025-10-02 14:27:31] .../lua/vim/lsp.lua:432	"stylua does not have a configuration"
