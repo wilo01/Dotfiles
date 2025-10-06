@@ -328,6 +328,58 @@ vim.keymap.set("n", "<leader>mn", "<CMD>MarkdownPreviewStop<CR>", { desc = "Stop
 
 -- Gitsigns Integration
 vim.keymap.set("n", "<leader>va", "<CMD>Gitsigns preview_hunk_inline<CR>", { desc = "Gitsigns preview Git hunk" })
+vim.keymap.set("n", "<leader>vA", function()
+   local function setup_float_keymaps()
+      vim.cmd("wincmd w")
+      local bufnr = vim.api.nvim_get_current_buf()
+
+      local function navigate_hunk(direction)
+         return function()
+            local float_win = vim.api.nvim_get_current_win()
+            vim.cmd("wincmd p")
+
+            if direction == "next" then
+               vim.cmd("Gitsigns next_hunk")
+            else
+               vim.cmd("Gitsigns prev_hunk")
+            end
+
+            local gitsigns = require('gitsigns')
+            local main_bufnr = vim.api.nvim_get_current_buf()
+            local hunks = gitsigns.get_hunks(main_bufnr)
+            if hunks and #hunks > 0 then
+               local cursor_line = vim.fn.line('.')
+               for _, hunk in ipairs(hunks) do
+                  if hunk.added and hunk.added.start <= cursor_line and cursor_line <= hunk.added.start + hunk.added.count - 1 then
+                     vim.fn.cursor(hunk.added.start, 1)
+                     break
+                  end
+               end
+            end
+            vim.cmd("normal! zz")
+
+            if vim.api.nvim_win_is_valid(float_win) then
+               vim.api.nvim_win_close(float_win, true)
+            end
+
+            vim.cmd("Gitsigns preview_hunk")
+            vim.defer_fn(setup_float_keymaps, 50)
+         end
+      end
+
+      vim.keymap.set("n", "J", navigate_hunk("next"),
+         { buffer = bufnr, desc = "Next hunk and refresh preview" })
+      vim.keymap.set("n", "K", navigate_hunk("prev"),
+         { buffer = bufnr, desc = "Previous hunk and refresh preview" })
+      vim.keymap.set("n", "q", "<cmd>close<CR>",
+         { buffer = bufnr, desc = "Close preview window" })
+      vim.keymap.set("n", "<Esc>", "<cmd>close<CR>",
+         { buffer = bufnr, desc = "Close preview window" })
+   end
+
+   vim.cmd("Gitsigns preview_hunk")
+   vim.defer_fn(setup_float_keymaps, 50)
+end, { desc = "Gitsigns preview floating Git hunk" })
 vim.keymap.set("n", "<leader>vs", "<CMD>Gitsigns diffthis<CR>", { desc = "Gitsigns Diff current buffer" })
 vim.keymap.set("n", "<leader>bl", "<CMD>Gitsigns blame<CR>", { desc = "Gitsigns Blame current file" }) -- [ ] TODO: Add toggle blame
 vim.keymap.set("n", "<leader>vt", "<CMD>Gitsigns toggle_deleted<CR>", { desc = "Gitsigns Toggle deleted lines" })

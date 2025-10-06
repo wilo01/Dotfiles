@@ -15,6 +15,9 @@ return {
          end,
          on_highlights = function(hl, colors)
             hl.GitSignsCurrentLineBlame = { fg = "#7dcfff", italic = true }
+            hl.GitSignsAddInline = { bg = "#35603a" }
+            hl.GitSignsDeleteInline = { bg = "#603a35" }
+            hl.GitSignsChangeInline = { bg = "#35603a" }
          end,
       })
       vim.cmd.colorscheme('tokyonight')
