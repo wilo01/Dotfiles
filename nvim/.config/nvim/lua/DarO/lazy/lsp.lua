@@ -1,186 +1,14 @@
-local function setup_diagnostics()
-   vim.diagnostic.config({
-      virtual_text = true,
-      underline = true,
-      update_in_insert = false,
-      severity_sort = true,
-      float = {
-         focusable = false,
-         style = "minimal",
-         border = "rounded",
-         source = "if_many",
-         header = "",
-         prefix = "",
-      },
-      signs = {
-         text = {
-            [vim.diagnostic.severity.ERROR] = "",
-            [vim.diagnostic.severity.WARN] = "",
-            [vim.diagnostic.severity.INFO] = "",
-            [vim.diagnostic.severity.HINT] = ""
-         },
-         numhl = {
-            [vim.diagnostic.severity.ERROR] = "ErrorMsg",
-            [vim.diagnostic.severity.WARN] = "WarningMsg",
-         }
-      }
-   })
-end
+local LSP_SERVERS = {
+   'gopls', 'lua_ls', 'eslint', 'ts_ls',
+   'dockerls', 'yamlls', 'zls', 'bashls',
+   'pyright', 'ruff'
+}
 
-local function get_server_configs(capabilities)
-   return {
-      gopls = {
-         root_markers = { "go.work", "go.mod", ".git" },
-         settings = {
-            gopls = {
-               analyses = { unusedparams = true },
-               staticcheck = true,
-            },
-         },
-         capabilities = capabilities,
-      },
-      lua_ls = {
-         root_markers = { ".luarc.json", ".luarc.jsonc", ".git" },
-         settings = {
-            Lua = {
-               runtime = { version = "LuaJIT" },
-               diagnostics = {
-                  globals = { "bit", "vim", "it", "describe", "before_each", "after_each" },
-               },
-               workspace = {
-                  checkThirdParty = false,
-               },
-               telemetry = {
-                  enable = false,
-               },
-            }
-         },
-         capabilities = capabilities,
-      },
-      eslint = {
-         root_markers = { ".eslintrc.js", ".eslintrc.json", "eslint.config.js", "package.json", ".git" },
-         settings = {
-            format = { enable = true },
-            codeActionOnSave = {
-               enable = true,
-               mode = "all"
-            },
-         },
-         capabilities = capabilities,
-      },
-      ts_ls = {
-         root_markers = { "package.json", "tsconfig.json", "jsconfig.json", ".git" },
-         settings = {
-            typescript = {
-               format = { indentSize = 3, tabSize = 3 },
-            },
-            javascript = {
-               format = { indentSize = 3, tabSize = 3 },
-            },
-         },
-         capabilities = capabilities,
-      },
-      dockerls = {
-         root_markers = { "Dockerfile", ".git" },
-         capabilities = capabilities,
-      },
-      yamlls = {
-         settings = {
-            yaml = {
-               schemas = {
-                  ["https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json"] =
-                  "/docker-compose.yml"
-               }
-            }
-         },
-         capabilities = capabilities,
-      },
-      zls = {
-         root_markers = { "build.zig", "build.zig.zon", ".git" },
-         settings = {
-            zls = {
-               enable_inlay_hints = true,
-               enable_snippets = true,
-               warn_style = true,
-            },
-         },
-         capabilities = capabilities,
-      },
-      bashls = {
-         root_markers = { ".git" },
-         capabilities = capabilities,
-      },
-      pyright = {
-         root_markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile", ".git" },
-         settings = {
-            python = {
-               analysis = {
-                  autoImportCompletions = true,
-                  typeCheckingMode = "standard",
-                  diagnosticMode = "workspace",
-                  useLibraryCodeForTypes = true,
-                  autoSearchPaths = true,
-                  diagnosticSeverityOverrides = {
-                     reportMissingImports = "error",
-                     reportUndefinedVariable = "error",
-                     reportGeneralTypeIssues = "warning",
-                     reportOptionalMemberAccess = "warning",
-                     reportOptionalSubscript = "warning",
-                     reportPrivateUsage = "warning",
-                     reportUnusedImport = "information",
-                     reportUnusedVariable = "information",
-                  }
-               }
-            }
-         },
-         capabilities = capabilities,
-      },
-      ruff = {
-         root_markers = { "pyproject.toml", "ruff.toml", ".ruff.toml", "setup.py", "setup.cfg", "requirements.txt", ".git" },
-         settings = {
-            init_options = {
-               settings = {
-                  args = {},
-                  lint = {
-                     enable = true,
-                     run = "onType",
-                  },
-                  format = {
-                     enable = true,
-                  },
-                  organizeImports = {
-                     enable = true,
-                  },
-               }
-            }
-         },
-         capabilities = capabilities,
-      },
-   }
-end
-
-local function setup_format_on_save()
-   vim.api.nvim_create_autocmd("BufWritePre", {
-      group = vim.api.nvim_create_augroup("LspFormat", { clear = true }),
-      callback = function()
-         vim.lsp.buf.format({
-            async = false,
-            filter = function(client)
-               local filetype = vim.bo.filetype
-               if filetype == "javascript" or filetype == "typescript" or
-                   filetype == "javascriptreact" or filetype == "typescriptreact" then
-                  return client.name == "eslint"
-               end
-
-               if filetype == "python" then
-                  return client.name == "ruff"
-               end
-               return client.name ~= "eslint" and client.name ~= "ruff-lsp"
-            end
-         })
-      end,
-   })
-end
+local CONFIG = {
+   INDENT_SIZE = 3,
+   FORMAT_TIMEOUT_MS = 5000,
+   EXCLUDED_FORMAT_FILETYPES = { "markdown", "text", "gitcommit" },
+}
 
 return {
    {
@@ -209,10 +37,39 @@ return {
       dependencies = { "williamboman/mason.nvim" },
       config = function()
          require("mason-lspconfig").setup({
-            ensure_installed = {
-               "ts_ls", "eslint", "lua_ls", "bashls", "gopls", "dockerls", "yamlls", "zls", "pyright", "ruff"
-            },
+            ensure_installed = LSP_SERVERS,
             automatic_installation = true,
+         })
+      end
+   },
+   {
+      "hrsh7th/nvim-cmp",
+      dependencies = {
+         "hrsh7th/cmp-nvim-lsp", "hrsh7th/cmp-buffer", "hrsh7th/cmp-path",
+         "L3MON4D3/LuaSnip", "saadparwaiz1/cmp_luasnip",
+      },
+      config = function()
+         local cmp = require('cmp')
+         local cmp_select = { behavior = cmp.SelectBehavior.Select }
+
+         cmp.setup({
+            snippet = {
+               expand = function(args)
+                  require('luasnip').lsp_expand(args.body)
+               end,
+            },
+            mapping = cmp.mapping.preset.insert({
+               ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
+               ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
+               ['<C-y>'] = cmp.mapping.confirm({ select = true }),
+               ["<C-Space>"] = cmp.mapping.complete(),
+            }),
+            sources = cmp.config.sources({
+               { name = 'nvim_lsp' },
+               { name = 'luasnip' },
+            }, {
+               { name = 'buffer' },
+            })
          })
       end
    },
@@ -221,41 +78,268 @@ return {
       ft = "lua",
       opts = {
          library = {
-            { path = "${3rd}/luv/library", words = { "vim%.uv" } },
-         }
+            { path = "luvit-meta/library", words = { "vim%.uv" } },
+            { path = "lazy.nvim",          words = { "Lazy" } },
+         },
+         integrations = {
+            lspconfig = true,
+            cmp = true,
+         },
       }
    },
    {
       "neovim/nvim-lspconfig",
-      dependencies = { "williamboman/mason.nvim", "hrsh7th/cmp-nvim-lsp" },
+      dependencies = { "williamboman/mason.nvim", "hrsh7th/nvim-cmp" },
       config = function()
-         local ok_cmp, cmp_lsp = pcall(require, 'cmp_nvim_lsp')
-         if not ok_cmp then
-            vim.notify("Failed to load cmp_nvim_lsp", vim.log.levels.ERROR)
-            return
+         local capabilities = vim.lsp.protocol.make_client_capabilities()
+         local ok, cmp_lsp = pcall(require, 'cmp_nvim_lsp')
+         if ok then
+            capabilities = cmp_lsp.default_capabilities()
          end
-
-         local capabilities = cmp_lsp.default_capabilities()
 
          vim.lsp.config['*'] = { capabilities = capabilities }
 
-         local server_configs = get_server_configs(capabilities)
-         for server, config in pairs(server_configs) do
-            vim.lsp.config[server] = config
-         end
-
-         local servers = {
-            'gopls', 'lua_ls', 'eslint', 'ts_ls', 'dockerls',
-            'yamlls', 'zls', 'bashls', 'pyright', 'ruff'
+         vim.lsp.config.gopls = {
+            root_markers = { "go.work", "go.mod", ".git" },
+            settings = {
+               gopls = {
+                  analyses = { unusedparams = true },
+                  staticcheck = true,
+                  hints = {
+                     assignVariableTypes = true,
+                     compositeLiteralFields = true,
+                     compositeLiteralTypes = true,
+                     constantValues = true,
+                     functionTypeParameters = true,
+                     parameterNames = true,
+                     rangeVariableTypes = true,
+                  },
+               },
+            },
          }
-         local ok_enable, err = pcall(vim.lsp.enable, servers)
-         if not ok_enable then
-            vim.notify("Failed to enable LSP servers: " .. tostring(err), vim.log.levels.WARN)
-         end
 
-         vim.lsp.set_log_level("WARN")
-         setup_diagnostics()
-         setup_format_on_save()
+         vim.lsp.config.lua_ls = {
+            root_markers = { ".luarc.json", ".luarc.jsonc", ".git" },
+            settings = {
+               Lua = {
+                  runtime = { version = "LuaJIT" },
+                  diagnostics = {
+                     globals = { "bit", "vim", "it", "describe", "before_each", "after_each" },
+                  },
+                  workspace = {
+                     checkThirdParty = false,
+                  },
+                  telemetry = {
+                     enable = false,
+                  },
+               }
+            },
+         }
+
+         vim.lsp.config.eslint = {
+            root_markers = { ".eslintrc.js", ".eslintrc.json", "eslint.config.js", "package.json", ".git" },
+            settings = {
+               format = { enable = true },
+            },
+         }
+
+         vim.lsp.config.ts_ls = {
+            root_markers = { "package.json", "tsconfig.json", "jsconfig.json", ".git" },
+            settings = {
+               typescript = {
+                  format = { indentSize = CONFIG.INDENT_SIZE, tabSize = CONFIG.INDENT_SIZE },
+                  inlayHints = {
+                     includeInlayParameterNameHints = "all",
+                     includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+                     includeInlayFunctionParameterTypeHints = true,
+                     includeInlayVariableTypeHints = true,
+                     includeInlayPropertyDeclarationTypeHints = true,
+                     includeInlayFunctionLikeReturnTypeHints = true,
+                     includeInlayEnumMemberValueHints = true,
+                  },
+               },
+               javascript = {
+                  format = { indentSize = CONFIG.INDENT_SIZE, tabSize = CONFIG.INDENT_SIZE },
+                  inlayHints = {
+                     includeInlayParameterNameHints = "all",
+                     includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+                     includeInlayFunctionParameterTypeHints = true,
+                     includeInlayVariableTypeHints = true,
+                     includeInlayPropertyDeclarationTypeHints = true,
+                     includeInlayFunctionLikeReturnTypeHints = true,
+                     includeInlayEnumMemberValueHints = true,
+                  },
+               },
+            },
+         }
+
+         vim.lsp.config.dockerls = {
+            root_markers = { "Dockerfile", ".git" },
+         }
+
+         vim.lsp.config.yamlls = {
+            root_markers = { ".git", "package.json", "docker-compose.yml" },
+            settings = {
+               yaml = {
+                  schemas = {
+                     ["https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json"] =
+                     "/docker-compose.yml"
+                  }
+               }
+            },
+         }
+
+         vim.lsp.config.zls = {
+            root_markers = { "build.zig", "build.zig.zon", ".git" },
+            settings = {
+               zls = {
+                  enable_inlay_hints = true,
+                  enable_snippets = true,
+                  warn_style = true,
+               },
+            },
+         }
+
+         vim.lsp.config.bashls = {
+            root_markers = { ".bashrc", ".bash_profile", "scripts/", ".git" },
+            filetypes = { "sh", "bash" },
+         }
+
+         vim.lsp.config.pyright = {
+            root_markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", ".git" },
+            settings = {
+               python = {
+                  analysis = {
+                     typeCheckingMode = "basic",
+                     autoImportCompletions = true,
+                  }
+               }
+            },
+         }
+
+         vim.lsp.config.ruff = {
+            root_markers = { "pyproject.toml", "ruff.toml", ".ruff.toml", ".git" },
+         }
+
+         local log_level = vim.env.NVIM_LSP_LOG_LEVEL or "WARN"
+         vim.lsp.set_log_level(log_level)
+
+         vim.diagnostic.config({
+            virtual_text = {
+               spacing = 3,
+               prefix = "●",
+               severity = {
+                  min = vim.diagnostic.severity.WARN,
+               },
+            },
+            virtual_lines = false,
+            underline = true,
+            update_in_insert = false,
+            severity_sort = true,
+            float = {
+               focusable = false,
+               style = "minimal",
+               border = "rounded",
+               source = "if_many",
+               header = "",
+               prefix = "",
+            },
+            signs = {
+               text = {
+                  [vim.diagnostic.severity.ERROR] = "",
+                  [vim.diagnostic.severity.WARN] = "",
+                  [vim.diagnostic.severity.INFO] = "",
+                  [vim.diagnostic.severity.HINT] = ""
+               },
+               numhl = {
+                  [vim.diagnostic.severity.ERROR] = "ErrorMsg",
+                  [vim.diagnostic.severity.WARN] = "WarningMsg",
+               }
+            }
+         })
+
+         vim.api.nvim_create_autocmd("LspAttach", {
+            group = vim.api.nvim_create_augroup("UserLspConfig", { clear = true }),
+            callback = function(args)
+               local bufnr = args.buf
+               local client = vim.lsp.get_client_by_id(args.data.client_id)
+
+               if not client then return end
+
+               if client:supports_method("textDocument/inlayHint") then
+                  vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+               end
+
+               if client:supports_method("textDocument/completion") then
+                  vim.lsp.completion.enable(true, client.id, bufnr, { autotrigger = true })
+               end
+
+               if client:supports_method("textDocument/semanticTokens") then
+                  vim.lsp.semantic_tokens.start(bufnr, client.id)
+               end
+
+               if client:supports_method("textDocument/codeLens") then
+                  vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "InsertLeave" }, {
+                     group = vim.api.nvim_create_augroup("LspCodelens", { clear = false }),
+                     buffer = bufnr,
+                     callback = function()
+                        vim.lsp.codelens.refresh({ bufnr = bufnr })
+                     end,
+                  })
+               end
+
+               if client.name == "eslint" then
+                  vim.api.nvim_create_autocmd("BufWritePre", {
+                     buffer = bufnr,
+                     callback = function()
+                        vim.lsp.buf.code_action({
+                           context = {
+                              only = { "source.fixAll" },
+                              diagnostics = vim.diagnostic.get(bufnr)
+                           },
+                           apply = true,
+                        })
+                     end,
+                  })
+               end
+
+               if client.name == "ruff" then
+                  client.server_capabilities.hoverProvider = false
+               end
+            end
+         })
+
+         vim.api.nvim_create_autocmd("BufWritePre", {
+            group = vim.api.nvim_create_augroup("LspFormat", { clear = true }),
+            callback = function(args)
+               local bufnr = args.buf
+               local filetype = vim.bo[bufnr].filetype
+
+               if vim.tbl_contains(CONFIG.EXCLUDED_FORMAT_FILETYPES, filetype) then
+                  return
+               end
+
+               local clients = vim.lsp.get_clients({ bufnr = bufnr })
+               if #clients == 0 then
+                  return
+               end
+
+               vim.lsp.buf.format({
+                  bufnr = bufnr,
+                  timeout_ms = CONFIG.FORMAT_TIMEOUT_MS,
+                  filter = function(client)
+                     return client:supports_method("textDocument/formatting", bufnr)
+                  end
+               })
+            end
+         })
+
+         if vim.lsp.enable then
+            local ok_enable, err = pcall(vim.lsp.enable, LSP_SERVERS)
+            if not ok_enable then
+               vim.notify("Failed to enable LSP servers: " .. tostring(err), vim.log.levels.WARN)
+            end
+         end
 
          vim.g.zig_fmt_parse_errors = 0
          vim.g.zig_fmt_autosave = 0
