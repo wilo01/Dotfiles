@@ -27,25 +27,6 @@ local function setup_diagnostics()
    })
 end
 
-local function setup_mason()
-   require("mason").setup({
-      ui = {
-         check_outdated_packages_on_open = true,
-         border = "rounded",
-         icons = {
-            package_installed = "✓",
-            package_pending = "➜",
-            package_uninstalled = "✗"
-         }
-      },
-      log_level = vim.log.levels.INFO,
-      max_concurrent_installers = 4,
-      pip = {
-         upgrade_pip = true,
-      },
-   })
-end
-
 local function get_server_configs(capabilities)
    return {
       gopls = {
@@ -204,7 +185,24 @@ end
 return {
    {
       "williamboman/mason.nvim",
-      config = setup_mason
+      config = function()
+         require("mason").setup({
+            ui = {
+               check_outdated_packages_on_open = true,
+               border = "rounded",
+               icons = {
+                  package_installed = "✓",
+                  package_pending = "➜",
+                  package_uninstalled = "✗"
+               }
+            },
+            log_level = vim.log.levels.INFO,
+            max_concurrent_installers = 4,
+            pip = {
+               upgrade_pip = true,
+            },
+         })
+      end
    },
    {
       "williamboman/mason-lspconfig.nvim",

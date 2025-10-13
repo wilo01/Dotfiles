@@ -233,7 +233,7 @@ vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>",
 
 -- LSP Formatting
 vim.keymap.set({ "n", "v" }, "<leader>f", function()
-   vim.lsp.buf.format()
+   -- vim.lsp.buf.format()
    vim.cmd("write")
 end, { desc = "Format and save with LSP" })
 vim.keymap.set("n", "<leader>d", function()
