@@ -236,6 +236,7 @@ vim.keymap.set({ "n", "v" }, "<leader>f", function()
    -- vim.lsp.buf.format()
    vim.cmd("write")
 end, { desc = "Format and save with LSP" })
+vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "LSP code actions" })
 vim.keymap.set("n", "<leader>d", function()
    local diagnostics = vim.diagnostic.get(0, { lnum = vim.fn.line('.') - 1 })
 

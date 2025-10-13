@@ -4477,3 +4477,22 @@
 [WARN][2025-10-13 18:23:07] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
 [START][2025-10-13 18:24:01] LSP logging initiated
 [WARN][2025-10-13 18:24:01] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-10-13 19:34:17] LSP logging initiated
+[WARN][2025-10-13 19:34:17] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-10-13 19:34:34] LSP logging initiated
+[WARN][2025-10-13 19:34:34] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-10-13 19:51:52] LSP logging initiated
+[WARN][2025-10-13 19:51:52] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-10-13 19:52:10] LSP logging initiated
+[WARN][2025-10-13 19:52:10] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[ERROR][2025-10-13 19:52:21] ...m/lsp/client.lua:620	"LSP[ts_ls]"	"Cannot find request with id 3 whilst attempting to cancel"
+[START][2025-10-13 20:23:43] LSP logging initiated
+[WARN][2025-10-13 20:23:43] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-10-13 20:25:32] LSP logging initiated
+[WARN][2025-10-13 20:25:32] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-10-13 20:31:04] LSP logging initiated
+[WARN][2025-10-13 20:31:04] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[WARN][2025-10-13 20:34:03] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for textDocument/typeDefinition despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[WARN][2025-10-13 20:34:03] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for workspace/executeCommand despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-10-13 20:34:18] LSP logging initiated
+[WARN][2025-10-13 20:34:18] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"

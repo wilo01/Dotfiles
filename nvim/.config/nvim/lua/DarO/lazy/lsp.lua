@@ -288,21 +288,6 @@ return {
                   })
                end
 
-               if client.name == "eslint" then
-                  vim.api.nvim_create_autocmd("BufWritePre", {
-                     buffer = bufnr,
-                     callback = function()
-                        vim.lsp.buf.code_action({
-                           context = {
-                              only = { "source.fixAll" },
-                              diagnostics = vim.diagnostic.get(bufnr)
-                           },
-                           apply = true,
-                        })
-                     end,
-                  })
-               end
-
                if client.name == "ruff" then
                   client.server_capabilities.hoverProvider = false
                end
@@ -324,13 +309,36 @@ return {
                   return
                end
 
-               vim.lsp.buf.format({
-                  bufnr = bufnr,
-                  timeout_ms = CONFIG.FORMAT_TIMEOUT_MS,
-                  filter = function(client)
-                     return client:supports_method("textDocument/formatting", bufnr)
+               local ok, gitsigns = pcall(require, "gitsigns")
+               if not ok then
+                  return
+               end
+
+               local hunks = gitsigns.get_hunks(bufnr)
+               if not hunks or #hunks == 0 then
+                  return
+               end
+
+               for _, hunk in ipairs(hunks) do
+                  if hunk.added and hunk.added.count > 0 then
+                     local start_line = hunk.added.start
+                     local end_line = start_line + hunk.added.count - 1
+
+                     local end_col = #vim.api.nvim_buf_get_lines(bufnr, end_line - 1, end_line, false)[1]
+                     vim.lsp.buf.format({
+                        bufnr = bufnr,
+                        async = false,
+                        range = {
+                           ["start"] = { start_line, 0 },
+                           ["end"] = { end_line, end_col }
+                        },
+                        timeout_ms = CONFIG.FORMAT_TIMEOUT_MS,
+                        filter = function(client)
+                           return client:supports_method("textDocument/rangeFormatting", bufnr)
+                        end
+                     })
                   end
-               })
+               end
             end
          })
 
