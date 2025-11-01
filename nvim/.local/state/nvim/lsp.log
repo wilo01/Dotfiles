@@ -4496,3 +4496,30 @@
 [WARN][2025-10-13 20:34:03] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for workspace/executeCommand despite dynamicRegistration set to false. Report upstream, this warning is harmless"
 [START][2025-10-13 20:34:18] LSP logging initiated
 [WARN][2025-10-13 20:34:18] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-10-14 22:33:43] LSP logging initiated
+[WARN][2025-10-14 22:33:43] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-10-14 22:36:58] LSP logging initiated
+[ERROR][2025-10-14 22:36:58] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	"[22:36:57 INF] <LSP Entry> Starting Marksman LSP server: {}\n"
+[ERROR][2025-10-14 22:36:58] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	'[22:36:58 INF] <Folder> Loading folder documents: {"uri": "file:///home/dariuszw/Dev/Private"}\n'
+[START][2025-10-14 22:37:23] LSP logging initiated
+[WARN][2025-10-14 22:37:23] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-10-25 21:44:02] LSP logging initiated
+[WARN][2025-10-25 21:44:02] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-10-25 22:07:53] LSP logging initiated
+[ERROR][2025-10-25 22:07:53] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	"[22:07:53 INF] <LSP Entry> Starting Marksman LSP server: {}\n"
+[ERROR][2025-10-25 22:07:53] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	'[22:07:53 INF] <Folder> Loading folder documents: {"uri": "file:///home/dariuszw/Dev/Private/projects/kolorowanki"}\n'
+[START][2025-10-25 22:14:49] LSP logging initiated
+[ERROR][2025-10-25 22:14:49] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	"[22:14:49 INF] <LSP Entry> Starting Marksman LSP server: {}\n"
+[ERROR][2025-10-25 22:14:49] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	'[22:14:49 INF] <Folder> Loading folder documents: {"uri": "file:///home/dariuszw/Dev/Private"}\n'
+[START][2025-11-01 21:17:34] LSP logging initiated
+[WARN][2025-11-01 21:17:34] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for textDocument/typeDefinition despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[WARN][2025-11-01 21:17:34] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for workspace/executeCommand despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-01 21:19:25] LSP logging initiated
+[WARN][2025-11-01 21:19:25] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for textDocument/typeDefinition despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[WARN][2025-11-01 21:19:25] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for workspace/executeCommand despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-01 21:27:42] LSP logging initiated
+[WARN][2025-11-01 21:27:42] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for textDocument/typeDefinition despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[WARN][2025-11-01 21:27:42] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for workspace/executeCommand despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-01 21:31:01] LSP logging initiated
+[WARN][2025-11-01 21:31:01] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for textDocument/typeDefinition despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[WARN][2025-11-01 21:31:01] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for workspace/executeCommand despite dynamicRegistration set to false. Report upstream, this warning is harmless"

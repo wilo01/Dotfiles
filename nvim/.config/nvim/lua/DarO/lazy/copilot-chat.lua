@@ -27,7 +27,7 @@ return {
          mode = { "n", "v" },
       },
       {
-         "<leader>gp",
+         "<leader>GP",
          function()
             require("CopilotChat").select_prompt()
          end,

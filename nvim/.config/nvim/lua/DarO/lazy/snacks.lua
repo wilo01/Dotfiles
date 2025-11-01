@@ -76,6 +76,23 @@ return {
          notification = {
             wo = { wrap = true }
          }
+      },
+      gh = {
+         enabled = true,
+         keys = {
+            select  = { "<cr>", "gh_actions", desc = "Select Action" },
+            edit    = { "i", "gh_edit", desc = "Edit" },
+            comment = { "a", "gh_comment", desc = "Add Comment" },
+            close   = { "c", "gh_close", desc = "Close" },
+            reopen  = { "o", "gh_reopen", desc = "Reopen" },
+         },
+      },
+      picker = {
+         enabled = true,
+         sources = {
+            gh_issue = {},
+            gh_pr = {},
+         }
       }
    },
    keys = function()
@@ -89,6 +106,10 @@ return {
          { "<leader>ob", function() Snacks.gitbrowse() end,               desc = "Snacks Git Open in Browser" },
          { "<leader>gf", function() Snacks.lazygit.log_file() end,        desc = "Snacks Lazygit Current File History" },
          { "<leader>gl", function() Snacks.lazygit.log() end,             desc = "Snacks Lazygit Log (cwd)" },
+         { "<leader>gi", function() Snacks.picker.gh_issue() end,                  desc = "GitHub Issues (open)" },
+         { "<leader>gI", function() Snacks.picker.gh_issue({ state = "all" }) end, desc = "GitHub Issues (all)" },
+         { "<leader>gp", function() Snacks.picker.gh_pr() end,                     desc = "GitHub Pull Requests (open)" },
+         { "<leader>gP", function() Snacks.picker.gh_pr({ state = "all" }) end,    desc = "GitHub Pull Requests (all)" },
          { "<leader>cR", function() Snacks.rename.rename_file() end,      desc = "Snacks Rename File" },
          { "<leader>te", function() Snacks.terminal() end,                desc = "Snacks Toggle Terminal" },
          -- { "<leader>T",  function() Snacks.terminal() end,                desc = "Snacks which_key_ignore" },
