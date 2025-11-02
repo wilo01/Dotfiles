@@ -151,6 +151,7 @@ return {
             snip("all", "todo", "[ ] TODO: $0")
             snip("all", "todo-", "- [ ] TODO: $0")
             snip("all", "todo--", "-- [ ] TODO: $0")
+            snip("all", "todo//", "// [ ] TODO: $0")
             snip("all", "datetime", get_timestamp, "Insert current date and time")
             snip("all", "timestamp", get_timestamp, "Insert current timestamp")
             snip("all", "date", get_date, "Insert current date")
