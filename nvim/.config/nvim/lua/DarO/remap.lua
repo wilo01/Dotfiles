@@ -112,14 +112,15 @@ vim.keymap.set("n", "<leader>*", function()
    local ft = vim.bo.filetype
    local comment_patterns = {
       javascript = "//",
-      lua = "%-%-",
-      python = "#",
       c = "//",
+      go = "//",
+      python = "#",
       sh = "#",
       bash = "#",
       zsh = "#",
-      vim = '"',
+      lua = "%-%-",
       sql = "%-%- ",
+      vim = '"',
    }
 
    local pattern = comment_patterns[ft]
@@ -233,7 +234,7 @@ vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>",
 
 -- LSP Formatting
 vim.keymap.set({ "n", "v" }, "<leader>f", function()
-   -- vim.lsp.buf.format()
+   vim.lsp.buf.format()
    vim.cmd("write")
 end, { desc = "Format and save with LSP" })
 vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "LSP code actions" })

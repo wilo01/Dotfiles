@@ -319,25 +319,44 @@ return {
                   return
                end
 
-               for _, hunk in ipairs(hunks) do
-                  if hunk.added and hunk.added.count > 0 then
-                     local start_line = hunk.added.start
-                     local end_line = start_line + hunk.added.count - 1
-
-                     local end_col = #vim.api.nvim_buf_get_lines(bufnr, end_line - 1, end_line, false)[1]
-                     vim.lsp.buf.format({
-                        bufnr = bufnr,
-                        async = false,
-                        range = {
-                           ["start"] = { start_line, 0 },
-                           ["end"] = { end_line, end_col }
-                        },
-                        timeout_ms = CONFIG.FORMAT_TIMEOUT_MS,
-                        filter = function(client)
-                           return client:supports_method("textDocument/rangeFormatting", bufnr)
-                        end
-                     })
+               local supports_range_format = false
+               for _, client in ipairs(clients) do
+                  if client:supports_method("textDocument/rangeFormatting", bufnr) then
+                     supports_range_format = true
+                     break
                   end
+               end
+               if supports_range_format then
+                  for _, hunk in ipairs(hunks) do
+                     if hunk.added and hunk.added.count > 0 then
+                        local start_line = hunk.added.start
+                        local end_line = start_line + hunk.added.count - 1
+
+                        local end_col = #vim.api.nvim_buf_get_lines(bufnr, end_line - 1, end_line, false)[1]
+                        vim.lsp.buf.format({
+                           bufnr = bufnr,
+                           async = false,
+                           range = {
+                              ["start"] = { start_line, 0 },
+                              ["end"] = { end_line, end_col }
+                           },
+                           timeout_ms = CONFIG.FORMAT_TIMEOUT_MS,
+                           filter = function(client)
+                              return client:supports_method("textDocument/rangeFormatting", bufnr)
+                           end
+                        })
+                     end
+                  end
+               else
+                  vim.lsp.buf.format({
+                     bufnr = bufnr,
+                     async = false,
+                     timeout_ms = CONFIG.FORMAT_TIMEOUT_MS,
+                     filter = function(client)
+                        return client:supports_method("textDocument/formatting", bufnr)
+                            and client.name ~= "ruff"
+                     end
+                  })
                end
             end
          })
