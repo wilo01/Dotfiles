@@ -19,46 +19,11 @@ autocmd("FileType", {
    pattern = "*",
    callback = function(opts)
       local ft = vim.bo[opts.buf].filetype
-      local commentstrings = {
-         bicep = "// %s",
-         sql = "-- %s",
-         lua = "-- %s",
-         python = "# %s",
-         bash = "# %s",
-         sh = "# %s",
-         zsh = "# %s",
-         vim = '" %s',
-         javascript = "// %s",
-         typescript = "// %s",
-         javascriptreact = "// %s",
-         typescriptreact = "// %s",
-         c = "// %s",
-         cpp = "// %s",
-         go = "// %s",
-         rust = "// %s",
-         zig = "// %s",
-         yaml = "# %s",
-         toml = "# %s",
-         json = "// %s",
-         jsonc = "// %s",
-         css = "/* %s */",
-         scss = "// %s",
-         html = "<!-- %s -->",
-         xml = "<!-- %s -->",
-         vue = "<!-- %s -->",
-         svelte = "<!-- %s -->",
-         markdown = "<!-- %s -->",
-         dockerfile = "# %s",
-         make = "# %s",
-         cmake = "# %s",
-         gitcommit = "# %s",
-         gitconfig = "# %s",
-         conf = "# %s",
-         ini = "; %s",
-      }
+      local comment_patterns = require("DarO.comment-patterns")
+      local commentstring = comment_patterns.get_commentstring(ft)
 
-      if commentstrings[ft] then
-         vim.bo[opts.buf].commentstring = commentstrings[ft]
+      if comment_patterns.commentstrings[ft] then
+         vim.bo[opts.buf].commentstring = commentstring
       end
    end,
    group = general,

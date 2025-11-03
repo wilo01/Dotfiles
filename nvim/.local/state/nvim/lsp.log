@@ -4541,3 +4541,6 @@
 [WARN][2025-11-02 20:47:26] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
 [START][2025-11-02 21:30:16] LSP logging initiated
 [ERROR][2025-11-02 21:30:16] ...lsp/handlers.lua:562	"2025/11/02 21:30:16 no completions found: getting file file:///home/dariuszw/Dev/Private/projects/healthpulse/internal/storage/storage.go for Completion: <nil> (package completions: invalid position for package completion: cursor after expression)\n\tposition=0:15\n"
+[START][2025-11-02 22:53:59] LSP logging initiated
+[ERROR][2025-11-02 22:53:59] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	"[22:53:59 INF] <LSP Entry> Starting Marksman LSP server: {}\n"
+[ERROR][2025-11-02 22:53:59] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	'[22:53:59 INF] <Folder> Loading folder documents: {"uri": "file:///home/dariuszw/Dev/Private/projects/healthpulse"}\n'

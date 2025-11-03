@@ -79,21 +79,8 @@ vim.keymap.set('n', '<leader>,', function()
 end, { desc = "Toggle true/false" })
 vim.keymap.set("n", "<leader>c/", function()
    local ft = vim.bo.filetype
-   local comment_patterns = {
-      javascript = "// ",
-      lua = "%-%- ",
-      python = "# ",
-      c = "// ",
-      sql = "%-%- ",
-   }
-
-   local pattern = comment_patterns[ft]
-
-   if not pattern then
-      vim.notify("No comment pattern defined for filetype: " .. ft, vim.log.levels.WARN)
-      return
-   end
-
+   local comment_patterns = require("DarO.comment-patterns")
+   local pattern = comment_patterns.get_comment_pattern(ft)
    local line_number = vim.fn.line(".") - 1
    local current_line = vim.api.nvim_buf_get_lines(0, line_number, line_number + 1, false)[1]
 
@@ -102,34 +89,25 @@ vim.keymap.set("n", "<leader>c/", function()
       return
    end
 
-   local updated_line = current_line:gsub(pattern .. ".*", "")
-   vim.api.nvim_buf_set_lines(0, line_number, line_number + 1, false, { updated_line })
+   if comment_patterns.has_block_comments(ft) then
+      local prefix = comment_patterns.get_comment_prefix(ft)
+      local suffix = comment_patterns.get_comment_suffix(ft)
+      local escaped_prefix = prefix:gsub("([%^%$%(%)%%%.%[%]%*%+%-%?])", "%%%1")
+      local escaped_suffix = suffix:gsub("([%^%$%(%)%%%.%[%]%*%+%-%?])", "%%%1")
+      local updated_line = current_line:gsub(escaped_prefix .. ".*" .. escaped_suffix, "")
+      vim.api.nvim_buf_set_lines(0, line_number, line_number + 1, false, { updated_line })
+   else
+      local updated_line = current_line:gsub(pattern .. ".*", "")
+      vim.api.nvim_buf_set_lines(0, line_number, line_number + 1, false, { updated_line })
+   end
    vim.notify("Comment removed from the current line!", vim.log.levels.INFO)
 end, { desc = "Remove comment from current line" })
 
 vim.keymap.set("n", "<leader>*", function()
    local gitsigns = require('gitsigns')
    local ft = vim.bo.filetype
-   local comment_patterns = {
-      javascript = "//",
-      c = "//",
-      go = "//",
-      python = "#",
-      sh = "#",
-      bash = "#",
-      zsh = "#",
-      lua = "%-%-",
-      sql = "%-%- ",
-      vim = '"',
-   }
-
-   local pattern = comment_patterns[ft]
-
-   if not pattern then
-      vim.notify("No comment pattern defined for filetype: " .. ft, vim.log.levels.WARN)
-      return
-   end
-
+   local comment_module = require("DarO.comment-patterns")
+   local pattern = comment_module.get_comment_pattern(ft)
    local bufnr = vim.api.nvim_get_current_buf()
    local hunks = gitsigns.get_hunks(bufnr)
 
@@ -172,6 +150,7 @@ vim.keymap.set("n", "<leader>*", function()
       return nil
    end
 
+   local raw_pattern = comment_module.get_comment_prefix(ft)
    for _, hunk in ipairs(hunks) do
       if hunk.added and hunk.added.start and hunk.added.count > 0 then
          local start_line = hunk.added.start - 1 -- Convert to 0-based
@@ -186,7 +165,7 @@ vim.keymap.set("n", "<leader>*", function()
                   table.insert(lines_to_delete, line_idx)
                   removed_count = removed_count + 1
                else
-                  local comment_pos = find_trailing_comment(original_line, pattern:gsub("%%", ""))
+                  local comment_pos = find_trailing_comment(original_line, raw_pattern)
                   if comment_pos then
                      local updated_line = original_line:sub(1, comment_pos - 1):gsub("%s+$", "")
                      vim.api.nvim_buf_set_lines(bufnr, line_idx, line_idx + 1, false, { updated_line })
@@ -238,21 +217,128 @@ vim.keymap.set({ "n", "v" }, "<leader>f", function()
    vim.cmd("write")
 end, { desc = "Format and save with LSP" })
 vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "LSP code actions" })
-vim.keymap.set("n", "<leader>d", function()
+vim.keymap.set("n", "<leader>[", function()
+   local diagnostics = vim.diagnostic.get(0)
+   if #diagnostics == 0 then
+      vim.notify("No diagnostics in current buffer", vim.log.levels.INFO)
+      return
+   end
+   vim.diagnostic.goto_prev({ wrap = true })
+   vim.cmd("normal! zz")
+end, { desc = "Go to previous diagnostic and center" })
+vim.keymap.set("n", "<leader>]", function()
+   local diagnostics = vim.diagnostic.get(0)
+   if #diagnostics == 0 then
+      vim.notify("No diagnostics in current buffer", vim.log.levels.INFO)
+      return
+   end
+   vim.diagnostic.goto_next({ wrap = true })
+   vim.cmd("normal! zz")
+end, { desc = "Go to next diagnostic and center" })
+vim.keymap.set("n", "<leader>D", function()
    local diagnostics = vim.diagnostic.get(0, { lnum = vim.fn.line('.') - 1 })
 
    vim.diagnostic.open_float(nil, { focusable = false, source = "if_many" })
 
    if diagnostics and #diagnostics > 0 then
       local message = diagnostics[1].message
+      local comment_patterns = require("DarO.comment-patterns")
+      local ft = vim.bo.filetype
+
+      local clean_message = message:gsub("\n", " "):gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
+
+      if #clean_message > 100 then
+         clean_message = clean_message:sub(1, 97) .. "..."
+      end
+
+      local todo_comment = comment_patterns.create_todo_comment(ft, clean_message)
+
+      local current_line_num = vim.fn.line('.') - 1
+      local current_line_content = vim.api.nvim_buf_get_lines(0, current_line_num, current_line_num + 1, false)[1]
+
+      if current_line_content then
+         local prefix = comment_patterns.get_comment_prefix_spaced(ft)
+         local todo_pattern = prefix:gsub("([%^%$%(%)%%%.%[%]%*%+%-%?])", "%%%1") .. "%[ %] TODO:"
+
+         if not current_line_content:match(todo_pattern) then
+            local updated_line = current_line_content .. "  " .. todo_comment
+            vim.api.nvim_buf_set_lines(0, current_line_num, current_line_num + 1, false, { updated_line })
+         else
+            vim.notify('TODO comment already exists on this line', vim.log.levels.INFO)
+         end
+      end
       vim.fn.setreg('+', message)
       vim.fn.setreg('"', message)
-      vim.notify(message, vim.log.levels.INFO)
+
+      vim.notify('TODO comment created: ' .. clean_message:sub(1, 50) .. (clean_message:len() > 50 and "..." or ""),
+         vim.log.levels.INFO)
    else
       vim.notify('No diagnostic found at cursor', vim.log.levels.WARN)
    end
-end, { desc = "Show diagnostic in floating window and copy message to clipboard" })
+end, { desc = "Create TODO comment from diagnostic and show in floating window" })
+vim.keymap.set("n", "<leader>d", function()
+   local diagnostics = vim.diagnostic.get(0)
+   local comment_patterns = require("DarO.comment-patterns")
+   local ft = vim.bo.filetype
 
+   if not diagnostics or #diagnostics == 0 then
+      vim.notify('No diagnostics found in current buffer', vim.log.levels.WARN)
+      return
+   end
+
+   local diagnostics_by_line = {}
+   for _, diagnostic in ipairs(diagnostics) do
+      local line_num = diagnostic.lnum
+      if not diagnostics_by_line[line_num] then
+         diagnostics_by_line[line_num] = {}
+      end
+      table.insert(diagnostics_by_line[line_num], diagnostic)
+   end
+   local line_numbers = {}
+   for line_num, _ in pairs(diagnostics_by_line) do
+      table.insert(line_numbers, line_num)
+   end
+   table.sort(line_numbers, function(a, b) return a > b end)
+
+   local comments_added = 0
+   local prefix = comment_patterns.get_comment_prefix_spaced(ft)
+   local suffix = comment_patterns.get_comment_suffix(ft)
+
+   for _, line_num in ipairs(line_numbers) do
+      local line_diagnostics = diagnostics_by_line[line_num]
+      local current_line = vim.api.nvim_buf_get_lines(0, line_num, line_num + 1, false)[1]
+
+      if current_line then
+         local todo_pattern = prefix:gsub("([%^%$%(%)%%%.%[%]%*%+%-%?])", "%%%1") .. "%[ %] TODO:"
+         if not current_line:match(todo_pattern) then
+            local messages = {}
+            for _, diag in ipairs(line_diagnostics) do
+               local clean_msg = diag.message:gsub("\n", " "):gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
+               if #clean_msg > 80 then
+                  clean_msg = clean_msg:sub(1, 77) .. "..."
+               end
+               table.insert(messages, clean_msg)
+            end
+
+            local combined_message = table.concat(messages, "; ")
+            local todo_comment = prefix .. "[ ] TODO: " .. combined_message
+            if suffix ~= "" then
+               todo_comment = todo_comment .. " " .. suffix
+            end
+
+            local updated_line = current_line .. "  " .. todo_comment
+            vim.api.nvim_buf_set_lines(0, line_num, line_num + 1, false, { updated_line })
+            comments_added = comments_added + 1
+         end
+      end
+   end
+
+   if comments_added > 0 then
+      vim.notify(string.format('Added TODO comments to %d lines with diagnostics', comments_added), vim.log.levels.INFO)
+   else
+      vim.notify('All diagnostic lines already have TODO comments', vim.log.levels.INFO)
+   end
+end, { desc = "Add TODO comments to all lines with diagnostics" })
 -- Quickfix and Location List Navigation
 vim.keymap.set("n", "<C-j>", "<cmd>cnext<CR>zz", { desc = "Next quickfix item" })
 vim.keymap.set("n", "<C-k>", "<cmd>cprev<CR>zz", { desc = "Previous quickfix item" })
@@ -523,7 +609,6 @@ local function open_git_online()
       print("Error: Unsupported remote host!")
       return
    end
-   -- [ ] TODO: Need checks for nil
    repo_path = remote_url:match(detected_host.ssh_pattern) or remote_url:match(detected_host.https_pattern)
    base_url = detected_host.base_url
 
