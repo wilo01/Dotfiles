@@ -78,17 +78,17 @@ autocmd({ "BufWritePre" }, {
    command = [[%s/\s\+$//e]],
 })
 
-vim.api.nvim_create_autocmd('LspAttach', {
-   group = vim.api.nvim_create_augroup('LspAttach', { clear = true }),
+autocmd('LspAttach', {
+   group = augroup('LspAttach', { clear = true }),
    callback = function(event)
       local opts = { buffer = event.buf }
 
       -- Backwards compatible document highlighting
       local ok_client, client = pcall(vim.lsp.get_client_by_id, event.data.client_id)
       if ok_client and client and client.server_capabilities and client.server_capabilities.documentHighlightProvider then
-         local highlight_augroup = vim.api.nvim_create_augroup("lsp-highlight-" .. event.buf, { clear = true })
+         local highlight_augroup = augroup("lsp-highlight-" .. event.buf, { clear = true })
 
-         vim.api.nvim_create_autocmd("CursorHold", {
+         autocmd("CursorHold", {
             group = highlight_augroup,
             buffer = event.buf,
             callback = function()
@@ -96,7 +96,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
             end,
          })
 
-         vim.api.nvim_create_autocmd("CursorMoved", {
+         autocmd("CursorMoved", {
             group = highlight_augroup,
             buffer = event.buf,
             callback = function()
@@ -186,7 +186,20 @@ vim.api.nvim_create_user_command("CSVformatting", function()
    print("CSV prettify functionality is now " .. (vim.g.csv_prettify_ind and "enabled" or "disabled") .. ".")
 end, { desc = "Toggle CSV prettify functionality globally" })
 
--- vim.api.nvim_create_autocmd("FileType", {
+autocmd('BufReadPost', {
+   callback = function(args)
+      local mark = vim.api.nvim_buf_get_mark(args.buf, '"')
+      local line_count = vim.api.nvim_buf_line_count(args.buf)
+      if mark[1] > 0 and mark[1] <= line_count then
+         vim.api.nvim_win_set_cursor(0, mark)
+         vim.schedule(function()
+            vim.cmd("normal! zz")
+         end)
+      end
+   end,
+   desc = "Restore cursor position on buffer read",
+})
+-- autocmd("FileType", {
 --    pattern = "qf",
 --    callback = function()
 --       vim.keymap.set("n", "k", "<Up><CR><C-w>p", { buffer = true, remap = false, desc = "Navigate up quickfix" })
