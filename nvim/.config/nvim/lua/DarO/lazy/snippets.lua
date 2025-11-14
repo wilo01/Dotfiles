@@ -355,6 +355,28 @@ return {
                   "try {\n\tconst response = await fetch('${1:url}');\n\tconst data = await response.json();\n\t${2}\n} catch (error) {\n\tconsole.error('Error:', error);\n}$0")
                snip(ft, "timeout", "setTimeout(() => {\n\t${1}\n}, ${2:1000});$0")
                snip(ft, "interval", "setInterval(() => {\n\t${1}\n}, ${2:1000});$0")
+               snip(ft,
+                  "<!DOCTYPE html>\n<html lang=\"${1:en}\">\n<head>\n\t<meta charset=\"UTF-8\">\n\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n\t<title>${2:Document}</title>\n</head>\n<body>\n\t${3}\n</body>\n</html>$0")
+               snip(ft, "div", "<div class=\"${1}\">\n\t${2}\n</div>$0")
+               snip(ft, "span", "<span class=\"${1}\">${2}</span>$0")
+               snip(ft, "a", "<a href=\"${1:#}\" target=\"${2:_blank}\">${3:Link text}</a>$0")
+               snip(ft, "img", "<img src=\"${1}\" alt=\"${2}\" width=\"${3}\" height=\"${4}\">$0")
+               snip(ft, "form", "<form action=\"${1}\" method=\"${2:POST}\">\n\t${3}\n</form>$0")
+               snip(ft, "input", "<input type=\"${1:text}\" name=\"${2}\" id=\"${3}\" placeholder=\"${4}\">$0")
+               snip(ft, "button", "<button type=\"${1:button}\" class=\"${2}\">${3:Click me}</button>$0")
+               snip(ft, "ul", "<ul>\n\t<li>${1}</li>\n\t<li>${2}</li>\n\t<li>${3}</li>\n</ul>$0")
+               snip(ft, "ol", "<ol>\n\t<li>${1}</li>\n\t<li>${2}</li>\n\t<li>${3}</li>\n</ol>$0")
+               snip(ft, "table",
+                  "<table>\n\t<thead>\n\t\t<tr>\n\t\t\t<th>${1:Header 1}</th>\n\t\t\t<th>${2:Header 2}</th>\n\t\t</tr>\n\t</thead>\n\t<tbody>\n\t\t<tr>\n\t\t\t<td>${3:Data 1}</td>\n\t\t\t<td>${4:Data 2}</td>\n\t\t</tr>\n\t</tbody>\n</table>$0")
+               snip(ft, "section", "<section class=\"${1}\">\n\t${2}\n</section>$0")
+               snip(ft, "article", "<article class=\"${1}\">\n\t${2}\n</article>$0")
+               snip(ft, "header", "<header class=\"${1}\">\n\t${2}\n</header>$0")
+               snip(ft, "footer", "<footer class=\"${1}\">\n\t${2}\n</footer>$0")
+               snip(ft, "nav", "<nav class=\"${1}\">\n\t${2}\n</nav>$0")
+               snip(ft, "main", "<main class=\"${1}\">\n\t${2}\n</main>$0")
+               snip(ft, "script", "<script src=\"${1}\">\n\t${2}\n</script>$0")
+               snip(ft, "link", "<link rel=\"${1:stylesheet}\" href=\"${2:style.css}\">$0")
+               snip(ft, "meta", "<meta ${1:name}=\"${2}\" content=\"${3}\">$0")
             end
 
             local ts_filetypes = { "typescript", "typescriptreact" }

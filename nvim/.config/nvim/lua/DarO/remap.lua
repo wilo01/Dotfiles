@@ -475,8 +475,9 @@ vim.keymap.set("n", "<leader>vb", "<CMD>Gitsigns blame_line<CR>", { desc = "Gits
 vim.keymap.set("n", "<leader>rg", "<CMD>Gitsigns reset_hunk<CR>", { desc = "Gitsigns Reset Hunk (Reset git, diff)" })
 vim.keymap.set("n", "<leader>sh", "<CMD>Gitsigns stage_hunk<CR>", { desc = "Gitsigns Stage Hunk" })
 vim.keymap.set("n", "<leader>sf", "<CMD>Gitsigns stage_buffer<CR>", { desc = "Gitsigns Stage entire File/Buffer" })
-vim.keymap.set("n", "<leader>uf", "<CMD>Gitsigns reset_buffer_index<CR>",
-   { desc = "Gitsigns Unstage entire File/Buffer" }) -- [ ] TODO: Toggle Unstage entire File/Buffer
+vim.keymap.set("n", "<leader>uf", function()
+   require('gitsigns').reset_buffer()
+end, { desc = "Gitsigns Discard all changes in File/Buffer (Reset Hunks)" })
 vim.keymap.set("n", "J", "<CMD>Gitsigns next_hunk<CR>zz", { desc = "Gitsigns go to next Git hunk and jump to center" })
 vim.keymap.set("n", "K", "<CMD>Gitsigns prev_hunk<CR>zz",
    { desc = "Gitsigns go to previous Git hunk and jump to center" })
