@@ -297,7 +297,7 @@ return {
                   "<changeSet id=\"${1:id}\" author=\"${2:author}\">\n\t<addColumn tableName=\"${3:table_name}\">\n\t\t<column name=\"${4:column_name}\" type=\"${5:varchar(50)}\"/>\n\t</addColumn>\n</changeSet>$0")
             end
 
-            local js_filetypes = { "javascript", "typescript", "javascriptreact", "typescriptreact" }
+            local js_filetypes = { "javascript", "typescript", "javascriptreact", "typescriptreact", "html", "html5" }
             for _, ft in ipairs(js_filetypes) do
                snip(ft, "clwo", "console.warn('', {\n\t'${1}': ${1}\n});$0")
                snip(ft, "clw", "console.warn('${1}', ${1})")
@@ -661,29 +661,6 @@ return {
             snip("rust", "closure", "|${1:params}| ${2:expression}$0")
             snip("rust", "async", "async fn ${1:function_name}(${2:params}) ${3:-> ReturnType }{\n\t${4:todo!()}\n}$0")
             snip("rust", "await", ".await$0")
-
-            snip("html", "html5",
-               "<!DOCTYPE html>\n<html lang=\"${1:en}\">\n<head>\n\t<meta charset=\"UTF-8\">\n\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n\t<title>${2:Document}</title>\n</head>\n<body>\n\t${3}\n</body>\n</html>$0")
-            snip("html", "div", "<div${1: class=\"${2}\"}>\n\t${3}\n</div>$0")
-            snip("html", "span", "<span${1: class=\"${2}\"}>${3}</span>$0")
-            snip("html", "a", "<a href=\"${1:#}\"${2: target=\"_blank\"}>${3:Link text}</a>$0")
-            snip("html", "img", "<img src=\"${1}\" alt=\"${2}\"${3: width=\"${4}\" height=\"${5}\"}>$0")
-            snip("html", "form", "<form${1: action=\"${2}\" method=\"${3:POST}\"}>\n\t${4}\n</form>$0")
-            snip("html", "input", "<input type=\"${1:text}\" name=\"${2}\" id=\"${3}\"${4: placeholder=\"${5}\"}>$0")
-            snip("html", "button", "<button type=\"${1:button}\"${2: class=\"${3}\"}>${4:Click me}</button>$0")
-            snip("html", "ul", "<ul>\n\t<li>${1}</li>\n\t<li>${2}</li>\n\t<li>${3}</li>\n</ul>$0")
-            snip("html", "ol", "<ol>\n\t<li>${1}</li>\n\t<li>${2}</li>\n\t<li>${3}</li>\n</ol>$0")
-            snip("html", "table",
-               "<table>\n\t<thead>\n\t\t<tr>\n\t\t\t<th>${1:Header 1}</th>\n\t\t\t<th>${2:Header 2}</th>\n\t\t</tr>\n\t</thead>\n\t<tbody>\n\t\t<tr>\n\t\t\t<td>${3:Data 1}</td>\n\t\t\t<td>${4:Data 2}</td>\n\t\t</tr>\n\t</tbody>\n</table>$0")
-            snip("html", "section", "<section${1: class=\"${2}\"}>\n\t${3}\n</section>$0")
-            snip("html", "article", "<article${1: class=\"${2}\"}>\n\t${3}\n</article>$0")
-            snip("html", "header", "<header${1: class=\"${2}\"}>\n\t${3}\n</header>$0")
-            snip("html", "footer", "<footer${1: class=\"${2}\"}>\n\t${3}\n</footer>$0")
-            snip("html", "nav", "<nav${1: class=\"${2}\"}>\n\t${3}\n</nav>$0")
-            snip("html", "main", "<main${1: class=\"${2}\"}>\n\t${3}\n</main>$0")
-            snip("html", "script", "<script${1: src=\"${2}\"}>\n\t${3}\n</script>$0")
-            snip("html", "link", "<link rel=\"${1:stylesheet}\" href=\"${2:style.css}\">$0")
-            snip("html", "meta", "<meta ${1:name}=\"${2}\" content=\"${3}\">$0")
 
             snip("dockerfile", "from", "FROM ${1:node:18-alpine}$0")
             snip("dockerfile", "run", "RUN ${1:npm install}$0")

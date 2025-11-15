@@ -9,10 +9,11 @@ return {
 
          configs.setup({
             ensure_installed = {
+               -- "sql", "xml",
                "vimdoc", "javascript", "typescript", "c", "lua", "rust",
                "jsdoc", "bash", "markdown", "markdown_inline", "query",
                "vim", "html", "css", "json", "yaml", "python", "go",
-               "templ", "sql", "xml", "toml", "tsx", "dockerfile", "vue",
+               "templ", "toml", "tsx", "dockerfile", "vue",
                "svelte", "php", "java", "regex", "elixir", "heex", "eex"
             },
             auto_install = true,
