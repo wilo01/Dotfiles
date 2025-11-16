@@ -116,6 +116,12 @@ fi
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 # nvim switcher
+#
+# To add new nvim config (for Flatpak Neovim):
+# 1. Create: ~/.Dotfiles/nvim/.config/nvim-<name>/
+# 2. Run: cd ~/.Dotfiles && stow nvim
+# 3. Symlink: ln -s ~/.config/nvim-<name> ~/.var/app/io.neovim.nvim/config/nvim-<name>
+#
 alias nvim-vimscript="NVIM_APPNAME=nvim-vimscript nvim"
 alias nvim-reddit="NVIM_APPNAME=nvim-reddit nvim"
 
@@ -267,6 +273,7 @@ alias rm="sudo rm"
 # lazygit and lazydocker aliases
 alias lg="lazygit"
 alias ld="lazydocker"
+alias dnf="sudo dnf"
 
 # Other exports
 export MANPAGER='nvim +Man!'
