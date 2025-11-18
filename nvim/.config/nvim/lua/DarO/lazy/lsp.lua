@@ -316,6 +316,10 @@ return {
          vim.api.nvim_create_autocmd("BufWritePre", {
             group = vim.api.nvim_create_augroup("LspFormat", { clear = true }),
             callback = function(args)
+               if vim.g.disable_autoformat then
+                  return
+               end
+
                local bufnr = args.buf
                local filetype = vim.bo[bufnr].filetype
 
@@ -361,6 +365,9 @@ return {
                            },
                            timeout_ms = CONFIG.FORMAT_TIMEOUT_MS,
                            filter = function(client)
+                              if vim.g.disable_autoformat then
+                                 return false
+                              end
                               return client:supports_method("textDocument/rangeFormatting", bufnr)
                            end
                         })
@@ -372,6 +379,9 @@ return {
                      async = false,
                      timeout_ms = CONFIG.FORMAT_TIMEOUT_MS,
                      filter = function(client)
+                        if vim.g.disable_autoformat then
+                           return false
+                        end
                         return client:supports_method("textDocument/formatting", bufnr)
                             and client.name ~= "ruff"
                      end

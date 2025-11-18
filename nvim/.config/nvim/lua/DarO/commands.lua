@@ -44,20 +44,6 @@ vim.api.nvim_create_user_command('LspStatus', function()
    end
 end, { desc = "Show comprehensive LSP status" })
 
--- LspFix command - apply common fixes
-vim.api.nvim_create_user_command('LspFix', function()
-   print("Applying LSP fixes...")
-   
-   -- Reload LSP safety and fixes modules
-   local lsp_safety = require('DarO.lsp_safety')
-   local lsp_fixes = require('DarO.lsp_fixes')
-   
-   lsp_safety.install_safety_patches()
-   lsp_fixes.apply_all_fixes()
-   
-   print("LSP fixes applied. Run :LspSafetyCheck to verify.")
-end, { desc = "Apply LSP fixes and safety patches" })
-
 -- LspReload command - safe LSP restart
 vim.api.nvim_create_user_command('LspReload', function(opts)
    local get_clients = vim.lsp.get_clients or vim.lsp.get_active_clients
@@ -103,22 +89,22 @@ end, {
 -- LspDebug command - comprehensive debugging info
 vim.api.nvim_create_user_command('LspDebug', function()
    print("=== LSP Debug Information ===")
-   
+
    -- Check Neovim version
    local version = vim.version()
    print(string.format("Neovim: %d.%d.%d", version.major, version.minor, version.patch))
-   
+
    -- Check if modern LSP API is available
    print("Modern LSP API:")
    print("  vim.lsp.config:", vim.lsp.config and "✓" or "✗")
    print("  vim.lsp.enable:", vim.lsp.enable and "✓" or "✗")
    print("  vim.lsp.get_clients:", vim.lsp.get_clients and "✓" or "✗")
-   
+
    -- Check for deprecated API
    if vim.lsp.get_active_clients and not vim.lsp.get_clients then
       print("  WARNING: Using deprecated vim.lsp.get_active_clients")
    end
-   
+
    -- Check required modules
    print("\nRequired modules:")
    local modules = { "lspconfig", "cmp_nvim_lsp", "mason", "mason-lspconfig" }
@@ -126,19 +112,19 @@ vim.api.nvim_create_user_command('LspDebug', function()
       local ok, _ = pcall(require, module)
       print(string.format("  %s: %s", module, ok and "✓" or "✗"))
    end
-   
+
    -- Show current buffer LSP info
    local bufnr = vim.api.nvim_get_current_buf()
    local get_clients = vim.lsp.get_clients or vim.lsp.get_active_clients
    local buf_clients = get_clients({ bufnr = bufnr })
-   
+
    print(string.format("\nCurrent buffer (%d):", bufnr))
    print("  Filetype:", vim.bo.filetype)
    print("  LSP clients:", #buf_clients)
    for _, client in ipairs(buf_clients) do
       print(string.format("    • %s", client.name))
    end
-   
+
    -- Check log file
    local log_path = vim.lsp.get_log_path()
    local log_stat = vim.loop.fs_stat(log_path)
@@ -149,12 +135,28 @@ vim.api.nvim_create_user_command('LspDebug', function()
    end
 end, { desc = "Show comprehensive LSP debug information" })
 
--- Auto-load safety module on LSP events
-vim.api.nvim_create_autocmd("LspAttach", {
-   callback = function()
-      -- Ensure safety module is loaded
-      pcall(require, 'DarO.lsp_safety')
-      pcall(require, 'DarO.lsp_fixes')
-   end,
-   desc = "Load LSP safety modules on attach"
-})
+-- FormatDebug command - show all autocommands that might format
+vim.api.nvim_create_user_command('FormatDebug', function()
+   print("=== Format Debug Information ===")
+   print("Autoformat disabled:", vim.g.disable_autoformat and "YES" or "NO")
+   print("\nBufWritePre autocommands:")
+   local autocmds = vim.api.nvim_get_autocmds({ event = "BufWritePre" })
+   for _, autocmd in ipairs(autocmds) do
+      print(string.format("  Group: %s", autocmd.group_name or "none"))
+      if autocmd.pattern then
+         print(string.format("  Pattern: %s", vim.inspect(autocmd.pattern)))
+      end
+   end
+
+   print("\nLSP clients with formatting capability:")
+   local get_clients = vim.lsp.get_clients or vim.lsp.get_active_clients
+   local clients = get_clients()
+   for _, client in ipairs(clients) do
+      if client.supports_method("textDocument/formatting") then
+         print(string.format("  • %s", client.name))
+         if client.name == "eslint" and client.config.settings then
+            print(string.format("    format.enable: %s", client.config.settings.format and client.config.settings.format.enable or "nil"))
+         end
+      end
+   end
+end, { desc = "Show format-related debug information" })

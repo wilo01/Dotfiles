@@ -75,7 +75,12 @@ autocmd('TextYankPost', {
 autocmd({ "BufWritePre" }, {
    group = augroup('DarO', {}),
    pattern = { "*.md", "*.lua", "*.js", "*.jsx", "*.ts", "*.rs", "*.go", "*.py" },
-   command = [[%s/\s\+$//e]],
+   callback = function()
+      if vim.g.disable_autoformat then
+         return
+      end
+      vim.cmd([[%s/\s\+$//e]])
+   end,
 })
 
 autocmd('LspAttach', {
@@ -155,6 +160,80 @@ autocmd('LspAttach', {
    end
 })
 
+-- CSV editing: buffer-local keymap for <leader>t
+autocmd("FileType", {
+   pattern = "csv",
+   callback = function()
+      vim.defer_fn(function()
+         vim.notify("Use <leader>t to toggle CSV formatting", vim.log.levels.INFO)
+      end, 100)
+      vim.keymap.set("n", "<leader>t", function()
+         local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+         local bufnr = vim.api.nvim_get_current_buf()
+         local is_prettified = vim.b[bufnr].is_csv_prettified or false
+
+         if is_prettified then
+            local cleaned_lines = {}
+            for _, line in ipairs(lines) do
+               local cleaned_line = line:gsub("%s*,%s*", ","):gsub("%s+$", "")
+               table.insert(cleaned_lines, cleaned_line)
+            end
+            vim.api.nvim_buf_set_lines(0, 0, -1, false, cleaned_lines)
+            print("CSV prettification disabled.")
+         else
+            local MAX_COLUMN_WIDTH = 100
+            local ELLIPSIS = "..."
+            local MAX_FORMAT_WIDTH = 144
+
+            local max_lengths = {}
+
+            for _, line in ipairs(lines) do
+               local cols = vim.split(line, ",", { plain = true })
+               for i, col in ipairs(cols) do
+                  local col_length = math.min(#col, MAX_COLUMN_WIDTH)
+                  max_lengths[i] = math.max(max_lengths[i] or 0, col_length)
+               end
+            end
+
+            local prettified_lines = {}
+            for _, line in ipairs(lines) do
+               local cols = vim.split(line, ",", { plain = true })
+               for i, col in ipairs(cols) do
+                  local max_len = max_lengths[i] or 0
+
+                  if max_len > MAX_FORMAT_WIDTH then
+                     max_len = MAX_FORMAT_WIDTH
+                  end
+
+                  local formatted_col = col
+                  if #col > MAX_COLUMN_WIDTH then
+                     formatted_col = col:sub(1, MAX_COLUMN_WIDTH - #ELLIPSIS) .. ELLIPSIS
+                  end
+
+                  local success, result = pcall(string.format, "%-" .. max_len .. "s", formatted_col)
+                  if success then
+                     cols[i] = result
+                  else
+                     cols[i] = formatted_col .. string.rep(" ", math.max(0, max_len - #formatted_col))
+                     vim.notify(
+                        "Warning: String format failed for column " .. i .. ", using fallback padding",
+                        vim.log.levels.WARN
+                     )
+                  end
+               end
+               table.insert(prettified_lines, table.concat(cols, " , "))
+            end
+
+            vim.api.nvim_buf_set_lines(0, 0, -1, false, prettified_lines)
+            print("CSV prettification enabled.")
+         end
+
+         vim.b[bufnr].is_csv_prettified = not is_prettified
+      end, { buffer = true, desc = "Toggle CSV formatting", noremap = true, silent = true })
+   end,
+   desc = "Setup CSV formatting keymap for csv files only",
+})
+
 -- Auto-close CSV edit formatting before saving
 autocmd("BufWritePre", {
    pattern = "*.csv",
@@ -164,7 +243,8 @@ autocmd("BufWritePre", {
          return
       end
 
-      if vim.g.is_csv_prettified then
+      local bufnr = vim.api.nvim_get_current_buf()
+      if vim.b[bufnr].is_csv_prettified then
          local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
          local cleaned_lines = {}
          for _, line in ipairs(lines) do
@@ -173,7 +253,7 @@ autocmd("BufWritePre", {
          end
          vim.api.nvim_buf_set_lines(0, 0, -1, false, cleaned_lines)
          print("CSV compacted before saving.")
-         vim.g.is_csv_prettified = false
+         vim.b[bufnr].is_csv_prettified = false
       else
          print("CSV already in compact format.")
       end

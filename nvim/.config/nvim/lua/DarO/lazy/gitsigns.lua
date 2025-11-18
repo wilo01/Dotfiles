@@ -57,6 +57,10 @@ return {
          group = TheDaroGroup,
          pattern = "*",
          callback = function()
+            if vim.g.disable_autoformat then
+               return
+            end
+
             local bufnr = vim.api.nvim_get_current_buf()
             local hunk_lines = gitsigns.get_hunks(bufnr)
 

@@ -244,4 +244,14 @@ function M.print_startup_time()
    end, 50)
 end
 
+--- Format buffer with LSP if autoformat is enabled
+--- Displays a warning notification if autoformat is disabled
+function M.format_buffer()
+   if vim.g.disable_autoformat then
+      vim.notify("Unable to format: formatting is disabled (use <leader>tf to enable)", vim.log.levels.WARN)
+   else
+      vim.lsp.buf.format()
+   end
+end
+
 return M

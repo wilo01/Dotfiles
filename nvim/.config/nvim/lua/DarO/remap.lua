@@ -1,3 +1,4 @@
+local utils = require("DarO.utils")
 vim.g.mapleader = " "
 
 -- Text Actions
@@ -37,17 +38,15 @@ vim.keymap.set("n", "<A-k>", "{zz", { desc = "Jump to previous empty line and ce
 
 -- Editing Utilities
 vim.keymap.set("n", "x", '"_x', { desc = "Delete character without yanking" })
-vim.keymap.set("n", "<leader>+", '<C-a>', { desc = "Increment number" })
+vim.keymap.set("n", "<leader>+", "<C-a>", { desc = "Increment number" })
 vim.keymap.set("n", "<leader>=", "<C-a>", { desc = "Increment number" })
 vim.keymap.set("x", "<leader>=", "g<C-a>", { desc = "Increment numbers across selection" })
-vim.keymap.set("n", "<leader>-", '<C-x>', { desc = "Decrement number" })
-vim.keymap.set("x", "<leader>-", 'g<C-x>', { desc = "Decrement numbers across selection" })
+vim.keymap.set("n", "<leader>-", "<C-x>", { desc = "Decrement number" })
+vim.keymap.set("x", "<leader>-", "g<C-x>", { desc = "Decrement numbers across selection" })
 vim.keymap.set({ "n", "v" }, "yc", "yy<cmd>normal gcc<CR>p", { desc = "Duplicate a line and comment out the first line" })
 vim.keymap.set("n", "<leader>oc", function()
    local filenameAndLine = vim.fn.expand("%:t") .. ":" .. vim.fn.line(".")
-   local escaped = filenameAndLine:gsub([[\]], [[\\]])
-       :gsub([["]], [[\\"]])
-       :gsub([[']], [[\']])
+   local escaped = filenameAndLine:gsub([[\]], [[\\]]):gsub([["]], [[\\"]]):gsub([[']], [[\']])
    local script = [[
     tell application "Google Chrome"
       activate
@@ -213,9 +212,14 @@ vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>",
 
 -- LSP Formatting
 vim.keymap.set({ "n", "v" }, "<leader>f", function()
-   vim.lsp.buf.format()
+   utils.format_buffer()
    vim.cmd("write")
 end, { desc = "Format and save with LSP" })
+vim.keymap.set("n", "<leader>tf", function()
+   vim.g.disable_autoformat = not vim.g.disable_autoformat
+   local status = vim.g.disable_autoformat and "DISABLED" or "ENABLED"
+   vim.notify("Autoformat " .. status .. " (:FormatDebug to verify)", vim.log.levels.INFO)
+end, { desc = "Toggle autoformat on save" })
 vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "LSP code actions" })
 vim.keymap.set("n", "<leader>[", function()
    local diagnostics = vim.diagnostic.get(0)
@@ -386,7 +390,6 @@ vim.api.nvim_create_autocmd("FileType", {
    end,
    desc = "Setup quickfix preview keymaps"
 })
-
 -- File Operations / File Navigation
 vim.keymap.set("n", "<leader>v", vim.cmd.Ex, { desc = "Open Netrw" })
 vim.keymap.set("n", "gb", "<C-o>zz", { desc = "Go back, and center" })
@@ -455,14 +458,10 @@ vim.keymap.set("n", "<leader>vA", function()
          end
       end
 
-      vim.keymap.set("n", "J", navigate_hunk("next"),
-         { buffer = bufnr, desc = "Next hunk and refresh preview" })
-      vim.keymap.set("n", "K", navigate_hunk("prev"),
-         { buffer = bufnr, desc = "Previous hunk and refresh preview" })
-      vim.keymap.set("n", "q", "<cmd>close<CR>",
-         { buffer = bufnr, desc = "Close preview window" })
-      vim.keymap.set("n", "<Esc>", "<cmd>close<CR>",
-         { buffer = bufnr, desc = "Close preview window" })
+      vim.keymap.set("n", "J", navigate_hunk("next"), { buffer = bufnr, desc = "Next hunk and refresh preview" })
+      vim.keymap.set("n", "K", navigate_hunk("prev"), { buffer = bufnr, desc = "Previous hunk and refresh preview" })
+      vim.keymap.set("n", "q", "<cmd>close<CR>", { buffer = bufnr, desc = "Close preview window" })
+      vim.keymap.set("n", "<Esc>", "<cmd>close<CR>", { buffer = bufnr, desc = "Close preview window" })
    end
 
    vim.cmd("Gitsigns preview_hunk")
@@ -492,7 +491,7 @@ vim.keymap.set("v", "<leader>cl", function()
       "});"
    }
    vim.api.nvim_put(snippet, 'l', true, true)
-   vim.lsp.buf.format()
+   utils.format_buffer()
    vim.cmd("write")
 end, { desc = "Insert object console.warn snippet with selection (log, debugger)" })
 
@@ -504,8 +503,8 @@ vim.keymap.set("v", "<leader>cn", function()
       string.format("\t'%s'", selected_text),
       ");"
    }
-   vim.api.nvim_put(snippet, 'l', true, true)
-   vim.lsp.buf.format()
+   vim.api.nvim_put(snippet, "l", true, true)
+   utils.format_buffer()
    vim.cmd("write")
 end, { desc = "Insert without object console.warn snippet with selection (log, debugger)" })
 
@@ -637,75 +636,6 @@ local function open_git_online()
 end
 
 vim.keymap.set("n", "<leader>og", open_git_online, { desc = "Open current file in GitHub or GitLab at cursor" })
-
--- CSV editing format (Auto close on save in -> autocmds.lua)
--- [ ] TODO: Remove comments and please restrict this keymap to be used only in .csv files
-vim.g.is_csv_prettified = false
-vim.keymap.set("n", "<leader>t", function()
-   local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-
-   if vim.g.is_csv_prettified then
-      local cleaned_lines = {}
-      for _, line in ipairs(lines) do
-         local cleaned_line = line:gsub("%s*,%s*", ","):gsub("%s+$", "")
-         table.insert(cleaned_lines, cleaned_line)
-      end
-      vim.api.nvim_buf_set_lines(0, 0, -1, false, cleaned_lines)
-      print("CSV prettification disabled.")
-   else
-      -- Configuration constants
-      local MAX_COLUMN_WIDTH = 100 -- Maximum width for any column
-      local ELLIPSIS = "..."
-      local MAX_FORMAT_WIDTH = 144 -- Lua string.format limitation
-
-      local max_lengths = {}
-
-      -- Calculate maximum lengths for each column with limits
-      for _, line in ipairs(lines) do
-         local cols = vim.split(line, ",", { plain = true })
-         for i, col in ipairs(cols) do
-            local col_length = math.min(#col, MAX_COLUMN_WIDTH)
-            max_lengths[i] = math.max(max_lengths[i] or 0, col_length)
-         end
-      end
-
-      local prettified_lines = {}
-      for _, line in ipairs(lines) do
-         local cols = vim.split(line, ",", { plain = true })
-         for i, col in ipairs(cols) do
-            local max_len = max_lengths[i] or 0
-
-            -- Ensure we don't exceed format limits
-            if max_len > MAX_FORMAT_WIDTH then
-               max_len = MAX_FORMAT_WIDTH
-            end
-
-            -- Truncate long fields with ellipsis
-            local formatted_col = col
-            if #col > MAX_COLUMN_WIDTH then
-               formatted_col = col:sub(1, MAX_COLUMN_WIDTH - #ELLIPSIS) .. ELLIPSIS
-            end
-
-            -- Safe string formatting with error handling
-            local success, result = pcall(string.format, "%-" .. max_len .. "s", formatted_col)
-            if success then
-               cols[i] = result
-            else
-               -- Fallback: just pad manually if string.format fails
-               cols[i] = formatted_col .. string.rep(" ", math.max(0, max_len - #formatted_col))
-               vim.notify("Warning: String format failed for column " .. i .. ", using fallback padding",
-                  vim.log.levels.WARN)
-            end
-         end
-         table.insert(prettified_lines, table.concat(cols, " , "))
-      end
-
-      vim.api.nvim_buf_set_lines(0, 0, -1, false, prettified_lines)
-      print("CSV prettification enabled.")
-   end
-
-   vim.g.is_csv_prettified = not vim.g.is_csv_prettified
-end, { desc = "Toggle CSV formatting for csv edit", noremap = true, silent = true })
 
 -- Quickfix Navigation
 vim.keymap.set("n", "<C-w>p", "<C-w>p", { desc = "Toggle between quickfix and file (previous window)" })
