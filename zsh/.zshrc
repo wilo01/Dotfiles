@@ -118,9 +118,12 @@ fi
 # nvim switcher
 #
 # To add new nvim config (for Flatpak Neovim):
-# 1. Create: ~/.Dotfiles/nvim/.config/nvim-<name>/
-# 2. Run: cd ~/.Dotfiles && stow nvim
-# 3. Symlink: ln -s ~/.config/nvim-<name> ~/.var/app/io.neovim.nvim/config/nvim-<name>
+# 1. Clone/create config: ~/.Dotfiles/nvim/.config/nvim-<name>/
+# 2. Run: nvims-update (or nvu) - automatically syncs configs
+#
+# Manual sync (if needed):
+# - Stow: cd ~/.Dotfiles && stow nvim
+# - Flatpak: ln -s ~/.config/nvim-<name> ~/.var/app/io.neovim.nvim/config/nvim-<name>
 #
 alias nvim-vimscript="NVIM_APPNAME=nvim-vimscript nvim"
 alias nvim-reddit="NVIM_APPNAME=nvim-reddit nvim"
@@ -181,6 +184,90 @@ function nvims() {
 }
 
 bindkey -s ^a "nvims\n"
+
+function nvims-update() {
+    local dotfiles_path="$HOME/.Dotfiles"
+    local config_path="$HOME/.config"
+    local flatpak_config_path="$HOME/.var/app/io.neovim.nvim/config"
+    local original_dir="$(pwd)"
+    local synced=0
+    local skipped=0
+    local errors=0
+
+    echo "🔄 Syncing Neovim configurations..."
+    echo ""
+
+    if [[ ! -d "$dotfiles_path" ]]; then
+        echo "❌ Error: $dotfiles_path directory not found"
+        return 1
+    fi
+
+    if ! command -v stow >/dev/null 2>&1; then
+        echo "❌ Error: stow command not found. Please install stow."
+        return 1
+    fi
+
+    echo "📦 Running stow to sync configs to ~/.config/..."
+    cd "$dotfiles_path" || { echo "❌ Failed to cd to $dotfiles_path"; return 1; }
+
+    if stow nvim 2>/dev/null; then
+        echo "✅ Stow completed successfully"
+    else
+        echo "⚠️  Stow completed with warnings (configs may already be linked)"
+    fi
+    echo ""
+
+    mkdir -p "$flatpak_config_path" 2>/dev/null
+    echo "🔗 Creating symlinks for Flatpak Neovim..."
+    echo ""
+
+    for config_dir in "$config_path"/nvim*; do
+        if [[ -d "$config_dir" ]]; then
+            local config_name="${config_dir##*/}"
+            local flatpak_link="$flatpak_config_path/$config_name"
+
+            if [[ -L "$flatpak_link" ]]; then
+                local current_target="$(readlink "$flatpak_link")"
+                if [[ "$current_target" == "$config_dir" ]]; then
+                    echo "⏭️  $config_name (already synced)"
+                    ((skipped++))
+                else
+                    echo "⚠️  $config_name (updating symlink)"
+                    rm "$flatpak_link"
+                    if ln -s "$config_dir" "$flatpak_link" 2>/dev/null; then
+                        echo "✅ $config_name (updated)"
+                        ((synced++))
+                    else
+                        echo "❌ $config_name (failed to update)"
+                        ((errors++))
+                    fi
+                fi
+            elif [[ -e "$flatpak_link" ]]; then
+                echo "❌ $config_name (path exists but is not a symlink)"
+                ((errors++))
+            else
+                if ln -s "$config_dir" "$flatpak_link" 2>/dev/null; then
+                    echo "✅ $config_name (synced)"
+                    ((synced++))
+                else
+                    echo "❌ $config_name (failed to create symlink)"
+                    ((errors++))
+                fi
+            fi
+        fi
+    done
+
+    cd "$original_dir" || true
+
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "📊 Summary: $synced synced, $skipped skipped, $errors errors"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+    if [[ $errors -gt 0 ]]; then
+        return 1
+    fi
+}
 
 bindkey "^[[1;2C" forward-word
 bindkey "^[[1;2D" backward-word
