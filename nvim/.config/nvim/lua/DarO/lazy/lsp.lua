@@ -3,7 +3,10 @@ local LSP_SERVERS = {
    'dockerls', 'yamlls', 'zls', 'bashls',
    'pyright', 'ruff'
 }
-
+local MASON_TOOLS = {
+   "golangci-lint", "gofumpt", "goimports",
+   "eslint_d"
+}
 local CONFIG = {
    INDENT_SIZE = 3,
    FORMAT_TIMEOUT_MS = 5000,
@@ -47,11 +50,7 @@ return {
       dependencies = { "williamboman/mason.nvim" },
       config = function()
          require("mason-tool-installer").setup({
-            ensure_installed = {
-               "golangci-lint",
-               "gofumpt",
-               "goimports",
-            },
+            ensure_installed = MASON_TOOLS,
             auto_update = false,
             run_on_start = true,
             start_delay = 3000,
@@ -332,8 +331,8 @@ return {
                   return
                end
 
-               local ok, gitsigns = pcall(require, "gitsigns")
-               if not ok then
+               local ok_gitsigns, gitsigns = pcall(require, "gitsigns")
+               if not ok_gitsigns then
                   return
                end
 
@@ -417,6 +416,7 @@ return {
          end
 
          lint.linters.golangcilint = {
+            name = 'golangcilint',
             cmd = golangci_path ~= "" and golangci_path or mason_path,
             stdin = false,
             args = {

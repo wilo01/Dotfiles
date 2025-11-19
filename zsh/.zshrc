@@ -407,3 +407,5 @@ command -v pyenv >/dev/null 2>&1 && eval "$(pyenv init -)"
 command -v pyenv >/dev/null 2>&1 && eval "$(pyenv virtualenv-init -)"
 
 export BROWSER="google-chrome --profile-directory=Default"
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

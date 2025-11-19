@@ -77,7 +77,7 @@ Browser/chrome-linux.zip
 Browser/chrome-linux/
 
 # Nvim state files
-nvim/.local/state/nvim/lsp.log
+nvim/.local/
 
 # Scripts and utilities (add selectively as needed)
 scripts/helper/test*.csv
