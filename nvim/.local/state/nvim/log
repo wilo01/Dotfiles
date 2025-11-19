@@ -69,3 +69,8 @@ stack traceback:
 	/home/dariuszw/.config/nvim/lua/DarO/statusline.lua:452: in function </home/dariuszw/.config/nvim/lua/DarO/statusline.lua:451>
 ERR 2025-10-09T23:02:38.287 ui.61181   tui_stop:641: TUI already stopped (race?)
 ERR 2025-10-09T23:02:38.296 ui.61625   tui_stop:641: TUI already stopped (race?)
+ERR 2025-11-12T14:26:19.160 nvim.414549.0 os_set_cloexec:500: Failed to get flags on descriptor 3: Bad file descriptor
+ERR 2025-11-13T01:36:02.509 ui.737372  tui_stop:641: TUI already stopped (race?)
+ERR 2025-11-14T11:29:47.365 ui.1183587 tui_stop:641: TUI already stopped (race?)
+ERR 2025-11-14T11:29:47.471 ui.155965  tui_stop:641: TUI already stopped (race?)
+ERR 2025-11-16T22:31:51.134 ui.66371   tui_stop:641: TUI already stopped (race?)

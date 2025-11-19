@@ -4544,3 +4544,240 @@
 [START][2025-11-02 22:53:59] LSP logging initiated
 [ERROR][2025-11-02 22:53:59] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	"[22:53:59 INF] <LSP Entry> Starting Marksman LSP server: {}\n"
 [ERROR][2025-11-02 22:53:59] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	'[22:53:59 INF] <Folder> Loading folder documents: {"uri": "file:///home/dariuszw/Dev/Private/projects/healthpulse"}\n'
+[START][2025-11-07 09:20:24] LSP logging initiated
+[ERROR][2025-11-07 09:20:24] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	"[09:20:24 INF] <LSP Entry> Starting Marksman LSP server: {}\n"
+[ERROR][2025-11-07 09:20:25] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	'[09:20:25 INF] <Folder> Loading folder documents: {"uri": "file:///home/dariuszw/Dev/Private/projects/devspace"}\n'
+[START][2025-11-08 00:18:45] LSP logging initiated
+[ERROR][2025-11-08 00:18:45] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	"[00:18:45 INF] <LSP Entry> Starting Marksman LSP server: {}\n"
+[ERROR][2025-11-08 00:18:46] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	'[00:18:46 INF] <Folder> Loading folder documents: {"uri": "file:///home/dariuszw/Dev/Private"}\n'
+[START][2025-11-10 09:33:29] LSP logging initiated
+[ERROR][2025-11-10 09:33:29] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	"[09:33:29 INF] <LSP Entry> Starting Marksman LSP server: {}\n"
+[ERROR][2025-11-10 09:33:29] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	'[09:33:29 INF] <Folder> Loading folder documents: {"uri": "file:///home/dariuszw/Dev/Private"}\n'
+[START][2025-11-10 10:09:58] LSP logging initiated
+[ERROR][2025-11-10 10:09:58] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	"[10:09:58 INF] <LSP Entry> Starting Marksman LSP server: {}\n"
+[ERROR][2025-11-10 10:09:59] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	'[10:09:59 INF] <Folder> Loading folder documents: {"uri": "file:///home/dariuszw/Dev/Private"}\n'
+[START][2025-11-10 10:20:24] LSP logging initiated
+[ERROR][2025-11-10 10:20:24] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	"[10:20:24 INF] <LSP Entry> Starting Marksman LSP server: {}\n"
+[ERROR][2025-11-10 10:20:24] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	'[10:20:24 INF] <Folder> Loading folder documents: {"uri": "file:///home/dariuszw/Dev/Private"}\n'
+[START][2025-11-10 10:33:44] LSP logging initiated
+[ERROR][2025-11-10 10:33:44] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	"[10:33:44 INF] <LSP Entry> Starting Marksman LSP server: {}\n"
+[ERROR][2025-11-10 10:33:45] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	'[10:33:45 INF] <Folder> Loading folder documents: {"uri": "file:///home/dariuszw/Dev/Private"}\n'
+[START][2025-11-10 11:11:25] LSP logging initiated
+[ERROR][2025-11-10 11:11:25] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	"[11:11:25 INF] <LSP Entry> Starting Marksman LSP server: {}\n"
+[ERROR][2025-11-10 11:11:27] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	'[11:11:27 INF] <Folder> Loading folder documents: {"uri": "file:///home/dariuszw/Dev/Private"}\n'
+[START][2025-11-10 12:46:10] LSP logging initiated
+[WARN][2025-11-10 12:46:10] ...lsp/handlers.lua:564	"12:46:10.180 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-11-10 12:46:22] LSP logging initiated
+[WARN][2025-11-10 12:46:22] ...lsp/handlers.lua:564	"12:46:22.858 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-11-10 12:53:24] LSP logging initiated
+[WARN][2025-11-10 12:53:24] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-10 12:57:55] LSP logging initiated
+[WARN][2025-11-10 12:57:55] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for textDocument/typeDefinition despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[WARN][2025-11-10 12:57:55] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for workspace/executeCommand despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[WARN][2025-11-10 12:58:19] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-10 13:28:58] LSP logging initiated
+[WARN][2025-11-10 13:28:58] ...lsp/handlers.lua:564	"13:28:58.834 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-11-10 13:48:34] LSP logging initiated
+[WARN][2025-11-10 13:48:34] ...m/lsp/client.lua:875	"The language server html triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-10 14:00:30] LSP logging initiated
+[ERROR][2025-11-10 14:00:30] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	"[14:00:30 INF] <LSP Entry> Starting Marksman LSP server: {}\n"
+[ERROR][2025-11-10 14:00:31] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	'[14:00:31 INF] <Folder> Loading folder documents: {"uri": "file:///home/dariuszw/Dev/Private"}\n'
+[START][2025-11-10 14:15:54] LSP logging initiated
+[WARN][2025-11-10 14:15:54] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-10 14:22:26] LSP logging initiated
+[WARN][2025-11-10 14:22:26] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-10 14:26:49] LSP logging initiated
+[WARN][2025-11-10 14:26:49] ...lsp/handlers.lua:564	"14:26:49.944 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-11-10 14:31:03] LSP logging initiated
+[WARN][2025-11-10 14:31:03] ...lsp/handlers.lua:564	"14:31:03.827 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-11-10 14:31:45] LSP logging initiated
+[WARN][2025-11-10 14:31:45] ...lsp/handlers.lua:564	"14:31:45.346 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[WARN][2025-11-10 14:31:49] ...lsp/handlers.lua:564	"14:31:49.427 WARNING ⛔️ Shfmt: disabling formatting as no executable was found at path 'shfmt'"
+[WARN][2025-11-10 14:33:56] ...lsp/handlers.lua:564	"14:33:56.708 WARNING ⛔️ Error while parsing file:///home/dariuszw/Dev/branch-opener/branches/tds-hexer/.env: syntax error"
+[WARN][2025-11-10 14:35:07] ...lsp/handlers.lua:564	"14:35:07.029 WARNING ⛔️ Error while parsing file:///home/dariuszw/Dev/branch-opener/branches/tds-hexer/.env: syntax error"
+[WARN][2025-11-10 14:35:07] ...lsp/handlers.lua:564	"14:35:07.053 WARNING ⛔️ Error while parsing file:///home/dariuszw/Dev/branch-opener/branches/tds-hexer/.env: syntax error"
+[START][2025-11-10 14:38:05] LSP logging initiated
+[WARN][2025-11-10 14:38:05] ...lsp/handlers.lua:564	"14:38:05.317 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[WARN][2025-11-10 14:38:34] ...lsp/handlers.lua:564	"14:38:34.270 WARNING ⛔️ Shfmt: disabling formatting as no executable was found at path 'shfmt'"
+[START][2025-11-10 14:51:40] LSP logging initiated
+[WARN][2025-11-10 14:51:40] ...lsp/handlers.lua:564	"14:51:40.816 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-11-10 14:52:47] LSP logging initiated
+[WARN][2025-11-10 14:52:47] ...lsp/handlers.lua:564	"14:52:47.082 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[WARN][2025-11-10 14:53:47] ...lsp/handlers.lua:564	"14:53:47.675 WARNING ⛔️ Shfmt: disabling formatting as no executable was found at path 'shfmt'"
+[START][2025-11-10 15:01:29] LSP logging initiated
+[WARN][2025-11-10 15:01:29] ...lsp/handlers.lua:564	"15:01:29.353 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[WARN][2025-11-10 15:02:52] ...lsp/handlers.lua:564	"15:02:52.379 WARNING ⛔️ Shfmt: disabling formatting as no executable was found at path 'shfmt'"
+[START][2025-11-10 15:09:20] LSP logging initiated
+[WARN][2025-11-10 15:09:20] ...lsp/handlers.lua:564	"15:09:20.132 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-11-10 15:19:21] LSP logging initiated
+[WARN][2025-11-10 15:19:21] ...lsp/handlers.lua:564	"15:19:21.866 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[WARN][2025-11-10 15:20:26] ...lsp/handlers.lua:564	"15:20:26.076 WARNING ⛔️ Error while parsing file:///home/dariuszw/Dev/branch-opener/branches/tds-hexer/.env: syntax error"
+[WARN][2025-11-10 15:20:27] ...lsp/handlers.lua:564	"15:20:27.906 WARNING ⛔️ Shfmt: disabling formatting as no executable was found at path 'shfmt'"
+[START][2025-11-10 15:26:14] LSP logging initiated
+[WARN][2025-11-10 15:26:14] ...lsp/handlers.lua:564	"15:26:14.894 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-11-12 10:26:36] LSP logging initiated
+[ERROR][2025-11-12 10:26:36] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	"[10:26:36 INF] <LSP Entry> Starting Marksman LSP server: {}\n"
+[ERROR][2025-11-12 10:26:36] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	'[10:26:36 INF] <Folder> Loading folder documents: {"uri": "file:///home/dariuszw/Dev/Private"}\n'
+[START][2025-11-12 10:34:46] LSP logging initiated
+[ERROR][2025-11-12 10:34:46] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	"[10:34:46 INF] <LSP Entry> Starting Marksman LSP server: {}\n"
+[ERROR][2025-11-12 10:34:47] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	'[10:34:47 INF] <Folder> Loading folder documents: {"uri": "file:///home/dariuszw/Dev/Private"}\n'
+[START][2025-11-12 10:57:51] LSP logging initiated
+[ERROR][2025-11-12 10:57:51] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	"[10:57:51 INF] <LSP Entry> Starting Marksman LSP server: {}\n"
+[ERROR][2025-11-12 10:57:52] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	'[10:57:52 INF] <Folder> Loading folder documents: {"uri": "file:///home/dariuszw/Dev/Private"}\n'
+[START][2025-11-12 12:48:39] LSP logging initiated
+[WARN][2025-11-12 12:48:39] ...lsp/handlers.lua:564	"12:48:39.533 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-11-12 13:00:08] LSP logging initiated
+[ERROR][2025-11-12 13:00:08] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	"[13:00:08 INF] <LSP Entry> Starting Marksman LSP server: {}\n"
+[START][2025-11-12 13:10:16] LSP logging initiated
+[WARN][2025-11-12 13:10:16] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[ERROR][2025-11-12 13:11:26] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	"[13:11:26 INF] <LSP Entry> Starting Marksman LSP server: {}\n"
+[START][2025-11-12 13:12:10] LSP logging initiated
+[WARN][2025-11-12 13:12:10] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-12 13:25:57] LSP logging initiated
+[WARN][2025-11-12 13:25:57] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for textDocument/typeDefinition despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[WARN][2025-11-12 13:25:57] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for workspace/executeCommand despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-12 13:31:39] LSP logging initiated
+[WARN][2025-11-12 13:31:39] ...lsp/handlers.lua:564	"13:31:39.010 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-11-12 13:37:37] LSP logging initiated
+[WARN][2025-11-12 13:37:37] ...lsp/handlers.lua:564	"13:37:37.747 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[WARN][2025-11-12 13:37:58] ...lsp/handlers.lua:564	"13:37:58.895 WARNING ⛔️ Shfmt: disabling formatting as no executable was found at path 'shfmt'"
+[START][2025-11-12 13:40:36] LSP logging initiated
+[WARN][2025-11-12 13:40:36] ...lsp/handlers.lua:564	"13:40:36.207 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-11-12 14:23:03] LSP logging initiated
+[WARN][2025-11-12 14:23:03] ...lsp/handlers.lua:564	"14:23:03.673 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-11-12 14:29:35] LSP logging initiated
+[WARN][2025-11-12 14:29:35] ...lsp/handlers.lua:564	"14:29:35.629 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-11-12 14:53:21] LSP logging initiated
+[WARN][2025-11-12 14:53:21] ...lsp/handlers.lua:564	"14:53:21.810 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-11-12 15:31:04] LSP logging initiated
+[WARN][2025-11-12 15:31:04] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for textDocument/typeDefinition despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[WARN][2025-11-12 15:31:04] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for workspace/executeCommand despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-12 20:28:46] LSP logging initiated
+[ERROR][2025-11-12 20:28:46] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	"[20:28:46 INF] <LSP Entry> Starting Marksman LSP server: {}\n"
+[ERROR][2025-11-12 20:28:47] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	'[20:28:47 INF] <Folder> Loading folder documents: {"uri": "file:///home/dariuszw/Dev/Private"}\n'
+[START][2025-11-12 20:53:08] LSP logging initiated
+[WARN][2025-11-12 20:53:08] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for textDocument/typeDefinition despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[WARN][2025-11-12 20:53:08] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for workspace/executeCommand despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-13 11:59:28] LSP logging initiated
+[WARN][2025-11-13 11:59:28] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for textDocument/typeDefinition despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[WARN][2025-11-13 11:59:28] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for workspace/executeCommand despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[WARN][2025-11-13 11:59:48] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-13 12:05:32] LSP logging initiated
+[WARN][2025-11-13 12:05:32] ...lsp/handlers.lua:564	"12:05:32.234 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-11-13 12:05:57] LSP logging initiated
+[WARN][2025-11-13 12:05:57] ...lsp/handlers.lua:564	"12:05:57.705 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[WARN][2025-11-13 12:06:09] ...lsp/handlers.lua:564	"12:06:09.002 WARNING ⛔️ Shfmt: disabling formatting as no executable was found at path 'shfmt'"
+[START][2025-11-13 12:11:27] LSP logging initiated
+[WARN][2025-11-13 12:11:27] ...lsp/handlers.lua:564	"12:11:27.238 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-11-13 12:43:08] LSP logging initiated
+[WARN][2025-11-13 12:43:08] ...lsp/handlers.lua:564	"12:43:08.359 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-11-13 12:45:19] LSP logging initiated
+[WARN][2025-11-13 12:45:19] ...lsp/handlers.lua:564	"12:45:19.749 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-11-13 12:46:49] LSP logging initiated
+[WARN][2025-11-13 12:46:49] ...lsp/handlers.lua:564	"12:46:49.661 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-11-13 12:51:30] LSP logging initiated
+[WARN][2025-11-13 12:51:30] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for textDocument/typeDefinition despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[WARN][2025-11-13 12:51:30] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for workspace/executeCommand despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-13 12:52:16] LSP logging initiated
+[ERROR][2025-11-13 12:52:16] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	"[12:52:16 INF] <LSP Entry> Starting Marksman LSP server: {}\n"
+[ERROR][2025-11-13 12:52:17] ...p/_transport.lua:36	"rpc"	"marksman"	"stderr"	'[12:52:17 INF] <Folder> Loading folder documents: {"uri": "file:///home/dariuszw/Dev/Private"}\n'
+[START][2025-11-13 12:53:18] LSP logging initiated
+[WARN][2025-11-13 12:53:18] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for textDocument/typeDefinition despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[WARN][2025-11-13 12:53:18] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for workspace/executeCommand despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-13 13:26:11] LSP logging initiated
+[WARN][2025-11-13 13:26:11] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for textDocument/typeDefinition despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[WARN][2025-11-13 13:26:11] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for workspace/executeCommand despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-13 14:14:23] LSP logging initiated
+[WARN][2025-11-13 14:14:23] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for textDocument/typeDefinition despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[WARN][2025-11-13 14:14:23] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for workspace/executeCommand despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-13 14:19:06] LSP logging initiated
+[WARN][2025-11-13 14:19:06] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for textDocument/typeDefinition despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[WARN][2025-11-13 14:19:06] ...m/lsp/client.lua:875	"The language server lemminx triggers a registerCapability handler for workspace/executeCommand despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-13 14:20:23] LSP logging initiated
+[ERROR][2025-11-13 14:20:23] .../lua/vim/lsp.lua:496	"cannot start bashls due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb692458b8. Info: bash-language-server is not executable"
+[ERROR][2025-11-13 14:20:23] .../lua/vim/lsp.lua:496	"cannot start dockerls due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb6924b378. Info: docker-langserver is not executable"
+[ERROR][2025-11-13 14:20:23] .../lua/vim/lsp.lua:496	"cannot start eslint due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb69251170. Info: vscode-eslint-language-server is not executable"
+[ERROR][2025-11-13 14:20:23] .../lua/vim/lsp.lua:496	"cannot start pyright due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb692277f0. Info: pyright-langserver is not executable"
+[ERROR][2025-11-13 14:20:23] .../lua/vim/lsp.lua:496	"cannot start ruff due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb6922d818. Info: ruff is not executable"
+[ERROR][2025-11-13 14:20:23] .../lua/vim/lsp.lua:496	"cannot start ts_ls due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb691f3360. Info: typescript-language-server is not executable"
+[ERROR][2025-11-13 14:20:23] .../lua/vim/lsp.lua:496	"cannot start yamlls due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb691fa6f8. Info: yaml-language-server is not executable"
+[ERROR][2025-11-13 14:20:23] .../lua/vim/lsp.lua:496	"cannot start zls due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb691fe980. Info: zls is not executable"
+[ERROR][2025-11-13 14:20:26] .../lua/vim/lsp.lua:496	"cannot start bashls due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb692458b8. Info: bash-language-server is not executable"
+[ERROR][2025-11-13 14:20:26] .../lua/vim/lsp.lua:496	"cannot start eslint due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb69251170. Info: vscode-eslint-language-server is not executable"
+[ERROR][2025-11-13 14:20:26] .../lua/vim/lsp.lua:496	"cannot start pyright due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb692277f0. Info: pyright-langserver is not executable"
+[ERROR][2025-11-13 14:20:26] .../lua/vim/lsp.lua:496	"cannot start ruff due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb6922d818. Info: ruff is not executable"
+[ERROR][2025-11-13 14:20:26] .../lua/vim/lsp.lua:496	"cannot start ts_ls due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb691f3360. Info: typescript-language-server is not executable"
+[ERROR][2025-11-13 14:20:26] .../lua/vim/lsp.lua:496	"cannot start yamlls due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb691fa6f8. Info: yaml-language-server is not executable"
+[ERROR][2025-11-13 14:20:26] .../lua/vim/lsp.lua:496	"cannot start zls due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb691fe980. Info: zls is not executable"
+[ERROR][2025-11-13 14:20:27] .../lua/vim/lsp.lua:496	"cannot start bashls due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb692458b8. Info: bash-language-server is not executable"
+[ERROR][2025-11-13 14:20:27] .../lua/vim/lsp.lua:496	"cannot start eslint due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb69251170. Info: vscode-eslint-language-server is not executable"
+[ERROR][2025-11-13 14:20:27] .../lua/vim/lsp.lua:496	"cannot start pyright due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb692277f0. Info: pyright-langserver is not executable"
+[ERROR][2025-11-13 14:20:27] .../lua/vim/lsp.lua:496	"cannot start ruff due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb6922d818. Info: ruff is not executable"
+[ERROR][2025-11-13 14:20:27] .../lua/vim/lsp.lua:496	"cannot start yamlls due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb691fa6f8. Info: yaml-language-server is not executable"
+[ERROR][2025-11-13 14:20:27] .../lua/vim/lsp.lua:496	"cannot start zls due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb691fe980. Info: zls is not executable"
+[ERROR][2025-11-13 14:20:34] .../lua/vim/lsp.lua:496	"cannot start bashls due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb692458b8. Info: bash-language-server is not executable"
+[ERROR][2025-11-13 14:20:34] .../lua/vim/lsp.lua:496	"cannot start eslint due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb69251170. Info: vscode-eslint-language-server is not executable"
+[ERROR][2025-11-13 14:20:34] .../lua/vim/lsp.lua:496	"cannot start pyright due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb692277f0. Info: pyright-langserver is not executable"
+[ERROR][2025-11-13 14:20:34] .../lua/vim/lsp.lua:496	"cannot start ruff due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb6922d818. Info: ruff is not executable"
+[ERROR][2025-11-13 14:20:34] .../lua/vim/lsp.lua:496	"cannot start yamlls due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb691fa6f8. Info: yaml-language-server is not executable"
+[ERROR][2025-11-13 14:20:37] .../lua/vim/lsp.lua:496	"cannot start bashls due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb692458b8. Info: bash-language-server is not executable"
+[ERROR][2025-11-13 14:20:37] .../lua/vim/lsp.lua:496	"cannot start pyright due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb692277f0. Info: pyright-langserver is not executable"
+[ERROR][2025-11-13 14:20:37] .../lua/vim/lsp.lua:496	"cannot start ruff due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb6922d818. Info: ruff is not executable"
+[ERROR][2025-11-13 14:20:37] .../lua/vim/lsp.lua:496	"cannot start yamlls due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb691fa6f8. Info: yaml-language-server is not executable"
+[ERROR][2025-11-13 14:20:40] .../lua/vim/lsp.lua:496	"cannot start bashls due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb692458b8. Info: bash-language-server is not executable"
+[ERROR][2025-11-13 14:20:40] .../lua/vim/lsp.lua:496	"cannot start pyright due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb692277f0. Info: pyright-langserver is not executable"
+[ERROR][2025-11-13 14:20:40] .../lua/vim/lsp.lua:496	"cannot start ruff due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7fcb6922d818. Info: ruff is not executable"
+[START][2025-11-13 14:20:53] LSP logging initiated
+[ERROR][2025-11-13 14:20:53] .../lua/vim/lsp.lua:496	"cannot start bashls due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7f38fe7a3b58. Info: bash-language-server is not executable"
+[ERROR][2025-11-13 14:20:53] .../lua/vim/lsp.lua:496	"cannot start pyright due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7f38fe7099a8. Info: pyright-langserver is not executable"
+[ERROR][2025-11-13 14:20:53] .../lua/vim/lsp.lua:496	"cannot start ruff due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7f38fe562f88. Info: ruff is not executable"
+[ERROR][2025-11-13 14:21:00] .../lua/vim/lsp.lua:496	"cannot start pyright due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7f38fe7099a8. Info: pyright-langserver is not executable"
+[ERROR][2025-11-13 14:21:00] .../lua/vim/lsp.lua:496	"cannot start ruff due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7f38fe562f88. Info: ruff is not executable"
+[ERROR][2025-11-13 14:21:09] .../lua/vim/lsp.lua:496	"cannot start ruff due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7f38fe562f88. Info: ruff is not executable"
+[ERROR][2025-11-13 14:21:26] .../lua/vim/lsp.lua:496	"cannot start ruff due to config error: /usr/local/share/nvim/runtime/lua/vim/lsp.lua:485: cmd: expected expected function or table with executable command, got table: 0x7f38fe562f88. Info: ruff is not executable"
+[WARN][2025-11-13 14:23:10] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-13 15:00:25] LSP logging initiated
+[WARN][2025-11-13 15:00:25] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-14 08:49:20] LSP logging initiated
+[WARN][2025-11-14 08:49:20] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-14 09:06:08] LSP logging initiated
+[WARN][2025-11-14 09:06:08] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-14 10:33:46] LSP logging initiated
+[WARN][2025-11-14 10:33:46] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-14 10:41:28] LSP logging initiated
+[WARN][2025-11-14 10:41:28] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[ERROR][2025-11-14 10:46:37] ...m/lsp/client.lua:620	"LSP[ts_ls]"	"Cannot find request with id 651 whilst attempting to cancel"
+[START][2025-11-14 11:39:20] LSP logging initiated
+[WARN][2025-11-14 11:39:20] ...lsp/handlers.lua:564	"11:39:20.860 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-11-14 11:40:35] LSP logging initiated
+[WARN][2025-11-14 11:40:35] ...lsp/handlers.lua:564	"11:40:35.983 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-11-14 11:41:22] LSP logging initiated
+[WARN][2025-11-14 11:41:22] ...lsp/handlers.lua:564	"11:41:22.297 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-11-14 11:42:49] LSP logging initiated
+[WARN][2025-11-14 11:42:49] ...lsp/handlers.lua:564	"11:42:49.597 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-11-14 11:46:03] LSP logging initiated
+[WARN][2025-11-14 11:46:03] ...lsp/handlers.lua:564	"11:46:03.088 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-11-14 21:57:05] LSP logging initiated
+[WARN][2025-11-14 21:57:05] ...lsp/handlers.lua:564	"21:57:05.316 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-11-14 22:20:37] LSP logging initiated
+[WARN][2025-11-14 22:20:37] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-14 22:36:21] LSP logging initiated
+[ERROR][2025-11-14 22:36:21] ...m/lsp/client.lua:620	"LSP[lua_ls]"	"Cannot find request with id 1172 whilst attempting to cancel"
+[START][2025-11-14 22:36:56] LSP logging initiated
+[WARN][2025-11-14 22:36:56] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-14 22:42:49] LSP logging initiated
+[WARN][2025-11-14 22:42:49] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-14 22:44:17] LSP logging initiated
+[WARN][2025-11-14 22:44:17] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-14 22:47:32] LSP logging initiated
+[WARN][2025-11-14 22:47:32] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-14 22:48:35] LSP logging initiated
+[WARN][2025-11-14 22:48:35] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-14 22:53:31] LSP logging initiated
+[WARN][2025-11-14 22:53:31] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-14 23:03:43] LSP logging initiated
+[WARN][2025-11-14 23:03:43] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-14 23:03:50] LSP logging initiated
+[WARN][2025-11-14 23:03:50] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
+[START][2025-11-15 19:38:31] LSP logging initiated
+[WARN][2025-11-15 19:38:31] ...lsp/handlers.lua:564	"19:38:31.876 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
