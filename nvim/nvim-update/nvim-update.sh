@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Neovim Update Script
-# Intelligently updates Neovim using Flatpak first, GitHub releases as fallback
+# Intelligently updates Neovim with multiple installation methods
 # Author: DarO
-# Usage: ./nvim-update.sh [--force-github] [--dry-run]
+# Usage: ./nvim-update.sh [--build-source|--dnf|--flatpak] [--dry-run]
 
 set -e
 
@@ -22,7 +22,8 @@ NC='\033[0m'
 
 # Flags
 DRY_RUN=false
-FORCE_GITHUB=false
+INSTALL_METHOD="source"  # Default to building from source
+# Valid methods: source, dnf, flatpak
 
 info() {
     echo -e "${BLUE}ℹ${NC} $1"
@@ -53,9 +54,19 @@ parse_args() {
                 info "Dry run mode enabled - no changes will be made"
                 shift
                 ;;
-            --force-github)
-                FORCE_GITHUB=true
-                info "Forcing GitHub installation method"
+            --build-source)
+                INSTALL_METHOD="source"
+                info "Using build-from-source installation method"
+                shift
+                ;;
+            --dnf)
+                INSTALL_METHOD="dnf"
+                info "Using Fedora DNF package manager"
+                shift
+                ;;
+            --flatpak)
+                INSTALL_METHOD="flatpak"
+                info "Using Flatpak installation method"
                 shift
                 ;;
             --help|-h)
@@ -78,12 +89,27 @@ show_help() {
     echo ""
     echo "Options:"
     echo "  --dry-run        Show what would be done without making changes"
-    echo "  --force-github   Skip Flatpak and use GitHub releases directly"
+    echo "  --build-source   Build from source (DEFAULT)"
+    echo "  --dnf            Install via Fedora DNF package manager"
+    echo "  --flatpak        Install via Flatpak (sandboxing limitations apply)"
     echo "  --help, -h       Show this help message"
     echo ""
-    echo "Update Methods (tried in order):"
-    echo "  1. Flatpak (io.neovim.nvim from Flathub)"
-    echo "  2. GitHub releases (official binaries to ~/.local/)"
+    echo "Installation Methods:"
+    echo "  1. Build from source (DEFAULT)"
+    echo "     - Latest features and optimizations"
+    echo "     - CMAKE_BUILD_TYPE=Release (optimized)"
+    echo "     - Uses existing host tools (rg, fd, etc.)"
+    echo "     - Most stable for Fedora installations"
+    echo ""
+    echo "  2. Fedora DNF (--dnf)"
+    echo "     - System integrated via package manager"
+    echo "     - May lag behind latest releases"
+    echo "     - Easiest updates via 'dnf update'"
+    echo ""
+    echo "  3. Flatpak (--flatpak)"
+    echo "     - Sandboxed application"
+    echo "     - Auto-updates from Flathub"
+    echo "     - Limited access to host tools (requires overrides)"
     echo ""
     echo "Safety Features:"
     echo "  - Automatic backup of current installation"
@@ -106,6 +132,45 @@ get_latest_version() {
         grep '"tag_name"' | \
         cut -d'"' -f4 | \
         sed 's/v//'
+}
+
+# Check if build dependencies are installed
+check_build_dependencies() {
+    step "Checking build dependencies..."
+
+    local missing_deps=()
+    local all_deps=("cmake" "gcc" "g++" "make" "git" "ninja-build" "gettext" "libtool" "libtool-ltdl-devel" "autoconf" "automake" "pkg-config")
+
+    for dep in "${all_deps[@]}"; do
+        if ! command -v "$dep" &> /dev/null && ! rpm -q "$dep" &> /dev/null; then
+            missing_deps+=("$dep")
+        fi
+    done
+
+    if [ ${#missing_deps[@]} -eq 0 ]; then
+        success "All build dependencies are installed"
+        return 0
+    fi
+
+    warning "Missing build dependencies: ${missing_deps[*]}"
+    echo ""
+    info "Install with: sudo dnf install ${missing_deps[*]}"
+    echo ""
+
+    if [[ "$DRY_RUN" == true ]]; then
+        return 0
+    fi
+
+    read -p "Install missing dependencies now? (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        sudo dnf install -y "${missing_deps[@]}"
+        success "Dependencies installed"
+        return 0
+    else
+        error "Cannot build without dependencies"
+        return 1
+    fi
 }
 
 # Create backup of current installation
@@ -257,56 +322,101 @@ setup_flatpak_config_links() {
     fi
 }
 
-# Install Neovim via GitHub releases
-install_via_github() {
-    step "Installing Neovim from GitHub releases..."
-    
+# Build Neovim from source
+build_from_source() {
+    step "Building Neovim from source..."
+
+    # Check dependencies first
+    if ! check_build_dependencies; then
+        return 1
+    fi
+
     local latest_version
     latest_version=$(get_latest_version)
-    
+
     if [[ -z "$latest_version" ]]; then
         error "Failed to get latest version from GitHub"
         return 1
     fi
-    
-    info "Latest version: v$latest_version"
-    
+
+    info "Building Neovim v$latest_version from source"
+
     if [[ "$DRY_RUN" == true ]]; then
-        info "Would download and install Neovim v$latest_version to ~/.local/"
+        info "Would clone repository and build Neovim v$latest_version"
+        info "Build type: Release (optimized)"
+        info "Install prefix: $HOME/.local"
         return 0
     fi
-    
-    local download_url="https://github.com/neovim/neovim/releases/download/v$latest_version/nvim-linux-x86_64.tar.gz"
-    local temp_dir=$(mktemp -d)
-    local install_dir="$HOME/.local"
-    
-    # Download latest release
-    info "Downloading Neovim v$latest_version..."
-    curl -L "$download_url" -o "$temp_dir/nvim.tar.gz"
-    
-    # Extract to temporary location
-    info "Extracting archive..."
-    tar -xzf "$temp_dir/nvim.tar.gz" -C "$temp_dir"
-    
-    # Remove old installation if it exists
-    if [[ -d "$install_dir/nvim-linux-x86_64" ]]; then
-        rm -rf "$install_dir/nvim-linux-x86_64"
+
+    local build_dir="$HOME/.cache/nvim-build"
+    local repo_dir="$build_dir/neovim"
+
+    # Create build directory
+    mkdir -p "$build_dir"
+
+    # Clone or update repository
+    if [[ -d "$repo_dir" ]]; then
+        info "Updating existing Neovim repository..."
+        cd "$repo_dir"
+        git fetch --all
+    else
+        info "Cloning Neovim repository..."
+        git clone https://github.com/neovim/neovim.git "$repo_dir"
+        cd "$repo_dir"
     fi
-    
-    # Move to installation directory
-    mv "$temp_dir/nvim-linux-x86_64" "$install_dir/"
-    
-    # Create/update symlink
-    mkdir -p "$HOME/.local/bin"
-    ln -sf "$install_dir/nvim-linux-x86_64/bin/nvim" "$HOME/.local/bin/nvim"
-    
+
+    # Checkout latest stable tag
+    info "Checking out v$latest_version..."
+    git checkout "v$latest_version"
+
+    # Clean previous builds
+    info "Cleaning previous builds..."
+    make distclean 2>/dev/null || true
+    rm -rf build/ .deps/ 2>/dev/null || true
+
+    # Configure build
+    info "Configuring build (CMAKE_BUILD_TYPE=Release)..."
+    cmake -B build -G Ninja \
+        -D CMAKE_BUILD_TYPE=Release \
+        -D CMAKE_INSTALL_PREFIX="$HOME/.local"
+
+    # Build with parallel jobs
+    local nproc_count=$(nproc)
+    info "Building with $nproc_count parallel jobs..."
+    cmake --build build --parallel "$nproc_count"
+
+    # Install
+    info "Installing to ~/.local/..."
+    cmake --install build
+
     # Create desktop entry
-    create_desktop_entry "$install_dir/nvim-linux-x86_64"
-    
-    # Cleanup
-    rm -rf "$temp_dir"
-    
-    success "Neovim v$latest_version installed to ~/.local/"
+    create_desktop_entry "$HOME/.local"
+
+    success "Neovim v$latest_version built and installed from source"
+    info "Build directory preserved at: $build_dir"
+    return 0
+}
+
+# Install Neovim via DNF package manager
+install_via_dnf() {
+    step "Installing Neovim via DNF package manager..."
+
+    if [[ "$DRY_RUN" == true ]]; then
+        info "Would run: sudo dnf install neovim"
+        return 0
+    fi
+
+    warning "DNF package may not be the latest version"
+    info "Checking available version..."
+
+    local dnf_version=$(dnf info neovim 2>/dev/null | grep "^Version" | awk '{print $3}')
+    if [[ -n "$dnf_version" ]]; then
+        info "DNF repository has: v$dnf_version"
+    fi
+
+    sudo dnf install -y neovim
+
+    success "Neovim installed via DNF"
     return 0
 }
 
@@ -393,27 +503,44 @@ main() {
     
     # Create backup
     create_backup
-    
-    # Try installation methods
+
+    # Install using selected method
     local install_success=false
-    
-    if [[ "$FORCE_GITHUB" == false ]]; then
-        info "Trying Flatpak installation first..."
-        if install_via_flatpak; then
-            install_success=true
-        else
-            warning "Flatpak installation failed, trying GitHub releases..."
-        fi
-    fi
-    
-    if [[ "$install_success" == false ]]; then
-        if install_via_github; then
-            install_success=true
-        else
-            error "GitHub installation failed"
+
+    case "$INSTALL_METHOD" in
+        source)
+            info "Building from source..."
+            if build_from_source; then
+                install_success=true
+            else
+                error "Build from source failed"
+                exit 1
+            fi
+            ;;
+        dnf)
+            info "Installing via DNF..."
+            if install_via_dnf; then
+                install_success=true
+            else
+                error "DNF installation failed"
+                exit 1
+            fi
+            ;;
+        flatpak)
+            warning "Using Flatpak with known sandboxing limitations"
+            info "You may need to install tools (rg, fd, etc.) separately"
+            if install_via_flatpak; then
+                install_success=true
+            else
+                error "Flatpak installation failed"
+                exit 1
+            fi
+            ;;
+        *)
+            error "Unknown installation method: $INSTALL_METHOD"
             exit 1
-        fi
-    fi
+            ;;
+    esac
     
     # Test installation
     if ! test_installation; then
@@ -423,10 +550,22 @@ main() {
     fi
     
     echo ""
-    success "Neovim successfully updated to v$latest_version!"
+    success "Neovim successfully updated to v$latest_version using $INSTALL_METHOD method!"
     echo ""
     info "Backup created in: $BACKUP_DIR/nvim-$CURRENT_DATE"
     info "To rollback if needed: $SCRIPT_DIR/rollback-nvim.sh"
+    echo ""
+
+    case "$INSTALL_METHOD" in
+        source)
+            info "Build artifacts preserved at: ~/.cache/nvim-build/"
+            ;;
+        flatpak)
+            warning "Remember: Flatpak has sandbox limitations"
+            info "Consider using: flatpak override --user io.neovim.nvim --filesystem=/usr/bin:ro"
+            ;;
+    esac
+
     echo ""
     info "Please restart your terminal and test your Neovim configuration"
 }

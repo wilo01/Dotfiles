@@ -4781,3 +4781,6 @@
 [WARN][2025-11-14 23:03:50] ...m/lsp/client.lua:875	"The language server eslint triggers a registerCapability handler for workspace/didChangeWorkspaceFolders despite dynamicRegistration set to false. Report upstream, this warning is harmless"
 [START][2025-11-15 19:38:31] LSP logging initiated
 [WARN][2025-11-15 19:38:31] ...lsp/handlers.lua:564	"19:38:31.876 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[START][2025-11-19 21:18:33] LSP logging initiated
+[WARN][2025-11-19 21:18:33] ...lsp/handlers.lua:564	"21:18:33.010 WARNING ⛔️ ShellCheck: disabling linting as no executable was found at path 'shellcheck'"
+[WARN][2025-11-19 21:18:34] ...lsp/handlers.lua:564	"21:18:34.353 WARNING ⛔️ Shfmt: disabling formatting as no executable was found at path 'shfmt'"
