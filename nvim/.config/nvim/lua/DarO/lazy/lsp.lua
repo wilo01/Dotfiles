@@ -107,8 +107,18 @@ return {
       lazy = true,
    },
    {
+      "joechrisellis/lsp-format-modifications.nvim",
+      dependencies = { "nvim-lua/plenary.nvim" },
+      lazy = true,
+   },
+   {
       "neovim/nvim-lspconfig",
-      dependencies = { "williamboman/mason.nvim", "hrsh7th/nvim-cmp", "b0o/schemastore.nvim" },
+      dependencies = {
+         "williamboman/mason.nvim",
+         "hrsh7th/nvim-cmp",
+         "b0o/schemastore.nvim",
+         "joechrisellis/lsp-format-modifications.nvim"
+      },
       config = function()
          local capabilities = vim.lsp.protocol.make_client_capabilities()
          local ok, cmp_lsp = pcall(require, 'cmp_nvim_lsp')
@@ -375,57 +385,47 @@ return {
                   return
                end
 
-               local ok_gitsigns, gitsigns = pcall(require, "gitsigns")
-               if not ok_gitsigns then
+               local ok_format_mod, format_modifications = pcall(require, "lsp-format-modifications")
+               if not ok_format_mod then
+                  vim.notify("lsp-format-modifications not available, skipping format", vim.log.levels.WARN)
                   return
                end
 
-               local hunks = gitsigns.get_hunks(bufnr)
-               if not hunks or #hunks == 0 then
-                  return
-               end
+               local has_range_formatting = false
+               local format_client = nil
 
-               local supports_range_format = false
                for _, client in ipairs(clients) do
                   if client:supports_method("textDocument/rangeFormatting", bufnr) then
-                     supports_range_format = true
+                     has_range_formatting = true
+                     format_client = client
                      break
                   end
                end
-               if supports_range_format then
-                  for _, hunk in ipairs(hunks) do
-                     if hunk.added and hunk.added.count > 0 then
-                        local start_line = hunk.added.start
-                        local end_line = start_line + hunk.added.count - 1
 
-                        local end_col = #vim.api.nvim_buf_get_lines(bufnr, end_line - 1, end_line, false)[1]
-                        vim.lsp.buf.format({
+               if has_range_formatting and format_client then
+                  format_modifications.format_modifications(format_client, bufnr, {
+                     format_callback = function(params)
+                        vim.lsp.buf.format(vim.tbl_extend("force", params or {}, {
                            bufnr = bufnr,
                            async = false,
-                           range = {
-                              ["start"] = { start_line, 0 },
-                              ["end"] = { end_line, end_col }
-                           },
                            timeout_ms = CONFIG.FORMAT_TIMEOUT_MS,
                            filter = function(client)
-                              if vim.g.disable_autoformat then
-                                 return false
-                              end
-                              return client:supports_method("textDocument/rangeFormatting", bufnr)
+                              return not vim.g.disable_autoformat
+                                  and client:supports_method("textDocument/rangeFormatting", bufnr)
                            end
-                        })
-                     end
-                  end
+                        }))
+                     end,
+                     vcs = "git",
+                     experimental_empty_line_handling = false,
+                  })
                else
                   vim.lsp.buf.format({
                      bufnr = bufnr,
                      async = false,
                      timeout_ms = CONFIG.FORMAT_TIMEOUT_MS,
                      filter = function(client)
-                        if vim.g.disable_autoformat then
-                           return false
-                        end
-                        return client:supports_method("textDocument/formatting", bufnr)
+                        return not vim.g.disable_autoformat
+                            and client:supports_method("textDocument/formatting", bufnr)
                      end
                   })
                end

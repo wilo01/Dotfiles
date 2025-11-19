@@ -244,14 +244,63 @@ function M.print_startup_time()
    end, 50)
 end
 
---- Format buffer with LSP if autoformat is enabled
+--- Format only modified lines with LSP if autoformat is enabled
+--- Uses lsp-format-modifications to format only git-changed lines
+--- Falls back to full buffer format if range formatting is unavailable
 --- Displays a warning notification if autoformat is disabled
 function M.format_buffer()
    if vim.g.disable_autoformat then
       vim.notify("Unable to format: formatting is disabled (use <leader>tf to enable)", vim.log.levels.WARN)
-   else
-      vim.lsp.buf.format()
+      return
    end
+   local bufnr = vim.api.nvim_get_current_buf()
+   local clients = vim.lsp.get_clients({ bufnr = bufnr })
+
+   if #clients == 0 then
+      vim.notify("No LSP clients attached to buffer", vim.log.levels.WARN)
+      return
+   end
+
+   local format_client = nil
+   for _, client in ipairs(clients) do
+      if client:supports_method("textDocument/rangeFormatting", bufnr) then
+         format_client = client
+         break
+      end
+   end
+
+   if format_client then
+      local ok, format_modifications = pcall(require, "lsp-format-modifications")
+      if ok then
+         format_modifications.format_modifications(format_client, bufnr, {
+            format_callback = function(params)
+               vim.lsp.buf.format(vim.tbl_extend("force", params or {}, {
+                  bufnr = bufnr,
+                  async = false,
+                  timeout_ms = 5000,
+                  filter = function(client)
+                     return not vim.g.disable_autoformat
+                         and client:supports_method("textDocument/rangeFormatting", bufnr)
+                  end
+               }))
+            end,
+            vcs = "git",
+            experimental_empty_line_handling = false,
+         })
+         return
+      end
+   end
+
+   vim.notify("Range formatting unavailable, formatting entire buffer", vim.log.levels.INFO)
+   vim.lsp.buf.format({
+      bufnr = bufnr,
+      async = false,
+      timeout_ms = 5000,
+      filter = function(client)
+         return not vim.g.disable_autoformat
+             and client:supports_method("textDocument/formatting", bufnr)
+      end
+   })
 end
 
 return M
