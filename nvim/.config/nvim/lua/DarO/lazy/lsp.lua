@@ -1,11 +1,11 @@
 local LSP_SERVERS = {
-   'gopls', 'lua_ls', 'eslint', 'ts_ls',
+   'gopls', 'lua_ls', 'ts_ls', 'eslint',
    'dockerls', 'yamlls', 'zls', 'bashls',
-   'pyright', 'ruff'
+   'pyright', 'ruff', 'jsonls', 'html', 'cssls'
 }
 local MASON_TOOLS = {
    "golangci-lint", "gofumpt", "goimports",
-   "eslint_d"
+   "eslint_d", "shellcheck", "mypy"
 }
 local CONFIG = {
    INDENT_SIZE = 3,
@@ -103,8 +103,12 @@ return {
       }
    },
    {
+      "b0o/schemastore.nvim",
+      lazy = true,
+   },
+   {
       "neovim/nvim-lspconfig",
-      dependencies = { "williamboman/mason.nvim", "hrsh7th/nvim-cmp" },
+      dependencies = { "williamboman/mason.nvim", "hrsh7th/nvim-cmp", "b0o/schemastore.nvim" },
       config = function()
          local capabilities = vim.lsp.protocol.make_client_capabilities()
          local ok, cmp_lsp = pcall(require, 'cmp_nvim_lsp')
@@ -130,6 +134,7 @@ return {
                      SA5001 = true,
                   },
                   staticcheck = true,
+                  verboseOutput = true,
                   hints = {
                      assignVariableTypes = true,
                      compositeLiteralFields = true,
@@ -160,9 +165,10 @@ return {
             },
          }
          vim.lsp.config.eslint = {
-            root_markers = { ".eslintrc.js", ".eslintrc.json", "eslint.config.js", "package.json", ".git" },
+            root_markers = { ".eslintrc.js", ".eslintrc.json", "eslint.config.js" },
             settings = {
                format = { enable = true },
+               onIgnoredFiles = "off",
             },
          }
 
@@ -205,7 +211,12 @@ return {
                yaml = {
                   schemas = {
                      ["https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json"] =
-                     "/docker-compose.yml"
+                     "/docker-compose.yml",
+                     ["https://json.schemastore.org/github-workflow.json"] = "/.github/workflows/*",
+                     ["https://json.schemastore.org/gitlab-ci.json"] = "/.gitlab-ci.yml",
+                     ["https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.29.0-standalone-strict/all.json"] =
+                     "/*.k8s.yaml",
+                     kubernetes = "/*.yaml",
                   }
                }
             },
@@ -239,6 +250,39 @@ return {
          }
          vim.lsp.config.ruff = {
             root_markers = { "pyproject.toml", "ruff.toml", ".ruff.toml", ".git" },
+         }
+         vim.lsp.config.jsonls = {
+            root_markers = { "package.json", ".git" },
+            settings = {
+               json = {
+                  schemas = require('schemastore').json.schemas(),
+                  validate = { enable = true },
+               }
+            },
+         }
+
+         vim.lsp.config.html = {
+            root_markers = { "package.json", ".git" },
+            settings = {
+               html = {
+                  format = {
+                     indentSize = CONFIG.INDENT_SIZE,
+                     tabSize = CONFIG.INDENT_SIZE,
+                  }
+               }
+            },
+         }
+
+         vim.lsp.config.cssls = {
+            root_markers = { "package.json", ".git" },
+            settings = {
+               css = {
+                  validate = true,
+                  lint = {
+                     unknownAtRules = "ignore",
+                  }
+               }
+            },
          }
          local log_level = vim.env.NVIM_LSP_LOG_LEVEL or "WARN"
          vim.lsp.set_log_level(log_level)
@@ -382,7 +426,6 @@ return {
                            return false
                         end
                         return client:supports_method("textDocument/formatting", bufnr)
-                            and client.name ~= "ruff"
                      end
                   })
                end
@@ -408,6 +451,13 @@ return {
          local lint = require('lint')
          lint.linters_by_ft = {
             go = { 'golangcilint' },
+            javascript = { 'eslint_d' },
+            javascriptreact = { 'eslint_d' },
+            typescript = { 'eslint_d' },
+            typescriptreact = { 'eslint_d' },
+            sh = { 'shellcheck' },
+            bash = { 'shellcheck' },
+            python = { 'mypy' },
          }
          local mason_path = vim.fn.stdpath("data") .. "/mason/bin/golangci-lint"
          local golangci_path = vim.fn.exepath("golangci-lint")
