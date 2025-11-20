@@ -126,5 +126,6 @@ claude/
 # Bin directory (seems to be new utilities)
 bin/
 
+nvim/.config/nvim-primagen
 nvim/.config/nvim-lazy
 nvim/.config/nvim-tj
