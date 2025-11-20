@@ -46,39 +46,5 @@ return {
             col = 1,
          },
       })
-
-      -- Autocmd for removing trailing whitespaces on changed lines
-      local augroup = vim.api.nvim_create_augroup
-      local TheDaroGroup = augroup('TheDarO', {})
-      local autocmd = vim.api.nvim_create_autocmd
-
-      -- Autocmd for removing trailing whitespaces on changed lines
-      autocmd({ "BufWritePre" }, {
-         group = TheDaroGroup,
-         pattern = "*",
-         callback = function()
-            if vim.g.disable_autoformat then
-               return
-            end
-
-            local bufnr = vim.api.nvim_get_current_buf()
-            local hunk_lines = gitsigns.get_hunks(bufnr)
-
-            if hunk_lines and #hunk_lines > 0 then
-               for _, hunk in ipairs(hunk_lines) do
-                  local start_line = hunk.added and hunk.added.start or nil
-                  local count = hunk.added and hunk.added.count or 0
-                  if start_line and count > 0 then
-                     local end_line = start_line + count - 1
-                     if start_line <= end_line then
-                        vim.api.nvim_buf_call(bufnr, function()
-                           vim.cmd(string.format("%d,%ds/\\s\\+$//e", start_line, end_line))
-                        end)
-                     end
-                  end
-               end
-            end
-         end,
-      })
    end
 }

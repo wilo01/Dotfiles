@@ -72,10 +72,9 @@ autocmd('TextYankPost', {
    end,
 })
 
--- NOTE: We are using selective removal in gitsigns.lua aswell (only on changed lines)
 autocmd({ "BufWritePre" }, {
    group = augroup('DarO', {}),
-   pattern = { "*.md", "*.lua", "*.js", "*.jsx", "*.ts", "*.rs", "*.go", "*.py" },
+   pattern = "*",
    callback = function()
       if vim.g.disable_autoformat then
          return
