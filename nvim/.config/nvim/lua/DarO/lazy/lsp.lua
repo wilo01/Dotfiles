@@ -1,3 +1,4 @@
+-- TODO: Fix issue with wired acting of completions for snippets
 local LSP_SERVERS = {
    'gopls', 'lua_ls', 'ts_ls', 'eslint',
    'dockerls', 'yamlls', 'zls', 'bashls',

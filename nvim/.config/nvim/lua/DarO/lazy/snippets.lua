@@ -737,6 +737,7 @@ return {
             function cmp_source.complete(_, _, callback)
                local bufnr = vim.api.nvim_get_current_buf()
                if not cache[bufnr] then
+                  -- TODO: Fix issue with wired acting of completions for snippets
                   local completion_items = vim.tbl_map(function(s)
                      local body = s.body
                      if type(body) == "function" then
