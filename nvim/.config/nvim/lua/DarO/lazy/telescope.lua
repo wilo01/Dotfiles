@@ -21,7 +21,7 @@ return {
 
       local function live_multigrep(opts)
          opts = opts or {}
-         opts.cwd = opts.cwd or vim.uv.cwd()
+         opts.cwd = opts.cwd or vim.uv.cwd() -- [ ] TODO: Undefined field `cwd`.
 
          local finder = finders.new_async_job {
             command_generator = function(prompt)
@@ -143,14 +143,21 @@ return {
       end, { desc = "Telescope Find files" })
 
       vim.keymap.set('n', '<C-p>', function()
-         if not utils.is_git_repo() then
-            vim.notify("Not a Git repository, using find_files instead", vim.log.levels.WARN)
-            builtin.find_files()
-            return
+         local search_dir
+
+         if utils.is_git_repo() then
+            search_dir = vim.fn.systemlist("git rev-parse --show-toplevel")[1]
+         else
+            search_dir = vim.fn.expand('%:p:h')
          end
 
-         builtin.git_files()
-      end, { desc = "Telescope Find Git files or any files" })
+         builtin.find_files({
+            cwd = search_dir,
+            hidden = true,
+            no_ignore = true,
+            follow = true,
+         })
+      end, { desc = "Telescope Find all files (smart path detection)" })
 
       vim.keymap.set('n', '<leader>ws', function()
          builtin.grep_string(vim.tbl_extend("force", grep_opts, {

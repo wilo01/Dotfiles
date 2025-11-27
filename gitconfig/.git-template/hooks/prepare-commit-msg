@@ -211,12 +211,17 @@ run_ai_sequential() {
          first_ai="$second_ai"
          second_ai=""
       else
-         ai_cmd="$ai_cmd -p"
          local adaptive_timeout=$(get_adaptive_timeout "$first_ai" "$AI_INACTIVITY_TIMEOUT")
          log_info "🤖 Calling ${first_ai^} AI (timeout: ${adaptive_timeout}s)..."
 
          local response
-         response=$(echo "$prompt" | monitor_process_with_timeout "$ai_cmd" "${first_ai^} AI" "$AI_MAX_TIMEOUT" "$adaptive_timeout")
+         if [[ "$first_ai" == "gemini" ]]; then
+            # Gemini uses positional argument (deprecated -p flag)
+            response=$(timeout "$AI_MAX_TIMEOUT" "$ai_cmd" "$prompt" 2>&1)
+         else
+            # Claude and others use -p flag with piped stdin
+            response=$(echo "$prompt" | monitor_process_with_timeout "$ai_cmd -p" "${first_ai^} AI" "$AI_MAX_TIMEOUT" "$adaptive_timeout")
+         fi
          local exit_code=$?
          local response_time=$PROCESS_ELAPSED_TIME
 
@@ -245,17 +250,23 @@ run_ai_sequential() {
    if [[ -n "$second_ai" ]] && ! is_ai_disabled "$second_ai"; then
       local ai_cmd
       if [[ "$second_ai" == "claude" ]]; then
-         ai_cmd="$AI_CLAUDE_CMD -p"
+         ai_cmd="$AI_CLAUDE_CMD"
       elif [[ "$second_ai" == "gemini" ]]; then
-         ai_cmd="$AI_GEMINI_CMD -p"
+         ai_cmd="$AI_GEMINI_CMD"
       else
-         ai_cmd="/usr/local/bin/$second_ai -p"
+         ai_cmd="/usr/local/bin/$second_ai"
       fi
       local adaptive_timeout=$(get_adaptive_timeout "$second_ai" "$AI_INACTIVITY_TIMEOUT")
       log_info "🤖 Calling ${second_ai^} AI (timeout: ${adaptive_timeout}s)..."
 
       local response
-      response=$(echo "$prompt" | monitor_process_with_timeout "$ai_cmd" "${second_ai^} AI" "$AI_MAX_TIMEOUT" "$adaptive_timeout")
+      if [[ "$second_ai" == "gemini" ]]; then
+         # Gemini uses positional argument (deprecated -p flag)
+         response=$(timeout "$AI_MAX_TIMEOUT" "$ai_cmd" "$prompt" 2>&1)
+      else
+         # Claude and others use -p flag with piped stdin
+         response=$(echo "$prompt" | monitor_process_with_timeout "$ai_cmd -p" "${second_ai^} AI" "$AI_MAX_TIMEOUT" "$adaptive_timeout")
+      fi
       local exit_code=$?
       local response_time=$PROCESS_ELAPSED_TIME
 
@@ -343,24 +354,25 @@ run_ai_race() {
    ) &
    local claude_pid=$!
 
-   # Start Gemini in background
+   # Start Gemini in background (uses positional argument, not deprecated -p flag)
    (
       local start=$(date +%s)
-      if echo "$prompt" | monitor_process_with_timeout "$AI_GEMINI_CMD -p" "Gemini AI" "$AI_MAX_TIMEOUT" "$AI_INACTIVITY_TIMEOUT" >"$gemini_temp" 2>&1; then
+      if timeout "$AI_MAX_TIMEOUT" "$AI_GEMINI_CMD" "$prompt" >"$gemini_temp" 2>&1; then
          local end=$(date +%s)
          echo $((end - start)) >"$gemini_time_file"
          if grep -q "^- " "$gemini_temp"; then
             echo "gemini" >"$winner_file"
          fi
       else
-         echo "$PROCESS_ELAPSED_TIME" >"$gemini_time_file"
+         local end=$(date +%s)
+         echo $((end - start)) >"$gemini_time_file"
       fi
    ) &
    local gemini_pid=$!
 
    # Race monitoring with proper time tracking
    local start_time=$(date +%s)
-   local race_timeout=60
+   local race_timeout=120
    local check_interval=0.2 # Check every 200ms
    local winner_time=""
    local loser_ai=""

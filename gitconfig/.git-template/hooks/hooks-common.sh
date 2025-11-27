@@ -20,11 +20,16 @@ load_hook_config() {
    ENABLE_LOCAL_HOOKS=$(git config --local hooks.enableLocalHooks || echo "false")
    ENABLE_AI_COMMIT=$(git config --local hooks.enableAiCommit || echo "false")
 
-   # AI Command Paths
+   # AI Command Paths - auto-detect if not configured
    AI_CLAUDE_CMD=$(git config --local hooks.aiClaudeCmd 2>/dev/null)
-   AI_CLAUDE_CMD=${AI_CLAUDE_CMD:-/usr/local/bin/claude}
+   if [[ -z "$AI_CLAUDE_CMD" ]]; then
+      AI_CLAUDE_CMD=$(which claude 2>/dev/null || echo "/usr/local/bin/claude")
+   fi
+
    AI_GEMINI_CMD=$(git config --local hooks.aiGeminiCmd 2>/dev/null)
-   AI_GEMINI_CMD=${AI_GEMINI_CMD:-/usr/local/bin/gemini}
+   if [[ -z "$AI_GEMINI_CMD" ]]; then
+      AI_GEMINI_CMD=$(which gemini 2>/dev/null || echo "/usr/local/bin/gemini")
+   fi
 
    # File Paths (validation will be done later if validate_safe_path is available)
    HOOKS_LOCAL_PATH=$(git config --local hooks.hooksLocalPath | sed "s|^~|$HOME|")
