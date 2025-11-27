@@ -849,17 +849,19 @@ except:
 # -----------------------------------------------------------------------------
 
 # Check if current branch is a maintenance branch pattern
-# Matches: *-13.1AV, *-12.1av, *-11AV (case insensitive)
+# Matches: *-13.1AV, *-13-1av, *-12.1av, *-11AV (case insensitive)
+# Supports both dot and dash separators between major/minor versions
 is_maintenance_branch() {
    local branch=$(get_current_branch)
-   # Match patterns like *-13.1AV, *-12.1av, *-11AV (case insensitive)
-   if [[ "${branch,,}" =~ -1[0-9](\.[0-9])?av$ ]]; then
+   # Match patterns like *-13.1AV, *-13-1av, *-12.1av, *-11AV (case insensitive)
+   if [[ "${branch,,}" =~ -1[0-9]([.-][0-9])?av$ ]]; then
       return 0
    fi
    return 1
 }
 
 # Lookup commit message from Commits.md by JIRA tag
+# Supports formats: "JIRA: VIS-1234", "JIRA: #VIS-1234", or standalone "VIS-1234" at line start
 lookup_commit_from_history() {
    local jira_tag="$1"
    local commits_file="$HOME/Dev/Private/Commits.md"
@@ -875,8 +877,9 @@ lookup_commit_from_history() {
       return 1
    fi
 
-   # Search for matching JIRA in Commits.md and extract the Logs section
-   local result=$(grep -A 10 "JIRA:.*$base_jira" "$commits_file" | grep -A 5 "^Logs:" | grep "^- " | head -10)
+   # Search for JIRA tag at line start (supports both "JIRA: VIS-1234" and standalone "VIS-1234")
+   # Filter out metadata lines like "- Commit branch HASH" and "- Commit HASH"
+   local result=$(grep -A 15 "^${base_jira}" "$commits_file" | grep -A 5 "^Logs:" | grep "^- " | grep -v "Commit.*HASH" | head -10)
 
    if [[ -n "$result" ]]; then
       echo "$result"
