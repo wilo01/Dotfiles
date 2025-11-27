@@ -117,13 +117,15 @@ clear_progress() {
 # -----------------------------------------------------------------------------
 
 # Monitor a process with activity timeout
-# Usage: monitor_process_with_timeout cmd description [max_timeout] [inactivity_timeout]
+# Usage: monitor_process_with_timeout cmd description [max_timeout] [inactivity_timeout] [time_output_file]
 # Outputs: Process output to stdout, timing info to stderr via PROCESS_ELAPSED_TIME variable
+# Note: When called through a pipe, PROCESS_ELAPSED_TIME won't propagate. Use time_output_file instead.
 monitor_process_with_timeout() {
    local cmd="$1"
    local description="${2:-Process}"
    local max_timeout="${3:-$AI_MAX_TIMEOUT}"
    local inactivity_timeout="${4:-$AI_INACTIVITY_TIMEOUT}"
+   local time_output_file="${5:-}"
 
    # Create temp files securely with error handling
    local temp_file=$(mktemp) || {
@@ -164,6 +166,8 @@ monitor_process_with_timeout() {
          kill_process_tree "$pid"
          log_warning "$description exceeded maximum timeout (${max_timeout}s)"
          PROCESS_ELAPSED_TIME=$elapsed
+         # Write time to file before returning (for pipe contexts)
+         [[ -n "$time_output_file" ]] && echo "$PROCESS_ELAPSED_TIME" > "$time_output_file"
          return 124 # timeout exit code
       fi
 
@@ -177,6 +181,8 @@ monitor_process_with_timeout() {
             kill_process_tree "$pid"
             log_warning "$description timed out after ${inactivity_timeout}s of inactivity"
             PROCESS_ELAPSED_TIME=$elapsed
+            # Write time to file before returning (for pipe contexts)
+            [[ -n "$time_output_file" ]] && echo "$PROCESS_ELAPSED_TIME" > "$time_output_file"
             return 124 # timeout exit code
          fi
       fi
@@ -203,6 +209,11 @@ monitor_process_with_timeout() {
 
    # Output result
    cat "$temp_file"
+
+   # Write elapsed time to file if requested (for pipe contexts where variable won't propagate)
+   if [[ -n "$time_output_file" ]]; then
+      echo "$PROCESS_ELAPSED_TIME" > "$time_output_file"
+   fi
 
    return $exit_code
 }
@@ -401,9 +412,22 @@ trim() {
 readonly ANALYTICS_FILE="${HOOKS_DIR:-$(dirname "${BASH_SOURCE[0]}")}/.git-hooks-analytics.json"
 readonly ANALYTICS_MAX_ENTRIES=50
 
-# Initialize analytics file if it doesn't exist
+# Initialize analytics file if it doesn't exist or is corrupted
 init_analytics() {
+    local needs_init=false
+
+    # Check if file exists
     if [[ ! -f "$ANALYTICS_FILE" ]]; then
+        needs_init=true
+        log_debug "Analytics file does not exist, creating..."
+    # Check if file is valid JSON (handles corrupted/empty files)
+    elif ! jq -e . "$ANALYTICS_FILE" >/dev/null 2>&1; then
+        needs_init=true
+        log_warning "Analytics file corrupted, recreating..."
+        rm -f "$ANALYTICS_FILE"
+    fi
+
+    if [[ "$needs_init" == "true" ]]; then
         cat > "$ANALYTICS_FILE" <<EOF
 {
     "claude": {
@@ -438,6 +462,11 @@ record_ai_performance() {
     local success="$2"  # true/false
     local response_time="$3"
     local is_winner="${4:-false}"  # true/false for race mode
+
+    # Ensure response_time is numeric (default to 0 if not)
+    if ! [[ "$response_time" =~ ^[0-9]+$ ]]; then
+        response_time="0"
+    fi
 
     init_analytics
 
@@ -816,6 +845,47 @@ except:
 }
 
 # -----------------------------------------------------------------------------
+# Maintenance Branch Detection
+# -----------------------------------------------------------------------------
+
+# Check if current branch is a maintenance branch pattern
+# Matches: *-13.1AV, *-12.1av, *-11AV (case insensitive)
+is_maintenance_branch() {
+   local branch=$(get_current_branch)
+   # Match patterns like *-13.1AV, *-12.1av, *-11AV (case insensitive)
+   if [[ "${branch,,}" =~ -1[0-9](\.[0-9])?av$ ]]; then
+      return 0
+   fi
+   return 1
+}
+
+# Lookup commit message from Commits.md by JIRA tag
+lookup_commit_from_history() {
+   local jira_tag="$1"
+   local commits_file="$HOME/Dev/Private/Commits.md"
+
+   if [[ ! -f "$commits_file" ]]; then
+      return 1
+   fi
+
+   # Extract base JIRA (without version suffix) e.g., VIS-1234 from VIS-1234-something-13.1AV
+   local base_jira=$(echo "$jira_tag" | grep -oE '^[A-Z]+-[0-9]+')
+
+   if [[ -z "$base_jira" ]]; then
+      return 1
+   fi
+
+   # Search for matching JIRA in Commits.md and extract the Logs section
+   local result=$(grep -A 10 "JIRA:.*$base_jira" "$commits_file" | grep -A 5 "^Logs:" | grep "^- " | head -10)
+
+   if [[ -n "$result" ]]; then
+      echo "$result"
+      return 0
+   fi
+   return 1
+}
+
+# -----------------------------------------------------------------------------
 # Export Functions
 # -----------------------------------------------------------------------------
 
@@ -829,3 +899,4 @@ export -f safe_write_file safe_read_file
 export -f command_exists validate_commands
 export -f shell_escape trim
 export -f init_analytics record_ai_performance get_ai_stats is_ai_disabled get_best_ai get_adaptive_timeout show_brief_stats
+export -f is_maintenance_branch lookup_commit_from_history

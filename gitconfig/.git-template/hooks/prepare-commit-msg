@@ -215,15 +215,22 @@ run_ai_sequential() {
          log_info "🤖 Calling ${first_ai^} AI (timeout: ${adaptive_timeout}s)..."
 
          local response
+         local response_time=""
+         local time_file=""
          if [[ "$first_ai" == "gemini" ]]; then
             # Gemini uses positional argument (deprecated -p flag)
+            local start_time=$(date +%s)
             response=$(timeout "$AI_MAX_TIMEOUT" "$ai_cmd" "$prompt" 2>&1)
+            response_time=$(($(date +%s) - start_time))
          else
             # Claude and others use -p flag with piped stdin
-            response=$(echo "$prompt" | monitor_process_with_timeout "$ai_cmd -p" "${first_ai^} AI" "$AI_MAX_TIMEOUT" "$adaptive_timeout")
+            # Use temp file for time since PROCESS_ELAPSED_TIME doesn't propagate through pipes
+            time_file=$(mktemp)
+            response=$(echo "$prompt" | monitor_process_with_timeout "$ai_cmd -p" "${first_ai^} AI" "$AI_MAX_TIMEOUT" "$adaptive_timeout" "$time_file")
+            response_time=$(cat "$time_file" 2>/dev/null || echo "0")
+            rm -f "$time_file"
          fi
          local exit_code=$?
-         local response_time=$PROCESS_ELAPSED_TIME
 
          if [[ $exit_code -eq 0 ]]; then
             log_points=$(echo "$response" | grep "^- " || true)
@@ -260,15 +267,22 @@ run_ai_sequential() {
       log_info "🤖 Calling ${second_ai^} AI (timeout: ${adaptive_timeout}s)..."
 
       local response
+      local response_time=""
+      local time_file=""
       if [[ "$second_ai" == "gemini" ]]; then
          # Gemini uses positional argument (deprecated -p flag)
+         local start_time=$(date +%s)
          response=$(timeout "$AI_MAX_TIMEOUT" "$ai_cmd" "$prompt" 2>&1)
+         response_time=$(($(date +%s) - start_time))
       else
          # Claude and others use -p flag with piped stdin
-         response=$(echo "$prompt" | monitor_process_with_timeout "$ai_cmd -p" "${second_ai^} AI" "$AI_MAX_TIMEOUT" "$adaptive_timeout")
+         # Use temp file for time since PROCESS_ELAPSED_TIME doesn't propagate through pipes
+         time_file=$(mktemp)
+         response=$(echo "$prompt" | monitor_process_with_timeout "$ai_cmd -p" "${second_ai^} AI" "$AI_MAX_TIMEOUT" "$adaptive_timeout" "$time_file")
+         response_time=$(cat "$time_file" 2>/dev/null || echo "0")
+         rm -f "$time_file"
       fi
       local exit_code=$?
-      local response_time=$PROCESS_ELAPSED_TIME
 
       if [[ $exit_code -eq 0 ]]; then
          log_points=$(echo "$response" | grep "^- " || true)
@@ -341,16 +355,14 @@ run_ai_race() {
 
    # Start Claude in background
    (
-      local start=$(date +%s)
-      if echo "$prompt" | monitor_process_with_timeout "$AI_CLAUDE_CMD -p" "Claude AI" "$AI_MAX_TIMEOUT" "$AI_INACTIVITY_TIMEOUT" >"$claude_temp" 2>&1; then
-         local end=$(date +%s)
-         echo $((end - start)) >"$claude_time_file"
+      # Pass time file as 5th parameter - monitor_process_with_timeout writes elapsed time there
+      # This avoids PROCESS_ELAPSED_TIME variable not propagating through pipes
+      if echo "$prompt" | monitor_process_with_timeout "$AI_CLAUDE_CMD -p" "Claude AI" "$AI_MAX_TIMEOUT" "$AI_INACTIVITY_TIMEOUT" "$claude_time_file" >"$claude_temp" 2>&1; then
          if grep -q "^- " "$claude_temp"; then
             echo "claude" >"$winner_file"
          fi
-      else
-         echo "$PROCESS_ELAPSED_TIME" >"$claude_time_file"
       fi
+      # Time already written to claude_time_file by monitor_process_with_timeout
    ) &
    local claude_pid=$!
 
@@ -482,6 +494,33 @@ run_ai_race() {
 }
 
 # -----------------------------------------------------------------------------
+# Maintenance Branch Interactive Mode
+# -----------------------------------------------------------------------------
+
+# Show interactive prompt for maintenance branches
+prompt_maintenance_mode() {
+   local jira_tag="$1"
+
+   echo "" >&2
+   echo "🔧 Maintenance branch detected" >&2
+   echo "   [s]kip AI - use default template" >&2
+   echo "   [l]ookup - search Commits.md for $jira_tag" >&2
+   echo "   [g]enerate or Enter - run AI generation" >&2
+   echo -n "Choice [s/l/g]: " >&2
+
+   # Read with 10 second timeout, default to generate
+   local choice
+   read -t 10 -n 1 choice </dev/tty 2>/dev/null || choice="g"
+   echo "" >&2
+
+   case "${choice,,}" in
+      s) echo "skip" ;;
+      l) echo "lookup" ;;
+      *) echo "generate" ;;
+   esac
+}
+
+# -----------------------------------------------------------------------------
 # Main Logic
 # -----------------------------------------------------------------------------
 
@@ -528,6 +567,47 @@ main() {
    }
 
    if [[ -z "$first_line" ]]; then
+      local mode="generate"
+
+      # Check if maintenance branch and prompt for mode
+      if is_maintenance_branch; then
+         mode=$(prompt_maintenance_mode "$jira_tag")
+      fi
+
+      case "$mode" in
+         skip)
+            log_info "⏭️  Skipping AI generation"
+            # Write default template
+            {
+               echo "$jira_tag"
+               echo ""
+               echo "$branch_name"
+               echo ""
+               echo "Logs:"
+               echo "- "
+            } >"$commit_msg_file"
+            exit 0
+            ;;
+         lookup)
+            local looked_up=$(lookup_commit_from_history "$jira_tag")
+            if [[ -n "$looked_up" ]]; then
+               log_success "📋 Found previous commit for $jira_tag"
+               {
+                  echo "$jira_tag"
+                  echo ""
+                  echo "$branch_name"
+                  echo ""
+                  echo "Logs:"
+                  echo "$looked_up"
+               } >"$commit_msg_file"
+               exit 0
+            else
+               log_warning "No previous commit found, falling back to AI"
+            fi
+            ;;
+      esac
+
+      # Continue with AI generation
       if [[ "$ENABLE_AI_COMMIT" == "true" ]] && has_staged_changes; then
          log_info "🤔 Generating AI commit message..."
 
