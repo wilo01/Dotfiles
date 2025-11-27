@@ -20,6 +20,9 @@ load_hook_config() {
    ENABLE_LOCAL_HOOKS=$(git config --local hooks.enableLocalHooks || echo "false")
    ENABLE_AI_COMMIT=$(git config --local hooks.enableAiCommit || echo "false")
 
+   # Maintenance branch prompt timeout (seconds)
+   MAINTENANCE_TIMEOUT=$(git config --local hooks.maintenanceTimeout || echo "${MAINTENANCE_TIMEOUT:-10}")
+
    # AI Command Paths - auto-detect if not configured
    AI_CLAUDE_CMD=$(git config --local hooks.aiClaudeCmd 2>/dev/null)
    if [[ -z "$AI_CLAUDE_CMD" ]]; then
@@ -36,7 +39,7 @@ load_hook_config() {
    HOOKS_LOCAL_FILENAME=$(git config --local hooks.hooksLocalFilename)
 
    export AI_MAX_TIMEOUT AI_INACTIVITY_TIMEOUT AI_SHOW_PROGRESS AI_PARALLEL_MODE AI_DEBUG
-   export ENABLE_GLOBAL_HOOKS ENABLE_LOCAL_HOOKS ENABLE_AI_COMMIT
+   export ENABLE_GLOBAL_HOOKS ENABLE_LOCAL_HOOKS ENABLE_AI_COMMIT MAINTENANCE_TIMEOUT
    export AI_CLAUDE_CMD AI_GEMINI_CMD
    export HOOKS_LOCAL_PATH HOOKS_LOCAL_FILENAME
 }
@@ -55,13 +58,6 @@ debug_config() {
 # -----------------------------------------------------------------------------
 # Logging Utilities
 # -----------------------------------------------------------------------------
-
-# Color codes for terminal output
-readonly COLOR_RED='\033[0;31m'
-readonly COLOR_GREEN='\033[0;32m'
-readonly COLOR_YELLOW='\033[1;33m'
-readonly COLOR_BLUE='\033[0;34m'
-readonly COLOR_RESET='\033[0m'
 
 # Log functions with consistent formatting
 log_info() {
@@ -573,11 +569,12 @@ record_ai_performance() {
             .history = .history[-50:]
             ')
     elif command_exists python3; then
-        analytics=$(python3 -c "
+        # Pipe analytics through stdin to avoid shell quoting issues
+        analytics=$(echo "$analytics" | python3 -c "
 import json
 import sys
 
-data = json.loads('''$analytics''')
+data = json.load(sys.stdin)
 ai = '$ai_name'
 success = '$success' == 'true'
 time = float('$response_time') if '$response_time' != 'failed' else 0
@@ -894,12 +891,12 @@ except:
 # -----------------------------------------------------------------------------
 
 # Check if current branch is a maintenance branch pattern
-# Matches: *-13.1AV, *-13-1av, *-12.1av, *-11AV (case insensitive)
-# Supports both dot and dash separators between major/minor versions
+# Matches: *-13.1AV, *-13-1av, *-20AV, *-25.2av (case insensitive)
+# Supports any version number with optional dot or dash separators
 is_maintenance_branch() {
    local branch=$(get_current_branch)
-   # Match patterns like *-13.1AV, *-13-1av, *-12.1av, *-11AV (case insensitive)
-   if [[ "${branch,,}" =~ -1[0-9]([.-][0-9])?av$ ]]; then
+   # Match patterns like *-13.1AV, *-20AV, *-25.2av (any version number)
+   if [[ "${branch,,}" =~ -[0-9]+([.-][0-9]+)?av$ ]]; then
       return 0
    fi
    return 1
@@ -907,11 +904,12 @@ is_maintenance_branch() {
 
 # Lookup commit message from Commits.md by JIRA tag
 # Supports formats: "JIRA: VIS-1234", "JIRA: #VIS-1234", or standalone "VIS-1234" at line start
+# Configure path via COMMITS_FILE environment variable
 lookup_commit_from_history() {
    local jira_tag="$1"
-   local commits_file="$HOME/Dev/Private/Commits.md"
+   local commits_file="${COMMITS_FILE:-$HOME/Dev/Private/Commits.md}"
 
-   if [[ ! -f "$commits_file" ]]; then
+   if [[ ! -f "$commits_file" ]] || [[ ! -r "$commits_file" ]]; then
       return 1
    fi
 
@@ -944,7 +942,7 @@ export -f show_progress clear_progress
 export -f monitor_process_with_timeout kill_process_tree
 export -f get_current_branch get_jira_tag get_project_root has_staged_changes get_diff_stats
 export -f safe_write_file safe_read_file
-export -f command_exists validate_commands
+export -f command_exists validate_commands validate_safe_path validate_ai_command
 export -f shell_escape trim
 export -f init_analytics record_ai_performance get_ai_stats is_ai_disabled get_best_ai get_adaptive_timeout show_brief_stats
 export -f is_maintenance_branch lookup_commit_from_history
