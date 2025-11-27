@@ -321,6 +321,22 @@ run_ai_race() {
 
    log_info "🏁 Racing Claude and Gemini AI - first valid response wins!"
 
+   # Validate AI commands before starting race
+   local claude_valid=true
+   local gemini_valid=true
+   if ! validate_ai_command "$AI_CLAUDE_CMD"; then
+      log_warning "Claude AI command validation failed, will skip"
+      claude_valid=false
+   fi
+   if ! validate_ai_command "$AI_GEMINI_CMD"; then
+      log_warning "Gemini AI command validation failed, will skip"
+      gemini_valid=false
+   fi
+   if [[ "$claude_valid" == "false" ]] && [[ "$gemini_valid" == "false" ]]; then
+      log_error "Both AI commands failed validation"
+      return 1
+   fi
+
    # Temp files for outputs (secure creation with error handling)
    local claude_temp=$(mktemp) || {
       log_error "Failed to create temp file for Claude"
@@ -353,34 +369,40 @@ run_ai_race() {
    # Cleanup on exit
    trap "rm -f '$claude_temp' '$gemini_temp' '$winner_file' '$claude_time_file' '$gemini_time_file'" RETURN INT TERM
 
-   # Start Claude in background
-   (
-      # Pass time file as 5th parameter - monitor_process_with_timeout writes elapsed time there
-      # This avoids PROCESS_ELAPSED_TIME variable not propagating through pipes
-      if echo "$prompt" | monitor_process_with_timeout "$AI_CLAUDE_CMD -p" "Claude AI" "$AI_MAX_TIMEOUT" "$AI_INACTIVITY_TIMEOUT" "$claude_time_file" >"$claude_temp" 2>&1; then
-         if grep -q "^- " "$claude_temp"; then
-            echo "claude" >"$winner_file"
+   # Start Claude in background (only if valid)
+   local claude_pid=""
+   if [[ "$claude_valid" == "true" ]]; then
+      (
+         # Pass time file as 5th parameter - monitor_process_with_timeout writes elapsed time there
+         # This avoids PROCESS_ELAPSED_TIME variable not propagating through pipes
+         if echo "$prompt" | monitor_process_with_timeout "$AI_CLAUDE_CMD -p" "Claude AI" "$AI_MAX_TIMEOUT" "$AI_INACTIVITY_TIMEOUT" "$claude_time_file" >"$claude_temp" 2>&1; then
+            if grep -q "^- " "$claude_temp"; then
+               echo "claude" >"$winner_file"
+            fi
          fi
-      fi
-      # Time already written to claude_time_file by monitor_process_with_timeout
-   ) &
-   local claude_pid=$!
+         # Time already written to claude_time_file by monitor_process_with_timeout
+      ) &
+      claude_pid=$!
+   fi
 
-   # Start Gemini in background (uses positional argument, not deprecated -p flag)
-   (
-      local start=$(date +%s)
-      if timeout "$AI_MAX_TIMEOUT" "$AI_GEMINI_CMD" "$prompt" >"$gemini_temp" 2>&1; then
-         local end=$(date +%s)
-         echo $((end - start)) >"$gemini_time_file"
-         if grep -q "^- " "$gemini_temp"; then
-            echo "gemini" >"$winner_file"
+   # Start Gemini in background (only if valid)
+   local gemini_pid=""
+   if [[ "$gemini_valid" == "true" ]]; then
+      (
+         local start=$(date +%s)
+         if timeout "$AI_MAX_TIMEOUT" "$AI_GEMINI_CMD" "$prompt" >"$gemini_temp" 2>&1; then
+            local end=$(date +%s)
+            echo $((end - start)) >"$gemini_time_file"
+            if grep -q "^- " "$gemini_temp"; then
+               echo "gemini" >"$winner_file"
+            fi
+         else
+            local end=$(date +%s)
+            echo $((end - start)) >"$gemini_time_file"
          fi
-      else
-         local end=$(date +%s)
-         echo $((end - start)) >"$gemini_time_file"
-      fi
-   ) &
-   local gemini_pid=$!
+      ) &
+      gemini_pid=$!
+   fi
 
    # Race monitoring with proper time tracking
    local start_time=$(date +%s)

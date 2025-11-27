@@ -167,7 +167,10 @@ monitor_process_with_timeout() {
          log_warning "$description exceeded maximum timeout (${max_timeout}s)"
          PROCESS_ELAPSED_TIME=$elapsed
          # Write time to file before returning (for pipe contexts)
-         [[ -n "$time_output_file" ]] && echo "$PROCESS_ELAPSED_TIME" > "$time_output_file"
+         # Only write to files in /tmp (created by mktemp)
+         if [[ -n "$time_output_file" ]] && [[ "$time_output_file" == /tmp/* ]]; then
+            echo "$PROCESS_ELAPSED_TIME" > "$time_output_file"
+         fi
          return 124 # timeout exit code
       fi
 
@@ -182,7 +185,10 @@ monitor_process_with_timeout() {
             log_warning "$description timed out after ${inactivity_timeout}s of inactivity"
             PROCESS_ELAPSED_TIME=$elapsed
             # Write time to file before returning (for pipe contexts)
-            [[ -n "$time_output_file" ]] && echo "$PROCESS_ELAPSED_TIME" > "$time_output_file"
+            # Only write to files in /tmp (created by mktemp)
+            if [[ -n "$time_output_file" ]] && [[ "$time_output_file" == /tmp/* ]]; then
+               echo "$PROCESS_ELAPSED_TIME" > "$time_output_file"
+            fi
             return 124 # timeout exit code
          fi
       fi
@@ -211,7 +217,8 @@ monitor_process_with_timeout() {
    cat "$temp_file"
 
    # Write elapsed time to file if requested (for pipe contexts where variable won't propagate)
-   if [[ -n "$time_output_file" ]]; then
+   # Only write to files in /tmp (created by mktemp)
+   if [[ -n "$time_output_file" ]] && [[ "$time_output_file" == /tmp/* ]]; then
       echo "$PROCESS_ELAPSED_TIME" > "$time_output_file"
    fi
 
@@ -424,10 +431,43 @@ init_analytics() {
     elif ! jq -e . "$ANALYTICS_FILE" >/dev/null 2>&1; then
         needs_init=true
         log_warning "Analytics file corrupted, recreating..."
-        rm -f "$ANALYTICS_FILE"
     fi
 
     if [[ "$needs_init" == "true" ]]; then
+        # Use file locking to prevent race conditions during initialization
+        local lock_file="${ANALYTICS_FILE}.init.lock"
+        local lock_acquired=false
+
+        # Try to acquire lock with short timeout (10 * 0.1s = 1 second)
+        local max_wait=10
+        local waited=0
+        while [[ $waited -lt $max_wait ]]; do
+            if mkdir "$lock_file" 2>/dev/null; then
+                lock_acquired=true
+                break
+            fi
+            sleep 0.1
+            waited=$((waited + 1))
+        done
+
+        if [[ "$lock_acquired" != "true" ]]; then
+            # Another process is initializing, wait and check again
+            sleep 0.5
+            if [[ -f "$ANALYTICS_FILE" ]] && jq -e . "$ANALYTICS_FILE" >/dev/null 2>&1; then
+                return 0  # File was created by another process
+            fi
+            log_debug "Failed to acquire init lock, proceeding anyway"
+        fi
+
+        # Double-check file wasn't created while we waited for lock
+        if [[ -f "$ANALYTICS_FILE" ]] && jq -e . "$ANALYTICS_FILE" >/dev/null 2>&1; then
+            [[ "$lock_acquired" == "true" ]] && rmdir "$lock_file" 2>/dev/null
+            return 0
+        fi
+
+        # Remove corrupted file if it exists
+        [[ -f "$ANALYTICS_FILE" ]] && rm -f "$ANALYTICS_FILE"
+
         cat > "$ANALYTICS_FILE" <<EOF
 {
     "claude": {
@@ -453,6 +493,8 @@ init_analytics() {
     "history": []
 }
 EOF
+        # Release lock
+        [[ "$lock_acquired" == "true" ]] && rmdir "$lock_file" 2>/dev/null
     fi
 }
 
@@ -474,8 +516,8 @@ record_ai_performance() {
     local lock_file="${ANALYTICS_FILE}.lock"
     local lock_acquired=false
 
-    # Try to acquire lock with timeout
-    local max_wait=5
+    # Try to acquire lock with timeout (50 * 0.1s = 5 seconds)
+    local max_wait=50
     local waited=0
     while [[ $waited -lt $max_wait ]]; do
         if mkdir "$lock_file" 2>/dev/null; then
@@ -487,7 +529,7 @@ record_ai_performance() {
     done
 
     if [[ "$lock_acquired" != "true" ]]; then
-        log_debug "Failed to acquire analytics lock after ${max_wait}s"
+        log_debug "Failed to acquire analytics lock after 5s"
         return 1
     fi
 
@@ -570,7 +612,10 @@ print(json.dumps(data, indent=2))
     fi
 
     # Check if AI should be disabled (3 consecutive failures)
-    local recent_failures_count=$(echo "$analytics" | grep -o "\"$ai_name\".*recent_failures.*\[.*\]" | grep -o "\"20" | wc -l)
+    local recent_failures_count=0
+    if command_exists jq; then
+        recent_failures_count=$(echo "$analytics" | jq -r --arg ai "$ai_name" '.[$ai].recent_failures | length' 2>/dev/null || echo "0")
+    fi
     if [[ "$recent_failures_count" -ge 3 ]]; then
         local disable_until=$(date -u -d "+1 hour" +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || date -u -v+1H +"%Y-%m-%dT%H:%M:%SZ")
         if command_exists jq; then
