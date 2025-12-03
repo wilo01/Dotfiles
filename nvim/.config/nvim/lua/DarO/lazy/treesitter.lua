@@ -23,6 +23,7 @@ return {
             modules = {},
             ignore_install = {},
          })
+         vim.treesitter.language.register("bash", "dotenv")
       end,
    },
 }

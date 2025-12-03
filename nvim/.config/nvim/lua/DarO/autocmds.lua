@@ -58,6 +58,12 @@ end
 vim.filetype.add({
    extension = {
       templ = 'templ',
+   },
+   filename = {
+      ['.env'] = 'dotenv',
+   },
+   pattern = {
+      ['.*%.env[^/]*'] = 'dotenv', -- Matches any file starting with .env
    }
 })
 
