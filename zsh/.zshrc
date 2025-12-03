@@ -295,8 +295,17 @@ alias kiosk_settings="echo open kiosk settings at: ; code_ks ; sleep 1 ; code_ka
 alias liqui_valid="echo cd ~/Dev/branch-opener/branches/tds-suite/source/server/database/ ; echo ./liquibase --defaultsFile=validate.liquibase.properties validate ; cd ~/Dev/branch-opener/branches/tds-suite/source/server/database/ ; ./liquibase --defaultsFile=validate.liquibase.properties validate"
 alias sqldev="echo ~/SQLDeveloper/opt/sqldeveloper/sqldeveloper.sh ; ~/SQLDeveloper/opt/sqldeveloper/sqldeveloper.sh"
 alias br='echo npm start at: ; echo ~/Dev/branch-opener/app/ ; if [[ -n "$(find ~/Dev/branch-opener/app/apex/kiosk/bdb/ -maxdepth 0 -type f -o -type d -printf '%s')" ]]; then echo "Removing content from ~/Dev/branch-opener/app/apex/kiosk/bdb/" ; rm -rf ~/Dev/branch-opener/app/apex/kiosk/bdb/* ; else echo "No content found in ~/Dev/branch-opener/app/apex/kiosk/bdb/, skipping removal." ; fi ; ls ~/Dev/branch-opener/app/apex/kiosk/bdb/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; xdg-open http://localhost:3333/static/ ; npm start'
-alias hx='echo pnpm start at: ; echo ~/tds-hexer/ ; cd ~/tds-hexer/ ; pnpm install ; pnpm run dev ; xdg-open http://localhost:3005/safe/'
+function hx() {
+    local variant="${1:-dev}"
+    echo "pnpm start at: ~/tds-hexer/"
+    echo "Running: pnpm run $variant"
+    cd ~/tds-hexer/
+    pnpm install
+    pnpm run "$variant"
+    xdg-open http://localhost:3005/safe/
+}
 alias ksw='echo kiosk start at: ; echo ~/tds-branch-opener/branches/tds-suite/source/ui-kiosk/ ; cd ~/tds-branch-opener/branches/tds-suite/source/ui-kiosk/ ; sencha app watch ; xdg-open http://localhost:3005/kiosk/'
+alias vsw='echo visitor-web-app start at: ; echo ~/tds-branch-opener/branches/tds-visitor-web-app/ui ; cd ~/tds-branch-opener/branches/tds-visitor-web-app/ui ; sencha app watch ; xdg-open http://localhost:3005/kiosk/'
 alias cy="echo Cypress open at: ; cdy ; sleep 1 ; echo ./node_modules/cypress/bin/cypress open ; ./node_modules/cypress/bin/cypress open"
 alias cy_all="echo Cypress run all tests at: ; cdy ; sleep 1 ; echo npx cypress run --headless --spec cypress/integration/tdsvisitor/rt/*.js ; npx cypress run --headless --spec cypress/integration/tdsvisitor/rt/*.js"
 alias docker_start_trunk="echo cd ~/Dev/branch-opener/branches/safe ; echo sudo docker start -ai trunk ; cd ~/Dev/branch-opener/branches/safe && sudo docker start -ai trunk"
@@ -350,9 +359,12 @@ alias recat="echo ~/recatest/recatest_run.sh ; ~/recatest/recatest_run.sh"
 alias clear_cache="echo free -h ; echo ; echo Before clean:; free -h ; echo ; echo After clean: ; echo sync \&\& echo 3 \| sudo tee /proc/sys/vm/drop_caches \&\& free -h ; sync && echo 3 | sudo tee /proc/sys/vm/drop_caches && free -h"
 alias tm='task-master'
 alias taskmaster='task-master'
+alias gemini-fast='gemini -m gemini-2.0-flash'
 alias clauded='claude --dangerously-skip-permissions'
 alias claude-sonnet='claude --model claude-sonnet-4-20250514'
 alias claude-opus='claude --model claude-opus-4-1-20250805'
+alias claude-fast='claude-haiku'
+alias claude-haiku='claude --model claude-3-5-haiku-20241022'
 alias filepath='realpath'
 alias rm="sudo rm"
 alias rm_nvim="echo 'Removing Neovim data, cache, state, and lazy-lock.json...' ; command rm -rf ~/.local/share/nvim ~/.local/state/nvim ~/.cache/nvim ~/.config/nvim/lazy-lock.json ~/.var/app/io.neovim.nvim/cache/nvim ~/.var/app/io.neovim.nvim/data/nvim && echo 'Neovim reset complete! Restart nvim to reinstall plugins.'"
