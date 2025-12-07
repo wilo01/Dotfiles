@@ -2,13 +2,11 @@
 
 import re
 import time
-import random
 import shutil
 import os
 from typing import Optional
 import pyshorteners
 import pyperclip
-import segno
 
 
 class HelperCore:
@@ -145,8 +143,10 @@ class HelperCore:
                 number = match.group(2)
                 return f"{tag}-{number}"
 
+            # Only match JIRA ticket at the START of the string
+            # This avoids uppercasing words like "allowed-13", "thing-12", "version-2"
             formatted = re.sub(
-                r"\b([a-zA-Z]+)-(\d+)\b",
+                r"^([a-zA-Z]{2,6})-(\d+)(?=-|$)",
                 uppercase_tag_match,
                 formatted,
                 flags=re.IGNORECASE,

@@ -3,3 +3,4 @@ command = tmux
 confirm-close-surface = false
 font-family = "MesloLGS NF"
 font-feature = -calt
+focus-follows-mouse = false

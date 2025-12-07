@@ -1,7 +1,6 @@
 """Command line interface for Helper CLI."""
 
 import click
-import pyperclip
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
@@ -320,7 +319,7 @@ def apex(apex_file, port, auth, copy):
     """Generate APEX upload curl command."""
     upload_command = helper.generate_apex_upload_command(apex_file, port, auth)
 
-    console.print(f"[bold blue]APEX Upload Command:[/bold blue]")
+    console.print("[bold blue]APEX Upload Command:[/bold blue]")
     console.print(Panel(upload_command, expand=False))
 
     if copy:
@@ -362,12 +361,12 @@ def custom_default_data(verify):
             file_size = SOURCE_PATH.stat().st_size
             console.print(f"✅ Source file exists ({file_size:,} bytes)")
         else:
-            console.print(f"❌ Source file not found")
+            console.print("❌ Source file not found")
 
         if TARGET_DIR.exists():
-            console.print(f"✅ Target directory exists")
+            console.print("✅ Target directory exists")
         else:
-            console.print(f"❌ Target directory not found")
+            console.print("❌ Target directory not found")
         return
 
     success, message, file_size = helper.custom_default_data()
@@ -482,7 +481,7 @@ def log(ticket_text, agent_name, output, auto, append):
     """Create work log for VIS tickets with agent output."""
 
     if auto or not ticket_text:
-        detected_ticket, ticket_number = helper.detect_vis_ticket_from_context()
+        detected_ticket, _ = helper.detect_vis_ticket_from_context()
         if detected_ticket:
             if not ticket_text:
                 ticket_text = detected_ticket
@@ -573,7 +572,7 @@ def check_github(username):
     elif status is False:
         console.print(f"❌ GitHub: [bold red]{username}[/bold red] is taken")
     else:
-        console.print(f"⚠️ Could not check GitHub availability")
+        console.print("⚠️ Could not check GitHub availability")
 
 
 @main.command("check-npm")
@@ -588,7 +587,7 @@ def check_npm(package_name):
     elif status is False:
         console.print(f"❌ npm: [bold red]{package_name}[/bold red] is taken")
     else:
-        console.print(f"⚠️ Could not check npm availability")
+        console.print("⚠️ Could not check npm availability")
 
 
 @main.command("check-trademark")
@@ -664,9 +663,59 @@ def jira_start(ticket):
 @click.option(
     "--ticket", "-t", help="Ticket to log time for (auto-detects if not provided)"
 )
-def jira_log(duration, description, ticket):
-    """Log work time to Jira and Google Sheets."""
+@click.option(
+    "--add",
+    "-a",
+    "add_ticket",
+    default=None,
+    help="Quick add: append entry to CSV (e.g., -a VIS-123)",
+)
+@click.option(
+    "--batch",
+    "-b",
+    "batch_file",
+    is_flag=False,
+    flag_value="default",
+    default=None,
+    help="Process CSV file (default: ~/.config/helper-cli/worklogs.csv)",
+)
+@click.option("--dry-run", is_flag=True, help="Preview batch entries without posting")
+@click.option(
+    "--time",
+    "start_time",
+    default="09:00",
+    help="Default start time for batch entries (HH:MM)",
+)
+def jira_log(
+    duration, description, ticket, add_ticket, batch_file, dry_run, start_time
+):
+    """Log work time to Jira and Google Sheets.
+
+    Quick add (append to CSV):
+        helper jira log -a VIS-123 2h
+        helper jira log --add VIS-123 2h
+
+    Batch mode (submit pending CSV entries):
+        helper jira log --batch
+        helper jira log --batch --dry-run
+
+    Single entry mode (immediate):
+        helper jira log 2h "Fixed bug" --ticket VIS-123
+
+    CSV format: issue_key,time_spent,date,description,status
+    Status flow: empty -> UPDATED -> DONE
+    """
     from rich.progress import Progress, SpinnerColumn, TextColumn
+
+    # Handle quick add mode
+    if add_ticket is not None:
+        _handle_quick_add(add_ticket, duration, description)
+        return
+
+    # Handle batch mode
+    if batch_file is not None:
+        _handle_batch_worklog(batch_file, dry_run, start_time)
+        return
 
     context_detector = get_context_detector()
     jira_service = get_jira_service()
@@ -678,24 +727,22 @@ def jira_log(duration, description, ticket):
     if not ticket:
         ticket = suggestion["ticket"]
         if ticket:
-            console.print(f"🎯 Auto-detected ticket: [bold cyan]{ticket}[/bold cyan]")
+            console.print(f"Auto-detected ticket: [bold cyan]{ticket}[/bold cyan]")
         else:
             ticket = console.input("Enter ticket number: ").strip().upper()
 
     if not duration:
         suggested_duration = suggestion["duration"]
         duration = (
-            console.input(f"⏰ Duration [{suggested_duration}]: ").strip()
+            console.input(f"Duration [{suggested_duration}]: ").strip()
             or suggested_duration
         )
 
     if not description:
         suggested_desc = suggestion["description"]
         if suggested_desc:
-            console.print(f"📝 Suggested: [dim]{suggested_desc}[/dim]")
-        description = (
-            console.input("📝 What did you work on? ").strip() or suggested_desc
-        )
+            console.print(f"Suggested: [dim]{suggested_desc}[/dim]")
+        description = console.input("What did you work on? ").strip() or suggested_desc
 
     # Log with progress indicator
     with Progress(
@@ -706,31 +753,197 @@ def jira_log(duration, description, ticket):
         task = progress.add_task("Logging work...", total=3)
 
         # Save to local cache first
-        progress.update(task, description="💾 Saving to local cache...")
-        success = jira_service.log_work(ticket, duration, description)
+        progress.update(task, description="Saving to local cache...")
+        jira_service.log_work(ticket, duration, description)
         progress.update(task, advance=1)
 
         # Sync to Jira if online
-        progress.update(task, description="🔄 Syncing to Jira...")
+        progress.update(task, description="Syncing to Jira...")
         if jira_service._is_online():
             jira_service._sync_worklogs()
             progress.update(task, advance=1)
         else:
             console.print(
-                "[yellow]📵 Offline - will sync when connection restored[/yellow]"
+                "[yellow]Offline - will sync when connection restored[/yellow]"
             )
             progress.update(task, advance=1)
 
         # Update Google Sheets
-        progress.update(task, description="📊 Updating Google Sheets...")
+        progress.update(task, description="Updating Google Sheets...")
         if sheets_service and sheets_service.service:
             sheets_service.append_work_log(ticket, duration, description)
         progress.update(task, advance=1)
 
     console.print(
-        f"✅ Logged [bold green]{duration}[/bold green] to [bold cyan]{ticket}[/bold cyan]"
+        f"Logged [bold green]{duration}[/bold green] to [bold cyan]{ticket}[/bold cyan]"
     )
     console.print(f"   {description}")
+
+
+def _handle_quick_add(ticket, duration, description=None):
+    """Handle quick add mode - append entry to CSV."""
+    from .worklog_batch import WorklogBatchProcessor
+
+    csv_path = WorklogBatchProcessor.DEFAULT_CSV_PATH
+
+    if not duration:
+        console.print(
+            "[red]Duration required. Usage: helper jira log -a VIS-123 2h[/red]"
+        )
+        return
+
+    WorklogBatchProcessor.append_entry(
+        file_path=csv_path,
+        issue_key=ticket,
+        time_spent=duration,
+        description=description or "",
+    )
+
+    from datetime import datetime
+
+    today = datetime.now().strftime("%d.%m.%Y")
+
+    console.print(
+        f"Added: [cyan]{ticket.upper()}[/cyan] [green]{duration}[/green] {today}"
+    )
+    if description:
+        console.print(f"       [dim]{description}[/dim]")
+    console.print(f"[dim]CSV: {csv_path}[/dim]")
+    console.print("[dim]Run 'helper jira log --batch' to submit[/dim]")
+
+
+def _handle_batch_worklog(batch_file, dry_run, start_time):
+    """Handle batch worklog processing from CSV file."""
+    from .worklog_batch import WorklogBatchProcessor
+
+    # Determine CSV file path
+    if batch_file == "default":
+        csv_path = WorklogBatchProcessor.DEFAULT_CSV_PATH
+    else:
+        csv_path = Path(batch_file).expanduser()
+
+    if not csv_path.exists():
+        console.print(f"[red]CSV file not found: {csv_path}[/red]")
+        console.print(
+            "[dim]Create a CSV with format: issue_key,time_spent,date,description,status[/dim]"
+        )
+        console.print("[dim]Date format: DD.MM.YYYY[/dim]")
+        return
+
+    # Get credentials - try .env first, then CredentialManager
+    creds = None
+    env_path = Path.home() / ".config" / "helper-cli" / ".env"
+    if env_path.exists():
+        try:
+            env_vars = {}
+            with open(env_path) as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        key, value = line.split("=", 1)
+                        env_vars[key.strip()] = value.strip().strip('"').strip("'")
+
+            if all(k in env_vars for k in ("JIRA_URL", "JIRA_EMAIL", "JIRA_API_TOKEN")):
+                creds = {
+                    "base_url": env_vars["JIRA_URL"],
+                    "email": env_vars["JIRA_EMAIL"],
+                    "api_token": env_vars["JIRA_API_TOKEN"],
+                }
+                console.print(f"[dim]Using credentials from {env_path}[/dim]")
+        except Exception:
+            pass
+
+    if not creds:
+        credential_manager = get_credential_manager()
+        creds = credential_manager.get_jira_credentials()
+
+    if not creds:
+        console.print("[red]JIRA credentials not configured.[/red]")
+        console.print("[dim]Create ~/.config/helper-cli/.env with:[/dim]")
+        console.print("[dim]  JIRA_URL=http://localhost:8080[/dim]")
+        console.print("[dim]  JIRA_EMAIL=your@email.com[/dim]")
+        console.print("[dim]  JIRA_API_TOKEN=your-token[/dim]")
+        return
+
+    # Initialize processor
+    processor = WorklogBatchProcessor(
+        base_url=creds["base_url"],
+        email=creds["email"],
+        api_token=creds["api_token"],
+    )
+
+    # Parse CSV
+    console.print(f"Loading [cyan]{csv_path}[/cyan]...")
+    try:
+        entries = processor.parse_csv(csv_path)
+    except Exception as e:
+        console.print(f"[red]Error reading CSV: {e}[/red]")
+        return
+
+    if not entries:
+        console.print("[yellow]No pending entries in CSV file[/yellow]")
+        console.print("[dim]Use 'helper jira log -a VIS-123 2h' to add entries[/dim]")
+        return
+
+    console.print(f"Found [bold]{len(entries)}[/bold] pending entries\n")
+
+    if dry_run:
+        console.print("[yellow]DRY RUN MODE - No changes will be made[/yellow]\n")
+
+    # Process with progress callback
+    results = []
+
+    def progress_callback(current, total, result):
+        status = (
+            "[green]OK[/green]"
+            if result.success
+            else f"[red]FAILED[/red] ({result.error_message})"
+        )
+        console.print(
+            f"  {current}/{total} [cyan]{result.entry.issue_key:12}[/cyan] "
+            f"{result.entry.time_spent:6} {result.entry.date:12} ... {status}"
+        )
+
+    console.print("Processing worklogs:")
+    results = processor.process_batch(
+        entries,
+        dry_run=dry_run,
+        default_time=start_time,
+        progress_callback=progress_callback,
+    )
+
+    # Summary
+    success_count = sum(1 for r in results if r.success)
+    failed_count = len(results) - success_count
+    updated_count = sum(1 for r in results if r.success and r.new_status == "UPDATED")
+    done_count = sum(1 for r in results if r.success and r.new_status == "DONE")
+
+    console.print()
+    if dry_run:
+        console.print(
+            f"[bold]Preview complete:[/bold] {len(results)} entries validated"
+        )
+        if failed_count > 0:
+            console.print(f"[yellow]{failed_count} entries have errors[/yellow]")
+        console.print("\n[dim]Run without --dry-run to submit these entries.[/dim]")
+    else:
+        console.print(
+            f"[bold]Summary:[/bold] {done_count} DONE, {updated_count} UPDATED, {failed_count} failed"
+        )
+
+        # Update CSV with new statuses
+        if success_count > 0:
+            processor.update_csv_status(csv_path, results)
+            console.print("[dim]CSV updated[/dim]")
+
+    # Show failed entries
+    if failed_count > 0:
+        console.print("\n[red]Failed entries:[/red]")
+        for result in results:
+            if not result.success:
+                console.print(
+                    f"  Row {result.entry.row_number}: {result.entry.issue_key} - {result.error_message}"
+                )
 
 
 @jira_group.command("standup")
@@ -761,7 +974,7 @@ def jira_standup(copy):
             if status in ["In Progress", "To Do"]:
                 summary = ticket.get("fields", {}).get("summary", "")
                 today_plan.append(f"{ticket['key']}: {summary}")
-    except:
+    except (KeyError, IndexError, AttributeError, Exception):
         today_plan = ["Continue current tasks"]
 
     # Generate standup notes
@@ -810,7 +1023,6 @@ def jira_status():
     jira_service = get_jira_service()
 
     # Get today's work logs
-    today_logs = []
     recent_logs = jira_service.get_recent_worklogs(days=1)
     today = datetime.now().date()
 
@@ -1028,7 +1240,7 @@ def name_finder(names, output, format, no_social, no_cache, workers, verbose):
             export_formats = ["csv", "markdown", "json"]
 
         if any(f in export_formats for f in ["csv", "markdown", "json"]):
-            console.print(f"\n[bold]Exporting results...[/bold]")
+            console.print("\n[bold]Exporting results...[/bold]")
 
             for fmt in export_formats:
                 if fmt == "csv":
@@ -1054,6 +1266,223 @@ def name_finder(names, output, format, no_social, no_cache, workers, verbose):
         checker.close()
 
 
+@main.group()
+def timesheet():
+    """Timesheet Tracking plugin commands for Jira Cloud."""
+    pass
+
+
+@timesheet.command("setup")
+@click.option(
+    "--jira-url",
+    prompt="Jira Cloud URL",
+    help="Base Jira Cloud URL (e.g., https://your-domain.atlassian.net)",
+)
+@click.option(
+    "--session-token", prompt="Session Token", help="tenant.session.token cookie value"
+)
+@click.option(
+    "--xsrf-token", prompt="XSRF Token", help="atlassian.xsrf.token cookie value"
+)
+@click.option("--jsessionid", prompt="JSESSIONID", help="JSESSIONID cookie value")
+def timesheet_setup(jira_url, session_token, xsrf_token, jsessionid):
+    """Configure authentication for Timesheet Tracking plugin.
+
+    To get your tokens:
+    1. Open your browser DevTools (F12)
+    2. Go to Application/Storage > Cookies
+    3. Find: tenant.session.token, atlassian.xsrf.token, JSESSIONID
+    4. Copy their values here
+    """
+    from .timesheet import save_timesheet_config
+
+    try:
+        config_path = save_timesheet_config(
+            jira_url=jira_url,
+            session_token=session_token,
+            xsrf_token=xsrf_token,
+            jsessionid=jsessionid,
+        )
+        console.print(f"✅ Configuration saved to: [green]{config_path}[/green]")
+        console.print("\n📝 You can now use: helper timesheet log <issue> <time>")
+    except Exception as e:
+        console.print(f"[red]Error saving configuration: {e}[/red]")
+
+
+@timesheet.command("log")
+@click.argument("issue_key")
+@click.argument("time_spent")
+@click.option("--comment", "-c", default="", help="Optional comment for the worklog")
+@click.option(
+    "--date", "-d", help="Date when work was done (YYYY-MM-DD, defaults to today)"
+)
+@click.option("--time", "-t", help="Time when work started (HH:MM, defaults to now)")
+def timesheet_log(issue_key, time_spent, comment, date, time):
+    """Log work time to a Jira issue.
+
+    Examples:
+        helper timesheet log TDT-123 30m
+        helper timesheet log TDT-123 2h --comment "Fixed bug"
+        helper timesheet log TDT-123 1h30m --date 2025-11-24 --time 09:00
+
+    Time format: 30m, 2h, 1d, 1h30m, etc.
+    """
+    from .timesheet import TimesheetLogger
+    from datetime import datetime, timezone
+
+    try:
+        # Load logger from config
+        logger = TimesheetLogger.from_config_file()
+
+        # Parse date/time if provided
+        started = None
+        if date or time:
+            date_str = date or datetime.now().strftime("%Y-%m-%d")
+            time_str = time or datetime.now().strftime("%H:%M")
+            started = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
+            started = started.replace(tzinfo=timezone.utc)
+
+        # Log the work
+        date_display = f" on {date}" if date else " today"
+        console.print(f"⏱️  Logging {time_spent} to {issue_key}{date_display}...")
+        result = logger.log_work(
+            issue_key=issue_key,
+            time_spent=time_spent,
+            started=started,
+            comment=comment,
+        )
+
+        # Check result
+        data = result.get("data", {}).get("invokeExtension", {})
+        if data.get("success"):
+            console.print(
+                f"✅ Successfully logged {time_spent} to {issue_key}{date_display}"
+            )
+            if comment:
+                console.print(f"   Comment: {comment}")
+        else:
+            errors = data.get("errors", [])
+            if errors:
+                for error in errors:
+                    console.print(f"[red]Error: {error.get('message')}[/red]")
+            else:
+                console.print("[yellow]Unknown response from API[/yellow]")
+                console.print(f"Response: {result}")
+
+    except FileNotFoundError as e:
+        console.print(f"[red]{e}[/red]")
+        console.print("Run: helper timesheet setup")
+    except Exception as e:
+        console.print(f"[red]Error logging work: {e}[/red]")
+
+
+@timesheet.command("batch")
+@click.argument("issue_key")
+@click.option("--mon", help="Monday hours (e.g., 8h)")
+@click.option("--tue", help="Tuesday hours")
+@click.option("--wed", help="Wednesday hours")
+@click.option("--thu", help="Thursday hours")
+@click.option("--fri", help="Friday hours")
+@click.option("--sat", help="Saturday hours")
+@click.option("--sun", help="Sunday hours")
+@click.option("--comment", "-c", default="", help="Comment for all entries")
+@click.option(
+    "--week-start",
+    "-w",
+    help="Start date of the week (YYYY-MM-DD, defaults to last Monday)",
+)
+def timesheet_batch(issue_key, mon, tue, wed, thu, fri, sat, sun, comment, week_start):
+    """Batch log time for multiple days of the week.
+
+    Examples:
+        # Log time for this week (Mon-Fri)
+        helper timesheet batch TDT-123 --mon 8h --tue 7h --wed 8h --thu 6h --fri 8h
+
+        # Log time for specific week starting Nov 25
+        helper timesheet batch TDT-123 --mon 8h --tue 8h --wed 8h --week-start 2025-11-25
+
+        # Log weekend work
+        helper timesheet batch TDT-123 --sat 4h --sun 3h
+    """
+    from .timesheet import TimesheetLogger
+    from datetime import datetime, timedelta, timezone
+
+    try:
+        logger = TimesheetLogger.from_config_file()
+
+        # Calculate week start date (defaults to last Monday)
+        if week_start:
+            start_date = datetime.strptime(week_start, "%Y-%m-%d")
+        else:
+            today = datetime.now()
+            days_since_monday = today.weekday()
+            start_date = today - timedelta(days=days_since_monday)
+
+        # Map day options to their offsets
+        days = {
+            "Monday": (mon, 0),
+            "Tuesday": (tue, 1),
+            "Wednesday": (wed, 2),
+            "Thursday": (thu, 3),
+            "Friday": (fri, 4),
+            "Saturday": (sat, 5),
+            "Sunday": (sun, 6),
+        }
+
+        logged_count = 0
+        errors_count = 0
+
+        console.print(f"\n📅 Batch logging time to {issue_key}")
+        console.print(f"Week starting: {start_date.strftime('%Y-%m-%d')}\n")
+
+        for day_name, (hours, offset) in days.items():
+            if not hours:
+                continue
+
+            work_date = start_date + timedelta(days=offset)
+            work_datetime = work_date.replace(
+                hour=9, minute=0, second=0, tzinfo=timezone.utc
+            )
+
+            console.print(
+                f"  {day_name:12} {work_date.strftime('%Y-%m-%d')} → {hours}...",
+                end=" ",
+            )
+
+            try:
+                result = logger.log_work(
+                    issue_key=issue_key,
+                    time_spent=hours,
+                    started=work_datetime,
+                    comment=comment if comment else f"Work on {day_name}",
+                )
+
+                data = result.get("data", {}).get("invokeExtension", {})
+                if data.get("success"):
+                    console.print("[green]✓[/green]")
+                    logged_count += 1
+                else:
+                    console.print("[red]✗[/red]")
+                    errors_count += 1
+                    errors = data.get("errors", [])
+                    if errors:
+                        for error in errors:
+                            console.print(
+                                f"    [dim red]{error.get('message')}[/dim red]"
+                            )
+            except Exception as e:
+                console.print(f"[red]✗ {e}[/red]")
+                errors_count += 1
+
+        console.print(f"\n📊 Summary: {logged_count} logged, {errors_count} errors")
+
+    except FileNotFoundError as e:
+        console.print(f"[red]{e}[/red]")
+        console.print("Run: helper timesheet setup")
+    except Exception as e:
+        console.print(f"[red]Error in batch logging: {e}[/red]")
+
+
 @main.command()
 def interactive():
     """Interactive mode for helper commands."""
@@ -1074,6 +1503,9 @@ def interactive():
             "log [ticket] [agent]",
             "Create work log for VIS tickets (auto-detect with -a)",
         ),
+        ("timesheet setup", "Configure Timesheet Tracking plugin auth"),
+        ("timesheet log <issue> <time>", "Log work time to Jira issue"),
+        ("timesheet batch <issue>", "Batch log time for multiple days"),
         ("ngrok <url>", "Generate QR code for NGROK URL"),
         ("vsc <url>", "Generate QR code for VSC URL"),
         ("rt <name>", "Setup RT directory"),
