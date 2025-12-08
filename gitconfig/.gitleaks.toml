@@ -1,0 +1,85 @@
+# Gitleaks configuration for credential detection
+# https://github.com/gitleaks/gitleaks
+
+title = "Custom Gitleaks Configuration"
+
+# Extend the default rules
+[extend]
+useDefault = true
+
+# Custom rules for your stack
+[[rules]]
+id = "oracle-connection-string"
+description = "Oracle database connection string with password"
+regex = '''jdbc:oracle:[^@]+@[^:]+:[0-9]+:[^\s]+password=[^\s&"']+'''
+keywords = ["jdbc:oracle", "password"]
+
+[[rules]]
+id = "jira-api-token"
+description = "Atlassian/JIRA API Token"
+regex = '''ATATT3x[a-zA-Z0-9_-]{100,}'''
+keywords = ["ATATT3x"]
+
+[[rules]]
+id = "anthropic-api-key"
+description = "Anthropic API Key"
+regex = '''sk-ant-[a-zA-Z0-9_-]{90,}'''
+keywords = ["sk-ant-"]
+
+[[rules]]
+id = "openai-project-key"
+description = "OpenAI Project API Key"
+regex = '''sk-proj-[a-zA-Z0-9_-]{80,}'''
+keywords = ["sk-proj-"]
+
+# Allowlist - files and paths to ignore
+[allowlist]
+description = "Global allowlist"
+paths = [
+    # Documentation
+    '''\.md$''',
+    '''README''',
+    '''CHANGELOG''',
+    '''docs/''',
+
+    # Example/template files
+    '''\.example$''',
+    '''\.template$''',
+    '''\.sample$''',
+
+    # Lock files
+    '''package-lock\.json$''',
+    '''yarn\.lock$''',
+    '''go\.sum$''',
+    '''Cargo\.lock$''',
+    '''Gemfile\.lock$''',
+    '''poetry\.lock$''',
+
+    # Build artifacts
+    '''\.min\.js$''',
+    '''\.min\.css$''',
+    '''dist/''',
+    '''build/''',
+    '''node_modules/''',
+
+    # Test fixtures
+    '''test.*fixtures?/''',
+    '''__tests__/''',
+    '''\.test\.(js|ts|py)$''',
+    '''_test\.go$''',
+
+    # Git hooks themselves
+    '''\.git-template/''',
+    '''\.githooks/''',
+]
+
+# Regex patterns to ignore in values
+regexes = [
+    # Placeholder patterns
+    '''YOUR_.*_HERE''',
+    '''REPLACE_ME''',
+    '''<[A-Z_]+>''',
+    '''xxx+''',
+    '''EXAMPLE''',
+    '''placeholder''',
+]

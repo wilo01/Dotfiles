@@ -124,11 +124,13 @@ monitor_process_with_timeout() {
    local time_output_file="${5:-}"
 
    # Create temp files securely with error handling
-   local temp_file=$(mktemp) || {
+   local temp_file
+   temp_file=$(mktemp) || {
       log_error "Failed to create temp file for $description"
       return 1
    }
-   local error_file=$(mktemp) || {
+   local error_file
+   error_file=$(mktemp) || {
       rm -f "$temp_file"
       log_error "Failed to create error file for $description"
       return 1
@@ -138,10 +140,12 @@ monitor_process_with_timeout() {
    chmod 600 "$temp_file" "$error_file"
 
    local last_size=0
-   local last_activity=$(date +%s)
-   local start_time=$(date +%s)
+   local last_activity start_time
+   last_activity=$(date +%s)
+   start_time=$(date +%s)
 
-   # Clean up temp files on exit
+   # Clean up temp files on exit (variables captured at trap definition time)
+   # shellcheck disable=SC2064
    trap "rm -f '$temp_file' '$error_file'" RETURN INT TERM
 
    # Start command in background - execute as array to prevent injection
@@ -152,10 +156,11 @@ monitor_process_with_timeout() {
    local pid=$!
 
    # Monitor loop
+   local current_size current_time elapsed
    while kill -0 "$pid" 2>/dev/null; do
-      local current_size=$(stat -f%z "$temp_file" 2>/dev/null || stat -c%s "$temp_file" 2>/dev/null || echo 0)
-      local current_time=$(date +%s)
-      local elapsed=$((current_time - start_time))
+      current_size=$(stat -f%z "$temp_file" 2>/dev/null || stat -c%s "$temp_file" 2>/dev/null || echo 0)
+      current_time=$(date +%s)
+      elapsed=$((current_time - start_time))
 
       # Check max timeout
       if ((elapsed > max_timeout)); then
@@ -200,7 +205,8 @@ monitor_process_with_timeout() {
    local exit_code=$?
 
    # Calculate final elapsed time
-   local end_time=$(date +%s)
+   local end_time
+   end_time=$(date +%s)
    PROCESS_ELAPSED_TIME=$((end_time - start_time))
 
    # Show errors if any
@@ -259,15 +265,15 @@ get_project_root() {
 
 # Check if there are staged changes
 has_staged_changes() {
-   git diff --cached --quiet 2>/dev/null
-   [[ $? -ne 0 ]]
+   ! git diff --cached --quiet 2>/dev/null
 }
 
 # Get diff statistics
 get_diff_stats() {
-   local files_changed=$(git diff --staged --name-status 2>/dev/null | wc -l)
-   local lines_added=$(git diff --staged --numstat 2>/dev/null | awk '{sum+=$1} END {print sum+0}')
-   local lines_deleted=$(git diff --staged --numstat 2>/dev/null | awk '{sum+=$2} END {print sum+0}')
+   local files_changed lines_added lines_deleted
+   files_changed=$(git diff --staged --name-status 2>/dev/null | wc -l)
+   lines_added=$(git diff --staged --numstat 2>/dev/null | awk '{sum+=$1} END {print sum+0}')
+   lines_deleted=$(git diff --staged --numstat 2>/dev/null | awk '{sum+=$2} END {print sum+0}')
 
    echo "$files_changed $lines_added $lines_deleted"
 }
@@ -282,7 +288,8 @@ safe_write_file() {
    local content="$2"
 
    # Create directory if it doesn't exist
-   local dir=$(dirname "$file")
+   local dir
+   dir=$(dirname "$file")
    [[ -d "$dir" ]] || mkdir -p "$dir"
 
    # Backup existing file
@@ -413,6 +420,7 @@ trim() {
 
 # Analytics file location
 readonly ANALYTICS_FILE="${HOOKS_DIR:-$(dirname "${BASH_SOURCE[0]}")}/.git-hooks-analytics.json"
+# shellcheck disable=SC2034  # Used in jq expressions for history trimming
 readonly ANALYTICS_MAX_ENTRIES=50
 
 # Initialize analytics file if it doesn't exist or is corrupted
@@ -529,12 +537,14 @@ record_ai_performance() {
         return 1
     fi
 
-    # Ensure lock is released on exit
+    # Ensure lock is released on exit (variable captured at trap definition time)
+    # shellcheck disable=SC2064
     trap "rmdir '$lock_file' 2>/dev/null" RETURN
 
     # Read current analytics
-    local analytics=$(cat "$ANALYTICS_FILE")
-    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    local analytics timestamp
+    analytics=$(cat "$ANALYTICS_FILE")
+    timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
     # Update using jq if available, otherwise use python
     if command_exists jq; then
@@ -614,7 +624,8 @@ print(json.dumps(data, indent=2))
         recent_failures_count=$(echo "$analytics" | jq -r --arg ai "$ai_name" '.[$ai].recent_failures | length' 2>/dev/null || echo "0")
     fi
     if [[ "$recent_failures_count" -ge 3 ]]; then
-        local disable_until=$(date -u -d "+1 hour" +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || date -u -v+1H +"%Y-%m-%dT%H:%M:%SZ")
+        local disable_until
+        disable_until=$(date -u -d "+1 hour" +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || date -u -v+1H +"%Y-%m-%dT%H:%M:%SZ")
         if command_exists jq; then
             analytics=$(echo "$analytics" | jq --arg ai "$ai_name" --arg until "$disable_until" '.[$ai].disabled_until = $until')
         fi
@@ -661,13 +672,15 @@ print(data['$ai_name'].get('disabled_until', ''))
     fi
 
     if [[ -n "$disabled_until" ]] && [[ "$disabled_until" != "null" ]]; then
-        local current_time=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+        local current_time
+        current_time=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
         if [[ "$current_time" < "$disabled_until" ]]; then
             return 0  # AI is disabled
         else
             # Re-enable AI
             if command_exists jq; then
-                local analytics=$(jq --arg ai "$ai_name" '.[$ai].disabled_until = null | .[$ai].recent_failures = []' "$ANALYTICS_FILE")
+                local analytics
+                analytics=$(jq --arg ai "$ai_name" '.[$ai].disabled_until = null | .[$ai].recent_failures = []' "$ANALYTICS_FILE")
                 echo "$analytics" > "$ANALYTICS_FILE"
             fi
         fi
@@ -680,8 +693,9 @@ print(data['$ai_name'].get('disabled_until', ''))
 get_best_ai() {
     init_analytics
 
-    local claude_disabled=$(is_ai_disabled "claude" && echo "true" || echo "false")
-    local gemini_disabled=$(is_ai_disabled "gemini" && echo "true" || echo "false")
+    local claude_disabled gemini_disabled
+    claude_disabled=$(is_ai_disabled "claude" && echo "true" || echo "false")
+    gemini_disabled=$(is_ai_disabled "gemini" && echo "true" || echo "false")
 
     # If both are disabled, return empty
     if [[ "$claude_disabled" == "true" ]] && [[ "$gemini_disabled" == "true" ]]; then
@@ -753,7 +767,8 @@ get_adaptive_timeout() {
     init_analytics
 
     if command_exists jq; then
-        local avg_time=$(jq -r --arg ai "$ai_name" '
+        local avg_time
+        avg_time=$(jq -r --arg ai "$ai_name" '
             if .[$ai].successful_calls > 0 then
                 (.[$ai].total_time / .[$ai].successful_calls)
             else
@@ -763,7 +778,8 @@ get_adaptive_timeout() {
 
         if [[ "$avg_time" != "0" ]]; then
             # Set timeout to 1.5x average + 5s buffer
-            local timeout=$(echo "$avg_time * 1.5 + 5" | bc 2>/dev/null || python3 -c "print(int($avg_time * 1.5 + 5))")
+            local timeout
+            timeout=$(echo "$avg_time * 1.5 + 5" | bc 2>/dev/null || python3 -c "print(int($avg_time * 1.5 + 5))")
             # Convert to integer for comparison
             timeout=${timeout%.*}
             # Ensure within bounds (10-60 seconds)
@@ -791,7 +807,8 @@ show_brief_stats() {
         echo "📊 Quick Stats:"
 
         # Claude stats
-        local claude_stats=$(jq -r '
+        local claude_stats
+        claude_stats=$(jq -r '
             .claude |
             "  Claude: " +
             (if .total_calls > 0 then
@@ -811,7 +828,8 @@ show_brief_stats() {
         ' "$ANALYTICS_FILE")
 
         # Gemini stats
-        local gemini_stats=$(jq -r '
+        local gemini_stats
+        gemini_stats=$(jq -r '
             .gemini |
             "  Gemini: " +
             (if .total_calls > 0 then
@@ -834,12 +852,14 @@ show_brief_stats() {
         echo "$gemini_stats"
 
         # Best performer
-        local best=$(get_best_ai)
+        local best
+        best=$(get_best_ai)
         if [[ -n "$best" ]]; then
             if [[ "$best" == "draw" ]]; then
                 # Check who has more wins in draw scenario
-                local claude_wins=$(jq -r '.claude.wins' "$ANALYTICS_FILE")
-                local gemini_wins=$(jq -r '.gemini.wins' "$ANALYTICS_FILE")
+                local claude_wins gemini_wins
+                claude_wins=$(jq -r '.claude.wins' "$ANALYTICS_FILE")
+                gemini_wins=$(jq -r '.gemini.wins' "$ANALYTICS_FILE")
                 if [[ "$claude_wins" -gt "$gemini_wins" ]]; then
                     echo "  Best performer: Draw (Claude leads with $claude_wins wins)"
                 elif [[ "$gemini_wins" -gt "$claude_wins" ]]; then
@@ -894,7 +914,8 @@ except:
 # Matches: *-13.1AV, *-13-1av, *-20AV, *-25.2av (case insensitive)
 # Supports any version number with optional dot or dash separators
 is_maintenance_branch() {
-   local branch=$(get_current_branch)
+   local branch
+   branch=$(get_current_branch)
    # Match patterns like *-13.1AV, *-20AV, *-25.2av (any version number)
    if [[ "${branch,,}" =~ -[0-9]+([.-][0-9]+)?av$ ]]; then
       return 0
@@ -914,7 +935,8 @@ lookup_commit_from_history() {
    fi
 
    # Extract base JIRA (without version suffix) e.g., VIS-1234 from VIS-1234-something-13.1AV
-   local base_jira=$(echo "$jira_tag" | grep -oE '^[A-Z]+-[0-9]+')
+   local base_jira
+   base_jira=$(echo "$jira_tag" | grep -oE '^[A-Z]+-[0-9]+')
 
    if [[ -z "$base_jira" ]]; then
       return 1
@@ -922,13 +944,260 @@ lookup_commit_from_history() {
 
    # Search for JIRA tag at line start (supports both "JIRA: VIS-1234" and standalone "VIS-1234")
    # Filter out metadata lines like "- Commit branch HASH" and "- Commit HASH"
-   local result=$(grep -A 15 "^${base_jira}" "$commits_file" | grep -A 5 "^Logs:" | grep "^- " | grep -v "Commit.*HASH" | head -10)
+   local result
+   result=$(grep -A 15 "^${base_jira}" "$commits_file" | grep -A 5 "^Logs:" | grep "^- " | grep -v "Commit.*HASH" | head -10)
 
    if [[ -n "$result" ]]; then
       echo "$result"
       return 0
    fi
    return 1
+}
+
+# -----------------------------------------------------------------------------
+# Credential Detection
+# -----------------------------------------------------------------------------
+
+# Common credential patterns (regex for grep -E)
+# Each pattern is designed to minimize false positives while catching real secrets
+CREDENTIAL_PATTERNS=(
+    # AWS
+    'AKIA[0-9A-Z]{16}'                                    # AWS Access Key ID
+    'aws_secret_access_key\s*=\s*[A-Za-z0-9/+=]{40}'      # AWS Secret Key
+
+    # OpenAI
+    'sk-[a-zA-Z0-9]{48}'                                  # OpenAI API Key
+    'sk-proj-[a-zA-Z0-9_-]{80,}'                          # OpenAI Project Key
+
+    # Anthropic
+    'sk-ant-[a-zA-Z0-9_-]{90,}'                           # Anthropic API Key
+
+    # Google
+    'AIza[0-9A-Za-z_-]{35}'                               # Google API Key
+
+    # GitHub
+    'ghp_[a-zA-Z0-9]{36}'                                 # GitHub Personal Access Token
+    'gho_[a-zA-Z0-9]{36}'                                 # GitHub OAuth Token
+    'ghr_[a-zA-Z0-9]{36}'                                 # GitHub Refresh Token
+    'ghs_[a-zA-Z0-9]{36}'                                 # GitHub Server Token
+    'github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59}'          # GitHub Fine-grained PAT
+
+    # GitLab
+    'glpat-[a-zA-Z0-9_-]{20,}'                            # GitLab Personal Token
+
+    # Atlassian/JIRA
+    'ATATT3x[a-zA-Z0-9_-]{100,}'                          # Atlassian API Token
+
+    # Slack
+    'xox[baprs]-[0-9]{10,13}-[0-9]{10,13}[a-zA-Z0-9-]*'   # Slack Token
+
+    # Stripe
+    'sk_live_[0-9a-zA-Z]{24}'                             # Stripe Live Secret Key
+    'rk_live_[0-9a-zA-Z]{24}'                             # Stripe Live Restricted Key
+
+    # Private Keys
+    '-----BEGIN (RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----'
+    '-----BEGIN PGP PRIVATE KEY BLOCK-----'
+
+    # Database Connection Strings (with embedded passwords)
+    'mongodb(\+srv)?://[^:]+:[^@]+@'                      # MongoDB
+    'postgres(ql)?://[^:]+:[^@]+@'                        # PostgreSQL
+    'mysql://[^:]+:[^@]+@'                                # MySQL
+
+    # Generic patterns (more restrictive to reduce false positives)
+    'password\s*[:=]\s*["\x27][^"\x27]{8,64}["\x27]'      # password = "..."
+    'api[_-]?key\s*[:=]\s*["\x27][a-zA-Z0-9_-]{20,}["\x27]' # api_key = "..."
+    'secret\s*[:=]\s*["\x27][^"\x27]{8,64}["\x27]'        # secret = "..."
+    'Bearer\s+[a-zA-Z0-9_-]{20,}'                         # Bearer tokens
+)
+
+# File patterns to skip (allowlist)
+CREDENTIAL_SKIP_PATTERNS=(
+    '\.example$'
+    '\.template$'
+    '\.sample$'
+    '\.md$'
+    '\.lock$'
+    '\.min\.js$'
+    'package-lock\.json$'
+    'yarn\.lock$'
+    'go\.sum$'
+    'Cargo\.lock$'
+    # Skip git hooks themselves (contain pattern definitions)
+    '\.git-template/hooks/'
+    '\.githooks/'
+    'hooks-common\.sh$'
+    'pre-commit$'
+    # Skip gitleaks config
+    '\.gitleaks\.toml$'
+)
+
+# Scan staged files for credentials
+# Returns: 0 if no findings, 1 if findings detected
+# Output: Formatted warnings to stderr
+scan_staged_for_credentials() {
+    local findings=()
+    local finding_count=0
+
+    # Get list of staged files (only added/modified, not deleted)
+    local staged_files
+    staged_files=$(git diff --cached --name-only --diff-filter=AM 2>/dev/null)
+
+    if [[ -z "$staged_files" ]]; then
+        return 0
+    fi
+
+    # Build combined regex pattern for faster matching
+    local combined_pattern=""
+    for pattern in "${CREDENTIAL_PATTERNS[@]}"; do
+        if [[ -n "$combined_pattern" ]]; then
+            combined_pattern+="|"
+        fi
+        combined_pattern+="($pattern)"
+    done
+
+    # Process each file
+    while IFS= read -r file; do
+        # Skip if file matches allowlist patterns
+        local skip=false
+        for pattern in "${CREDENTIAL_SKIP_PATTERNS[@]}"; do
+            if [[ "$file" =~ $pattern ]]; then
+                skip=true
+                break
+            fi
+        done
+        [[ "$skip" == "true" ]] && continue
+
+        # Get staged content and scan with grep -n for line numbers
+        local matches
+        matches=$(git show ":$file" 2>/dev/null | grep -nE "$combined_pattern" 2>/dev/null | head -20)
+
+        if [[ -n "$matches" ]]; then
+            while IFS= read -r match; do
+                local line_num line_content masked_line
+                line_num=$(echo "$match" | cut -d: -f1)
+                line_content=$(echo "$match" | cut -d: -f2-)
+                # Mask the sensitive part for display
+                masked_line=$(echo "$line_content" | sed -E 's/([a-zA-Z0-9_-]{8})[a-zA-Z0-9_-]{10,}/\1***/g')
+                findings+=("  File: $file:$line_num")
+                findings+=("    > ${masked_line:0:100}")
+                ((finding_count++))
+            done <<< "$matches"
+        fi
+    done <<< "$staged_files"
+
+    # Display findings if any
+    if [[ $finding_count -gt 0 ]]; then
+        format_credential_warning "${findings[@]}"
+        return 1
+    fi
+
+    return 0
+}
+
+# Run gitleaks scan if available
+# Returns: 0 if no findings or gitleaks not installed, 1 if findings
+run_gitleaks_scan() {
+    if ! command_exists gitleaks; then
+        log_debug "gitleaks not installed, skipping"
+        return 0
+    fi
+
+    local config_file="${HOOKS_DIR}/../.gitleaks.toml"
+    local gitleaks_args=("git" "--staged" "--no-banner" "--exit-code" "1" "--verbose")
+
+    if [[ -f "$config_file" ]]; then
+        gitleaks_args+=("--config" "$config_file")
+    fi
+
+    # Run gitleaks and capture output
+    local output
+    output=$(gitleaks "${gitleaks_args[@]}" 2>&1)
+    local exit_code=$?
+
+    if [[ $exit_code -eq 1 ]]; then
+        echo "" >&2
+        echo "============================================================" >&2
+        echo "  GITLEAKS: Potential secrets detected" >&2
+        echo "============================================================" >&2
+
+        # Parse and display findings with masked secrets
+        # Format: Finding: RuleID, Secret: xxx, File: path, Line: N
+        echo "$output" | while IFS= read -r line; do
+            # Skip info/warning lines, show finding details
+            if [[ "$line" =~ ^Finding: ]] || [[ "$line" =~ ^Secret: ]] || \
+               [[ "$line" =~ ^File: ]] || [[ "$line" =~ ^Line: ]] || \
+               [[ "$line" =~ ^RuleID: ]] || [[ "$line" =~ ^Match: ]]; then
+                # Mask secrets in output (show first 8 chars + ***)
+                local masked_line
+                masked_line=$(echo "$line" | sed -E 's/(Secret:\s*[a-zA-Z0-9_-]{8})[a-zA-Z0-9_-]{10,}/\1***/g')
+                echo "  $masked_line" >&2
+            elif [[ "$line" =~ leaks\ found ]]; then
+                echo "" >&2
+                echo "  $line" >&2
+            fi
+        done
+
+        echo "------------------------------------------------------------" >&2
+        return 1
+    fi
+
+    return 0
+}
+
+# Format credential warning output
+format_credential_warning() {
+    local findings=("$@")
+
+    echo "" >&2
+    echo "==============================================================" >&2
+    echo "  CREDENTIAL WARNING - Potential secrets detected" >&2
+    echo "==============================================================" >&2
+    echo "" >&2
+
+    for finding in "${findings[@]}"; do
+        echo "$finding" >&2
+    done
+
+    echo "" >&2
+    echo "--------------------------------------------------------------" >&2
+    echo "  Tip: Use environment variables or a secrets manager" >&2
+    echo "  To skip once: git commit --no-verify" >&2
+    echo "==============================================================" >&2
+}
+
+# Main credential scan entry point
+# Runs both gitleaks (if available) and custom patterns
+run_credential_scan() {
+    local enable_scan use_gitleaks
+    enable_scan=$(git config --local hooks.enableCredentialScan 2>/dev/null || echo "true")
+    use_gitleaks=$(git config --local hooks.useGitleaks 2>/dev/null || echo "true")
+
+    if [[ "$enable_scan" != "true" ]]; then
+        log_debug "Credential scanning disabled"
+        return 0
+    fi
+
+    local has_findings=false
+
+    # Run gitleaks first if enabled and available
+    if [[ "$use_gitleaks" == "true" ]]; then
+        if ! run_gitleaks_scan; then
+            has_findings=true
+        fi
+    fi
+
+    # Always run custom patterns (catches things gitleaks might miss)
+    if ! scan_staged_for_credentials; then
+        has_findings=true
+    fi
+
+    # Return status (but don't block - warning mode)
+    if [[ "$has_findings" == "true" ]]; then
+        return 1
+    fi
+
+    return 0
 }
 
 # -----------------------------------------------------------------------------
@@ -946,3 +1215,4 @@ export -f command_exists validate_commands validate_safe_path validate_ai_comman
 export -f shell_escape trim
 export -f init_analytics record_ai_performance get_ai_stats is_ai_disabled get_best_ai get_adaptive_timeout show_brief_stats
 export -f is_maintenance_branch lookup_commit_from_history
+export -f scan_staged_for_credentials run_gitleaks_scan format_credential_warning run_credential_scan

@@ -390,11 +390,25 @@ run_ai_race() {
    # Set restrictive permissions
    chmod 600 "$claude_temp" "$gemini_temp" "$winner_file" "$claude_time_file" "$gemini_time_file"
 
-   # Cleanup on exit
-   trap "rm -f '$claude_temp' '$gemini_temp' '$winner_file' '$claude_time_file' '$gemini_time_file'" RETURN INT TERM
+   # Track PIDs for cleanup
+   local claude_pid=""
+   local gemini_pid=""
+
+   # Cleanup function for signal handling
+   cleanup_race() {
+      clear_progress
+      log_warning "Interrupted - cleaning up..."
+      [[ -n "$claude_pid" ]] && kill_process_tree "$claude_pid" 2>/dev/null
+      [[ -n "$gemini_pid" ]] && kill_process_tree "$gemini_pid" 2>/dev/null
+      rm -f "$claude_temp" "$gemini_temp" "$winner_file" "$claude_time_file" "$gemini_time_file"
+      exit 130
+   }
+
+   # Set trap for Ctrl+C and other signals
+   trap cleanup_race INT TERM
+   trap "rm -f '$claude_temp' '$gemini_temp' '$winner_file' '$claude_time_file' '$gemini_time_file'" RETURN
 
    # Start Claude in background (only if valid)
-   local claude_pid=""
    if [[ "$claude_valid" == "true" ]]; then
       (
          # Pass time file as 5th parameter - monitor_process_with_timeout writes elapsed time there
@@ -410,7 +424,6 @@ run_ai_race() {
    fi
 
    # Start Gemini in background (only if valid)
-   local gemini_pid=""
    if [[ "$gemini_valid" == "true" ]]; then
       (
          local start=$(date +%s)
