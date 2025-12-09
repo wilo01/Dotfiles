@@ -923,6 +923,18 @@ is_maintenance_branch() {
    return 1
 }
 
+# Check if current branch follows JIRA pattern (XXX-1234)
+# Matches: VIS-1234, TDT-5678, ABC-123, etc. (2+ uppercase letters + dash + numbers)
+is_jira_branch() {
+   local branch
+   branch=$(get_current_branch)
+   # Match pattern: 2+ uppercase letters, dash, 1+ digits (at branch start)
+   if [[ "$branch" =~ ^[A-Z]{2,}-[0-9]+ ]]; then
+      return 0
+   fi
+   return 1
+}
+
 # Lookup commit message from Commits.md by JIRA tag
 # Supports formats: "JIRA: VIS-1234", "JIRA: #VIS-1234", or standalone "VIS-1234" at line start
 # Configure path via COMMITS_FILE environment variable
@@ -942,10 +954,10 @@ lookup_commit_from_history() {
       return 1
    fi
 
-   # Search for JIRA tag at line start (supports both "JIRA: VIS-1234" and standalone "VIS-1234")
+   # Search for JIRA tag at line start - use tac to find the LAST (most recent) match
    # Filter out metadata lines like "- Commit branch HASH" and "- Commit HASH"
    local result
-   result=$(grep -A 15 "^${base_jira}" "$commits_file" | grep -A 5 "^Logs:" | grep "^- " | grep -v "Commit.*HASH" | head -10)
+   result=$(tac "$commits_file" | grep -m 1 -A 15 "^${base_jira}" | tac | grep -A 5 "^Logs:" | grep "^- " | grep -v "Commit.*HASH" | head -10)
 
    if [[ -n "$result" ]]; then
       echo "$result"
@@ -1214,5 +1226,5 @@ export -f safe_write_file safe_read_file
 export -f command_exists validate_commands validate_safe_path validate_ai_command
 export -f shell_escape trim
 export -f init_analytics record_ai_performance get_ai_stats is_ai_disabled get_best_ai get_adaptive_timeout show_brief_stats
-export -f is_maintenance_branch lookup_commit_from_history
+export -f is_maintenance_branch is_jira_branch lookup_commit_from_history
 export -f scan_staged_for_credentials run_gitleaks_scan format_credential_warning run_credential_scan
