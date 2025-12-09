@@ -6,7 +6,7 @@ local LSP_SERVERS = {
 }
 local MASON_TOOLS = {
    "golangci-lint", "gofumpt", "goimports",
-   "eslint_d", "shellcheck", "mypy"
+   "eslint_d", "shellcheck", "mypy", "jq"
 }
 local CONFIG = {
    INDENT_SIZE = 3,
