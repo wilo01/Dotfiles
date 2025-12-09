@@ -330,6 +330,15 @@ func (c *Client) DeleteWorklog(key, worklogID string) error {
 	return nil
 }
 
+// ExtractProjectKey extracts the project key from an issue key (e.g., VIS-1234 -> VIS)
+func ExtractProjectKey(issueKey string) string {
+	parts := strings.Split(issueKey, "-")
+	if len(parts) >= 1 {
+		return strings.ToUpper(parts[0])
+	}
+	return ""
+}
+
 // SearchAssignedTickets searches for tickets assigned to the current user
 func (c *Client) SearchAssignedTickets(project string) ([]Ticket, error) {
 	jql := "assignee = currentUser() AND status != Done"

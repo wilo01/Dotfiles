@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/dariuszw/hlp/internal/worklog"
+	"github.com/dariuszw/hlp/pkg/duration"
 )
 
 // Error formats an error message
@@ -184,4 +187,94 @@ func ConfirmProtectedProfile(profileName, baseURL string, entryCount int) bool {
 	fmt.Println()
 
 	return ConfirmAction(WarningText.Render("Proceed with batch operation?"))
+}
+
+// DailyBreakdown formats the daily time summary with warnings
+func DailyBreakdown(summaries []worklog.DailySummary, expectedStr string) string {
+	if len(summaries) == 0 {
+		return ""
+	}
+
+	var sb strings.Builder
+	sb.WriteString("\n")
+	sb.WriteString(Header("Daily Time Summary"))
+	sb.WriteString("\n\n")
+
+	for _, day := range summaries {
+		dateStr := day.Date.Format("Mon 02 Jan")
+		loggedStr := duration.Format(day.TotalLogged)
+
+		var statusIcon, statusText string
+
+		switch day.Status {
+		case worklog.DayStatusOver:
+			statusIcon = WarningText.Render("^")
+			diffStr := "+" + duration.Format(day.Difference)
+			statusText = WarningText.Render(diffStr)
+		case worklog.DayStatusUnder:
+			statusIcon = ErrorText.Render("v")
+			diffStr := "-" + duration.Format(-day.Difference)
+			statusText = ErrorText.Render(diffStr)
+		default:
+			statusIcon = Success.Render("=")
+			statusText = Success.Render("OK")
+		}
+
+		sb.WriteString(fmt.Sprintf("  %s  %s  %s / %s  %s\n",
+			Muted.Render(dateStr),
+			statusIcon,
+			loggedStr,
+			Muted.Render(expectedStr),
+			statusText))
+	}
+
+	return sb.String()
+}
+
+// DailyWarningsSummary returns a summary line for daily totals
+func DailyWarningsSummary(result *worklog.AnalysisResult) string {
+	if !result.HasWarnings {
+		return ""
+	}
+
+	overCount, underCount, _ := result.CountByStatus()
+
+	var parts []string
+	if overCount > 0 {
+		parts = append(parts, WarningText.Render(fmt.Sprintf("%d day(s) over", overCount)))
+	}
+	if underCount > 0 {
+		parts = append(parts, ErrorText.Render(fmt.Sprintf("%d day(s) under", underCount)))
+	}
+
+	return Warning(strings.Join(parts, ", "))
+}
+
+// FormatDailyWarning formats a single-day warning message
+func FormatDailyWarning(date time.Time, totalLogged, expected time.Duration) string {
+	diff := totalLogged - expected
+	dateStr := date.Format("Mon 02 Jan")
+	expectedStr := duration.Format(expected)
+
+	if diff > 0 {
+		return Warning(fmt.Sprintf(
+			"Daily total for %s: %s (expected %s, over by %s)",
+			dateStr,
+			duration.Format(totalLogged),
+			expectedStr,
+			duration.Format(diff)))
+	} else if diff < 0 {
+		return Warning(fmt.Sprintf(
+			"Daily total for %s: %s (expected %s, under by %s)",
+			dateStr,
+			duration.Format(totalLogged),
+			expectedStr,
+			duration.Format(-diff)))
+	}
+
+	return SuccessMsg(fmt.Sprintf(
+		"Daily total for %s: %s (exactly %s)",
+		dateStr,
+		duration.Format(totalLogged),
+		expectedStr))
 }

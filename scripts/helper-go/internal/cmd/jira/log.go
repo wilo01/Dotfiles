@@ -9,6 +9,7 @@ import (
 	"github.com/dariuszw/hlp/internal/context"
 	internalJira "github.com/dariuszw/hlp/internal/jira"
 	"github.com/dariuszw/hlp/internal/ui"
+	"github.com/dariuszw/hlp/internal/worklog"
 	"github.com/dariuszw/hlp/pkg/duration"
 	"github.com/spf13/cobra"
 )
@@ -155,19 +156,28 @@ func runLog(cmd *cobra.Command, args []string) {
 	if description != "" {
 		fmt.Println(ui.Muted.Render("  Comment: " + description))
 	}
+
+	// Show daily total warning
+	showDailyWarning(client, startTime)
 }
 
 func runBatchLog(cmd *cobra.Command, args []string) {
-	csvPath := batch.DefaultCSVPath()
-
-	// Show current profile
+	// Get current profile for CSV path and auto-create decision
 	profile, _ := config.GetActiveProfile()
+	csvPath := batch.DefaultCSVPathForProfile(profile)
+
+	// Show current profile with CSV info
 	if profile != nil {
 		modeStr := ui.Success.Render(" [READ/WRITE]")
+		csvInfo := ui.Muted.Render(" → worklogs.csv")
 		if profile.Protected {
 			modeStr = ui.WarningText.Render(" [PROTECTED]")
 		}
-		fmt.Printf("Profile: %s%s\n", ui.Primary.Render(profile.Name), modeStr)
+		if profile.IsLocal() {
+			csvInfo = ui.Muted.Render(" → worklogs-local.csv")
+			modeStr = ui.Primary.Render(" [MOCK]")
+		}
+		fmt.Printf("Profile: %s%s%s\n", ui.Primary.Render(profile.Name), modeStr, csvInfo)
 	}
 
 	// Show loading message
@@ -216,17 +226,38 @@ func runBatchLog(cmd *cobra.Command, args []string) {
 	}
 
 	if logDryRun {
-		// Preview mode - show entries without processing
-		fmt.Println("Processing worklogs " + ui.Muted.Render("(dry run)") + ":")
-		for i, e := range entries {
-			fmt.Printf("  %s %s %s %s %s ... %s\n",
-				ui.Muted.Render(fmt.Sprintf("%d/%d", i+1, len(entries))),
-				ui.Primary.Render(fmt.Sprintf("%-12s", e.IssueKey)),
-				ui.Muted.Render(fmt.Sprintf("%-30s", truncateString(e.Description, 30))),
-				ui.Success.Render(fmt.Sprintf("%-8s", e.TimeSpent)),
-				ui.Muted.Render(fmt.Sprintf("%-12s", e.Date)),
-				ui.Muted.Render("PENDING"))
+		// Preview mode - load ALL entries (including DONE) for complete daily totals
+		allEntries, _ := batch.ParseCSV(csvPath)
+
+		// Get unique dates from pending entries
+		pendingDates := make(map[string]bool)
+		for _, e := range entries {
+			if t, err := batch.ParseDate(e.Date, "09:00"); err == nil {
+				pendingDates[t.Format("2006-01-02")] = true
+			}
 		}
+
+		// Filter all entries to only include dates that have pending entries
+		var relevantEntries []batch.Entry
+		for _, e := range allEntries {
+			if t, err := batch.ParseDate(e.Date, "09:00"); err == nil {
+				if pendingDates[t.Format("2006-01-02")] {
+					relevantEntries = append(relevantEntries, e)
+				}
+			}
+		}
+
+		// Fetch descriptions for all relevant entries
+		allKeys := getUniqueTicketKeys(relevantEntries)
+		allSummaries, _ := client.GetIssueSummaries(allKeys)
+		for i := range relevantEntries {
+			if summary, ok := allSummaries[relevantEntries[i].IssueKey]; ok {
+				relevantEntries[i].Description = summary
+			}
+		}
+
+		fmt.Println("Processing worklogs " + ui.Muted.Render("(dry run)") + ":")
+		showDryRunGroupedByDay(relevantEntries, getExpectedHoursPerDay())
 		fmt.Println()
 		fmt.Println(ui.Warning("Dry run - no entries posted"))
 		return
@@ -237,8 +268,14 @@ func runBatchLog(cmd *cobra.Command, args []string) {
 	// Track results for summary
 	var failedEntries []batch.Result
 
-	// Process batch
-	processor := batch.NewProcessor(client, logTime)
+	// Process batch with profile config (mock mode for LOCAL)
+	mockMode := profile != nil && profile.IsLocal()
+	processor := batch.NewProcessorWithConfig(batch.ProcessorConfig{
+		Client:      client,
+		DefaultTime: logTime,
+		Profile:     profile,
+		MockMode:    mockMode,
+	})
 	results := processor.ProcessBatch(entries, false, func(current, total int, result batch.Result) {
 		var status string
 		if result.Success {
@@ -301,6 +338,9 @@ func runBatchLog(cmd *cobra.Command, args []string) {
 				ui.ErrorText.Render(r.ErrorMessage))
 		}
 	}
+
+	// Show daily total warnings for batch
+	showBatchDailyWarnings(client, results)
 }
 
 func runSyncLog(cmd *cobra.Command, args []string) {
@@ -354,8 +394,9 @@ func runSyncLog(cmd *cobra.Command, args []string) {
 		ui.Muted.Render(fromDate.Format("2006-01-02")),
 		ui.Muted.Render(toDate.Format("2006-01-02")))
 
-	// Load existing CSV entries
-	csvPath := batch.DefaultCSVPath()
+	// Load existing CSV entries using profile-aware path
+	profile, _ := config.GetActiveProfile()
+	csvPath := batch.DefaultCSVPathForProfile(profile)
 	csvEntries, _ := batch.ParseCSV(csvPath) // Empty if file doesn't exist
 
 	// Find missing entries
@@ -515,4 +556,300 @@ func unique(items []string) []string {
 		}
 	}
 	return result
+}
+
+// getExpectedHoursPerDay returns the expected hours per day from config
+func getExpectedHoursPerDay() time.Duration {
+	cfg, err := config.Load()
+	if err != nil {
+		return 8 * time.Hour
+	}
+
+	expectedStr := cfg.Preferences.ExpectedHoursPerDay
+	if expectedStr == "" {
+		return 8 * time.Hour
+	}
+
+	expectedDur, err := duration.Parse(expectedStr)
+	if err != nil {
+		return 8 * time.Hour
+	}
+
+	return expectedDur
+}
+
+// showDailyWarning fetches daily total and shows warning if over/under expected hours
+func showDailyWarning(client *internalJira.Client, logDate time.Time) {
+	expectedDur := getExpectedHoursPerDay()
+
+	// Fetch all worklogs for this day
+	fromDate := time.Date(logDate.Year(), logDate.Month(), logDate.Day(), 0, 0, 0, 0, logDate.Location())
+	toDate := fromDate.Add(24 * time.Hour)
+
+	worklogs, err := client.FetchUserWorklogs(fromDate, toDate, nil)
+	if err != nil {
+		return // Silently skip if fetch fails
+	}
+
+	// Calculate daily total
+	var totalLogged time.Duration
+	targetDate := logDate.Format("2006-01-02")
+	for _, wl := range worklogs {
+		if wl.Started.Format("2006-01-02") == targetDate {
+			totalLogged += wl.TimeSpent
+		}
+	}
+
+	// Show warning
+	fmt.Println()
+	fmt.Println(ui.FormatDailyWarning(logDate, totalLogged, expectedDur))
+}
+
+// showBatchDailyWarnings shows per-day breakdown with over/under warnings for batch mode
+func showBatchDailyWarnings(client *internalJira.Client, results []batch.Result) {
+	// Get unique dates from successfully processed entries
+	dates := getUniqueDatesFromResults(results)
+	if len(dates) == 0 {
+		return
+	}
+
+	expectedDur := getExpectedHoursPerDay()
+
+	// Find date range
+	minDate, maxDate := dates[0], dates[0]
+	for _, d := range dates {
+		if d.Before(minDate) {
+			minDate = d
+		}
+		if d.After(maxDate) {
+			maxDate = d
+		}
+	}
+
+	// Fetch existing worklogs for date range
+	worklogs, err := client.FetchUserWorklogs(minDate, maxDate.Add(24*time.Hour), nil)
+	if err != nil {
+		return // Silently skip if fetch fails
+	}
+
+	// Analyze
+	analysis := worklog.AnalyzeDailyTotals(worklogs, expectedDur)
+
+	if analysis.HasWarnings {
+		cfg, _ := config.Load()
+		expectedStr := cfg.Preferences.ExpectedHoursPerDay
+		if expectedStr == "" {
+			expectedStr = "8h"
+		}
+
+		fmt.Print(ui.DailyBreakdown(analysis.Summaries, expectedStr))
+		fmt.Println(ui.DailyWarningsSummary(analysis))
+	}
+}
+
+// getUniqueDatesFromResults extracts unique dates from processed results
+func getUniqueDatesFromResults(results []batch.Result) []time.Time {
+	seen := make(map[string]bool)
+	var dates []time.Time
+
+	for _, r := range results {
+		if !r.Success {
+			continue
+		}
+
+		t, err := batch.ParseDate(r.Entry.Date, "09:00")
+		if err != nil {
+			continue
+		}
+
+		dateKey := t.Format("2006-01-02")
+		if !seen[dateKey] {
+			seen[dateKey] = true
+			dates = append(dates, t.Truncate(24*time.Hour))
+		}
+	}
+
+	return dates
+}
+
+// showDryRunDailyWarnings shows projected daily totals for dry-run mode
+func showDryRunDailyWarnings(client *internalJira.Client, entries []batch.Entry) {
+	// Get unique dates from entries
+	dates := getUniqueDatesFromEntries(entries)
+	if len(dates) == 0 {
+		return
+	}
+
+	expectedDur := getExpectedHoursPerDay()
+
+	// Find date range
+	minDate, maxDate := dates[0], dates[0]
+	for _, d := range dates {
+		if d.Before(minDate) {
+			minDate = d
+		}
+		if d.After(maxDate) {
+			maxDate = d
+		}
+	}
+
+	// Fetch existing worklogs from JIRA for date range
+	existingWorklogs, err := client.FetchUserWorklogs(minDate, maxDate.Add(24*time.Hour), nil)
+	if err != nil {
+		existingWorklogs = []internalJira.Worklog{} // Continue with empty if fetch fails
+	}
+
+	// Convert CSV entries to worklogs for analysis
+	var csvWorklogs []internalJira.Worklog
+	for _, e := range entries {
+		parsedDate, err := batch.ParseDate(e.Date, "09:00")
+		if err != nil {
+			continue
+		}
+
+		dur, err := duration.Parse(e.TimeSpent)
+		if err != nil {
+			continue
+		}
+
+		csvWorklogs = append(csvWorklogs, internalJira.Worklog{
+			IssueKey:  e.IssueKey,
+			Started:   parsedDate,
+			TimeSpent: dur,
+		})
+	}
+
+	// Combine existing + CSV entries
+	allWorklogs := append(existingWorklogs, csvWorklogs...)
+
+	// Analyze combined totals
+	analysis := worklog.AnalyzeDailyTotals(allWorklogs, expectedDur)
+
+	if analysis.HasWarnings {
+		cfg, _ := config.Load()
+		expectedStr := cfg.Preferences.ExpectedHoursPerDay
+		if expectedStr == "" {
+			expectedStr = "8h"
+		}
+
+		fmt.Println()
+		fmt.Println(ui.Info("Projected daily totals (existing JIRA + CSV entries):"))
+		fmt.Print(ui.DailyBreakdown(analysis.Summaries, expectedStr))
+		fmt.Println(ui.DailyWarningsSummary(analysis))
+	}
+}
+
+// getUniqueDatesFromEntries extracts unique dates from batch entries
+func getUniqueDatesFromEntries(entries []batch.Entry) []time.Time {
+	seen := make(map[string]bool)
+	var dates []time.Time
+
+	for _, e := range entries {
+		t, err := batch.ParseDate(e.Date, "09:00")
+		if err != nil {
+			continue
+		}
+
+		dateKey := t.Format("2006-01-02")
+		if !seen[dateKey] {
+			seen[dateKey] = true
+			dates = append(dates, t.Truncate(24*time.Hour))
+		}
+	}
+
+	return dates
+}
+
+// showDryRunGroupedByDay shows entries grouped by day with totals
+func showDryRunGroupedByDay(entries []batch.Entry, expectedHours time.Duration) {
+	// Group entries by date
+	type dayGroup struct {
+		date    string
+		entries []batch.Entry
+		total   time.Duration
+	}
+
+	byDate := make(map[string]*dayGroup)
+	dateOrder := []string{}
+
+	for _, e := range entries {
+		t, err := batch.ParseDate(e.Date, "09:00")
+		if err != nil {
+			continue
+		}
+		dateKey := t.Format("02.01.2006")
+
+		dur, _ := duration.Parse(e.TimeSpent)
+
+		if _, exists := byDate[dateKey]; !exists {
+			byDate[dateKey] = &dayGroup{date: dateKey}
+			dateOrder = append(dateOrder, dateKey)
+		}
+		byDate[dateKey].entries = append(byDate[dateKey].entries, e)
+		byDate[dateKey].total += dur
+	}
+
+	// Print entries grouped by day
+	entryNum := 0
+	totalEntries := len(entries)
+
+	for _, dateKey := range dateOrder {
+		group := byDate[dateKey]
+
+		// Print entries for this day
+		for _, e := range group.entries {
+			entryNum++
+			// Check if entry is DONE (grayed out) or PENDING (normal)
+			isDone := e.Status == batch.StatusDone || e.Status == batch.StatusUpdated || e.Status == batch.StatusSync
+			if isDone {
+				// DONE entries - all grayed out
+				fmt.Printf("  %s %s %s %s %s ... %s\n",
+					ui.Muted.Render(fmt.Sprintf("%d/%d", entryNum, totalEntries)),
+					ui.Muted.Render(fmt.Sprintf("%-12s", e.IssueKey)),
+					ui.Muted.Render(fmt.Sprintf("%-30s", truncateString(e.Description, 30))),
+					ui.Muted.Render(fmt.Sprintf("%-8s", e.TimeSpent)),
+					ui.Muted.Render(fmt.Sprintf("%-12s", e.Date)),
+					ui.Muted.Render(e.Status))
+			} else {
+				// PENDING entries - normal colors
+				fmt.Printf("  %s %s %s %s %s ... %s\n",
+					ui.Muted.Render(fmt.Sprintf("%d/%d", entryNum, totalEntries)),
+					ui.Primary.Render(fmt.Sprintf("%-12s", e.IssueKey)),
+					ui.Muted.Render(fmt.Sprintf("%-30s", truncateString(e.Description, 30))),
+					ui.Success.Render(fmt.Sprintf("%-8s", e.TimeSpent)),
+					ui.Muted.Render(fmt.Sprintf("%-12s", e.Date)),
+					ui.Muted.Render("PENDING"))
+			}
+		}
+
+		// Print separator and total for this day
+		fmt.Println("  " + ui.Muted.Render("─────────────────────────────────────────────────────────────────────────────────────"))
+
+		// Calculate difference from expected
+		diff := group.total - expectedHours
+		var diffStr string
+		if diff > 0 {
+			diffStr = ui.WarningText.Render(fmt.Sprintf("(+%s over %s)", duration.Format(diff), duration.Format(expectedHours)))
+		} else if diff < 0 {
+			diffStr = ui.ErrorText.Render(fmt.Sprintf("(need %s for %s)", duration.Format(-diff), duration.Format(expectedHours)))
+		} else {
+			diffStr = ui.Success.Render("✓")
+		}
+
+		// Align total under time_spent column
+		// Entry format: "  X/X TICKET-KEY    DESCRIPTION                    TIME     DATE..."
+		// Positions:     2   4   12           30                             8
+		// Total before time: 2 + 4 + 12 + 1 + 30 + 1 = 50
+		totalStr := duration.Format(group.total)
+		fmt.Printf("  %s%s%s    %s\n",
+			ui.Muted.Render(fmt.Sprintf("%-10s", dateKey)),
+			"                                      ", // 38 spaces to align with time column
+			ui.Success.Render(fmt.Sprintf("%-8s", totalStr)),
+			diffStr)
+
+		// Add blank line between days (except for last day)
+		if dateKey != dateOrder[len(dateOrder)-1] {
+			fmt.Println()
+		}
+	}
 }

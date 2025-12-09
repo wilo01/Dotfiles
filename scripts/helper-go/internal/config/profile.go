@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
@@ -16,6 +17,15 @@ type JiraProfile struct {
 	Email     string   `yaml:"email"`
 	Protected bool     `yaml:"protected"` // Requires confirmation for writes
 	Projects  []string `yaml:"projects,omitempty"`
+}
+
+// IsLocal returns true if this profile connects to a local JIRA instance
+// Used to enable LOCAL-only features like auto-creating tickets and separate CSV
+func (p *JiraProfile) IsLocal() bool {
+	if p == nil {
+		return false
+	}
+	return strings.HasPrefix(p.BaseURL, "http://localhost:")
 }
 
 // JiraProfiles holds all profiles and the active one

@@ -35,12 +35,13 @@ type SheetsConfig struct {
 
 // Preferences holds user preferences
 type Preferences struct {
-	AutoDetectContext bool   `mapstructure:"auto_detect_context" yaml:"auto_detect_context"`
-	DefaultDuration   string `mapstructure:"default_duration" yaml:"default_duration"`
-	WorkHoursStart    string `mapstructure:"work_hours_start" yaml:"work_hours_start"`
-	WorkHoursEnd      string `mapstructure:"work_hours_end" yaml:"work_hours_end"`
-	RichOutput        bool   `mapstructure:"rich_output" yaml:"rich_output"`
-	CopyToClipboard   bool   `mapstructure:"copy_to_clipboard" yaml:"copy_to_clipboard"`
+	AutoDetectContext   bool   `mapstructure:"auto_detect_context" yaml:"auto_detect_context"`
+	DefaultDuration     string `mapstructure:"default_duration" yaml:"default_duration"`
+	WorkHoursStart      string `mapstructure:"work_hours_start" yaml:"work_hours_start"`
+	WorkHoursEnd        string `mapstructure:"work_hours_end" yaml:"work_hours_end"`
+	ExpectedHoursPerDay string `mapstructure:"expected_hours_per_day" yaml:"expected_hours_per_day"`
+	RichOutput          bool   `mapstructure:"rich_output" yaml:"rich_output"`
+	CopyToClipboard     bool   `mapstructure:"copy_to_clipboard" yaml:"copy_to_clipboard"`
 }
 
 // GetConfigDir returns the configuration directory path
@@ -74,12 +75,13 @@ func Default() *Config {
 			SheetID: "",
 		},
 		Preferences: Preferences{
-			AutoDetectContext: true,
-			DefaultDuration:   "1h",
-			WorkHoursStart:    "09:00",
-			WorkHoursEnd:      "17:00",
-			RichOutput:        true,
-			CopyToClipboard:   true,
+			AutoDetectContext:   true,
+			DefaultDuration:     "1h",
+			WorkHoursStart:      "09:00",
+			WorkHoursEnd:        "17:00",
+			ExpectedHoursPerDay: "8h",
+			RichOutput:          true,
+			CopyToClipboard:     true,
 		},
 	}
 }

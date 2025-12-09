@@ -70,6 +70,16 @@ type Result struct {
 type Processor struct {
 	client      *jira.Client
 	defaultTime string
+	profile     *config.JiraProfile
+	mockMode    bool // For LOCAL profile - simulate without JIRA calls
+}
+
+// ProcessorConfig configures batch processor behavior
+type ProcessorConfig struct {
+	Client      *jira.Client
+	DefaultTime string
+	Profile     *config.JiraProfile
+	MockMode    bool // For LOCAL profile - simulate without JIRA calls
 }
 
 // NewProcessor creates a new batch processor
@@ -83,20 +93,42 @@ func NewProcessor(client *jira.Client, defaultTime string) *Processor {
 	}
 }
 
+// NewProcessorWithConfig creates a processor with full configuration
+func NewProcessorWithConfig(cfg ProcessorConfig) *Processor {
+	if cfg.DefaultTime == "" {
+		cfg.DefaultTime = "09:00"
+	}
+	return &Processor{
+		client:      cfg.Client,
+		defaultTime: cfg.DefaultTime,
+		profile:     cfg.Profile,
+		mockMode:    cfg.MockMode,
+	}
+}
+
 // DefaultCSVPath returns the default path for the worklogs CSV
 func DefaultCSVPath() string {
+	return config.GetConfigPath("worklogs.csv")
+}
+
+// DefaultCSVPathForProfile returns the CSV path based on the active profile
+// LOCAL profiles use worklogs-local.csv to avoid mixing test data with production
+func DefaultCSVPathForProfile(profile *config.JiraProfile) string {
+	if profile != nil && profile.IsLocal() {
+		return config.GetConfigPath("worklogs-local.csv")
+	}
 	return config.GetConfigPath("worklogs.csv")
 }
 
 // CSV column indices (6-column format)
 // Format: issue_key, issue_description, TimeSpent, Date, Comment, Status
 const (
-	ColIssueKey     = 0
-	ColDescription  = 1
-	ColTimeSpent    = 2
-	ColDate         = 3
-	ColComment      = 4
-	ColStatus       = 5
+	ColIssueKey    = 0
+	ColDescription = 1
+	ColTimeSpent   = 2
+	ColDate        = 3
+	ColComment     = 4
+	ColStatus      = 5
 )
 
 // ParseCSV parses a CSV file into entries
@@ -235,7 +267,15 @@ func (p *Processor) SyncWorklog(entry Entry) Result {
 		return result
 	}
 
-	// 2. Fetch existing worklogs for this issue/date
+	// 2. Mock mode - skip JIRA calls for LOCAL testing
+	if p.mockMode {
+		result.Success = true
+		result.NewStatus = StatusDone
+		result.ErrorMessage = "mock"
+		return result
+	}
+
+	// 3. Fetch existing worklogs for this issue/date
 	existing, err := p.client.GetWorklogsByDate(entry.IssueKey, csvTime)
 	if err != nil {
 		errStr := err.Error()
@@ -322,7 +362,6 @@ func (p *Processor) SyncWorklog(entry Entry) Result {
 	result.NewStatus = StatusDone
 	return result
 }
-
 
 // ProcessBatch processes all entries
 func (p *Processor) ProcessBatch(entries []Entry, dryRun bool, progressFn func(current, total int, result Result)) []Result {
