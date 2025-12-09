@@ -1,9 +1,13 @@
 package config
 
 import (
+	"bufio"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/zalando/go-keyring"
 )
@@ -36,7 +40,7 @@ func (cm *CredentialManager) SetJiraToken(token string) error {
 	return cm.set("jira_token", token)
 }
 
-// GetJiraToken retrieves the JIRA API token
+// GetJiraToken retrieves the JIRA API token (legacy - use GetJiraTokenForProfile)
 func (cm *CredentialManager) GetJiraToken() (string, error) {
 	// First check environment variable
 	if token := os.Getenv("JIRA_API_TOKEN"); token != "" {
@@ -46,6 +50,72 @@ func (cm *CredentialManager) GetJiraToken() (string, error) {
 		return token, nil
 	}
 	return cm.get("jira_token")
+}
+
+// GetJiraTokenForProfile retrieves the JIRA API token for a specific profile
+// Priority: 1) env vars, 2) MCP .env file, 3) keyring fallback
+func (cm *CredentialManager) GetJiraTokenForProfile(profileName string) (string, error) {
+	// 1. Global env var override (for scripting)
+	if token := os.Getenv("JIRA_API_TOKEN"); token != "" {
+		return token, nil
+	}
+	if token := os.Getenv("HLP_JIRA_TOKEN"); token != "" {
+		return token, nil
+	}
+
+	// 2. MCP profile .env file
+	if token, err := cm.GetJiraTokenFromMCPProfile(profileName); err == nil && token != "" {
+		return token, nil
+	}
+
+	// 3. Fallback to keyring/file (for local profile or missing .env)
+	return cm.get("jira_token")
+}
+
+// GetJiraTokenFromMCPProfile reads token from MCP .env file
+func (cm *CredentialManager) GetJiraTokenFromMCPProfile(profileName string) (string, error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "", fmt.Errorf("failed to get home directory: %w", err)
+	}
+
+	envPath := filepath.Join(homeDir, ".claude", "mcp-servers", "jira-profiles", fmt.Sprintf("jira-%s.env", profileName))
+
+	file, err := os.Open(envPath)
+	if err != nil {
+		return "", fmt.Errorf("failed to open MCP profile .env: %w", err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+
+		// Skip comments and empty lines
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+
+		// Parse KEY=VALUE
+		parts := strings.SplitN(line, "=", 2)
+		if len(parts) != 2 {
+			continue
+		}
+
+		key := strings.TrimSpace(parts[0])
+		value := strings.TrimSpace(parts[1])
+
+		// Check for JIRA token variables (Cloud uses JIRA_API_TOKEN, Server/DC uses JIRA_PERSONAL_TOKEN)
+		if key == "JIRA_API_TOKEN" || key == "JIRA_PERSONAL_TOKEN" {
+			return value, nil
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return "", fmt.Errorf("error reading MCP profile .env: %w", err)
+	}
+
+	return "", errors.New("no JIRA token found in MCP profile .env")
 }
 
 // SetTimesheetSession stores timesheet session tokens

@@ -1,7 +1,9 @@
 package ui
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
@@ -156,4 +158,30 @@ func ProgressBar(current, total int, width int) string {
 
 	bar := strings.Repeat("█", filled) + strings.Repeat("░", width-filled)
 	return fmt.Sprintf("[%s] %d/%d", Primary.Render(bar), current, total)
+}
+
+// ConfirmAction prompts user for Y/N confirmation
+// Returns true if user confirms, false otherwise
+func ConfirmAction(message string) bool {
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Printf("%s [y/N]: ", message)
+	input, _ := reader.ReadString('\n')
+	input = strings.TrimSpace(strings.ToLower(input))
+
+	return input == "y" || input == "yes"
+}
+
+// ConfirmProtectedProfile shows a warning and prompts for confirmation
+func ConfirmProtectedProfile(profileName, baseURL string, entryCount int) bool {
+	fmt.Println()
+	fmt.Println(WarningText.Render("WARNING: Protected Profile"))
+	fmt.Println(Divider(50))
+	fmt.Printf("  Profile:  %s\n", Primary.Render(profileName))
+	fmt.Printf("  URL:      %s\n", Muted.Render(baseURL))
+	fmt.Printf("  Entries:  %s\n", Success.Render(fmt.Sprintf("%d", entryCount)))
+	fmt.Println(Divider(50))
+	fmt.Println()
+
+	return ConfirmAction(WarningText.Render("Proceed with batch operation?"))
 }

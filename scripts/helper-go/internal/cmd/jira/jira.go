@@ -15,4 +15,5 @@ func init() {
 	JiraCmd.AddCommand(configCmd)
 	JiraCmd.AddCommand(logCmd)
 	JiraCmd.AddCommand(statusCmd)
+	JiraCmd.AddCommand(profileCmd)
 }

@@ -34,12 +34,13 @@ type Ticket struct {
 
 // Worklog represents a JIRA worklog entry
 type Worklog struct {
-	ID        string        `json:"id"`
-	IssueKey  string        `json:"issue_key"`
-	Started   time.Time     `json:"started"`
-	TimeSpent time.Duration `json:"time_spent"`
-	Comment   string        `json:"comment"`
-	Author    string        `json:"author"`
+	ID           string        `json:"id"`
+	IssueKey     string        `json:"issue_key"`
+	Started      time.Time     `json:"started"`
+	TimeSpent    time.Duration `json:"time_spent"`
+	TimeSpentStr string        `json:"time_spent_str"` // "2h 30m" format for comparison
+	Comment      string        `json:"comment"`
+	Author       string        `json:"author"`
 }
 
 // WorklogEntry is used to create a new worklog
@@ -47,6 +48,14 @@ type WorklogEntry struct {
 	TimeSpent string    `json:"timeSpent"`
 	Started   time.Time `json:"started"`
 	Comment   string    `json:"comment,omitempty"`
+}
+
+// CurrentUser represents the authenticated JIRA user
+type CurrentUser struct {
+	AccountID    string `json:"accountId"`    // Cloud
+	Name         string `json:"name"`         // Server/DC username
+	DisplayName  string `json:"displayName"`
+	EmailAddress string `json:"emailAddress"`
 }
 
 // NewClient creates a new JIRA client
@@ -66,8 +75,14 @@ func NewClient(baseURL, email, apiToken string) *Client {
 		// Cloud: use Basic auth with email:apiToken
 		auth := base64.StdEncoding.EncodeToString([]byte(email + ":" + apiToken))
 		client.SetHeader("Authorization", "Basic "+auth)
+	} else if strings.HasPrefix(apiToken, "JSESSIONID=") {
+		// Server/DC with session cookie (for instances with basic auth disabled)
+		client.SetHeader("Cookie", apiToken)
+	} else if len(apiToken) == 32 && !strings.Contains(apiToken, "-") {
+		// Looks like a raw session ID (32 hex chars)
+		client.SetHeader("Cookie", "JSESSIONID="+apiToken)
 	} else {
-		// Server/DC: use Bearer token
+		// Server/DC: use Bearer token (PAT)
 		client.SetHeader("Authorization", "Bearer "+apiToken)
 	}
 
@@ -82,6 +97,15 @@ func NewClient(baseURL, email, apiToken string) *Client {
 // isCloudInstance checks if the URL is a JIRA Cloud instance
 func isCloudInstance(baseURL string) bool {
 	return strings.Contains(baseURL, ".atlassian.net")
+}
+
+// stripOrderBy removes ORDER BY clause from JQL (Cloud doesn't support it in enhanced search)
+func stripOrderBy(jql string) string {
+	idx := strings.Index(strings.ToUpper(jql), "ORDER BY")
+	if idx != -1 {
+		return strings.TrimSpace(jql[:idx])
+	}
+	return jql
 }
 
 // GetTicket fetches a ticket by key
@@ -200,10 +224,11 @@ func (c *Client) LogWork(key string, entry WorklogEntry) error {
 func (c *Client) GetWorklogs(key string) ([]Worklog, error) {
 	var result struct {
 		Worklogs []struct {
-			ID      string `json:"id"`
-			Started string `json:"started"`
-			Comment json.RawMessage `json:"comment"`
-			Author  struct {
+			ID        string          `json:"id"`
+			Started   string          `json:"started"`
+			TimeSpent string          `json:"timeSpent"`
+			Comment   json.RawMessage `json:"comment"`
+			Author    struct {
 				DisplayName string `json:"displayName"`
 			} `json:"author"`
 			TimeSpentSeconds int `json:"timeSpentSeconds"`
@@ -225,10 +250,11 @@ func (c *Client) GetWorklogs(key string) ([]Worklog, error) {
 	var worklogs []Worklog
 	for _, w := range result.Worklogs {
 		wl := Worklog{
-			ID:        w.ID,
-			IssueKey:  key,
-			TimeSpent: time.Duration(w.TimeSpentSeconds) * time.Second,
-			Author:    w.Author.DisplayName,
+			ID:           w.ID,
+			IssueKey:     key,
+			TimeSpent:    time.Duration(w.TimeSpentSeconds) * time.Second,
+			TimeSpentStr: w.TimeSpent, // "2h 30m" format from JIRA
+			Author:       w.Author.DisplayName,
 		}
 
 		// Parse started time
@@ -269,6 +295,41 @@ func (c *Client) GetWorklogs(key string) ([]Worklog, error) {
 	return worklogs, nil
 }
 
+// GetWorklogsByDate fetches worklogs for a ticket on a specific date
+func (c *Client) GetWorklogsByDate(key string, date time.Time) ([]Worklog, error) {
+	worklogs, err := c.GetWorklogs(key)
+	if err != nil {
+		return nil, err
+	}
+
+	// Filter by date (compare year, month, day only)
+	targetDate := date.Format("2006-01-02")
+	var filtered []Worklog
+	for _, wl := range worklogs {
+		if wl.Started.Format("2006-01-02") == targetDate {
+			filtered = append(filtered, wl)
+		}
+	}
+
+	return filtered, nil
+}
+
+// DeleteWorklog deletes a worklog by ID
+func (c *Client) DeleteWorklog(key, worklogID string) error {
+	resp, err := c.httpClient.R().
+		Delete("/rest/api/2/issue/" + key + "/worklog/" + worklogID)
+
+	if err != nil {
+		return fmt.Errorf("failed to delete worklog: %w", err)
+	}
+
+	if resp.StatusCode() != http.StatusNoContent && resp.StatusCode() != http.StatusOK {
+		return fmt.Errorf("failed to delete worklog: %s", resp.Status())
+	}
+
+	return nil
+}
+
 // SearchAssignedTickets searches for tickets assigned to the current user
 func (c *Client) SearchAssignedTickets(project string) ([]Ticket, error) {
 	jql := "assignee = currentUser() AND status != Done"
@@ -305,6 +366,13 @@ func (c *Client) Search(jql string, maxResults int) ([]Ticket, error) {
 		} `json:"issues"`
 	}
 
+	// Cloud uses different endpoint and doesn't support ORDER BY
+	endpoint := "/rest/api/2/search"
+	if isCloudInstance(c.baseURL) {
+		endpoint = "/rest/api/2/search/jql"
+		jql = stripOrderBy(jql)
+	}
+
 	resp, err := c.httpClient.R().
 		SetQueryParams(map[string]string{
 			"jql":        jql,
@@ -312,7 +380,7 @@ func (c *Client) Search(jql string, maxResults int) ([]Ticket, error) {
 			"fields":     "summary,status,assignee,issuetype,priority,updated",
 		}).
 		SetResult(&result).
-		Get("/rest/api/2/search")
+		Get(endpoint)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to search: %w", err)
@@ -364,4 +432,154 @@ func (c *Client) TestConnection() error {
 	}
 
 	return nil
+}
+
+// GetCurrentUser fetches the authenticated user's info
+func (c *Client) GetCurrentUser() (*CurrentUser, error) {
+	var result CurrentUser
+
+	resp, err := c.httpClient.R().
+		SetResult(&result).
+		Get("/rest/api/2/myself")
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get current user: %w", err)
+	}
+
+	if resp.StatusCode() != http.StatusOK {
+		return nil, fmt.Errorf("failed to get current user: %s", resp.Status())
+	}
+
+	return &result, nil
+}
+
+// GetIssueSummaries fetches summaries for multiple tickets in a single request
+func (c *Client) GetIssueSummaries(keys []string) (map[string]string, error) {
+	if len(keys) == 0 {
+		return make(map[string]string), nil
+	}
+
+	// Build JQL: key in (VIS-1, VIS-2, ...)
+	jql := fmt.Sprintf("key in (%s)", strings.Join(keys, ", "))
+
+	tickets, err := c.Search(jql, len(keys))
+	if err != nil {
+		return nil, err
+	}
+
+	summaries := make(map[string]string)
+	for _, t := range tickets {
+		summaries[t.Key] = t.Summary
+	}
+
+	return summaries, nil
+}
+
+// SearchIssuesWithWorklogs finds issues that were updated in date range
+// Note: Uses 'updated' field which works on both Cloud and Server/DC
+// (worklogAuthor and worklogDate are Cloud-only JQL fields)
+func (c *Client) SearchIssuesWithWorklogs(fromDate, toDate time.Time) ([]string, error) {
+	// Note: ORDER BY is stripped for Cloud in Search() method
+	jql := fmt.Sprintf(
+		`updated >= "%s" ORDER BY updated DESC`,
+		fromDate.Format("2006-01-02"),
+	)
+
+	tickets, err := c.Search(jql, 200)
+	if err != nil {
+		return nil, err
+	}
+
+	var keys []string
+	for _, t := range tickets {
+		keys = append(keys, t.Key)
+	}
+	return keys, nil
+}
+
+// SearchIssuesWithUserWorklogs finds issues with current user's worklogs (Cloud only)
+// Uses worklogAuthor and worklogDate JQL fields for efficient server-side filtering
+func (c *Client) SearchIssuesWithUserWorklogs(fromDate, toDate time.Time) ([]string, error) {
+	jql := fmt.Sprintf(
+		`worklogAuthor = currentUser() AND worklogDate >= "%s" AND worklogDate <= "%s"`,
+		fromDate.Format("2006-01-02"),
+		toDate.Format("2006-01-02"),
+	)
+
+	tickets, err := c.Search(jql, 200)
+	if err != nil {
+		return nil, err
+	}
+
+	var keys []string
+	for _, t := range tickets {
+		keys = append(keys, t.Key)
+	}
+	return keys, nil
+}
+
+// FetchUserWorklogs fetches all worklogs for current user in date range
+// progressFn is called with (current, total, issueKey) for each issue processed
+func (c *Client) FetchUserWorklogs(fromDate, toDate time.Time, progressFn func(current, total int, issueKey string)) ([]Worklog, error) {
+	// Get current user
+	currentUser, err := c.GetCurrentUser()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get current user: %w", err)
+	}
+
+	// Search for issues - use Cloud-specific JQL if available
+	var issueKeys []string
+	isCloud := isCloudInstance(c.baseURL)
+
+	if isCloud {
+		// Cloud: Use worklogAuthor JQL for efficient server-side filtering
+		issueKeys, err = c.SearchIssuesWithUserWorklogs(fromDate, toDate)
+	} else {
+		// Server/DC: Fall back to updated date search
+		issueKeys, err = c.SearchIssuesWithWorklogs(fromDate, toDate)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to search issues: %w", err)
+	}
+
+	// Fetch worklogs for each issue and filter
+	var result []Worklog
+	total := len(issueKeys)
+	for i, key := range issueKeys {
+		if progressFn != nil {
+			progressFn(i+1, total, key)
+		}
+
+		worklogs, err := c.GetWorklogs(key)
+		if err != nil {
+			continue // Skip issues with fetch errors
+		}
+
+		for _, wl := range worklogs {
+			// Filter by author - Cloud JQL pre-filters, but still verify
+			// Server/DC requires this filter since we search by 'updated' date
+			if !isCurrentUserWorklog(wl, currentUser) {
+				continue
+			}
+
+			// Filter by date range
+			wlDate := wl.Started.Truncate(24 * time.Hour)
+			fromTrunc := fromDate.Truncate(24 * time.Hour)
+			toTrunc := toDate.Truncate(24 * time.Hour)
+
+			if wlDate.Before(fromTrunc) || wlDate.After(toTrunc) {
+				continue
+			}
+
+			result = append(result, wl)
+		}
+	}
+
+	return result, nil
+}
+
+// isCurrentUserWorklog checks if a worklog belongs to the current user
+func isCurrentUserWorklog(wl Worklog, user *CurrentUser) bool {
+	// Compare by display name (works for both Cloud and Server)
+	return wl.Author == user.DisplayName
 }

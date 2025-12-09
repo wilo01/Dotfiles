@@ -33,6 +33,22 @@ For JIRA Server/DC, use a Personal Access Token.`,
 func runConfig(cmd *cobra.Command, args []string) {
 	reader := bufio.NewReader(os.Stdin)
 
+	// Show active profile context
+	profile, _ := config.GetActiveProfile()
+	if profile != nil {
+		fmt.Printf("Configuring profile: %s\n", ui.Primary.Render(profile.Name))
+		fmt.Printf("  URL: %s\n", ui.Muted.Render(profile.BaseURL))
+
+		// Check if MCP .env file exists for this profile
+		mcpEnvPath := fmt.Sprintf("~/.claude/mcp-servers/jira-profiles/jira-%s.env", profile.Name)
+		credMgr := config.NewCredentialManager()
+		if token, _ := credMgr.GetJiraTokenFromMCPProfile(profile.Name); token != "" {
+			fmt.Printf("  Token: %s (from MCP .env)\n\n", ui.Success.Render("Found"))
+			fmt.Printf("%s Token already configured in %s\n", ui.Info(""), ui.Muted.Render(mcpEnvPath))
+			fmt.Printf("Edit that file to change the token, or continue to override in keyring.\n\n")
+		}
+	}
+
 	// Get current values
 	currentURL := viper.GetString("jira.base_url")
 	currentEmail := viper.GetString("jira.email")

@@ -10,26 +10,46 @@ import (
 
 	"github.com/dariuszw/hlp/internal/config"
 	"github.com/dariuszw/hlp/internal/jira"
+	"github.com/dariuszw/hlp/pkg/duration"
+)
+
+// Status constants for worklog entries
+const (
+	StatusPending = ""
+	StatusSync    = "SYNC"
+	StatusUpdated = "UPDATED"
+	StatusDone    = "DONE"
 )
 
 // Entry represents a single worklog entry from CSV
 type Entry struct {
-	IssueKey  string
-	TimeSpent string
-	Date      string // DD/MM/YYYY or DD.MM.YYYY
-	Comment   string
-	Status    string // empty = pending, UPDATED, DONE
-	RowNumber int
+	IssueKey    string
+	TimeSpent   string
+	Date        string // DD/MM/YYYY or DD.MM.YYYY
+	Comment     string
+	Status      string // empty = pending, SYNC, UPDATED, DONE
+	RowNumber   int
+	Description string // Ticket summary from JIRA (populated at runtime)
 }
 
 // IsPending returns true if entry needs to be posted
 func (e Entry) IsPending() bool {
-	return e.Status == ""
+	return e.Status == StatusPending
 }
 
 // IsDone returns true if entry is completed
 func (e Entry) IsDone() bool {
-	return strings.ToUpper(e.Status) == "DONE"
+	return strings.ToUpper(e.Status) == StatusDone
+}
+
+// IsUpdated returns true if entry was posted but needs verification
+func (e Entry) IsUpdated() bool {
+	return strings.ToUpper(e.Status) == StatusUpdated
+}
+
+// IsSync returns true if entry matches what's in JIRA
+func (e Entry) IsSync() bool {
+	return strings.ToUpper(e.Status) == StatusSync
 }
 
 // NeedsProcessing returns true if entry needs processing
@@ -68,6 +88,17 @@ func DefaultCSVPath() string {
 	return config.GetConfigPath("worklogs.csv")
 }
 
+// CSV column indices (6-column format)
+// Format: issue_key, issue_description, TimeSpent, Date, Comment, Status
+const (
+	ColIssueKey     = 0
+	ColDescription  = 1
+	ColTimeSpent    = 2
+	ColDate         = 3
+	ColComment      = 4
+	ColStatus       = 5
+)
+
 // ParseCSV parses a CSV file into entries
 func ParseCSV(path string) ([]Entry, error) {
 	f, err := os.Open(path)
@@ -88,32 +119,32 @@ func ParseCSV(path string) ([]Entry, error) {
 	for i, record := range records {
 		rowNum := i + 1
 
-		if len(record) < 3 {
+		if len(record) < 4 {
 			continue
 		}
 
 		// Skip header row
 		if rowNum == 1 {
-			first := strings.ToLower(record[0])
+			first := strings.ToLower(record[ColIssueKey])
 			if first == "issue_key" || first == "issue" || first == "ticket" {
 				continue
 			}
 		}
 
 		entry := Entry{
-			IssueKey:  strings.ToUpper(strings.TrimSpace(record[0])),
-			TimeSpent: strings.TrimSpace(record[1]),
-			Date:      strings.TrimSpace(record[2]),
-			RowNumber: rowNum,
+			IssueKey:    strings.ToUpper(strings.TrimSpace(record[ColIssueKey])),
+			Description: strings.TrimSpace(record[ColDescription]),
+			TimeSpent:   strings.TrimSpace(record[ColTimeSpent]),
+			Date:        strings.TrimSpace(record[ColDate]),
+			RowNumber:   rowNum,
 		}
 
-		if len(record) > 3 {
-			entry.Comment = strings.TrimSpace(record[3])
+		if len(record) > ColComment {
+			entry.Comment = strings.TrimSpace(record[ColComment])
 		}
 
-		// Check for status in the 5th column or parse from comment
-		if len(record) > 4 {
-			entry.Status = strings.TrimSpace(record[4])
+		if len(record) > ColStatus {
+			entry.Status = strings.TrimSpace(record[ColStatus])
 		}
 
 		entries = append(entries, entry)
@@ -138,15 +169,32 @@ func ParsePendingCSV(path string) ([]Entry, error) {
 	return pending, nil
 }
 
-// ParseDate parses DD/MM/YYYY or DD.MM.YYYY to time.Time
+// ParseDate parses date string with optional time component
+// Formats: DD.MM.YYYY HH:MM, DD.MM.YYYY, DD/MM/YYYY, YYYY-MM-DD
+// timeStr parameter is used as fallback if date doesn't contain time
 func ParseDate(dateStr, timeStr string) (time.Time, error) {
 	dateStr = strings.TrimSpace(dateStr)
 	timeStr = strings.TrimSpace(timeStr)
 
-	// Try different date formats
-	var day, month, year int
-	var err error
+	var day, month, year, hour, minute int
+	hour, minute = 9, 0 // Default time
 
+	// Check if dateStr contains time component (space followed by HH:MM)
+	if idx := strings.Index(dateStr, " "); idx > 0 {
+		datePart := dateStr[:idx]
+		timePart := strings.TrimSpace(dateStr[idx+1:])
+
+		// Parse time from dateStr
+		if _, err := fmt.Sscanf(timePart, "%d:%d", &hour, &minute); err == nil {
+			dateStr = datePart // Use only date part for date parsing
+		}
+	} else if timeStr != "" {
+		// Use timeStr parameter as fallback
+		fmt.Sscanf(timeStr, "%d:%d", &hour, &minute)
+	}
+
+	// Parse date part
+	var err error
 	if strings.Contains(dateStr, "/") {
 		_, err = fmt.Sscanf(dateStr, "%d/%d/%d", &day, &month, &year)
 	} else if strings.Contains(dateStr, ".") {
@@ -162,35 +210,108 @@ func ParseDate(dateStr, timeStr string) (time.Time, error) {
 		return time.Time{}, fmt.Errorf("invalid date: %s", dateStr)
 	}
 
-	// Parse time
-	hour, minute := 9, 0
-	if timeStr != "" {
-		fmt.Sscanf(timeStr, "%d:%d", &hour, &minute)
-	}
-
 	return time.Date(year, time.Month(month), day, hour, minute, 0, 0, time.Local), nil
 }
 
-// Process processes a single entry
+// Process processes a single entry (legacy - use SyncWorklog instead)
 func (p *Processor) Process(entry Entry) Result {
+	return p.SyncWorklog(entry)
+}
+
+// SyncWorklog syncs a worklog entry - compares CSV against JIRA data
+// Behavior:
+// - If matching time+duration exists in JIRA → SKIP (already exists)
+// - If matching time but different duration → DELETE old, CREATE new (UPDATED)
+// - If no matching time but other worklogs exist → FAIL (time conflict)
+// - If no worklogs for this date → CREATE new (DONE)
+func (p *Processor) SyncWorklog(entry Entry) Result {
 	result := Result{Entry: entry}
 
-	// Parse date
-	started, err := ParseDate(entry.Date, p.defaultTime)
+	// 1. Parse date (uses time from CSV if present, otherwise --time flag)
+	csvTime, err := ParseDate(entry.Date, p.defaultTime)
 	if err != nil {
 		result.Success = false
 		result.ErrorMessage = err.Error()
 		return result
 	}
 
-	// Create worklog entry
+	// 2. Fetch existing worklogs for this issue/date
+	existing, err := p.client.GetWorklogsByDate(entry.IssueKey, csvTime)
+	if err != nil {
+		errStr := err.Error()
+		// Check for 404 (issue not found)
+		if strings.Contains(errStr, "404") || strings.Contains(errStr, "not found") {
+			result.Success = false
+			result.ErrorMessage = "issue not found"
+			return result
+		}
+		result.Success = false
+		result.ErrorMessage = fmt.Sprintf("failed to fetch worklogs: %v", err)
+		return result
+	}
+
+	// 3. Parse CSV duration for comparison
+	csvDuration, _ := duration.Parse(entry.TimeSpent)
+	csvHour, csvMin := csvTime.Hour(), csvTime.Minute()
+
+	// 4. Look for a worklog with matching time
+	for _, jiraWL := range existing {
+		jiraHour, jiraMin := jiraWL.Started.Hour(), jiraWL.Started.Minute()
+
+		if csvHour == jiraHour && csvMin == jiraMin {
+			// Same time - check duration
+			if csvDuration == jiraWL.TimeSpent {
+				// Already exists with same duration - SKIP
+				result.Success = true
+				result.NewStatus = StatusDone
+				result.ErrorMessage = "already exists"
+				return result
+			}
+
+			// Same time, different duration - delete old and create new
+			if err := p.client.DeleteWorklog(entry.IssueKey, jiraWL.ID); err != nil {
+				result.Success = false
+				result.ErrorMessage = fmt.Sprintf("failed to delete existing worklog: %v", err)
+				return result
+			}
+
+			worklogEntry := jira.WorklogEntry{
+				TimeSpent: entry.TimeSpent,
+				Started:   csvTime,
+				Comment:   entry.Comment,
+			}
+
+			if err := p.client.LogWork(entry.IssueKey, worklogEntry); err != nil {
+				result.Success = false
+				result.ErrorMessage = err.Error()
+				return result
+			}
+
+			result.Success = true
+			result.NewStatus = StatusUpdated
+			result.ErrorMessage = "updated duration"
+			return result
+		}
+	}
+
+	// 5. No matching time found - check for conflicts
+	if len(existing) > 0 {
+		// There are worklogs for this date, but at different times
+		// This is a conflict - CSV says one time, JIRA has another
+		jiraTime := existing[0].Started
+		result.Success = false
+		result.ErrorMessage = fmt.Sprintf("time conflict: CSV has %02d:%02d but JIRA has %02d:%02d",
+			csvHour, csvMin, jiraTime.Hour(), jiraTime.Minute())
+		return result
+	}
+
+	// 6. No worklogs for this date - create new
 	worklogEntry := jira.WorklogEntry{
 		TimeSpent: entry.TimeSpent,
-		Started:   started,
+		Started:   csvTime,
 		Comment:   entry.Comment,
 	}
 
-	// Post to JIRA
 	if err := p.client.LogWork(entry.IssueKey, worklogEntry); err != nil {
 		result.Success = false
 		result.ErrorMessage = err.Error()
@@ -198,9 +319,10 @@ func (p *Processor) Process(entry Entry) Result {
 	}
 
 	result.Success = true
-	result.NewStatus = "DONE"
+	result.NewStatus = StatusDone
 	return result
 }
+
 
 // ProcessBatch processes all entries
 func (p *Processor) ProcessBatch(entries []Entry, dryRun bool, progressFn func(current, total int, result Result)) []Result {
@@ -223,7 +345,7 @@ func (p *Processor) ProcessBatch(entries []Entry, dryRun bool, progressFn func(c
 				result = Result{
 					Entry:     entry,
 					Success:   true,
-					NewStatus: "DONE",
+					NewStatus: StatusUpdated,
 				}
 			}
 		} else {
@@ -277,11 +399,11 @@ func UpdateCSVStatus(path string, results []Result) error {
 	for i, record := range records {
 		rowNum := i + 1
 		if newStatus, ok := updates[rowNum]; ok {
-			// Ensure we have at least 5 columns
-			for len(record) < 5 {
+			// Ensure we have at least 6 columns (new format)
+			for len(record) < 6 {
 				record = append(record, "")
 			}
-			record[4] = newStatus
+			record[ColStatus] = newStatus
 			records[i] = record
 		}
 	}
@@ -297,10 +419,74 @@ func UpdateCSVStatus(path string, results []Result) error {
 	return writer.WriteAll(records)
 }
 
+// UpdateCSVDescriptions updates empty description fields in the CSV
+func UpdateCSVDescriptions(path string, descriptions map[string]string) (int, error) {
+	if len(descriptions) == 0 {
+		return 0, nil
+	}
+
+	// Read all lines
+	f, err := os.Open(path)
+	if err != nil {
+		return 0, err
+	}
+
+	reader := csv.NewReader(f)
+	reader.FieldsPerRecord = -1
+	records, err := reader.ReadAll()
+	f.Close()
+	if err != nil {
+		return 0, err
+	}
+
+	// Update descriptions
+	updated := 0
+	for i, record := range records {
+		if len(record) <= ColDescription {
+			continue
+		}
+
+		issueKey := strings.ToUpper(strings.TrimSpace(record[ColIssueKey]))
+		currentDesc := strings.TrimSpace(record[ColDescription])
+
+		// Only update if description is empty and we have a new one
+		if currentDesc == "" {
+			if newDesc, ok := descriptions[issueKey]; ok && newDesc != "" {
+				record[ColDescription] = newDesc
+				records[i] = record
+				updated++
+			}
+		}
+	}
+
+	if updated == 0 {
+		return 0, nil
+	}
+
+	// Write back
+	f, err = os.Create(path)
+	if err != nil {
+		return 0, err
+	}
+	defer f.Close()
+
+	writer := csv.NewWriter(f)
+	if err := writer.WriteAll(records); err != nil {
+		return 0, err
+	}
+
+	return updated, nil
+}
+
 // AppendEntry appends a new entry to the CSV file
-func AppendEntry(path string, issueKey, timeSpent, date, comment string) error {
+func AppendEntry(path string, issueKey, description, timeSpent, date, comment string) error {
+	return AppendEntryWithStatus(path, issueKey, description, timeSpent, date, comment, StatusPending)
+}
+
+// AppendEntryWithStatus appends a new entry to the CSV file with a specific status
+func AppendEntryWithStatus(path, issueKey, description, timeSpent, date, comment, status string) error {
 	if date == "" {
-		date = time.Now().Format("02/01/2006")
+		date = time.Now().Format("02.01.2006") // DD.MM.YYYY format
 	}
 
 	// Ensure directory exists
@@ -321,9 +507,141 @@ func AppendEntry(path string, issueKey, timeSpent, date, comment string) error {
 
 	return writer.Write([]string{
 		strings.ToUpper(issueKey),
+		description,
 		timeSpent,
 		date,
 		comment,
-		"", // Empty status
+		status,
 	})
+}
+
+// FindMissingWorklogs compares JIRA worklogs with CSV entries and returns missing ones
+func FindMissingWorklogs(jiraWorklogs []jira.Worklog, csvEntries []Entry) []jira.Worklog {
+	// Build a set of existing CSV entries keyed by IssueKey+Date+TimeSpent
+	existing := make(map[string]bool)
+	for _, e := range csvEntries {
+		key := buildComparisonKey(e.IssueKey, e.Date, e.TimeSpent)
+		existing[key] = true
+	}
+
+	var missing []jira.Worklog
+	for _, wl := range jiraWorklogs {
+		dateStr := wl.Started.Format("02.01.2006 15:04")
+		key := buildComparisonKey(wl.IssueKey, dateStr, wl.TimeSpentStr)
+
+		if !existing[key] {
+			missing = append(missing, wl)
+		}
+	}
+
+	return missing
+}
+
+// buildComparisonKey creates a unique identifier for worklog comparison
+func buildComparisonKey(issueKey, date, timeSpent string) string {
+	issueKey = strings.ToUpper(strings.TrimSpace(issueKey))
+	date = normalizeDate(date)
+	timeSpent = normalizeTimeSpent(timeSpent)
+	return fmt.Sprintf("%s|%s|%s", issueKey, date, timeSpent)
+}
+
+// normalizeDate converts date to consistent YYYY-MM-DD HH:MM format for comparison
+func normalizeDate(date string) string {
+	t, err := ParseDate(date, "00:00")
+	if err != nil {
+		return strings.TrimSpace(date)
+	}
+	return t.Format("2006-01-02 15:04")
+}
+
+// normalizeTimeSpent normalizes time format for comparison
+func normalizeTimeSpent(ts string) string {
+	d, err := duration.Parse(ts)
+	if err != nil {
+		return strings.TrimSpace(ts)
+	}
+	return duration.Format(d)
+}
+
+// SortCSVByDate sorts CSV entries by date (newest first) and rewrites the file
+func SortCSVByDate(path string) error {
+	// Read all records
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+
+	reader := csv.NewReader(f)
+	reader.FieldsPerRecord = -1
+	records, err := reader.ReadAll()
+	f.Close()
+	if err != nil {
+		return err
+	}
+
+	if len(records) <= 1 {
+		return nil // Nothing to sort
+	}
+
+	// Check if first row is header
+	hasHeader := false
+	var header []string
+	if len(records) > 0 {
+		first := strings.ToLower(records[0][0])
+		if first == "issue_key" || first == "issue" || first == "ticket" {
+			hasHeader = true
+			header = records[0]
+			records = records[1:]
+		}
+	}
+
+	// Sort records by date descending (newest first)
+	sortRecordsByDate(records)
+
+	// Write back to file
+	f, err = os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	writer := csv.NewWriter(f)
+	defer writer.Flush()
+
+	// Write header if present
+	if hasHeader {
+		if err := writer.Write(header); err != nil {
+			return err
+		}
+	}
+
+	// Write sorted records
+	return writer.WriteAll(records)
+}
+
+// sortRecordsByDate sorts CSV records by date column (index 2) in descending order
+func sortRecordsByDate(records [][]string) {
+	for i := 0; i < len(records)-1; i++ {
+		for j := i + 1; j < len(records); j++ {
+			dateI := parseRecordDate(records[i])
+			dateJ := parseRecordDate(records[j])
+
+			// Sort descending (newest first)
+			if dateJ.After(dateI) {
+				records[i], records[j] = records[j], records[i]
+			}
+		}
+	}
+}
+
+// parseRecordDate parses date from CSV record
+func parseRecordDate(record []string) time.Time {
+	if len(record) <= ColDate {
+		return time.Time{}
+	}
+	t, err := ParseDate(record[ColDate], "00:00")
+	if err != nil {
+		return time.Time{}
+	}
+	return t
 }
