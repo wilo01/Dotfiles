@@ -71,7 +71,8 @@ type Processor struct {
 	client      *jira.Client
 	defaultTime string
 	profile     *config.JiraProfile
-	mockMode    bool // For LOCAL profile - simulate without JIRA calls
+	mockMode    bool              // For LOCAL profile - simulate without JIRA calls
+	currentUser *jira.CurrentUser // Cached current user for ownership checks
 }
 
 // ProcessorConfig configures batch processor behavior
@@ -245,6 +246,18 @@ func ParseDate(dateStr, timeStr string) (time.Time, error) {
 	return time.Date(year, time.Month(month), day, hour, minute, 0, 0, time.Local), nil
 }
 
+// isOwnWorklog checks if a worklog belongs to the current user
+func (p *Processor) isOwnWorklog(wl jira.Worklog) bool {
+	if p.currentUser == nil {
+		user, err := p.client.GetCurrentUser()
+		if err != nil {
+			return false // Fail safe - don't touch if can't verify
+		}
+		p.currentUser = user
+	}
+	return wl.Author == p.currentUser.DisplayName
+}
+
 // Process processes a single entry (legacy - use SyncWorklog instead)
 func (p *Processor) Process(entry Entry) Result {
 	return p.SyncWorklog(entry)
@@ -309,6 +322,13 @@ func (p *Processor) SyncWorklog(entry Entry) Result {
 			}
 
 			// Same time, different duration - delete old and create new
+			// First check if this is our worklog
+			if !p.isOwnWorklog(jiraWL) {
+				result.Success = false
+				result.ErrorMessage = fmt.Sprintf("worklog belongs to %s, skipping", jiraWL.Author)
+				return result
+			}
+
 			if err := p.client.DeleteWorklog(entry.IssueKey, jiraWL.ID); err != nil {
 				result.Success = false
 				result.ErrorMessage = fmt.Sprintf("failed to delete existing worklog: %v", err)

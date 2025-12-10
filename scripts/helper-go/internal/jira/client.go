@@ -34,13 +34,14 @@ type Ticket struct {
 
 // Worklog represents a JIRA worklog entry
 type Worklog struct {
-	ID           string        `json:"id"`
-	IssueKey     string        `json:"issue_key"`
-	Started      time.Time     `json:"started"`
-	TimeSpent    time.Duration `json:"time_spent"`
-	TimeSpentStr string        `json:"time_spent_str"` // "2h 30m" format for comparison
-	Comment      string        `json:"comment"`
-	Author       string        `json:"author"`
+	ID              string        `json:"id"`
+	IssueKey        string        `json:"issue_key"`
+	Started         time.Time     `json:"started"`
+	TimeSpent       time.Duration `json:"time_spent"`
+	TimeSpentStr    string        `json:"time_spent_str"` // "2h 30m" format for comparison
+	Comment         string        `json:"comment"`
+	Author          string        `json:"author"`
+	AuthorAccountId string        `json:"author_account_id"` // Cloud: accountId for reliable matching
 }
 
 // WorklogEntry is used to create a new worklog
@@ -228,8 +229,9 @@ func (c *Client) GetWorklogs(key string) ([]Worklog, error) {
 			Started   string          `json:"started"`
 			TimeSpent string          `json:"timeSpent"`
 			Comment   json.RawMessage `json:"comment"`
-			Author    struct {
+			Author struct {
 				DisplayName string `json:"displayName"`
+				AccountId   string `json:"accountId"`
 			} `json:"author"`
 			TimeSpentSeconds int `json:"timeSpentSeconds"`
 		} `json:"worklogs"`
@@ -250,11 +252,12 @@ func (c *Client) GetWorklogs(key string) ([]Worklog, error) {
 	var worklogs []Worklog
 	for _, w := range result.Worklogs {
 		wl := Worklog{
-			ID:           w.ID,
-			IssueKey:     key,
-			TimeSpent:    time.Duration(w.TimeSpentSeconds) * time.Second,
-			TimeSpentStr: w.TimeSpent, // "2h 30m" format from JIRA
-			Author:       w.Author.DisplayName,
+			ID:              w.ID,
+			IssueKey:        key,
+			TimeSpent:       time.Duration(w.TimeSpentSeconds) * time.Second,
+			TimeSpentStr:    w.TimeSpent, // "2h 30m" format from JIRA
+			Author:          w.Author.DisplayName,
+			AuthorAccountId: w.Author.AccountId,
 		}
 
 		// Parse started time
@@ -295,18 +298,24 @@ func (c *Client) GetWorklogs(key string) ([]Worklog, error) {
 	return worklogs, nil
 }
 
-// GetWorklogsByDate fetches worklogs for a ticket on a specific date
+// GetWorklogsByDate fetches worklogs for a ticket on a specific date (current user only)
 func (c *Client) GetWorklogsByDate(key string, date time.Time) ([]Worklog, error) {
 	worklogs, err := c.GetWorklogs(key)
 	if err != nil {
 		return nil, err
 	}
 
-	// Filter by date (compare year, month, day only)
+	// Get current user for filtering
+	currentUser, err := c.GetCurrentUser()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get current user: %w", err)
+	}
+
+	// Filter by date AND author (current user only)
 	targetDate := date.Format("2006-01-02")
 	var filtered []Worklog
 	for _, wl := range worklogs {
-		if wl.Started.Format("2006-01-02") == targetDate {
+		if wl.Started.Format("2006-01-02") == targetDate && isCurrentUserWorklog(wl, currentUser) {
 			filtered = append(filtered, wl)
 		}
 	}
@@ -317,6 +326,7 @@ func (c *Client) GetWorklogsByDate(key string, date time.Time) ([]Worklog, error
 // DeleteWorklog deletes a worklog by ID
 func (c *Client) DeleteWorklog(key, worklogID string) error {
 	resp, err := c.httpClient.R().
+		SetQueryParam("adjustEstimate", "leave").
 		Delete("/rest/api/2/issue/" + key + "/worklog/" + worklogID)
 
 	if err != nil {
@@ -324,7 +334,7 @@ func (c *Client) DeleteWorklog(key, worklogID string) error {
 	}
 
 	if resp.StatusCode() != http.StatusNoContent && resp.StatusCode() != http.StatusOK {
-		return fmt.Errorf("failed to delete worklog: %s", resp.Status())
+		return fmt.Errorf("failed to delete worklog: %s - %s", resp.Status(), resp.String())
 	}
 
 	return nil
@@ -589,6 +599,10 @@ func (c *Client) FetchUserWorklogs(fromDate, toDate time.Time, progressFn func(c
 
 // isCurrentUserWorklog checks if a worklog belongs to the current user
 func isCurrentUserWorklog(wl Worklog, user *CurrentUser) bool {
-	// Compare by display name (works for both Cloud and Server)
-	return wl.Author == user.DisplayName
+	// For Cloud: prefer AccountId comparison (most reliable)
+	if user.AccountID != "" && wl.AuthorAccountId != "" {
+		return wl.AuthorAccountId == user.AccountID
+	}
+	// Fallback: case-insensitive display name comparison
+	return strings.EqualFold(wl.Author, user.DisplayName)
 }

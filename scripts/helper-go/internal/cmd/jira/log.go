@@ -197,6 +197,29 @@ func runBatchLog(cmd *cobra.Command, args []string) {
 
 	fmt.Printf("Found %s pending entries\n", ui.Success.Render(fmt.Sprintf("%d", len(entries))))
 
+	// Get JIRA client (needed for preview and processing)
+	client, err := getJiraClient()
+	if err != nil {
+		fmt.Println(ui.Error(err.Error()))
+		return
+	}
+
+	// Fetch ticket summaries for descriptions (needed for preview)
+	uniqueKeys := getUniqueTicketKeys(entries)
+	summaries, _ := client.GetIssueSummaries(uniqueKeys)
+	for i := range entries {
+		if summary, ok := summaries[entries[i].IssueKey]; ok {
+			entries[i].Description = summary
+		}
+	}
+
+	// Show preview before confirmation (only for non-dry-run)
+	if !logDryRun {
+		fmt.Println()
+		fmt.Println("Processing worklogs " + ui.Muted.Render("(preview)") + ":")
+		showWorklogPreview(entries, getExpectedHoursPerDay())
+	}
+
 	// Safety guard for protected profiles
 	if !logDryRun && !logConfirm {
 		if profile != nil && profile.Protected {
@@ -208,22 +231,6 @@ func runBatchLog(cmd *cobra.Command, args []string) {
 	}
 
 	fmt.Println()
-
-	// Get JIRA client (needed for both dry-run and actual processing)
-	client, err := getJiraClient()
-	if err != nil {
-		fmt.Println(ui.Error(err.Error()))
-		return
-	}
-
-	// Fetch ticket summaries for descriptions
-	uniqueKeys := getUniqueTicketKeys(entries)
-	summaries, _ := client.GetIssueSummaries(uniqueKeys)
-	for i := range entries {
-		if summary, ok := summaries[entries[i].IssueKey]; ok {
-			entries[i].Description = summary
-		}
-	}
 
 	if logDryRun {
 		// Preview mode - load ALL entries (including DONE) for complete daily totals
@@ -840,6 +847,90 @@ func showDryRunGroupedByDay(entries []batch.Entry, expectedHours time.Duration) 
 		// Entry format: "  X/X TICKET-KEY    DESCRIPTION                    TIME     DATE..."
 		// Positions:     2   4   12           30                             8
 		// Total before time: 2 + 4 + 12 + 1 + 30 + 1 = 50
+		totalStr := duration.Format(group.total)
+		fmt.Printf("  %s%s%s    %s\n",
+			ui.Muted.Render(fmt.Sprintf("%-10s", dateKey)),
+			"                                      ", // 38 spaces to align with time column
+			ui.Success.Render(fmt.Sprintf("%-8s", totalStr)),
+			diffStr)
+
+		// Add blank line between days (except for last day)
+		if dateKey != dateOrder[len(dateOrder)-1] {
+			fmt.Println()
+		}
+	}
+}
+
+// showWorklogPreview displays pending entries before confirmation prompt
+func showWorklogPreview(entries []batch.Entry, expectedHours time.Duration) {
+	if len(entries) == 0 {
+		return
+	}
+
+	// Group entries by date
+	type dayGroup struct {
+		date    string
+		entries []batch.Entry
+		total   time.Duration
+	}
+
+	byDate := make(map[string]*dayGroup)
+	dateOrder := []string{}
+
+	for _, e := range entries {
+		t, err := batch.ParseDate(e.Date, "09:00")
+		if err != nil {
+			continue
+		}
+		dateKey := t.Format("02.01.2006")
+
+		dur, _ := duration.Parse(e.TimeSpent)
+
+		if _, exists := byDate[dateKey]; !exists {
+			byDate[dateKey] = &dayGroup{date: dateKey}
+			dateOrder = append(dateOrder, dateKey)
+		}
+		byDate[dateKey].entries = append(byDate[dateKey].entries, e)
+		byDate[dateKey].total += dur
+	}
+
+	// Print entries grouped by day
+	entryNum := 0
+	totalEntries := len(entries)
+
+	for _, dateKey := range dateOrder {
+		group := byDate[dateKey]
+
+		// Print entries for this day
+		for _, e := range group.entries {
+			entryNum++
+
+			// Format date - show time only if present in the Date field
+			dateDisplay := e.Date
+
+			fmt.Printf("  %s %s %s %s %s ... %s\n",
+				ui.Muted.Render(fmt.Sprintf("%d/%d", entryNum, totalEntries)),
+				ui.Primary.Render(fmt.Sprintf("%-12s", e.IssueKey)),
+				ui.Muted.Render(fmt.Sprintf("%-30s", truncateString(e.Description, 30))),
+				ui.Success.Render(fmt.Sprintf("%-8s", e.TimeSpent)),
+				ui.Muted.Render(fmt.Sprintf("%-16s", dateDisplay)),
+				ui.Muted.Render("PENDING"))
+		}
+
+		// Print separator and total for this day
+		fmt.Println("  " + ui.Muted.Render("─────────────────────────────────────────────────────────────────────────────────────"))
+
+		// Calculate difference from expected
+		diff := group.total - expectedHours
+		var diffStr string
+		if diff > 0 {
+			diffStr = ui.WarningText.Render(fmt.Sprintf("(+%s over %s)", duration.Format(diff), duration.Format(expectedHours)))
+		} else if diff < 0 {
+			diffStr = ui.ErrorText.Render(fmt.Sprintf("(need %s for %s)", duration.Format(-diff), duration.Format(expectedHours)))
+		} else {
+			diffStr = ui.Success.Render("✓")
+		}
+
 		totalStr := duration.Format(group.total)
 		fmt.Printf("  %s%s%s    %s\n",
 			ui.Muted.Render(fmt.Sprintf("%-10s", dateKey)),

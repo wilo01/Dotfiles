@@ -71,12 +71,6 @@ func Format(d time.Duration) string {
 
 	var parts []string
 
-	if hours >= 8 {
-		days := hours / 8
-		hours = hours % 8
-		parts = append(parts, fmt.Sprintf("%dd", days))
-	}
-
 	if hours > 0 {
 		parts = append(parts, fmt.Sprintf("%dh", hours))
 	}
