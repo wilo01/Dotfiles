@@ -59,6 +59,14 @@ type CurrentUser struct {
 	EmailAddress string `json:"emailAddress"`
 }
 
+// IssueDetails holds summary and type for an issue (used by sync)
+type IssueDetails struct {
+	Summary   string
+	IssueType string
+	ParentKey string // For sub-tasks: parent ticket key
+	IsSubtask bool   // True if this is a sub-task
+}
+
 // NewClient creates a new JIRA client
 func NewClient(baseURL, email, apiToken string) *Client {
 	// Ensure baseURL doesn't have trailing slash
@@ -360,6 +368,12 @@ func (c *Client) SearchAssignedTickets(project string) ([]Ticket, error) {
 	return c.Search(jql, 50)
 }
 
+// SearchSprintTickets searches for tickets in the current sprint assigned to user
+func (c *Client) SearchSprintTickets() ([]Ticket, error) {
+	jql := "assignee = currentUser() AND sprint in openSprints() AND status != Done ORDER BY updated DESC"
+	return c.Search(jql, 50)
+}
+
 // Search performs a JQL search
 func (c *Client) Search(jql string, maxResults int) ([]Ticket, error) {
 	var result struct {
@@ -380,6 +394,9 @@ func (c *Client) Search(jql string, maxResults int) ([]Ticket, error) {
 				Priority *struct {
 					Name string `json:"name"`
 				} `json:"priority"`
+				Parent *struct {
+					Key string `json:"key"`
+				} `json:"parent"`
 				Updated string `json:"updated"`
 			} `json:"fields"`
 		} `json:"issues"`
@@ -396,7 +413,7 @@ func (c *Client) Search(jql string, maxResults int) ([]Ticket, error) {
 		SetQueryParams(map[string]string{
 			"jql":        jql,
 			"maxResults": fmt.Sprintf("%d", maxResults),
-			"fields":     "summary,status,assignee,issuetype,priority,updated",
+			"fields":     "summary,status,assignee,issuetype,priority,parent,updated",
 		}).
 		SetResult(&result).
 		Get(endpoint)
@@ -424,6 +441,9 @@ func (c *Client) Search(jql string, maxResults int) ([]Ticket, error) {
 		}
 		if issue.Fields.Priority != nil {
 			ticket.Priority = issue.Fields.Priority.Name
+		}
+		if issue.Fields.Parent != nil {
+			ticket.ParentKey = issue.Fields.Parent.Key
 		}
 		if issue.Fields.Updated != "" {
 			if t, err := time.Parse("2006-01-02T15:04:05.000-0700", issue.Fields.Updated); err == nil {
@@ -492,6 +512,33 @@ func (c *Client) GetIssueSummaries(keys []string) (map[string]string, error) {
 	}
 
 	return summaries, nil
+}
+
+// GetIssueDetails fetches summaries and types for multiple tickets in a single request
+func (c *Client) GetIssueDetails(keys []string) (map[string]IssueDetails, error) {
+	if len(keys) == 0 {
+		return make(map[string]IssueDetails), nil
+	}
+
+	// Build JQL: key in (VIS-1, VIS-2, ...)
+	jql := fmt.Sprintf("key in (%s)", strings.Join(keys, ", "))
+
+	tickets, err := c.Search(jql, len(keys))
+	if err != nil {
+		return nil, err
+	}
+
+	details := make(map[string]IssueDetails)
+	for _, t := range tickets {
+		details[t.Key] = IssueDetails{
+			Summary:   t.Summary,
+			IssueType: t.IssueType,
+			ParentKey: t.ParentKey,
+			IsSubtask: t.IsSubtask,
+		}
+	}
+
+	return details, nil
 }
 
 // SearchIssuesWithWorklogs finds issues that were updated in date range

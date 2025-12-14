@@ -191,6 +191,44 @@ Describe the functional impact, not the cosmetic changes."
    echo "$prompt"
 }
 
+# Generate AI prompt for extending existing commit message
+# Only generates NEW bullet points not already covered by existing logs
+generate_extend_ai_prompt() {
+   local existing_logs="$1"
+   local diff_content="$2"
+   local files_changed="$3"
+   local lines_added="$4"
+   local lines_deleted="$5"
+
+   local diff_names
+   diff_names=$(git diff --staged --name-status 2>/dev/null)
+
+   cat <<EOF
+You are extending an existing commit message. Generate ONLY NEW bullet points for changes NOT already covered.
+
+EXISTING COMMIT LOGS (do NOT repeat these):
+$existing_logs
+
+CURRENT STAGED CHANGES:
+Files: $files_changed changed, +$lines_added/-$lines_deleted lines
+$diff_names
+
+DIFF:
+$diff_content
+
+INSTRUCTIONS:
+- Output ONLY bullet points starting with '- ' for NEW changes
+- Do NOT duplicate or rephrase any existing log points
+- If all changes are already covered by existing logs, output nothing
+- Keep each bullet point under 72 characters
+- Focus on functional changes, not formatting
+- DO NOT include semantic commit prefixes like 'feat:', 'fix:', 'docs:', etc.
+- DO NOT include scope in parentheses like '(hooks)', '(git)', '(api)', etc.
+
+OUTPUT: New bullet points only (or nothing if no new changes)
+EOF
+}
+
 # -----------------------------------------------------------------------------
 # AI Execution - Sequential Mode
 # -----------------------------------------------------------------------------
@@ -597,6 +635,38 @@ prompt_commit_mode() {
    esac
 }
 
+# Show prompt for extending existing commit message with AI
+prompt_extend_mode() {
+   local timeout="${MAINTENANCE_TIMEOUT:-10}"
+
+   # Check if running interactively
+   if [[ ! -t 0 ]] && [[ ! -e /dev/tty ]]; then
+      echo "use"
+      return
+   fi
+
+   echo "" >&2
+   echo "📝 Staged changes detected. Extend commit message?" >&2
+   echo "   [u]se existing logs as-is" >&2
+   echo "   [e]xtend - AI adds new points for current changes" >&2
+   echo -n "Choice [u/e]: " >&2
+
+   local choice
+   if ! read -t "$timeout" -n 1 choice </dev/tty 2>/dev/null; then
+      echo "use"
+      return
+   fi
+   echo "" >&2
+
+   # Flush input buffer
+   read -t 0.1 -n 10000 discard </dev/tty 2>/dev/null || true
+
+   case "${choice,,}" in
+      e) echo "extend" ;;
+      *) echo "use" ;;
+   esac
+}
+
 # -----------------------------------------------------------------------------
 # Main Logic
 # -----------------------------------------------------------------------------
@@ -663,6 +733,49 @@ main() {
                # Validate format - must contain at least one bullet point
                if echo "$looked_up" | grep -q "^- "; then
                   log_success "📋 Found previous commit for $jira_tag"
+                  echo "$looked_up" | head -5 | sed 's/^/   /' >&2
+
+                  # Check if there are staged changes to potentially extend
+                  if [[ "$ENABLE_AI_COMMIT" == "true" ]] && has_staged_changes; then
+                     local extend_mode
+                     extend_mode=$(prompt_extend_mode)
+
+                     if [[ "$extend_mode" == "extend" ]]; then
+                        log_info "🤔 Generating additional commit points..."
+
+                        # Get diff info
+                        local diff_stats_result
+                        diff_stats_result=$(get_diff_stats) || { log_error "Failed to get diff"; exit 1; }
+                        read -r files_changed lines_added lines_deleted <<<"$diff_stats_result"
+
+                        local diff_content
+                        diff_content=$(git diff --staged --unified=1 2>/dev/null | head -200)
+
+                        # Generate extend prompt
+                        local extend_prompt
+                        extend_prompt=$(generate_extend_ai_prompt "$looked_up" "$diff_content" "$files_changed" "$lines_added" "$lines_deleted")
+
+                        # Run AI
+                        local new_points=""
+                        if [[ "$AI_PARALLEL_MODE" != "false" ]]; then
+                           new_points=$(run_ai_race "$extend_prompt")
+                        else
+                           new_points=$(run_ai_sequential "$extend_prompt")
+                        fi
+
+                        # Merge logs if AI produced new points
+                        if [[ -n "$new_points" ]] && echo "$new_points" | grep -q "^- "; then
+                           log_success "✨ Added new commit points"
+                           looked_up="${looked_up}
+${new_points}"
+                        else
+                           log_info "No additional changes to add"
+                        fi
+
+                        show_brief_stats
+                     fi
+                  fi
+
                   write_commit_message "$jira_tag" "$branch_name" "$looked_up" "$commit_msg_file" || exit 1
                   exit 0
                else

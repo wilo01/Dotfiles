@@ -377,7 +377,7 @@ alias ld="lazydocker"
 alias dnf="sudo dnf"
 
 # hlp (helper) build alias
-alias hlp-build="cd ~/.Dotfiles/scripts/helper-go && go build -o ./bin/hlp ./cmd/hlp && echo 'Built: ~/.Dotfiles/scripts/helper-go/bin/hlp'"
+alias hlp-build="(cd ~/.Dotfiles/scripts/helper-go && go build -o ~/go/bin/hlp ./cmd/hlp) && echo 'Built: ~/go/bin/hlp'"
 alias hlp-install="cd ~/.Dotfiles/scripts/helper-go && go install ./cmd/hlp && echo 'Installed to: $(go env GOPATH)/bin/hlp'"
 
 # Other exports

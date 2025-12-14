@@ -2,6 +2,7 @@ package jira
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/dariuszw/hlp/internal/batch"
@@ -236,19 +237,27 @@ func runBatchLog(cmd *cobra.Command, args []string) {
 		// Preview mode - load ALL entries (including DONE) for complete daily totals
 		allEntries, _ := batch.ParseCSV(csvPath)
 
-		// Get unique dates from pending entries
-		pendingDates := make(map[string]bool)
+		// Get unique dates from pending entries AND draft entries with time
+		relevantDates := make(map[string]bool)
 		for _, e := range entries {
 			if t, err := batch.ParseDate(e.Date, "09:00"); err == nil {
-				pendingDates[t.Format("2006-01-02")] = true
+				relevantDates[t.Format("2006-01-02")] = true
+			}
+		}
+		// Also include dates with DRAFT entries that have time logged
+		for _, e := range allEntries {
+			if e.IsDraft() && e.TimeSpent != "" {
+				if t, err := batch.ParseDate(e.Date, "09:00"); err == nil {
+					relevantDates[t.Format("2006-01-02")] = true
+				}
 			}
 		}
 
-		// Filter all entries to only include dates that have pending entries
+		// Filter all entries to only include relevant dates
 		var relevantEntries []batch.Entry
 		for _, e := range allEntries {
 			if t, err := batch.ParseDate(e.Date, "09:00"); err == nil {
-				if pendingDates[t.Format("2006-01-02")] {
+				if relevantDates[t.Format("2006-01-02")] {
 					relevantEntries = append(relevantEntries, e)
 				}
 			}
@@ -406,92 +415,264 @@ func runSyncLog(cmd *cobra.Command, args []string) {
 	csvPath := batch.DefaultCSVPathForProfile(profile)
 	csvEntries, _ := batch.ParseCSV(csvPath) // Empty if file doesn't exist
 
-	// Find missing entries
+	// Find missing worklogs
 	missing := batch.FindMissingWorklogs(jiraWorklogs, csvEntries)
+	addedCount := 0
 
-	if len(missing) == 0 {
+	// Fetch issue details if there are missing worklogs
+	var details map[string]internalJira.IssueDetails
+	if len(missing) > 0 {
+		fmt.Printf("Found %s new worklogs to add\n",
+			ui.Success.Render(fmt.Sprintf("%d", len(missing))))
+		fmt.Print("Fetching issue details...")
+		uniqueKeys := getUniqueWorklogKeys(missing)
+		details, _ = client.GetIssueDetails(uniqueKeys)
+		fmt.Println(" done")
+		fmt.Println()
+	} else {
 		fmt.Println(ui.Info("CSV is up to date - no new worklogs found"))
-		return
 	}
 
-	fmt.Printf("Found %s new worklogs to add\n",
-		ui.Success.Render(fmt.Sprintf("%d", len(missing))))
-
-	// Fetch issue summaries for descriptions
-	fmt.Print("Fetching issue summaries...")
-	uniqueKeys := getUniqueWorklogKeys(missing)
-	summaries, _ := client.GetIssueSummaries(uniqueKeys)
-	fmt.Println(" done")
-	fmt.Println()
-
-	// Preview (if dry-run) or add entries
+	// Handle dry-run: preview both SYNC and DRAFT entries
 	if logDryRun {
-		fmt.Println("New entries to add " + ui.Muted.Render("(dry run)") + ":")
-		for _, wl := range missing {
-			desc := summaries[wl.IssueKey]
-			fmt.Printf("  %s %s %s %s %s\n",
-				ui.Primary.Render("SYNC"),
-				ui.Primary.Render(fmt.Sprintf("%-12s", wl.IssueKey)),
-				ui.Muted.Render(fmt.Sprintf("%-30s", truncateString(desc, 30))),
-				ui.Success.Render(fmt.Sprintf("%-8s", wl.TimeSpentStr)),
-				ui.Muted.Render(wl.Started.Format("02.01.2006 15:04")))
+		// Preview sync entries
+		if len(missing) > 0 {
+			fmt.Println("New SYNC entries to add " + ui.Muted.Render("(dry run)") + ":")
+			for _, wl := range missing {
+				detail := details[wl.IssueKey]
+				fmt.Printf("  %s %s %s %s %s %s\n",
+					ui.Primary.Render("SYNC"),
+					ui.Primary.Render(fmt.Sprintf("%-12s", wl.IssueKey)),
+					ui.Muted.Render("["+detail.IssueType+"]"),
+					ui.Muted.Render(fmt.Sprintf("%-25s", truncateString(detail.Summary, 25))),
+					ui.Success.Render(fmt.Sprintf("%-8s", wl.TimeSpentStr)),
+					ui.Muted.Render(wl.Started.Format("02.01.2006 15:04")))
+			}
+			fmt.Println()
 		}
+
+		// Preview DRAFT entries
+		fmt.Println("Checking sprint tickets for DRAFT entries " + ui.Muted.Render("(dry run)") + ":")
+		sprintTickets, err := client.SearchSprintTickets()
+		if err != nil {
+			fmt.Println(ui.Warning("Failed to fetch sprint tickets: " + err.Error()))
+		} else {
+			entries, _ := batch.ParseCSV(csvPath)
+			draftPreviewCount := 0
+
+			// Find last logged date (same logic as actual run)
+			lastLoggedDate := time.Now().Format("02.01.2006")
+			for _, e := range entries {
+				if e.TimeSpent != "" || e.Status == batch.StatusDone ||
+					e.Status == batch.StatusSync || e.Status == batch.StatusUpdated {
+					lastLoggedDate = strings.Split(e.Date, " ")[0]
+					break
+				}
+			}
+
+			for _, ticket := range sprintTickets {
+				// For sub-tasks: show that it will use parent key
+				issueKey := ticket.Key
+				issueType := ticket.IssueType
+				description := ticket.Summary
+
+				if ticket.IsSubtask && ticket.ParentKey != "" {
+					issueKey = ticket.ParentKey
+					description = "... > " + ticket.Summary // Preview shows parent will be fetched
+				}
+
+				// TODO: Extract to helper function: entryExistsForTicket(entries, key, date, subtaskSummary)
+				// This same logic appears 2 more times in this file (search for "exists := false")
+				exists := false
+				for _, e := range entries {
+					if strings.EqualFold(e.IssueKey, issueKey) {
+						entryDate := strings.Split(e.Date, " ")[0]
+						descriptionMatches := !ticket.IsSubtask || strings.Contains(e.Description, ticket.Summary)
+						if (entryDate == lastLoggedDate && descriptionMatches) || e.TimeSpent != "" ||
+							e.Status == batch.StatusDone || e.Status == batch.StatusSync ||
+							e.Status == batch.StatusUpdated || (e.Status == batch.StatusDraft && descriptionMatches) {
+							exists = true
+							break
+						}
+					}
+				}
+
+				if !exists {
+					draftPreviewCount++
+					fmt.Printf("  %s %s %s %s %s\n",
+						ui.Muted.Render("DRAFT"),
+						ui.Primary.Render(fmt.Sprintf("%-12s", issueKey)),
+						ui.Muted.Render("["+issueType+"]"),
+						ui.Muted.Render(truncateString(description, 25)),
+						ui.Muted.Render("("+lastLoggedDate+")"))
+				}
+			}
+
+			if draftPreviewCount == 0 {
+				fmt.Println(ui.Muted.Render("  No new DRAFT entries needed"))
+			}
+		}
+
 		fmt.Println()
 		fmt.Println(ui.Warning("Dry run - no changes made"))
 		return
 	}
 
-	// Append new entries with SYNC status
-	fmt.Println("Adding new entries:")
-	addedCount := 0
-	for _, wl := range missing {
-		dateStr := wl.Started.Format("02.01.2006 15:04") // Include time for proper sorting
-		desc := summaries[wl.IssueKey]
-		if err := batch.AppendEntryWithStatus(csvPath, wl.IssueKey, desc, wl.TimeSpentStr, dateStr, wl.Comment, batch.StatusSync); err != nil {
-			fmt.Printf("  %s %s - %s\n",
-				ui.ErrorText.Render("FAILED"),
-				ui.Primary.Render(wl.IssueKey),
-				ui.Muted.Render(err.Error()))
-			continue
+	// Actual sync: Append new entries with SYNC status
+	if len(missing) > 0 {
+		fmt.Println("Adding new entries:")
+		for _, wl := range missing {
+			dateStr := wl.Started.Format("02.01.2006 15:04")
+			detail := details[wl.IssueKey]
+			if err := batch.AppendEntryWithStatus(csvPath, wl.IssueKey, "", detail.IssueType, detail.Summary, wl.TimeSpentStr, dateStr, wl.Comment, "", batch.StatusSync); err != nil {
+				fmt.Printf("  %s %s - %s\n",
+					ui.ErrorText.Render("FAILED"),
+					ui.Primary.Render(wl.IssueKey),
+					ui.Muted.Render(err.Error()))
+				continue
+			}
+			addedCount++
+			fmt.Printf("  %s %s %s %s %s %s\n",
+				ui.Success.Render("SYNC"),
+				ui.Primary.Render(fmt.Sprintf("%-12s", wl.IssueKey)),
+				ui.Muted.Render("["+detail.IssueType+"]"),
+				ui.Muted.Render(fmt.Sprintf("%-25s", truncateString(detail.Summary, 25))),
+				ui.Success.Render(fmt.Sprintf("%-8s", wl.TimeSpentStr)),
+				ui.Muted.Render(dateStr))
 		}
-		addedCount++
-		fmt.Printf("  %s %s %s %s %s\n",
-			ui.Success.Render("SYNC"),
-			ui.Primary.Render(fmt.Sprintf("%-12s", wl.IssueKey)),
-			ui.Muted.Render(fmt.Sprintf("%-30s", truncateString(desc, 30))),
-			ui.Success.Render(fmt.Sprintf("%-8s", wl.TimeSpentStr)),
-			ui.Muted.Render(dateStr))
-	}
 
-	// Sort CSV by date
-	fmt.Println("\nSorting CSV by date...")
-	if err := batch.SortCSVByDate(csvPath); err != nil {
-		fmt.Println(ui.Warning("Failed to sort CSV: " + err.Error()))
-	} else {
-		fmt.Println(ui.Success.Render("CSV sorted (newest first)"))
-	}
-
-	// Fill missing descriptions for existing entries
-	entries, _ := batch.ParseCSV(csvPath)
-	var keysNeedingDesc []string
-	for _, e := range entries {
-		if e.Description == "" {
-			keysNeedingDesc = append(keysNeedingDesc, e.IssueKey)
-		}
-	}
-	if len(keysNeedingDesc) > 0 {
-		fmt.Print("Fetching missing descriptions...")
-		descSummaries, _ := client.GetIssueSummaries(unique(keysNeedingDesc))
-		updatedCount, _ := batch.UpdateCSVDescriptions(csvPath, descSummaries)
-		if updatedCount > 0 {
-			fmt.Printf(" updated %d entries\n", updatedCount)
+		// Sort CSV by date
+		fmt.Println("\nSorting CSV by date...")
+		if err := batch.SortCSVByDate(csvPath); err != nil {
+			fmt.Println(ui.Warning("Failed to sort CSV: " + err.Error()))
 		} else {
-			fmt.Println(" done")
+			fmt.Println(ui.Success.Render("CSV sorted (newest first)"))
+		}
+
+		// Fill missing descriptions for existing entries
+		entries, _ := batch.ParseCSV(csvPath)
+		var keysNeedingDesc []string
+		for _, e := range entries {
+			if e.Description == "" {
+				keysNeedingDesc = append(keysNeedingDesc, e.IssueKey)
+			}
+		}
+		if len(keysNeedingDesc) > 0 {
+			fmt.Print("Fetching missing descriptions...")
+			descSummaries, _ := client.GetIssueSummaries(unique(keysNeedingDesc))
+			updatedCount, _ := batch.UpdateCSVDescriptions(csvPath, descSummaries)
+			if updatedCount > 0 {
+				fmt.Printf(" updated %d entries\n", updatedCount)
+			} else {
+				fmt.Println(" done")
+			}
+		}
+
+		fmt.Printf("\nSummary: %s entries synced from JIRA\n",
+			ui.Success.Render(fmt.Sprintf("%d", addedCount)))
+	}
+
+	// Add sprint tickets as DRAFT entries (at TOP of CSV)
+	fmt.Println("\nChecking sprint tickets for DRAFT entries...")
+	sprintTickets, err := client.SearchSprintTickets()
+	if err != nil {
+		fmt.Println(ui.Warning("Failed to fetch sprint tickets: " + err.Error()))
+		return
+	}
+
+	// Re-parse CSV to get updated entries after sync
+	entries, _ := batch.ParseCSV(csvPath)
+	draftCount := 0
+
+	// Find last logged date from CSV (excluding DRAFT entries)
+	// CSV is sorted newest first, so first non-DRAFT entry is the most recent
+	lastLoggedDate := time.Now().Format("02.01.2006") // fallback to today
+	for _, e := range entries {
+		if e.TimeSpent != "" || e.Status == batch.StatusDone ||
+			e.Status == batch.StatusSync || e.Status == batch.StatusUpdated {
+			lastLoggedDate = strings.Split(e.Date, " ")[0]
+			break
+		}
+	}
+	draftDateTime := lastLoggedDate + " 09:00"
+
+	for _, ticket := range sprintTickets {
+		// Determine issue key, subtask key, type, and description
+		// For sub-tasks: use parent key/type and combined description, store subtask key
+		issueKey := ticket.Key
+		subtaskKey := ""
+		issueType := ticket.IssueType
+		description := ticket.Summary
+
+		if ticket.IsSubtask && ticket.ParentKey != "" {
+			// Fetch parent details
+			// TODO: Log error when parent ticket fetch fails instead of silently continuing
+			parentTicket, err := client.GetTicket(ticket.ParentKey)
+			if err == nil {
+				subtaskKey = ticket.Key // Store original subtask key
+				issueKey = parentTicket.Key
+				issueType = parentTicket.IssueType
+				description = parentTicket.Summary + " > " + ticket.Summary
+			}
+		}
+
+		// Check if entry already exists (for the issue key we'll use, not original sub-task key)
+		exists := false
+		for _, e := range entries {
+			if strings.EqualFold(e.IssueKey, issueKey) {
+				entryDate := strings.Split(e.Date, " ")[0]
+				// For sub-tasks, also check if description matches (same parent > sub-task combo)
+				descriptionMatches := !ticket.IsSubtask || strings.Contains(e.Description, ticket.Summary)
+				if (entryDate == lastLoggedDate && descriptionMatches) || e.TimeSpent != "" ||
+					e.Status == batch.StatusDone || e.Status == batch.StatusSync ||
+					e.Status == batch.StatusUpdated || (e.Status == batch.StatusDraft && descriptionMatches) {
+					exists = true
+					break
+				}
+			}
+		}
+
+		if !exists {
+			err := batch.PrependEntryWithStatus(
+				csvPath,
+				issueKey,
+				subtaskKey,
+				issueType,
+				description,
+				"",
+				draftDateTime,
+				"",
+				"",
+				batch.StatusDraft,
+			)
+			if err == nil {
+				draftCount++
+				fmt.Printf("  %s %s %s %s\n",
+					ui.Muted.Render("DRAFT"),
+					ui.Primary.Render(fmt.Sprintf("%-12s", issueKey)),
+					ui.Muted.Render("["+issueType+"]"),
+					ui.Muted.Render(truncateString(description, 35)))
+			}
 		}
 	}
 
-	fmt.Printf("\nSummary: %s entries synced from JIRA\n",
-		ui.Success.Render(fmt.Sprintf("%d", addedCount)))
+	if draftCount > 0 {
+		fmt.Printf("\nAdded %s DRAFT entries from sprint (at top of CSV)\n",
+			ui.Success.Render(fmt.Sprintf("%d", draftCount)))
+	} else {
+		fmt.Println(ui.Muted.Render("No new DRAFT entries needed"))
+	}
+
+	// Always enrich and restructure existing entries (even when no new worklogs)
+	fmt.Print("\nChecking for entries needing metadata update...")
+	enriched, restructured, err := batch.EnrichAndRestructureCSV(csvPath, client)
+	if err != nil {
+		fmt.Println(ui.Warning(" " + err.Error()))
+	} else if enriched > 0 || restructured > 0 {
+		fmt.Printf(" updated %d, restructured %d subtasks\n", enriched, restructured)
+	} else {
+		fmt.Println(" all entries up to date")
+	}
 }
 
 func getJiraClient() (*internalJira.Client, error) {
@@ -806,17 +987,21 @@ func showDryRunGroupedByDay(entries []batch.Entry, expectedHours time.Duration) 
 		// Print entries for this day
 		for _, e := range group.entries {
 			entryNum++
-			// Check if entry is DONE (grayed out) or PENDING (normal)
-			isDone := e.Status == batch.StatusDone || e.Status == batch.StatusUpdated || e.Status == batch.StatusSync
-			if isDone {
-				// DONE entries - all grayed out
+			// Check if entry is skipped (DONE/SYNC/UPDATED/DRAFT - grayed out) or PENDING (normal)
+			isSkipped := e.Status == batch.StatusDone || e.Status == batch.StatusUpdated || e.Status == batch.StatusSync || e.Status == batch.StatusDraft
+			if isSkipped {
+				// Skipped entries - all grayed out
+				statusDisplay := e.Status
+				if statusDisplay == "" {
+					statusDisplay = "PENDING"
+				}
 				fmt.Printf("  %s %s %s %s %s ... %s\n",
 					ui.Muted.Render(fmt.Sprintf("%d/%d", entryNum, totalEntries)),
 					ui.Muted.Render(fmt.Sprintf("%-12s", e.IssueKey)),
 					ui.Muted.Render(fmt.Sprintf("%-30s", truncateString(e.Description, 30))),
 					ui.Muted.Render(fmt.Sprintf("%-8s", e.TimeSpent)),
 					ui.Muted.Render(fmt.Sprintf("%-12s", e.Date)),
-					ui.Muted.Render(e.Status))
+					ui.Muted.Render(statusDisplay))
 			} else {
 				// PENDING entries - normal colors
 				fmt.Printf("  %s %s %s %s %s ... %s\n",

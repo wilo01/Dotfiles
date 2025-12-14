@@ -957,7 +957,7 @@ lookup_commit_from_history() {
    # Search for JIRA tag at line start - use tac to find the LAST (most recent) match
    # Filter out metadata lines like "- Commit branch HASH" and "- Commit HASH"
    local result
-   result=$(tac "$commits_file" | grep -m 1 -A 15 "^${base_jira}" | tac | grep -A 5 "^Logs:" | grep "^- " | grep -v "Commit.*HASH" | head -10)
+   result=$(tac "$commits_file" | grep -m 1 -B 15 "^${base_jira}" | tac | grep -A 5 "^Logs:" | grep "^- " | grep -v "Commit.*HASH" | head -10)
 
    if [[ -n "$result" ]]; then
       echo "$result"

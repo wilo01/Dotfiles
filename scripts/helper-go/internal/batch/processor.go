@@ -19,17 +19,21 @@ const (
 	StatusSync    = "SYNC"
 	StatusUpdated = "UPDATED"
 	StatusDone    = "DONE"
+	StatusDraft   = "DRAFT" // Entry not ready for batch processing
 )
 
 // Entry represents a single worklog entry from CSV
 type Entry struct {
-	IssueKey    string
-	TimeSpent   string
-	Date        string // DD/MM/YYYY or DD.MM.YYYY
+	IssueKey    string // Parent/main issue key
+	SubtaskKey  string // Sub-task key if applicable (empty for non-subtasks)
+	IssueType   string // Story, Bug, Task, etc.
+	Description string // Ticket summary from JIRA (combined for subtasks)
 	Comment     string
+	Date        string // DD/MM/YYYY or DD.MM.YYYY
+	TimeSpent   string
+	SubtaskLogInd string // Y = log to subtask, N/empty = log to parent
 	Status      string // empty = pending, SYNC, UPDATED, DONE
-	RowNumber   int
-	Description string // Ticket summary from JIRA (populated at runtime)
+	RowNumber   int    // Internal - row number in CSV
 }
 
 // IsPending returns true if entry needs to be posted
@@ -40,6 +44,11 @@ func (e Entry) IsPending() bool {
 // IsDone returns true if entry is completed
 func (e Entry) IsDone() bool {
 	return strings.ToUpper(e.Status) == StatusDone
+}
+
+// IsDraft returns true if entry is a draft (not ready for batch)
+func (e Entry) IsDraft() bool {
+	return strings.ToUpper(e.Status) == StatusDraft
 }
 
 // IsUpdated returns true if entry was posted but needs verification
@@ -54,7 +63,15 @@ func (e Entry) IsSync() bool {
 
 // NeedsProcessing returns true if entry needs processing
 func (e Entry) NeedsProcessing() bool {
-	return !e.IsDone()
+	return !e.IsDone() && !e.IsDraft()
+}
+
+// GetLoggingTarget returns the key where worklog should be posted
+func (e Entry) GetLoggingTarget() string {
+	if strings.ToUpper(e.SubtaskLogInd) == "Y" && e.SubtaskKey != "" {
+		return e.SubtaskKey
+	}
+	return e.IssueKey
 }
 
 // Result represents the result of a single worklog submission
@@ -121,18 +138,22 @@ func DefaultCSVPathForProfile(profile *config.JiraProfile) string {
 	return config.GetConfigPath("worklogs.csv")
 }
 
-// CSV column indices (6-column format)
-// Format: issue_key, issue_description, TimeSpent, Date, Comment, Status
+// CSV column indices (9-column format)
+// Format: issue_key, subtask_key, issue_type, description, comment, date, time_spent, log_to, status
 const (
 	ColIssueKey    = 0
-	ColDescription = 1
-	ColTimeSpent   = 2
-	ColDate        = 3
+	ColSubtaskKey  = 1
+	ColIssueType   = 2
+	ColDescription = 3
 	ColComment     = 4
-	ColStatus      = 5
+	ColDate        = 5
+	ColTimeSpent   = 6
+	ColSubtaskLogInd = 7
+	ColStatus      = 8
 )
 
 // ParseCSV parses a CSV file into entries
+// Supports 9-column (new), 7-column, and old 6-column formats for backward compatibility
 func ParseCSV(path string) ([]Entry, error) {
 	f, err := os.Open(path)
 	if err != nil {
@@ -158,29 +179,59 @@ func ParseCSV(path string) ([]Entry, error) {
 
 		// Skip header row
 		if rowNum == 1 {
-			first := strings.ToLower(record[ColIssueKey])
+			first := strings.ToLower(record[0])
 			if first == "issue_key" || first == "issue" || first == "ticket" {
 				continue
 			}
 		}
 
-		entry := Entry{
-			IssueKey:    strings.ToUpper(strings.TrimSpace(record[ColIssueKey])),
-			Description: strings.TrimSpace(record[ColDescription]),
-			TimeSpent:   strings.TrimSpace(record[ColTimeSpent]),
-			Date:        strings.TrimSpace(record[ColDate]),
-			RowNumber:   rowNum,
+		// Detect format by column count
+		if len(record) >= 9 {
+			// New 9-column format: issue_key, subtask_key, issue_type, description, comment, date, time_spent, log_to, status
+			entry := Entry{
+				IssueKey:    strings.ToUpper(strings.TrimSpace(record[ColIssueKey])),
+				SubtaskKey:  strings.ToUpper(strings.TrimSpace(record[ColSubtaskKey])),
+				IssueType:   strings.TrimSpace(record[ColIssueType]),
+				Description: strings.TrimSpace(record[ColDescription]),
+				Comment:     strings.TrimSpace(record[ColComment]),
+				Date:        strings.TrimSpace(record[ColDate]),
+				TimeSpent:   strings.TrimSpace(record[ColTimeSpent]),
+				SubtaskLogInd: strings.ToUpper(strings.TrimSpace(record[ColSubtaskLogInd])),
+				Status:      strings.TrimSpace(record[ColStatus]),
+				RowNumber:   rowNum,
+			}
+			entries = append(entries, entry)
+		} else if len(record) >= 7 {
+			// 7-column format: issue_key, issue_type, description, comment, date, time_spent, status
+			// (no subtask_key or log_to - backward compatible)
+			entry := Entry{
+				IssueKey:    strings.ToUpper(strings.TrimSpace(record[0])),
+				IssueType:   strings.TrimSpace(record[1]),
+				Description: strings.TrimSpace(record[2]),
+				Comment:     strings.TrimSpace(record[3]),
+				Date:        strings.TrimSpace(record[4]),
+				TimeSpent:   strings.TrimSpace(record[5]),
+				Status:      strings.TrimSpace(record[6]),
+				RowNumber:   rowNum,
+			}
+			entries = append(entries, entry)
+		} else {
+			// Old 6-column format: issue_key, description, time_spent, date, comment, status
+			entry := Entry{
+				IssueKey:    strings.ToUpper(strings.TrimSpace(record[0])),
+				Description: strings.TrimSpace(record[1]),
+				TimeSpent:   strings.TrimSpace(record[2]),
+				Date:        strings.TrimSpace(record[3]),
+				RowNumber:   rowNum,
+			}
+			if len(record) > 4 {
+				entry.Comment = strings.TrimSpace(record[4])
+			}
+			if len(record) > 5 {
+				entry.Status = strings.TrimSpace(record[5])
+			}
+			entries = append(entries, entry)
 		}
-
-		if len(record) > ColComment {
-			entry.Comment = strings.TrimSpace(record[ColComment])
-		}
-
-		if len(record) > ColStatus {
-			entry.Status = strings.TrimSpace(record[ColStatus])
-		}
-
-		entries = append(entries, entry)
 	}
 
 	return entries, nil
@@ -272,6 +323,9 @@ func (p *Processor) Process(entry Entry) Result {
 func (p *Processor) SyncWorklog(entry Entry) Result {
 	result := Result{Entry: entry}
 
+	// Determine the target issue key based on log_to setting
+	targetKey := entry.GetLoggingTarget()
+
 	// 1. Parse date (uses time from CSV if present, otherwise --time flag)
 	csvTime, err := ParseDate(entry.Date, p.defaultTime)
 	if err != nil {
@@ -289,7 +343,7 @@ func (p *Processor) SyncWorklog(entry Entry) Result {
 	}
 
 	// 3. Fetch existing worklogs for this issue/date
-	existing, err := p.client.GetWorklogsByDate(entry.IssueKey, csvTime)
+	existing, err := p.client.GetWorklogsByDate(targetKey, csvTime)
 	if err != nil {
 		errStr := err.Error()
 		// Check for 404 (issue not found)
@@ -329,7 +383,7 @@ func (p *Processor) SyncWorklog(entry Entry) Result {
 				return result
 			}
 
-			if err := p.client.DeleteWorklog(entry.IssueKey, jiraWL.ID); err != nil {
+			if err := p.client.DeleteWorklog(targetKey, jiraWL.ID); err != nil {
 				result.Success = false
 				result.ErrorMessage = fmt.Sprintf("failed to delete existing worklog: %v", err)
 				return result
@@ -341,7 +395,7 @@ func (p *Processor) SyncWorklog(entry Entry) Result {
 				Comment:   entry.Comment,
 			}
 
-			if err := p.client.LogWork(entry.IssueKey, worklogEntry); err != nil {
+			if err := p.client.LogWork(targetKey, worklogEntry); err != nil {
 				result.Success = false
 				result.ErrorMessage = err.Error()
 				return result
@@ -372,7 +426,7 @@ func (p *Processor) SyncWorklog(entry Entry) Result {
 		Comment:   entry.Comment,
 	}
 
-	if err := p.client.LogWork(entry.IssueKey, worklogEntry); err != nil {
+	if err := p.client.LogWork(targetKey, worklogEntry); err != nil {
 		result.Success = false
 		result.ErrorMessage = err.Error()
 		return result
@@ -458,8 +512,9 @@ func UpdateCSVStatus(path string, results []Result) error {
 	for i, record := range records {
 		rowNum := i + 1
 		if newStatus, ok := updates[rowNum]; ok {
-			// Ensure we have at least 6 columns (new format)
-			for len(record) < 6 {
+			// TODO: Consider logging warning when padding short records - could mask data issues
+			// Ensure we have at least 9 columns (new format)
+			for len(record) < 9 {
 				record = append(record, "")
 			}
 			record[ColStatus] = newStatus
@@ -538,12 +593,13 @@ func UpdateCSVDescriptions(path string, descriptions map[string]string) (int, er
 }
 
 // AppendEntry appends a new entry to the CSV file
-func AppendEntry(path string, issueKey, description, timeSpent, date, comment string) error {
-	return AppendEntryWithStatus(path, issueKey, description, timeSpent, date, comment, StatusPending)
+func AppendEntry(path string, issueKey, subtaskKey, issueType, description, timeSpent, date, comment string) error {
+	return AppendEntryWithStatus(path, issueKey, subtaskKey, issueType, description, timeSpent, date, comment, "", StatusPending)
 }
 
 // AppendEntryWithStatus appends a new entry to the CSV file with a specific status
-func AppendEntryWithStatus(path, issueKey, description, timeSpent, date, comment, status string) error {
+// 9-column format: issue_key, subtask_key, issue_type, description, comment, date, time_spent, subtask_log_ind, status
+func AppendEntryWithStatus(path, issueKey, subtaskKey, issueType, description, timeSpent, date, comment, subtaskLogInd, status string) error {
 	if date == "" {
 		date = time.Now().Format("02.01.2006") // DD.MM.YYYY format
 	}
@@ -564,14 +620,127 @@ func AppendEntryWithStatus(path, issueKey, description, timeSpent, date, comment
 	writer := csv.NewWriter(f)
 	defer writer.Flush()
 
+	// Default subtaskLogInd to "N" if empty
+	if subtaskLogInd == "" {
+		subtaskLogInd = "N"
+	}
+
 	return writer.Write([]string{
 		strings.ToUpper(issueKey),
+		strings.ToUpper(subtaskKey),
+		issueType,
 		description,
-		timeSpent,
-		date,
 		comment,
+		date,
+		timeSpent,
+		strings.ToUpper(subtaskLogInd),
 		status,
 	})
+}
+
+// PrependEntryWithStatus adds a new entry at the top of the CSV file (after header)
+// 9-column format: issue_key, subtask_key, issue_type, description, comment, date, time_spent, subtask_log_ind, status
+func PrependEntryWithStatus(path, issueKey, subtaskKey, issueType, description, timeSpent, date, comment, subtaskLogInd, status string) error {
+	if date == "" {
+		date = time.Now().Format("02.01.2006")
+	}
+
+	// Ensure directory exists
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return err
+	}
+
+	// Read existing file
+	var records [][]string
+	if f, err := os.Open(path); err == nil {
+		reader := csv.NewReader(f)
+		reader.FieldsPerRecord = -1
+		records, _ = reader.ReadAll()
+		f.Close()
+	}
+
+	// Default subtaskLogInd to "N" if empty
+	if subtaskLogInd == "" {
+		subtaskLogInd = "N"
+	}
+
+	// Create new entry (9-column format)
+	newEntry := []string{
+		strings.ToUpper(issueKey),
+		strings.ToUpper(subtaskKey),
+		issueType,
+		description,
+		comment,
+		date,
+		timeSpent,
+		strings.ToUpper(subtaskLogInd),
+		status,
+	}
+
+	// Insert after header (or at position 0 if no header)
+	var result [][]string
+	if len(records) > 0 {
+		// Check if first row is header
+		first := strings.ToLower(records[0][0])
+		if first == "issue_key" || first == "issue" || first == "ticket" {
+			// Has header - insert after it
+			result = append(result, records[0])
+			result = append(result, newEntry)
+			result = append(result, records[1:]...)
+		} else {
+			// No header - insert at top
+			result = append(result, newEntry)
+			result = append(result, records...)
+		}
+	} else {
+		result = [][]string{newEntry}
+	}
+
+	// Write back
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	writer := csv.NewWriter(f)
+	return writer.WriteAll(result)
+}
+
+// UpdateEntryDescription updates the description of an existing entry by row number
+func UpdateEntryDescription(path string, rowNumber int, newDescription string) error {
+	// Read all records
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+
+	reader := csv.NewReader(f)
+	reader.FieldsPerRecord = -1
+	records, err := reader.ReadAll()
+	f.Close()
+	if err != nil {
+		return err
+	}
+
+	// Update the description at the specified row
+	if rowNumber > 0 && rowNumber <= len(records) {
+		idx := rowNumber - 1 // Convert to 0-based index
+		if len(records[idx]) > ColDescription {
+			records[idx][ColDescription] = newDescription
+		}
+	}
+
+	// Write back
+	f, err = os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	writer := csv.NewWriter(f)
+	return writer.WriteAll(records)
 }
 
 // FindMissingWorklogs compares JIRA worklogs with CSV entries and returns missing ones
@@ -703,4 +872,154 @@ func parseRecordDate(record []string) time.Time {
 		return time.Time{}
 	}
 	return t
+}
+
+// unique returns unique strings from a slice
+func unique(items []string) []string {
+	seen := make(map[string]bool)
+	var result []string
+	for _, item := range items {
+		if !seen[item] {
+			seen[item] = true
+			result = append(result, item)
+		}
+	}
+	return result
+}
+
+// EnrichAndRestructureCSV updates empty descriptions/types AND restructures subtask entries
+// Returns (enrichedCount, restructuredCount, error)
+func EnrichAndRestructureCSV(path string, client *jira.Client) (int, int, error) {
+	entries, err := ParseCSV(path)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	// Collect keys needing lookup (empty desc/type OR potential subtasks without SubtaskKey)
+	var keysToFetch []string
+	for _, e := range entries {
+		if e.Description == "" || e.IssueType == "" {
+			keysToFetch = append(keysToFetch, e.IssueKey)
+		}
+		// For entries that might be subtasks stored in IssueKey (SubtaskKey is empty)
+		if e.SubtaskKey == "" && e.IssueKey != "" {
+			keysToFetch = append(keysToFetch, e.IssueKey)
+		}
+	}
+
+	if len(keysToFetch) == 0 {
+		return 0, 0, nil
+	}
+
+	// Fetch issue details
+	details, err := client.GetIssueDetails(unique(keysToFetch))
+	if err != nil {
+		return 0, 0, err
+	}
+
+	// Collect parent keys for subtasks that need restructuring
+	var parentKeys []string
+	for _, detail := range details {
+		if detail.IsSubtask && detail.ParentKey != "" {
+			parentKeys = append(parentKeys, detail.ParentKey)
+		}
+	}
+
+	// Fetch parent details
+	var parentDetails map[string]jira.IssueDetails
+	if len(parentKeys) > 0 {
+		parentDetails, _ = client.GetIssueDetails(unique(parentKeys))
+	}
+
+	// Update CSV
+	return updateCSVWithRestructure(path, details, parentDetails)
+}
+
+// updateCSVWithRestructure updates the CSV file with enrichment and restructuring
+func updateCSVWithRestructure(path string, details map[string]jira.IssueDetails, parentDetails map[string]jira.IssueDetails) (int, int, error) {
+	// Read all records
+	f, err := os.Open(path)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	reader := csv.NewReader(f)
+	reader.FieldsPerRecord = -1
+	records, err := reader.ReadAll()
+	f.Close()
+	if err != nil {
+		return 0, 0, err
+	}
+
+	enriched := 0
+	restructured := 0
+
+	for i, record := range records {
+		if len(record) < 9 {
+			continue
+		}
+
+		// Skip header
+		if i == 0 {
+			first := strings.ToLower(record[0])
+			if first == "issue_key" || first == "issue" || first == "ticket" {
+				continue
+			}
+		}
+
+		issueKey := strings.ToUpper(strings.TrimSpace(record[ColIssueKey]))
+		subtaskKey := strings.ToUpper(strings.TrimSpace(record[ColSubtaskKey]))
+		currentDesc := strings.TrimSpace(record[ColDescription])
+		currentType := strings.TrimSpace(record[ColIssueType])
+
+		detail, hasDetail := details[issueKey]
+
+		// Check if this entry needs restructuring (IssueKey is a subtask but SubtaskKey is empty)
+		if hasDetail && detail.IsSubtask && detail.ParentKey != "" && subtaskKey == "" {
+			// Restructure: move issueKey to SubtaskKey, use parent as IssueKey
+			parentDetail, hasParent := parentDetails[detail.ParentKey]
+			if hasParent {
+				record[ColSubtaskKey] = issueKey                                        // Original key becomes subtask
+				record[ColIssueKey] = detail.ParentKey                                  // Parent becomes main key
+				record[ColIssueType] = parentDetail.IssueType                           // Parent's type
+				record[ColDescription] = parentDetail.Summary + " > " + detail.Summary  // Combined description
+				records[i] = record
+				restructured++
+				continue // Skip normal enrichment since we just did full restructure
+			}
+		}
+
+		// Normal enrichment: fill empty Description and IssueType
+		updated := false
+		if currentDesc == "" && hasDetail && detail.Summary != "" {
+			record[ColDescription] = detail.Summary
+			updated = true
+		}
+		if currentType == "" && hasDetail && detail.IssueType != "" {
+			record[ColIssueType] = detail.IssueType
+			updated = true
+		}
+		if updated {
+			records[i] = record
+			enriched++
+		}
+	}
+
+	if enriched == 0 && restructured == 0 {
+		return 0, 0, nil
+	}
+
+	// Write back
+	f, err = os.Create(path)
+	if err != nil {
+		return 0, 0, err
+	}
+	defer f.Close()
+
+	writer := csv.NewWriter(f)
+	if err := writer.WriteAll(records); err != nil {
+		return 0, 0, err
+	}
+
+	return enriched, restructured, nil
 }
