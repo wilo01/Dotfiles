@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// TODO: MAGIC NUMBER - "1 day = 8 hours" (line 48) should be const hoursPerDay = 8
 var (
 	// Pattern matches: 1h, 30m, 2h30m, 1d, 1d4h, etc.
 	durationPattern = regexp.MustCompile(`(?i)(\d+)(d|h|m|s)?`)

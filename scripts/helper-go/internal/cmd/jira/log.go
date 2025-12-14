@@ -162,6 +162,7 @@ func runLog(cmd *cobra.Command, args []string) {
 	showDailyWarning(client, startTime)
 }
 
+// TODO: SILENT ERROR - Multiple places in this function ignore errors with _ (see lines ~167,210,268,330,429,553,562,584)
 func runBatchLog(cmd *cobra.Command, args []string) {
 	// Get current profile for CSV path and auto-create decision
 	profile, _ := config.GetActiveProfile()
@@ -723,6 +724,7 @@ func getUniqueWorklogKeys(worklogs []internalJira.Worklog) []string {
 }
 
 // truncateString truncates a string to maxLen, adding "..." if truncated
+// TODO: DUPLICATE - Move to shared utils package (also defined in add.go)
 func truncateString(s string, maxLen int) string {
 	if len(s) <= maxLen {
 		return s
@@ -734,6 +736,7 @@ func truncateString(s string, maxLen int) string {
 }
 
 // unique returns unique strings from a slice
+// TODO: DUPLICATE - Move to shared utils package (also defined in processor.go)
 func unique(items []string) []string {
 	seen := make(map[string]bool)
 	var result []string
@@ -767,6 +770,7 @@ func getExpectedHoursPerDay() time.Duration {
 }
 
 // showDailyWarning fetches daily total and shows warning if over/under expected hours
+// TODO: MAGIC NUMBER - Define const dayDuration = 24 * time.Hour (used in multiple places)
 func showDailyWarning(client *internalJira.Client, logDate time.Time) {
 	expectedDur := getExpectedHoursPerDay()
 
@@ -861,6 +865,7 @@ func getUniqueDatesFromResults(results []batch.Result) []time.Time {
 }
 
 // showDryRunDailyWarnings shows projected daily totals for dry-run mode
+// TODO: DEAD CODE - This function and getUniqueDatesFromEntries() below are never called - remove or implement
 func showDryRunDailyWarnings(client *internalJira.Client, entries []batch.Entry) {
 	// Get unique dates from entries
 	dates := getUniqueDatesFromEntries(entries)
@@ -1047,6 +1052,7 @@ func showDryRunGroupedByDay(entries []batch.Entry, expectedHours time.Duration) 
 }
 
 // showWorklogPreview displays pending entries before confirmation prompt
+// TODO: DUPLICATE - Nearly identical to showDryRunGroupedByDay() - consolidate into single parameterized function
 func showWorklogPreview(entries []batch.Entry, expectedHours time.Duration) {
 	if len(entries) == 0 {
 		return

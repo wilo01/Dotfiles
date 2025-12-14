@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// TODO: MAGIC NUMBER - Work hours and timezone should be configurable via config file
 const (
 	lastSyncFilename = "last-sync"
 	// Work hours: 8:00-16:00 Europe/Dublin

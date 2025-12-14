@@ -101,6 +101,7 @@ type ProcessorConfig struct {
 }
 
 // NewProcessor creates a new batch processor
+// TODO: MAGIC NUMBER - Default time "09:00" should be a named constant (also in NewProcessorWithConfig)
 func NewProcessor(client *jira.Client, defaultTime string) *Processor {
 	if defaultTime == "" {
 		defaultTime = "09:00"
@@ -848,6 +849,7 @@ func SortCSVByDate(path string) error {
 }
 
 // sortRecordsByDate sorts CSV records by date column (index 2) in descending order
+// TODO: PERFORMANCE - Replace bubble sort with sort.Slice() for O(n log n) complexity
 func sortRecordsByDate(records [][]string) {
 	for i := 0; i < len(records)-1; i++ {
 		for j := i + 1; j < len(records); j++ {

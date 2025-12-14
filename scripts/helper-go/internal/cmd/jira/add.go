@@ -341,6 +341,7 @@ func runAdd(cmd *cobra.Command, args []string) {
 
 // RunAutoSync performs sprint sync, returns error if failed.
 // If quiet=true, suppresses output except errors.
+// TODO: DUPLICATE - Ticket processing logic largely duplicates runAdd() - extract common function
 func RunAutoSync(quiet bool) error {
 	// Get current profile for CSV path
 	profile, _ := config.GetActiveProfile()

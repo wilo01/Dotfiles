@@ -645,6 +645,7 @@ func (c *Client) FetchUserWorklogs(fromDate, toDate time.Time, progressFn func(c
 }
 
 // isCurrentUserWorklog checks if a worklog belongs to the current user
+// TODO: NIL CHECK - Add guard for user == nil before accessing AccountID/DisplayName
 func isCurrentUserWorklog(wl Worklog, user *CurrentUser) bool {
 	// For Cloud: prefer AccountId comparison (most reliable)
 	if user.AccountID != "" && wl.AuthorAccountId != "" {
