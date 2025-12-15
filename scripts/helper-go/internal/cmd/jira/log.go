@@ -15,6 +15,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const dayDuration = 24 * time.Hour
+
 var (
 	logTicket   string
 	logComment  string
@@ -162,10 +164,12 @@ func runLog(cmd *cobra.Command, args []string) {
 	showDailyWarning(client, startTime)
 }
 
-// TODO: SILENT ERROR - Multiple places in this function ignore errors with _ (see lines ~167,210,268,330,429,553,562,584)
 func runBatchLog(cmd *cobra.Command, args []string) {
 	// Get current profile for CSV path and auto-create decision
-	profile, _ := config.GetActiveProfile()
+	profile, err := config.GetActiveProfile()
+	if err != nil {
+		fmt.Println(ui.Muted.Render("  (using default profile)"))
+	}
 	csvPath := batch.DefaultCSVPathForProfile(profile)
 
 	// Show current profile with CSV info
@@ -208,7 +212,11 @@ func runBatchLog(cmd *cobra.Command, args []string) {
 
 	// Fetch ticket summaries for descriptions (needed for preview)
 	uniqueKeys := getUniqueTicketKeys(entries)
-	summaries, _ := client.GetIssueSummaries(uniqueKeys)
+	summaries, err := client.GetIssueSummaries(uniqueKeys)
+	if err != nil {
+		fmt.Println(ui.Warning("Could not fetch ticket summaries: " + err.Error()))
+		summaries = make(map[string]string)
+	}
 	for i := range entries {
 		if summary, ok := summaries[entries[i].IssueKey]; ok {
 			entries[i].Description = summary
@@ -482,21 +490,7 @@ func runSyncLog(cmd *cobra.Command, args []string) {
 					description = "... > " + ticket.Summary // Preview shows parent will be fetched
 				}
 
-				// TODO: Extract to helper function: entryExistsForTicket(entries, key, date, subtaskSummary)
-				// This same logic appears 2 more times in this file (search for "exists := false")
-				exists := false
-				for _, e := range entries {
-					if strings.EqualFold(e.IssueKey, issueKey) {
-						entryDate := strings.Split(e.Date, " ")[0]
-						descriptionMatches := !ticket.IsSubtask || strings.Contains(e.Description, ticket.Summary)
-						if (entryDate == lastLoggedDate && descriptionMatches) || e.TimeSpent != "" ||
-							e.Status == batch.StatusDone || e.Status == batch.StatusSync ||
-							e.Status == batch.StatusUpdated || (e.Status == batch.StatusDraft && descriptionMatches) {
-							exists = true
-							break
-						}
-					}
-				}
+				exists := batch.EntryExistsForTicket(entries, issueKey, lastLoggedDate, ticket.IsSubtask, ticket.Summary)
 
 				if !exists {
 					draftPreviewCount++
@@ -607,9 +601,10 @@ func runSyncLog(cmd *cobra.Command, args []string) {
 
 		if ticket.IsSubtask && ticket.ParentKey != "" {
 			// Fetch parent details
-			// TODO: Log error when parent ticket fetch fails instead of silently continuing
 			parentTicket, err := client.GetTicket(ticket.ParentKey)
-			if err == nil {
+			if err != nil {
+				fmt.Println(ui.Warning(fmt.Sprintf("Could not fetch parent %s: %v", ticket.ParentKey, err)))
+			} else {
 				subtaskKey = ticket.Key // Store original subtask key
 				issueKey = parentTicket.Key
 				issueType = parentTicket.IssueType
@@ -618,20 +613,7 @@ func runSyncLog(cmd *cobra.Command, args []string) {
 		}
 
 		// Check if entry already exists (for the issue key we'll use, not original sub-task key)
-		exists := false
-		for _, e := range entries {
-			if strings.EqualFold(e.IssueKey, issueKey) {
-				entryDate := strings.Split(e.Date, " ")[0]
-				// For sub-tasks, also check if description matches (same parent > sub-task combo)
-				descriptionMatches := !ticket.IsSubtask || strings.Contains(e.Description, ticket.Summary)
-				if (entryDate == lastLoggedDate && descriptionMatches) || e.TimeSpent != "" ||
-					e.Status == batch.StatusDone || e.Status == batch.StatusSync ||
-					e.Status == batch.StatusUpdated || (e.Status == batch.StatusDraft && descriptionMatches) {
-					exists = true
-					break
-				}
-			}
-		}
+		exists := batch.EntryExistsForTicket(entries, issueKey, lastLoggedDate, ticket.IsSubtask, ticket.Summary)
 
 		if !exists {
 			err := batch.PrependEntryWithStatus(
@@ -724,7 +706,7 @@ func getUniqueWorklogKeys(worklogs []internalJira.Worklog) []string {
 }
 
 // truncateString truncates a string to maxLen, adding "..." if truncated
-// TODO: DUPLICATE - Move to shared utils package (also defined in add.go)
+// TO REVIEW: Could move to shared utils (also in add.go) - skipped: only 2 occurrences
 func truncateString(s string, maxLen int) string {
 	if len(s) <= maxLen {
 		return s
@@ -736,7 +718,7 @@ func truncateString(s string, maxLen int) string {
 }
 
 // unique returns unique strings from a slice
-// TODO: DUPLICATE - Move to shared utils package (also defined in processor.go)
+// TO REVIEW: Could move to shared utils (also in processor.go) - skipped: only 2 occurrences
 func unique(items []string) []string {
 	seen := make(map[string]bool)
 	var result []string
@@ -770,13 +752,12 @@ func getExpectedHoursPerDay() time.Duration {
 }
 
 // showDailyWarning fetches daily total and shows warning if over/under expected hours
-// TODO: MAGIC NUMBER - Define const dayDuration = 24 * time.Hour (used in multiple places)
 func showDailyWarning(client *internalJira.Client, logDate time.Time) {
 	expectedDur := getExpectedHoursPerDay()
 
 	// Fetch all worklogs for this day
 	fromDate := time.Date(logDate.Year(), logDate.Month(), logDate.Day(), 0, 0, 0, 0, logDate.Location())
-	toDate := fromDate.Add(24 * time.Hour)
+	toDate := fromDate.Add(dayDuration)
 
 	worklogs, err := client.FetchUserWorklogs(fromDate, toDate, nil)
 	if err != nil {
@@ -819,7 +800,7 @@ func showBatchDailyWarnings(client *internalJira.Client, results []batch.Result)
 	}
 
 	// Fetch existing worklogs for date range
-	worklogs, err := client.FetchUserWorklogs(minDate, maxDate.Add(24*time.Hour), nil)
+	worklogs, err := client.FetchUserWorklogs(minDate, maxDate.Add(dayDuration), nil)
 	if err != nil {
 		return // Silently skip if fetch fails
 	}
@@ -857,96 +838,7 @@ func getUniqueDatesFromResults(results []batch.Result) []time.Time {
 		dateKey := t.Format("2006-01-02")
 		if !seen[dateKey] {
 			seen[dateKey] = true
-			dates = append(dates, t.Truncate(24*time.Hour))
-		}
-	}
-
-	return dates
-}
-
-// showDryRunDailyWarnings shows projected daily totals for dry-run mode
-// TODO: DEAD CODE - This function and getUniqueDatesFromEntries() below are never called - remove or implement
-func showDryRunDailyWarnings(client *internalJira.Client, entries []batch.Entry) {
-	// Get unique dates from entries
-	dates := getUniqueDatesFromEntries(entries)
-	if len(dates) == 0 {
-		return
-	}
-
-	expectedDur := getExpectedHoursPerDay()
-
-	// Find date range
-	minDate, maxDate := dates[0], dates[0]
-	for _, d := range dates {
-		if d.Before(minDate) {
-			minDate = d
-		}
-		if d.After(maxDate) {
-			maxDate = d
-		}
-	}
-
-	// Fetch existing worklogs from JIRA for date range
-	existingWorklogs, err := client.FetchUserWorklogs(minDate, maxDate.Add(24*time.Hour), nil)
-	if err != nil {
-		existingWorklogs = []internalJira.Worklog{} // Continue with empty if fetch fails
-	}
-
-	// Convert CSV entries to worklogs for analysis
-	var csvWorklogs []internalJira.Worklog
-	for _, e := range entries {
-		parsedDate, err := batch.ParseDate(e.Date, "09:00")
-		if err != nil {
-			continue
-		}
-
-		dur, err := duration.Parse(e.TimeSpent)
-		if err != nil {
-			continue
-		}
-
-		csvWorklogs = append(csvWorklogs, internalJira.Worklog{
-			IssueKey:  e.IssueKey,
-			Started:   parsedDate,
-			TimeSpent: dur,
-		})
-	}
-
-	// Combine existing + CSV entries
-	allWorklogs := append(existingWorklogs, csvWorklogs...)
-
-	// Analyze combined totals
-	analysis := worklog.AnalyzeDailyTotals(allWorklogs, expectedDur)
-
-	if analysis.HasWarnings {
-		cfg, _ := config.Load()
-		expectedStr := cfg.Preferences.ExpectedHoursPerDay
-		if expectedStr == "" {
-			expectedStr = "8h"
-		}
-
-		fmt.Println()
-		fmt.Println(ui.Info("Projected daily totals (existing JIRA + CSV entries):"))
-		fmt.Print(ui.DailyBreakdown(analysis.Summaries, expectedStr))
-		fmt.Println(ui.DailyWarningsSummary(analysis))
-	}
-}
-
-// getUniqueDatesFromEntries extracts unique dates from batch entries
-func getUniqueDatesFromEntries(entries []batch.Entry) []time.Time {
-	seen := make(map[string]bool)
-	var dates []time.Time
-
-	for _, e := range entries {
-		t, err := batch.ParseDate(e.Date, "09:00")
-		if err != nil {
-			continue
-		}
-
-		dateKey := t.Format("2006-01-02")
-		if !seen[dateKey] {
-			seen[dateKey] = true
-			dates = append(dates, t.Truncate(24*time.Hour))
+			dates = append(dates, t.Truncate(dayDuration))
 		}
 	}
 
@@ -1052,7 +944,7 @@ func showDryRunGroupedByDay(entries []batch.Entry, expectedHours time.Duration) 
 }
 
 // showWorklogPreview displays pending entries before confirmation prompt
-// TODO: DUPLICATE - Nearly identical to showDryRunGroupedByDay() - consolidate into single parameterized function
+// TO REVIEW: Similar to showDryRunGroupedByDay() - skipped: only 2 occurrences
 func showWorklogPreview(entries []batch.Entry, expectedHours time.Duration) {
 	if len(entries) == 0 {
 		return

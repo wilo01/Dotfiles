@@ -8,7 +8,8 @@ import (
 	"time"
 )
 
-// TODO: MAGIC NUMBER - "1 day = 8 hours" (line 48) should be const hoursPerDay = 8
+const hoursPerDay = 8 // JIRA standard workday
+
 var (
 	// Pattern matches: 1h, 30m, 2h30m, 1d, 1d4h, etc.
 	durationPattern = regexp.MustCompile(`(?i)(\d+)(d|h|m|s)?`)
@@ -46,7 +47,7 @@ func Parse(s string) (time.Duration, error) {
 
 		switch unit {
 		case "d":
-			total += time.Duration(value) * 8 * time.Hour // 1 day = 8 hours in JIRA
+			total += time.Duration(value) * hoursPerDay * time.Hour
 		case "h":
 			total += time.Duration(value) * time.Hour
 		case "m":
@@ -61,16 +62,23 @@ func Parse(s string) (time.Duration, error) {
 	return total, nil
 }
 
-// Format formats a duration as a JIRA-style string
+// Format formats a duration as a JIRA-style string (e.g., "1d2h30m")
 func Format(d time.Duration) string {
 	if d == 0 {
 		return "0m"
 	}
 
-	hours := int(d.Hours())
+	totalHours := int(d.Hours())
 	minutes := int(d.Minutes()) % 60
 
+	days := totalHours / hoursPerDay
+	hours := totalHours % hoursPerDay
+
 	var parts []string
+
+	if days > 0 {
+		parts = append(parts, fmt.Sprintf("%dd", days))
+	}
 
 	if hours > 0 {
 		parts = append(parts, fmt.Sprintf("%dh", hours))

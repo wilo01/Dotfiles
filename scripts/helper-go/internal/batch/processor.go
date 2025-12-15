@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -20,6 +21,8 @@ const (
 	StatusUpdated = "UPDATED"
 	StatusDone    = "DONE"
 	StatusDraft   = "DRAFT" // Entry not ready for batch processing
+
+	defaultStartTime = "09:00" // Default worklog start time
 )
 
 // Entry represents a single worklog entry from CSV
@@ -74,6 +77,28 @@ func (e Entry) GetLoggingTarget() string {
 	return e.IssueKey
 }
 
+// EntryExistsForTicket checks if an entry exists for the given ticket on the specified date.
+// For subtasks, it also checks if the description contains the subtask summary.
+func EntryExistsForTicket(entries []Entry, issueKey, date string, isSubtask bool, subtaskSummary string) bool {
+	for _, e := range entries {
+		if !strings.EqualFold(e.IssueKey, issueKey) {
+			continue
+		}
+		entryDate := strings.Split(e.Date, " ")[0]
+		descriptionMatches := !isSubtask || strings.Contains(e.Description, subtaskSummary)
+
+		if (entryDate == date && descriptionMatches) ||
+			e.TimeSpent != "" ||
+			e.Status == StatusDone ||
+			e.Status == StatusSync ||
+			e.Status == StatusUpdated ||
+			(e.Status == StatusDraft && descriptionMatches) {
+			return true
+		}
+	}
+	return false
+}
+
 // Result represents the result of a single worklog submission
 type Result struct {
 	Entry        Entry
@@ -101,10 +126,9 @@ type ProcessorConfig struct {
 }
 
 // NewProcessor creates a new batch processor
-// TODO: MAGIC NUMBER - Default time "09:00" should be a named constant (also in NewProcessorWithConfig)
 func NewProcessor(client *jira.Client, defaultTime string) *Processor {
 	if defaultTime == "" {
-		defaultTime = "09:00"
+		defaultTime = defaultStartTime
 	}
 	return &Processor{
 		client:      client,
@@ -115,7 +139,7 @@ func NewProcessor(client *jira.Client, defaultTime string) *Processor {
 // NewProcessorWithConfig creates a processor with full configuration
 func NewProcessorWithConfig(cfg ProcessorConfig) *Processor {
 	if cfg.DefaultTime == "" {
-		cfg.DefaultTime = "09:00"
+		cfg.DefaultTime = defaultStartTime
 	}
 	return &Processor{
 		client:      cfg.Client,
@@ -513,10 +537,12 @@ func UpdateCSVStatus(path string, results []Result) error {
 	for i, record := range records {
 		rowNum := i + 1
 		if newStatus, ok := updates[rowNum]; ok {
-			// TODO: Consider logging warning when padding short records - could mask data issues
 			// Ensure we have at least 9 columns (new format)
-			for len(record) < 9 {
-				record = append(record, "")
+			if len(record) < 9 {
+				fmt.Printf("Warning: Row %d has %d columns, padding to 9\n", rowNum, len(record))
+				for len(record) < 9 {
+					record = append(record, "")
+				}
 			}
 			record[ColStatus] = newStatus
 			records[i] = record
@@ -849,19 +875,13 @@ func SortCSVByDate(path string) error {
 }
 
 // sortRecordsByDate sorts CSV records by date column (index 2) in descending order
-// TODO: PERFORMANCE - Replace bubble sort with sort.Slice() for O(n log n) complexity
 func sortRecordsByDate(records [][]string) {
-	for i := 0; i < len(records)-1; i++ {
-		for j := i + 1; j < len(records); j++ {
-			dateI := parseRecordDate(records[i])
-			dateJ := parseRecordDate(records[j])
-
-			// Sort descending (newest first)
-			if dateJ.After(dateI) {
-				records[i], records[j] = records[j], records[i]
-			}
-		}
-	}
+	sort.Slice(records, func(i, j int) bool {
+		dateI := parseRecordDate(records[i])
+		dateJ := parseRecordDate(records[j])
+		// Sort descending (newest first)
+		return dateJ.Before(dateI)
+	})
 }
 
 // parseRecordDate parses date from CSV record

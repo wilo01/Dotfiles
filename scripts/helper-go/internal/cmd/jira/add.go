@@ -198,10 +198,9 @@ func runAdd(cmd *cobra.Command, args []string) {
 				}
 				updated++
 
-				// TODO: Consider batching CSV updates instead of re-reading after each ticket
-				// Re-read entries for next iteration (skip in dry-run)
+				// Update in-memory entry (no need to re-read CSV - row numbers don't change for description updates)
 				if !addDryRun {
-					entries, _ = batch.ParseCSV(csvPath)
+					existingEntry.Description = ticket.Summary
 				}
 				continue
 			}
@@ -228,9 +227,10 @@ func runAdd(cmd *cobra.Command, args []string) {
 		description := ticket.Summary
 
 		if ticket.IsSubtask && ticket.ParentKey != "" {
-			// TODO: Log error when parent ticket fetch fails instead of silently continuing
 			parentTicket, err := client.GetTicket(ticket.ParentKey)
-			if err == nil {
+			if err != nil {
+				fmt.Println(ui.Warning(fmt.Sprintf("Could not fetch parent %s: %v", ticket.ParentKey, err)))
+			} else {
 				subtaskKey = ticket.Key
 				issueKey = parentTicket.Key
 				issueType = parentTicket.IssueType
@@ -341,7 +341,7 @@ func runAdd(cmd *cobra.Command, args []string) {
 
 // RunAutoSync performs sprint sync, returns error if failed.
 // If quiet=true, suppresses output except errors.
-// TODO: DUPLICATE - Ticket processing logic largely duplicates runAdd() - extract common function
+// TO REVIEW: Ticket processing shares logic with runAdd() - skipped: only 2 occurrences
 func RunAutoSync(quiet bool) error {
 	// Get current profile for CSV path
 	profile, _ := config.GetActiveProfile()
