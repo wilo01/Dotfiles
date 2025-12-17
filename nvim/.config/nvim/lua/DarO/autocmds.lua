@@ -216,16 +216,9 @@ autocmd("FileType", {
                      formatted_col = col:sub(1, MAX_COLUMN_WIDTH - #ELLIPSIS) .. ELLIPSIS
                   end
 
-                  local success, result = pcall(string.format, "%-" .. max_len .. "s", formatted_col)
-                  if success then
-                     cols[i] = result
-                  else
-                     cols[i] = formatted_col .. string.rep(" ", math.max(0, max_len - #formatted_col))
-                     vim.notify(
-                        "Warning: String format failed for column " .. i .. ", using fallback padding",
-                        vim.log.levels.WARN
-                     )
-                  end
+                  -- Skip string.format entirely - use direct padding (more reliable)
+                  local padding_needed = math.max(0, max_len - #formatted_col)
+                  cols[i] = formatted_col .. string.rep(" ", padding_needed)
                end
                table.insert(prettified_lines, table.concat(cols, " , "))
             end
