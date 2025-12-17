@@ -35,7 +35,7 @@ set $menu $rofi_cmd -show combi -combi-modes drun#run#window -modes combi
 #
 # Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
 # Requires: desktop-backgrounds-compat, swaybg
-set $default_bg /usr/share/backgrounds/default-dark.png
+set $default_bg /usr/share/backgrounds/default-dark.jxl
 
 output * bg $default_bg fill
 output eDP-1 pos 0 0
