@@ -297,6 +297,7 @@ alias sqldev="echo ~/SQLDeveloper/opt/sqldeveloper/sqldeveloper.sh ; ~/SQLDevelo
 alias br='echo npm start at: ; echo ~/Dev/branch-opener/app/ ; if [[ -n "$(find ~/Dev/branch-opener/app/apex/kiosk/bdb/ -maxdepth 0 -type f -o -type d -printf '%s')" ]]; then echo "Removing content from ~/Dev/branch-opener/app/apex/kiosk/bdb/" ; rm -rf ~/Dev/branch-opener/app/apex/kiosk/bdb/* ; else echo "No content found in ~/Dev/branch-opener/app/apex/kiosk/bdb/, skipping removal." ; fi ; ls ~/Dev/branch-opener/app/apex/kiosk/bdb/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; xdg-open http://localhost:3333/static/ ; npm start'
 function hx() {
     local variant="${1:-dev}"
+    pkill -f "pnpm run dev"
     echo "pnpm start at: ~/tds-hexer/"
     echo "Running: pnpm run $variant"
     cd ~/tds-hexer/
@@ -423,5 +424,51 @@ command -v pyenv >/dev/null 2>&1 && eval "$(pyenv init -)"
 command -v pyenv >/dev/null 2>&1 && eval "$(pyenv virtualenv-init -)"
 
 export BROWSER="google-chrome --profile-directory=Default"
+
+# -----------------------------------------------------------------------------
+# Git stale lock cleanup - runs before any git command
+# -----------------------------------------------------------------------------
+_git_cleanup_stale_lock() {
+   local cmd="$1"
+   # Only run for git commands
+   [[ "$cmd" != git\ * ]] && return
+
+   # Get git dir (works even in subdirectories)
+   local git_dir
+   git_dir=$(git rev-parse --git-dir 2>/dev/null) || return
+
+   local lock_file="$git_dir/index.lock"
+   [[ ! -f "$lock_file" ]] && return
+
+   # Check if any process holds the lock
+   if lsof "$lock_file" &>/dev/null; then
+      echo "⚠️  Lock file in use by another process: $lock_file" >&2
+      return
+   fi
+
+   # Show lock file info
+   local lock_age
+   lock_age=$(stat -c %Y "$lock_file" 2>/dev/null)
+   local now=$(date +%s)
+   local age_mins=$(( (now - lock_age) / 60 ))
+
+   echo "" >&2
+   echo "🔒 Stale git lock detected: $lock_file" >&2
+   echo "   Age: ${age_mins} minutes (created: $(date -d @$lock_age '+%H:%M:%S'))" >&2
+   echo "" >&2
+
+   # Ask for confirmation
+   echo -n "Remove stale lock and continue? [Y/n] " >&2
+   read -r response
+   if [[ "$response" =~ ^[Nn] ]]; then
+      echo "Aborted. Lock file kept." >&2
+      return 1
+   fi
+
+   rm -f "$lock_file"
+   echo "🔓 Removed stale lock. Continuing..." >&2
+}
+autoload -Uz add-zsh-hook
+add-zsh-hook preexec _git_cleanup_stale_lock
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

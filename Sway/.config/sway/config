@@ -5,9 +5,6 @@
 # Read `man 5 sway` for a complete reference.
 # Based on https://github.com/raf092/sway-dotfiles/blob/main/sway/config
 
-# Java Swing Wayland/Sway fixes (JDK-7172749, non-reparenting WM)
-exec export _JAVA_AWT_WM_NONREPARENTING=1
-
 ### Variables
 #
 # Logo key. Use Mod1 for Alt.
