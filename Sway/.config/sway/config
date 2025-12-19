@@ -5,6 +5,9 @@
 # Read `man 5 sway` for a complete reference.
 # Based on https://github.com/raf092/sway-dotfiles/blob/main/sway/config
 
+# Java Swing Wayland/Sway fixes (JDK-7172749, non-reparenting WM)
+exec export _JAVA_AWT_WM_NONREPARENTING=1
+
 ### Variables
 #
 # Logo key. Use Mod1 for Alt.
@@ -72,7 +75,7 @@ for_window [class=".*"] inhibit_idle fullscreen
 for_window [app_id=".*"] inhibit_idle fullscreen
 exec swayidle -w \
          timeout 120 'swaylock -i $default_bg -f' \
-         timeout 240 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
+         timeout 240 'swaymsg "output * power off"' resume 'swaymsg "output * power on"; swaybg -i /usr/share/backgrounds/default-dark.jxl -m fill' \
          before-sleep 'swaylock -i $default_bg -f'
 #
 # This will lock your screen after 300 seconds of inactivity, then turn off
