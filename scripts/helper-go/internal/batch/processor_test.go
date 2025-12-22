@@ -111,3 +111,46 @@ func TestEntryExistsForTicket(t *testing.T) {
 		})
 	}
 }
+
+func TestSanitizeForCSV(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{
+			name:     "Simple description without commas",
+			input:    "Simple description",
+			expected: "Simple description",
+		},
+		{
+			name:     "Description with commas in brackets",
+			input:    "DSS - [Code Review]-[13.1AV,13.0AV,12.1AV]",
+			expected: "DSS - [Code Review]-[13.1AV 13.0AV 12.1AV]",
+		},
+		{
+			name:     "Parent child with comma",
+			input:    "Parent > Child, with comma",
+			expected: "Parent > Child  with comma",
+		},
+		{
+			name:     "Multiple commas",
+			input:    "one,two,three,four",
+			expected: "one two three four",
+		},
+		{
+			name:     "Empty string",
+			input:    "",
+			expected: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := SanitizeForCSV(tt.input)
+			if result != tt.expected {
+				t.Errorf("SanitizeForCSV(%q) = %q, want %q", tt.input, result, tt.expected)
+			}
+		})
+	}
+}

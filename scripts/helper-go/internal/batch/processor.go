@@ -25,6 +25,12 @@ const (
 	defaultStartTime = "09:00" // Default worklog start time
 )
 
+// SanitizeForCSV replaces commas with spaces to prevent CSV parsing issues
+// in editors that don't handle RFC 4180 quoted fields properly
+func SanitizeForCSV(s string) string {
+	return strings.ReplaceAll(s, ",", " ")
+}
+
 // Entry represents a single worklog entry from CSV
 type Entry struct {
 	IssueKey    string // Parent/main issue key
@@ -593,7 +599,7 @@ func UpdateCSVDescriptions(path string, descriptions map[string]string) (int, er
 		// Only update if description is empty and we have a new one
 		if currentDesc == "" {
 			if newDesc, ok := descriptions[issueKey]; ok && newDesc != "" {
-				record[ColDescription] = newDesc
+				record[ColDescription] = SanitizeForCSV(newDesc)
 				records[i] = record
 				updated++
 			}
@@ -656,7 +662,7 @@ func AppendEntryWithStatus(path, issueKey, subtaskKey, issueType, description, t
 		strings.ToUpper(issueKey),
 		strings.ToUpper(subtaskKey),
 		issueType,
-		description,
+		SanitizeForCSV(description),
 		comment,
 		date,
 		timeSpent,
@@ -697,7 +703,7 @@ func PrependEntryWithStatus(path, issueKey, subtaskKey, issueType, description, 
 		strings.ToUpper(issueKey),
 		strings.ToUpper(subtaskKey),
 		issueType,
-		description,
+		SanitizeForCSV(description),
 		comment,
 		date,
 		timeSpent,
@@ -755,7 +761,7 @@ func UpdateEntryDescription(path string, rowNumber int, newDescription string) e
 	if rowNumber > 0 && rowNumber <= len(records) {
 		idx := rowNumber - 1 // Convert to 0-based index
 		if len(records[idx]) > ColDescription {
-			records[idx][ColDescription] = newDescription
+			records[idx][ColDescription] = SanitizeForCSV(newDescription)
 		}
 	}
 
@@ -1007,11 +1013,11 @@ func updateCSVWithRestructure(path string, details map[string]jira.IssueDetails,
 			// Restructure: move issueKey to SubtaskKey, use parent as IssueKey
 			parentDetail, hasParent := parentDetails[detail.ParentKey]
 			if hasParent {
-				record[ColSubtaskKey] = issueKey                                        // Original key becomes subtask
-				record[ColIssueKey] = detail.ParentKey                                  // Parent becomes main key
-				record[ColIssueType] = parentDetail.IssueType                           // Parent's type
-				record[ColDescription] = parentDetail.Summary + " > " + detail.Summary  // Combined description
-				record[ColSubtaskLogInd] = "Y"                                          // Worklog was logged to subtask
+				record[ColSubtaskKey] = issueKey                                                            // Original key becomes subtask
+				record[ColIssueKey] = detail.ParentKey                                                      // Parent becomes main key
+				record[ColIssueType] = parentDetail.IssueType                                               // Parent's type
+				record[ColDescription] = SanitizeForCSV(parentDetail.Summary + " > " + detail.Summary)      // Combined description
+				record[ColSubtaskLogInd] = "Y"                                                              // Worklog was logged to subtask
 				records[i] = record
 				restructured++
 				continue // Skip normal enrichment since we just did full restructure
@@ -1021,7 +1027,7 @@ func updateCSVWithRestructure(path string, details map[string]jira.IssueDetails,
 		// Normal enrichment: fill empty Description and IssueType
 		updated := false
 		if currentDesc == "" && hasDetail && detail.Summary != "" {
-			record[ColDescription] = detail.Summary
+			record[ColDescription] = SanitizeForCSV(detail.Summary)
 			updated = true
 		}
 		if currentType == "" && hasDetail && detail.IssueType != "" {
