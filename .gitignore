@@ -37,6 +37,7 @@ dev-debug.log
 **/*API_KEY*
 *.backup
 .gitignore-backup
+test-secrets.txt
 
 # AI tool configs
 AI-tools/.claude.json*
@@ -67,7 +68,6 @@ zsh/.oh-my-zsh/cache/
 # SQL Developer files
 sqldev/.sqldeveloper/tmp/
 sqldev/.sqldeveloper/*.log
-sqldev/.sqldeveloper/24.3.1/
 sqldev/.sqldeveloper/system24.3.1.347.1826/
 sqldev/.sqldeveloper/system23.1.1.345.2114/
 sqldev/.sqldeveloper/SqlHistory/
