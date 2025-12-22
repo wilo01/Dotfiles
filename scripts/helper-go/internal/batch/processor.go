@@ -773,9 +773,15 @@ func UpdateEntryDescription(path string, rowNumber int, newDescription string) e
 // FindMissingWorklogs compares JIRA worklogs with CSV entries and returns missing ones
 func FindMissingWorklogs(jiraWorklogs []jira.Worklog, csvEntries []Entry) []jira.Worklog {
 	// Build a set of existing CSV entries keyed by IssueKey+Date+TimeSpent
+	// When SubtaskLogInd=Y, use SubtaskKey as the comparison key (worklog was logged to subtask)
 	existing := make(map[string]bool)
 	for _, e := range csvEntries {
-		key := buildComparisonKey(e.IssueKey, e.Date, e.TimeSpent)
+		// Use the key where worklog was actually logged
+		issueKey := e.IssueKey
+		if strings.EqualFold(e.SubtaskLogInd, "Y") && e.SubtaskKey != "" {
+			issueKey = e.SubtaskKey // Worklog was logged to subtask
+		}
+		key := buildComparisonKey(issueKey, e.Date, e.TimeSpent)
 		existing[key] = true
 	}
 
@@ -1005,6 +1011,7 @@ func updateCSVWithRestructure(path string, details map[string]jira.IssueDetails,
 				record[ColIssueKey] = detail.ParentKey                                  // Parent becomes main key
 				record[ColIssueType] = parentDetail.IssueType                           // Parent's type
 				record[ColDescription] = parentDetail.Summary + " > " + detail.Summary  // Combined description
+				record[ColSubtaskLogInd] = "Y"                                          // Worklog was logged to subtask
 				records[i] = record
 				restructured++
 				continue // Skip normal enrichment since we just did full restructure
