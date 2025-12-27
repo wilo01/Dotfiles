@@ -386,9 +386,8 @@ export MANPAGER='nvim +Man!'
 export USE_BUILTIN_RIPGREP=1
 # export MANWIDTH=999
 # export JAVA_HOME="/usr/lib/jvm/java-11-openjdk/"
-export JAVA_HOME="/usr/lib/jvm/java-1.8.0-openjdk"
+export JAVA_HOME="/usr/lib/jvm/java-21-openjdk"
 export PATH="$JAVA_HOME/bin:$PATH"
-export PATH="/usr/lib/jvm/java-8-openjdk/bin:$PATH"
 
 export PATH="$HOME/bin/Sencha/Cmd:$PATH"
 export PATH="$HOME/.cargo/bin:$PATH"
@@ -472,3 +471,13 @@ autoload -Uz add-zsh-hook
 add-zsh-hook preexec _git_cleanup_stale_lock
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+alias ga="git add \"\$@\" && git status"
+
+# Override git add to show status after staging
+git() {
+  if [[ "$1" == "add" ]]; then
+    command git "$@" && command git status
+  else
+    command git "$@"
+  fi
+}

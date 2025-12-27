@@ -1,6 +1,8 @@
 package batch
 
 import (
+	"os"
+	"strings"
 	"testing"
 )
 
@@ -112,44 +114,79 @@ func TestEntryExistsForTicket(t *testing.T) {
 	}
 }
 
-func TestSanitizeForCSV(t *testing.T) {
+func TestCSVQuotingWithCommas(t *testing.T) {
 	tests := []struct {
-		name     string
-		input    string
-		expected string
+		name        string
+		description string
+		wantQuoted  bool
 	}{
 		{
-			name:     "Simple description without commas",
-			input:    "Simple description",
-			expected: "Simple description",
+			name:        "Description with commas in brackets",
+			description: "DSS - Confirmation on auto access group assignment > [Code Review]-[13.1AV,13.0AV,12.1AV]",
+			wantQuoted:  true,
 		},
 		{
-			name:     "Description with commas in brackets",
-			input:    "DSS - [Code Review]-[13.1AV,13.0AV,12.1AV]",
-			expected: "DSS - [Code Review]-[13.1AV 13.0AV 12.1AV]",
+			name:        "Simple description without commas",
+			description: "Simple task description",
+			wantQuoted:  false,
 		},
 		{
-			name:     "Parent child with comma",
-			input:    "Parent > Child, with comma",
-			expected: "Parent > Child  with comma",
+			name:        "Description with embedded quotes",
+			description: `Say "hello" to the world`,
+			wantQuoted:  true,
 		},
 		{
-			name:     "Multiple commas",
-			input:    "one,two,three,four",
-			expected: "one two three four",
-		},
-		{
-			name:     "Empty string",
-			input:    "",
-			expected: "",
+			name:        "Parent child combined description with comma",
+			description: "Parent Task > Child, with comma in name",
+			wantQuoted:  true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := SanitizeForCSV(tt.input)
-			if result != tt.expected {
-				t.Errorf("SanitizeForCSV(%q) = %q, want %q", tt.input, result, tt.expected)
+			// Create temp file
+			tmpFile, err := os.CreateTemp("", "csv_quote_test_*.csv")
+			if err != nil {
+				t.Fatalf("Failed to create temp file: %v", err)
+			}
+			tmpPath := tmpFile.Name()
+			tmpFile.Close()
+			defer os.Remove(tmpPath)
+
+			// Write entry using AppendEntryWithStatus
+			err = AppendEntryWithStatus(tmpPath, "TEST-1", "", "Bug", tt.description, "1h", "23.12.2025 09:00", "", "", StatusDraft)
+			if err != nil {
+				t.Fatalf("AppendEntryWithStatus failed: %v", err)
+			}
+
+			// Read raw file content
+			rawContent, err := os.ReadFile(tmpPath)
+			if err != nil {
+				t.Fatalf("Failed to read temp file: %v", err)
+			}
+			rawStr := string(rawContent)
+
+			// Check if description is quoted in raw CSV
+			if tt.wantQuoted {
+				// For fields with commas or quotes, csv.Writer wraps in double quotes
+				// Embedded quotes become ""
+				if !strings.Contains(rawStr, `"`) {
+					t.Errorf("Expected quoted field in raw CSV for description with special chars, got: %s", rawStr)
+				}
+			}
+
+			// Round-trip: parse back and verify data preserved exactly
+			entries, err := ParseCSV(tmpPath)
+			if err != nil {
+				t.Fatalf("ParseCSV failed: %v", err)
+			}
+
+			if len(entries) != 1 {
+				t.Fatalf("Expected 1 entry, got %d", len(entries))
+			}
+
+			if entries[0].Description != tt.description {
+				t.Errorf("Round-trip failed: got %q, want %q", entries[0].Description, tt.description)
 			}
 		})
 	}

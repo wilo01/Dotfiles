@@ -7,6 +7,10 @@ local autocmd = vim.api.nvim_create_autocmd
 local augroup = vim.api.nvim_create_augroup
 local general = augroup("General Settings", { clear = true })
 
+local CSV_STATE_COMPACT = 0
+local CSV_STATE_FULL = 1
+local csv_buffer_data = {}
+
 autocmd("BufEnter", {
    callback = function()
       vim.opt.formatoptions:remove({ "c", "r", "o" })
@@ -166,98 +170,165 @@ autocmd('LspAttach', {
    end
 })
 
--- CSV editing: buffer-local keymap for <leader>t
+--- Parse CSV line respecting quoted fields
+--- @param line string CSV line to parse
+--- @return table columns
+local function csv_parse_line(line)
+   local cols = {}
+   local current = ""
+   local in_quotes = false
+   local i = 1
+
+   while i <= #line do
+      local char = line:sub(i, i)
+
+      if char == '"' then
+         in_quotes = not in_quotes
+         current = current .. char
+      elseif char == "," and not in_quotes then
+         table.insert(cols, current)
+         current = ""
+      else
+         current = current .. char
+      end
+      i = i + 1
+   end
+
+   table.insert(cols, current)
+   return cols
+end
+
+local function csv_get_state(bufnr)
+   if not csv_buffer_data[bufnr] then
+      csv_buffer_data[bufnr] = { state = CSV_STATE_COMPACT }
+   end
+   return csv_buffer_data[bufnr]
+end
+
+local function csv_prettify(lines)
+   local MAX_FORMAT_WIDTH = 144
+   local max_lengths = {}
+
+   for _, line in ipairs(lines) do
+      local cols = csv_parse_line(line)
+      for i, col in ipairs(cols) do
+         max_lengths[i] = math.max(max_lengths[i] or 0, #col)
+      end
+   end
+
+   local prettified = {}
+   for _, line in ipairs(lines) do
+      local cols = csv_parse_line(line)
+      for i, col in ipairs(cols) do
+         local max_len = math.min(max_lengths[i] or 0, MAX_FORMAT_WIDTH)
+         local padding = math.max(0, max_len - #col)
+         cols[i] = col .. string.rep(" ", padding)
+      end
+      table.insert(prettified, table.concat(cols, " , "))
+   end
+   return prettified
+end
+
+local function csv_compact(lines)
+   local compacted = {}
+   for _, line in ipairs(lines) do
+      local cleaned = line:gsub("%s*,%s*", ",")
+      cleaned = cleaned:gsub("%s+$", "")
+      compacted[#compacted + 1] = cleaned
+   end
+   return compacted
+end
+
 autocmd("FileType", {
    pattern = "csv",
    callback = function()
       vim.defer_fn(function()
-         vim.notify("Use <leader>t to toggle CSV formatting", vim.log.levels.INFO)
+         vim.notify("CSV: <leader>t toggles Compact ↔ Full", vim.log.levels.INFO)
       end, 100)
+
       vim.keymap.set("n", "<leader>t", function()
-         local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-         local bufnr = vim.api.nvim_get_current_buf()
-         local is_prettified = vim.b[bufnr].is_csv_prettified or false
+         local buf = vim.api.nvim_get_current_buf()
+         local data = csv_get_state(buf)
 
-         if is_prettified then
-            local cleaned_lines = {}
-            for _, line in ipairs(lines) do
-               local cleaned_line = line:gsub("%s*,%s*", ","):gsub("%s+$", "")
-               table.insert(cleaned_lines, cleaned_line)
-            end
-            vim.api.nvim_buf_set_lines(0, 0, -1, false, cleaned_lines)
-            print("CSV prettification disabled.")
-         else
-            local MAX_COLUMN_WIDTH = 100
-            local ELLIPSIS = "..."
-            local MAX_FORMAT_WIDTH = 144
-
-            local max_lengths = {}
-
-            for _, line in ipairs(lines) do
-               local cols = vim.split(line, ",", { plain = true })
-               for i, col in ipairs(cols) do
-                  local col_length = math.min(#col, MAX_COLUMN_WIDTH)
-                  max_lengths[i] = math.max(max_lengths[i] or 0, col_length)
-               end
-            end
-
-            local prettified_lines = {}
-            for _, line in ipairs(lines) do
-               local cols = vim.split(line, ",", { plain = true })
-               for i, col in ipairs(cols) do
-                  local max_len = max_lengths[i] or 0
-
-                  if max_len > MAX_FORMAT_WIDTH then
-                     max_len = MAX_FORMAT_WIDTH
-                  end
-
-                  local formatted_col = col
-                  if #col > MAX_COLUMN_WIDTH then
-                     formatted_col = col:sub(1, MAX_COLUMN_WIDTH - #ELLIPSIS) .. ELLIPSIS
-                  end
-
-                  -- Skip string.format entirely - use direct padding (more reliable)
-                  local padding_needed = math.max(0, max_len - #formatted_col)
-                  cols[i] = formatted_col .. string.rep(" ", padding_needed)
-               end
-               table.insert(prettified_lines, table.concat(cols, " , "))
-            end
-
-            vim.api.nvim_buf_set_lines(0, 0, -1, false, prettified_lines)
-            print("CSV prettification enabled.")
+         if data.needs_restore and data.prettified_for_restore then
+            vim.api.nvim_buf_set_lines(buf, 0, -1, false, data.prettified_for_restore)
+            data.prettified_for_restore = nil
+            data.needs_restore = nil
+            vim.notify("[CSV: Full] Recovered from failed save", vim.log.levels.WARN)
+            return
          end
 
-         vim.b[bufnr].is_csv_prettified = not is_prettified
-      end, { buffer = true, desc = "Toggle CSV formatting", noremap = true, silent = true })
+         local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+
+         if data.state == CSV_STATE_COMPACT then
+            local prettified = csv_prettify(lines)
+            vim.api.nvim_buf_set_lines(buf, 0, -1, false, prettified)
+            data.state = CSV_STATE_FULL
+            vim.notify("[CSV: Full] Pretty view - editable", vim.log.levels.INFO)
+         else
+            local compacted = csv_compact(lines)
+            vim.api.nvim_buf_set_lines(buf, 0, -1, false, compacted)
+            data.state = CSV_STATE_COMPACT
+            vim.notify("[CSV: Compact] Raw CSV", vim.log.levels.INFO)
+         end
+      end, { buffer = true, desc = "Toggle CSV: Compact ↔ Full", noremap = true, silent = true })
    end,
-   desc = "Setup CSV formatting keymap for csv files only",
+   desc = "Setup CSV 2-state toggle",
 })
 
--- Auto-close CSV edit formatting before saving
 autocmd("BufWritePre", {
    pattern = "*.csv",
    callback = function()
-      if not vim.g.csv_prettify_ind then
-         print("CSV prettify functionality is disabled.")
-         return
-      end
+      if not vim.g.csv_prettify_ind then return end
 
       local bufnr = vim.api.nvim_get_current_buf()
-      if vim.b[bufnr].is_csv_prettified then
-         local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-         local cleaned_lines = {}
-         for _, line in ipairs(lines) do
-            local cleaned_line = line:gsub("%s*,%s*", ","):gsub("%s+$", "")
-            table.insert(cleaned_lines, cleaned_line)
-         end
-         vim.api.nvim_buf_set_lines(0, 0, -1, false, cleaned_lines)
-         print("CSV compacted before saving.")
-         vim.b[bufnr].is_csv_prettified = false
-      else
-         print("CSV already in compact format.")
-      end
+      local data = csv_buffer_data[bufnr]
+      if not data or data.state == CSV_STATE_COMPACT then return end
+
+      local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+      data.prettified_for_restore = lines
+      data.needs_restore = true
+
+      local compacted = csv_compact(lines)
+      vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, compacted)
    end,
-   desc = "Remove spaces from CSV before saving",
+   desc = "CSV: Compact before save",
+})
+
+autocmd("BufWritePost", {
+   pattern = "*.csv",
+   callback = function()
+      if not vim.g.csv_prettify_ind then return end
+
+      local bufnr = vim.api.nvim_get_current_buf()
+      local data = csv_buffer_data[bufnr]
+      if not data or not data.needs_restore then return end
+
+      vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, data.prettified_for_restore)
+      vim.bo[bufnr].modified = false
+      data.prettified_for_restore = nil
+      data.needs_restore = nil
+      vim.notify("Saved compacted CSV", vim.log.levels.INFO)
+   end,
+   desc = "CSV: Restore Full view after save",
+})
+
+autocmd({ "BufUnload", "BufWipeout" }, {
+   pattern = "*.csv",
+   callback = function()
+      local bufnr = vim.api.nvim_get_current_buf()
+      csv_buffer_data[bufnr] = nil
+   end,
+   desc = "CSV: Cleanup state on buffer close",
+})
+
+autocmd("BufReadPost", {
+   pattern = "*.csv",
+   callback = function()
+      local bufnr = vim.api.nvim_get_current_buf()
+      csv_buffer_data[bufnr] = { state = CSV_STATE_COMPACT }
+   end,
+   desc = "CSV: Reset state on file reload",
 })
 
 vim.api.nvim_create_user_command("CSVformatting", function()

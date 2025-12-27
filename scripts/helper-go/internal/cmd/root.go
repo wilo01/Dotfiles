@@ -6,8 +6,10 @@ import (
 
 	"github.com/dariuszw/hlp/internal/cmd/badge"
 	"github.com/dariuszw/hlp/internal/cmd/dev"
+	"github.com/dariuszw/hlp/internal/cmd/git"
 	"github.com/dariuszw/hlp/internal/cmd/jira"
 	"github.com/dariuszw/hlp/internal/cmd/namefinder"
+	"github.com/dariuszw/hlp/internal/cmd/standup"
 	"github.com/dariuszw/hlp/internal/cmd/timesheet"
 	"github.com/dariuszw/hlp/internal/config"
 	"github.com/dariuszw/hlp/internal/ui"
@@ -46,7 +48,9 @@ func init() {
 	// Register commands at top level
 	dev.RegisterTopLevel(rootCmd)
 	badge.RegisterTopLevel(rootCmd)
+	rootCmd.AddCommand(git.GitCmd)
 	rootCmd.AddCommand(jira.JiraCmd)
+	rootCmd.AddCommand(standup.StandupCmd)
 	rootCmd.AddCommand(timesheet.TimesheetCmd)
 	rootCmd.AddCommand(namefinder.NameFinderCmd)
 }

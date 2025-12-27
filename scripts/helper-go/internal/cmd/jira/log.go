@@ -1,3 +1,4 @@
+// Package jira provides JIRA worklog commands for the helper CLI.
 package jira
 
 import (
@@ -111,12 +112,11 @@ func runLog(cmd *cobra.Command, args []string) {
 	// Parse date/time
 	var startTime time.Time
 	if logDate != "" {
-		t, err := time.Parse("2006-01-02", logDate)
+		startTime, err = time.Parse("2006-01-02", logDate)
 		if err != nil {
 			fmt.Println(ui.Error("Invalid date format. Use YYYY-MM-DD"))
 			return
 		}
-		startTime = t
 	} else {
 		startTime = time.Now()
 	}
@@ -164,7 +164,7 @@ func runLog(cmd *cobra.Command, args []string) {
 	showDailyWarning(client, startTime)
 }
 
-func runBatchLog(cmd *cobra.Command, args []string) {
+func runBatchLog(_ *cobra.Command, _ []string) {
 	// Get current profile for CSV path and auto-create decision
 	profile, err := config.GetActiveProfile()
 	if err != nil {
@@ -368,7 +368,7 @@ func runBatchLog(cmd *cobra.Command, args []string) {
 	showBatchDailyWarnings(client, results)
 }
 
-func runSyncLog(cmd *cobra.Command, args []string) {
+func runSyncLog(_ *cobra.Command, _ []string) {
 	// Determine date range (default: last 7 days)
 	toDate := time.Now()
 	fromDate := toDate.AddDate(0, 0, -7)
@@ -519,7 +519,7 @@ func runSyncLog(cmd *cobra.Command, args []string) {
 		for _, wl := range missing {
 			dateStr := wl.Started.Format("02.01.2006 15:04")
 			detail := details[wl.IssueKey]
-			if err := batch.AppendEntryWithStatus(csvPath, wl.IssueKey, "", detail.IssueType, detail.Summary, wl.TimeSpentStr, dateStr, wl.Comment, "", batch.StatusSync); err != nil {
+			if err = batch.AppendEntryWithStatus(csvPath, wl.IssueKey, "", detail.IssueType, detail.Summary, wl.TimeSpentStr, dateStr, wl.Comment, "", batch.StatusSync); err != nil {
 				fmt.Printf("  %s %s - %s\n",
 					ui.ErrorText.Render("FAILED"),
 					ui.Primary.Render(wl.IssueKey),
@@ -538,7 +538,7 @@ func runSyncLog(cmd *cobra.Command, args []string) {
 
 		// Sort CSV by date
 		fmt.Println("\nSorting CSV by date...")
-		if err := batch.SortCSVByDate(csvPath); err != nil {
+		if err = batch.SortCSVByDate(csvPath); err != nil {
 			fmt.Println(ui.Warning("Failed to sort CSV: " + err.Error()))
 		} else {
 			fmt.Println(ui.Success.Render("CSV sorted (newest first)"))
@@ -616,7 +616,7 @@ func runSyncLog(cmd *cobra.Command, args []string) {
 		exists := batch.EntryExistsForTicket(entries, issueKey, lastLoggedDate, ticket.IsSubtask, ticket.Summary)
 
 		if !exists {
-			err := batch.PrependEntryWithStatus(
+			err = batch.PrependEntryWithStatus(
 				csvPath,
 				issueKey,
 				subtaskKey,
