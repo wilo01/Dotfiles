@@ -23,6 +23,8 @@ func (m Model) View() string {
 	footer := m.renderFooter()
 
 	// Render content and set it in viewport
+	// TODO: SetContent on value receiver - changes are lost after View() returns.
+	// Move SetContent to Update() method where state mutations belong.
 	content := m.renderPresentationContent()
 	m.viewport.SetContent(content)
 
