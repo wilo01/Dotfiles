@@ -129,6 +129,10 @@ alias nvim-vimscript="NVIM_APPNAME=nvim-vimscript nvim"
 alias nvim-reddit="NVIM_APPNAME=nvim-reddit nvim"
 
 function nvims() {
+    if ! command -v fzf &>/dev/null; then
+        echo "Error: fzf is not installed"
+        return 1
+    fi
     local config_path="$HOME/.config"
     local items=()
     local numbered_items=()
@@ -342,13 +346,25 @@ alias git_abort_merge="echo git merge --abort ; echo Git abort merge ; git merge
 alias git_undo_merge="echo git merge --abort ; echo Git abort merge ; git merge --abort"
 alias git_merge_undo="echo git merge --abort ; echo Git abort merge ; git merge --abort"
 
+# Git wrapper - bisect helper + status after add
 function git() {
+    # Handle git bisect stop/exit
     if [[ $1 == "bisect" && ($2 == "stop" || $2 == "exit") ]]; then
         echo "❗ 'git bisect reset' is the proper way to exit bisect mode. Executing it for you now..."
         command git bisect reset
-        return 0
+        return $?
     fi
+
+    # Execute git command
     command git "$@"
+    local ret=$?
+
+    # Show status after add
+    if [[ "$1" == "add" && $ret -eq 0 ]]; then
+        command git status
+    fi
+
+    return $ret
 }
 # Linux Setup
 alias sshkey="echo cat ~/.ssh/id_ed25519.pub ; cat ~/.ssh/id_ed25519.pub"
@@ -472,12 +488,3 @@ add-zsh-hook preexec _git_cleanup_stale_lock
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 alias ga="git add \"\$@\" && git status"
-
-# Override git add to show status after staging
-git() {
-  if [[ "$1" == "add" ]]; then
-    command git "$@" && command git status
-  else
-    command git "$@"
-  fi
-}
