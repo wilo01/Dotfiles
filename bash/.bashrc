@@ -15,6 +15,8 @@ export PATH
 # export SYSTEMD_PAGER=
 
 # User specific aliases and functions
+alias rm="sudo rm"
+
 if [ -d ~/.bashrc.d ]; then
     for rc in ~/.bashrc.d/*; do
         if [ -f "$rc" ]; then
