@@ -112,6 +112,10 @@ exec swayidle -w \
    for_window [app_id="keepassxc"] move to workspace 19; move workspace to output eDP-1; workspace 19
    for_window [class="Spotify"] move to workspace 20; move workspace to output eDP-1; workspace 20
 
+   # Workspace swap (WS 1-7 → external, WS 8-20 → laptop)
+   bindsym $mod+Shift+w exec ~/.config/sway/scripts/swap-workspaces.sh
+   exec_always ~/.config/sway/scripts/monitor-watcher.sh &
+
 ### Key bindings
 #
 # Basics:
