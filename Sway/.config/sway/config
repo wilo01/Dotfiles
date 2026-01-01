@@ -209,27 +209,27 @@ exec swayidle -w \
     bindsym $mod+Ctrl+8 workspace 18
     bindsym $mod+Ctrl+9 workspace 19
     bindsym $mod+Ctrl+0 workspace 20
-    # Move focused container to workspace
-    bindsym $mod+Shift+1 move container to workspace 1; workspace 1
-    bindsym $mod+Shift+2 move container to workspace 2; workspace 2
-    bindsym $mod+Shift+3 move container to workspace 3; workspace 3
-    bindsym $mod+Shift+4 move container to workspace 4; workspace 4
-    bindsym $mod+Shift+5 move container to workspace 5; workspace 5
-    bindsym $mod+Shift+6 move container to workspace 6; workspace 6
-    bindsym $mod+Shift+7 move container to workspace 7; workspace 7
-    bindsym $mod+Shift+8 move container to workspace 8; workspace 8
-    bindsym $mod+Shift+9 move container to workspace 9; workspace 9; move workspace to output eDP-1
-    bindsym $mod+Shift+0 move container to workspace 10; workspace 10; move workspace to output eDP-1
-    bindsym $mod+Shift+Ctrl+1 move container to workspace 11; workspace 11; move workspace to output eDP-1
-    bindsym $mod+Shift+Ctrl+2 move container to workspace 12; workspace 12; move workspace to output eDP-1
-    bindsym $mod+Shift+Ctrl+3 move container to workspace 13; workspace 13; move workspace to output eDP-1
-    bindsym $mod+Shift+Ctrl+4 move container to workspace 14; workspace 14; move workspace to output eDP-1
-    bindsym $mod+Shift+Ctrl+5 move container to workspace 15; workspace 15; move workspace to output eDP-1
-    bindsym $mod+Shift+Ctrl+6 move container to workspace 16; workspace 16; move workspace to output eDP-1
-    bindsym $mod+Shift+Ctrl+7 move container to workspace 17; workspace 17; move workspace to output eDP-1
-    bindsym $mod+Shift+Ctrl+8 move container to workspace 18; workspace 18; move workspace to output eDP-1
-    bindsym $mod+Shift+Ctrl+9 move container to workspace 19; workspace 19; move workspace to output eDP-1
-    bindsym $mod+Shift+Ctrl+0 move container to workspace 20; workspace 20; move workspace to output eDP-1
+    # Move focused container to workspace (PiP-aware)
+    bindsym $mod+Shift+1 exec ~/.config/sway/scripts/pip-move-to-ws.sh 1
+    bindsym $mod+Shift+2 exec ~/.config/sway/scripts/pip-move-to-ws.sh 2
+    bindsym $mod+Shift+3 exec ~/.config/sway/scripts/pip-move-to-ws.sh 3
+    bindsym $mod+Shift+4 exec ~/.config/sway/scripts/pip-move-to-ws.sh 4
+    bindsym $mod+Shift+5 exec ~/.config/sway/scripts/pip-move-to-ws.sh 5
+    bindsym $mod+Shift+6 exec ~/.config/sway/scripts/pip-move-to-ws.sh 6
+    bindsym $mod+Shift+7 exec ~/.config/sway/scripts/pip-move-to-ws.sh 7
+    bindsym $mod+Shift+8 exec ~/.config/sway/scripts/pip-move-to-ws.sh 8
+    bindsym $mod+Shift+9 exec ~/.config/sway/scripts/pip-move-to-ws.sh 9 eDP-1
+    bindsym $mod+Shift+0 exec ~/.config/sway/scripts/pip-move-to-ws.sh 10 eDP-1
+    bindsym $mod+Shift+Ctrl+1 exec ~/.config/sway/scripts/pip-move-to-ws.sh 11 eDP-1
+    bindsym $mod+Shift+Ctrl+2 exec ~/.config/sway/scripts/pip-move-to-ws.sh 12 eDP-1
+    bindsym $mod+Shift+Ctrl+3 exec ~/.config/sway/scripts/pip-move-to-ws.sh 13 eDP-1
+    bindsym $mod+Shift+Ctrl+4 exec ~/.config/sway/scripts/pip-move-to-ws.sh 14 eDP-1
+    bindsym $mod+Shift+Ctrl+5 exec ~/.config/sway/scripts/pip-move-to-ws.sh 15 eDP-1
+    bindsym $mod+Shift+Ctrl+6 exec ~/.config/sway/scripts/pip-move-to-ws.sh 16 eDP-1
+    bindsym $mod+Shift+Ctrl+7 exec ~/.config/sway/scripts/pip-move-to-ws.sh 17 eDP-1
+    bindsym $mod+Shift+Ctrl+8 exec ~/.config/sway/scripts/pip-move-to-ws.sh 18 eDP-1
+    bindsym $mod+Shift+Ctrl+9 exec ~/.config/sway/scripts/pip-move-to-ws.sh 19 eDP-1
+    bindsym $mod+Shift+Ctrl+0 exec ~/.config/sway/scripts/pip-move-to-ws.sh 20 eDP-1
 
 #
 # Layout stuff:
@@ -276,6 +276,9 @@ exec swayidle -w \
 
     #Floating Apps
     for_window [app_id="thunar"] floating enable, resize set 1200 800
+
+    # PiP toggle (cycles corners: BR→TR→TL→BL→exit)
+    bindsym $mod+p exec ~/.config/sway/scripts/pip-toggle.sh
 #
 # Scratchpad:
 #

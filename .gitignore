@@ -18,6 +18,7 @@ dev-debug.log
 *.njsproj
 *.sln
 *.sw?
+*~
 .cursor/
 .windsurf/
 .zed/
@@ -129,3 +130,4 @@ bin/
 nvim/.config/nvim-primagen
 nvim/.config/nvim-lazy
 nvim/.config/nvim-tj
+zsh/.oh-my-zsh/
