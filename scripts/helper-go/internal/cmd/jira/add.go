@@ -437,16 +437,33 @@ func RunAutoSync(quiet bool) error {
 			continue
 		}
 
+		// Determine issue key, subtask key, type, and description
+		// For sub-tasks: use parent key/type and combined description
+		issueKey := ticket.Key
+		subtaskKey := ""
+		issueType := ticket.IssueType
+		description := ticket.Summary
+
+		if ticket.IsSubtask && ticket.ParentKey != "" {
+			parentTicket, err := client.GetTicket(ticket.ParentKey)
+			if err == nil {
+				subtaskKey = ticket.Key
+				issueKey = parentTicket.Key
+				issueType = parentTicket.IssueType
+				description = parentTicket.Summary + " > " + ticket.Summary
+			}
+		}
+
 		// Prepare entry
 		currentDateTime := time.Now().Format("02.01.2006 15:04")
 
 		// Prepend to CSV with DRAFT status
 		err = batch.PrependEntryWithStatus(
 			csvPath,
-			ticketKey,
-			"",              // subtaskKey - empty for now
-			ticket.IssueType,
-			ticket.Summary,
+			issueKey,
+			subtaskKey,
+			issueType,
+			description,
 			"",              // timeSpent - empty for draft
 			currentDateTime,
 			"",              // comment
@@ -459,11 +476,15 @@ func RunAutoSync(quiet bool) error {
 		}
 
 		if !quiet {
+			displayKey := issueKey
+			if subtaskKey != "" {
+				displayKey = issueKey + " > " + subtaskKey
+			}
 			fmt.Printf("%s %s %s - %s\n",
 				ui.Success.Render("✓"),
-				ui.Primary.Render(ticketKey),
-				ui.Muted.Render("["+ticket.IssueType+"]"),
-				ui.Muted.Render(truncateString(ticket.Summary, 40)))
+				ui.Primary.Render(displayKey),
+				ui.Muted.Render("["+issueType+"]"),
+				ui.Muted.Render(truncateString(description, 40)))
 		}
 		added++
 		entries, _ = batch.ParseCSV(csvPath)

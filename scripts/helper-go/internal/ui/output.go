@@ -10,7 +10,17 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/dariuszw/hlp/internal/worklog"
 	"github.com/dariuszw/hlp/pkg/duration"
+	"golang.org/x/term"
 )
+
+// GetTerminalWidth returns the current terminal width, or 80 as fallback
+func GetTerminalWidth() int {
+	width, _, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil || width < 40 {
+		return 80
+	}
+	return width
+}
 
 // Error formats an error message
 func Error(msg string) string {

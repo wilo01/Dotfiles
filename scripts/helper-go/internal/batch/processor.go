@@ -64,6 +64,15 @@ func (e Entry) IsSync() bool {
 	return strings.ToUpper(e.Status) == StatusSync
 }
 
+// DisplayKey returns the display key for the entry
+// For subtasks: "ParentKey > SubtaskKey", otherwise just IssueKey
+func (e Entry) DisplayKey() string {
+	if e.SubtaskKey != "" {
+		return e.IssueKey + " > " + e.SubtaskKey
+	}
+	return e.IssueKey
+}
+
 // NeedsProcessing returns true if entry needs processing
 func (e Entry) NeedsProcessing() bool {
 	return !e.IsDone() && !e.IsDraft()

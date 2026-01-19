@@ -15,6 +15,24 @@ var (
 	ColorHighlight = lipgloss.Color("226") // Yellow
 )
 
+// Branch colors for git graph visualization (VSCode Git Graph style)
+var BranchColors = []lipgloss.Color{
+	lipgloss.Color("#F14C4C"), // Red
+	lipgloss.Color("#3B8EEA"), // Blue
+	lipgloss.Color("#23D18B"), // Green
+	lipgloss.Color("#E5E510"), // Yellow
+	lipgloss.Color("#BC3FBC"), // Purple
+	lipgloss.Color("#29B8DB"), // Cyan
+	lipgloss.Color("#E48B39"), // Orange
+	lipgloss.Color("#DDA0DD"), // Plum
+}
+
+// BranchStyle returns a style with the color for the given branch index
+func BranchStyle(index int) lipgloss.Style {
+	color := BranchColors[index%len(BranchColors)]
+	return lipgloss.NewStyle().Foreground(color)
+}
+
 // Styles
 var (
 	// Text styles

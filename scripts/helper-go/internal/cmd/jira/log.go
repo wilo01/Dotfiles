@@ -31,6 +31,26 @@ var (
 	logConfirm  bool
 )
 
+// getDescriptionWidth returns dynamic description column width based on terminal
+func getDescriptionWidth() int {
+	width := ui.GetTerminalWidth()
+	fixed := 57 // counter + key + time + date + status + spaces
+	descWidth := width - fixed
+	if descWidth < 15 {
+		descWidth = 15
+	}
+	if descWidth > 50 {
+		descWidth = 50
+	}
+	return descWidth
+}
+
+// getContentWidth returns the total width of a content row
+func getContentWidth() int {
+	// 2 indent + 3 counter + 20 key + descWidth + 8 time + 12 date + 8 status + spaces
+	return 2 + 3 + 20 + getDescriptionWidth() + 8 + 12 + 8 + 4
+}
+
 var logCmd = &cobra.Command{
 	Use:   "log [duration] [description]",
 	Short: "Log work time to a JIRA ticket",
@@ -189,7 +209,80 @@ func runBatchLog(_ *cobra.Command, _ []string) {
 	// Show loading message
 	fmt.Printf("Loading %s...\n", ui.Primary.Render(csvPath))
 
-	// Parse CSV
+	// DRY-RUN MODE: Handle separately with ALL entries (including DRAFT)
+	// This must come BEFORE ParsePendingCSV() to avoid filtering out DRAFT entries
+	if logDryRun {
+		allEntries, err := batch.ParseCSV(csvPath)
+		if err != nil {
+			fmt.Println(ui.Error("Failed to parse CSV: " + err.Error()))
+			return
+		}
+
+		if len(allEntries) == 0 {
+			fmt.Println(ui.Info("No entries in CSV"))
+			return
+		}
+
+		// Count pending vs draft for summary
+		pendingCount := 0
+		draftCount := 0
+		for _, e := range allEntries {
+			if e.IsDraft() {
+				draftCount++
+			} else if e.NeedsProcessing() {
+				pendingCount++
+			}
+		}
+
+		fmt.Printf("Found %s entries (%d pending, %d draft)\n",
+			ui.Success.Render(fmt.Sprintf("%d", len(allEntries))),
+			pendingCount, draftCount)
+
+		// Get JIRA client for fetching summaries
+		client, err := getJiraClient()
+		if err != nil {
+			fmt.Println(ui.Error(err.Error()))
+			return
+		}
+
+		// Get unique dates from pending entries AND draft entries (regardless of time)
+		relevantDates := make(map[string]bool)
+		for _, e := range allEntries {
+			if e.NeedsProcessing() || e.IsDraft() {
+				if t, err := batch.ParseDate(e.Date, "09:00"); err == nil {
+					relevantDates[t.Format("2006-01-02")] = true
+				}
+			}
+		}
+
+		// Filter all entries to only include relevant dates
+		var relevantEntries []batch.Entry
+		for _, e := range allEntries {
+			if t, err := batch.ParseDate(e.Date, "09:00"); err == nil {
+				if relevantDates[t.Format("2006-01-02")] {
+					relevantEntries = append(relevantEntries, e)
+				}
+			}
+		}
+
+		// Fetch descriptions for all relevant entries
+		allKeys := getUniqueTicketKeys(relevantEntries)
+		allSummaries, _ := client.GetIssueSummaries(allKeys)
+		for i := range relevantEntries {
+			if summary, ok := allSummaries[relevantEntries[i].IssueKey]; ok {
+				relevantEntries[i].Description = summary
+			}
+		}
+
+		fmt.Println()
+		fmt.Println("Processing worklogs " + ui.Muted.Render("(dry run)") + ":")
+		showDryRunGroupedByDay(relevantEntries, getExpectedHoursPerDay())
+		fmt.Println()
+		fmt.Println(ui.Warning("Dry run - no entries posted"))
+		return
+	}
+
+	// BATCH MODE: Use filtered entries (excludes DRAFT and DONE)
 	entries, err := batch.ParsePendingCSV(csvPath)
 	if err != nil {
 		fmt.Println(ui.Error("Failed to parse CSV: " + err.Error()))
@@ -223,15 +316,13 @@ func runBatchLog(_ *cobra.Command, _ []string) {
 		}
 	}
 
-	// Show preview before confirmation (only for non-dry-run)
-	if !logDryRun {
-		fmt.Println()
-		fmt.Println("Processing worklogs " + ui.Muted.Render("(preview)") + ":")
-		showWorklogPreview(entries, getExpectedHoursPerDay())
-	}
+	// Show preview before confirmation
+	fmt.Println()
+	fmt.Println("Processing worklogs " + ui.Muted.Render("(preview)") + ":")
+	showWorklogPreview(entries, getExpectedHoursPerDay())
 
 	// Safety guard for protected profiles
-	if !logDryRun && !logConfirm {
+	if !logConfirm {
 		if profile != nil && profile.Protected {
 			if !ui.ConfirmProtectedProfile(profile.Name, profile.BaseURL, len(entries)) {
 				fmt.Println(ui.Info("Operation cancelled"))
@@ -241,52 +332,6 @@ func runBatchLog(_ *cobra.Command, _ []string) {
 	}
 
 	fmt.Println()
-
-	if logDryRun {
-		// Preview mode - load ALL entries (including DONE) for complete daily totals
-		allEntries, _ := batch.ParseCSV(csvPath)
-
-		// Get unique dates from pending entries AND draft entries with time
-		relevantDates := make(map[string]bool)
-		for _, e := range entries {
-			if t, err := batch.ParseDate(e.Date, "09:00"); err == nil {
-				relevantDates[t.Format("2006-01-02")] = true
-			}
-		}
-		// Also include dates with DRAFT entries that have time logged
-		for _, e := range allEntries {
-			if e.IsDraft() && e.TimeSpent != "" {
-				if t, err := batch.ParseDate(e.Date, "09:00"); err == nil {
-					relevantDates[t.Format("2006-01-02")] = true
-				}
-			}
-		}
-
-		// Filter all entries to only include relevant dates
-		var relevantEntries []batch.Entry
-		for _, e := range allEntries {
-			if t, err := batch.ParseDate(e.Date, "09:00"); err == nil {
-				if relevantDates[t.Format("2006-01-02")] {
-					relevantEntries = append(relevantEntries, e)
-				}
-			}
-		}
-
-		// Fetch descriptions for all relevant entries
-		allKeys := getUniqueTicketKeys(relevantEntries)
-		allSummaries, _ := client.GetIssueSummaries(allKeys)
-		for i := range relevantEntries {
-			if summary, ok := allSummaries[relevantEntries[i].IssueKey]; ok {
-				relevantEntries[i].Description = summary
-			}
-		}
-
-		fmt.Println("Processing worklogs " + ui.Muted.Render("(dry run)") + ":")
-		showDryRunGroupedByDay(relevantEntries, getExpectedHoursPerDay())
-		fmt.Println()
-		fmt.Println(ui.Warning("Dry run - no entries posted"))
-		return
-	}
 
 	fmt.Println("Processing worklogs:")
 
@@ -313,10 +358,11 @@ func runBatchLog(_ *cobra.Command, _ []string) {
 			status = ui.ErrorText.Render("FAILED") + " " + ui.Muted.Render("("+result.ErrorMessage+")")
 		}
 
-		fmt.Printf("  %s %s %s %s %s ... %s\n",
-			ui.Muted.Render(fmt.Sprintf("%d/%d", current, total)),
-			ui.Primary.Render(fmt.Sprintf("%-12s", result.Entry.IssueKey)),
-			ui.Muted.Render(fmt.Sprintf("%-30s", truncateString(result.Entry.Description, 30))),
+		descWidth := getDescriptionWidth()
+		fmt.Printf("  %s %s %s %s %s %s\n",
+			ui.Muted.Render(fmt.Sprintf("%d", current)),
+			ui.Primary.Render(fmt.Sprintf("%-20s", result.Entry.DisplayKey())),
+			ui.Muted.Render(fmt.Sprintf("%-*s", descWidth, truncateString(result.Entry.Description, descWidth))),
 			ui.Success.Render(fmt.Sprintf("%-8s", result.Entry.TimeSpent)),
 			ui.Muted.Render(fmt.Sprintf("%-12s", result.Entry.Date)),
 			status)
@@ -876,7 +922,6 @@ func showDryRunGroupedByDay(entries []batch.Entry, expectedHours time.Duration) 
 
 	// Print entries grouped by day
 	entryNum := 0
-	totalEntries := len(entries)
 
 	for _, dateKey := range dateOrder {
 		group := byDate[dateKey]
@@ -892,27 +937,34 @@ func showDryRunGroupedByDay(entries []batch.Entry, expectedHours time.Duration) 
 				if statusDisplay == "" {
 					statusDisplay = "PENDING"
 				}
-				fmt.Printf("  %s %s %s %s %s ... %s\n",
-					ui.Muted.Render(fmt.Sprintf("%d/%d", entryNum, totalEntries)),
-					ui.Muted.Render(fmt.Sprintf("%-12s", e.IssueKey)),
-					ui.Muted.Render(fmt.Sprintf("%-30s", truncateString(e.Description, 30))),
-					ui.Muted.Render(fmt.Sprintf("%-8s", e.TimeSpent)),
-					ui.Muted.Render(fmt.Sprintf("%-12s", e.Date)),
+				// Show "—" for DRAFT entries without TimeSpent
+				timeDisplay := e.TimeSpent
+				if timeDisplay == "" {
+					timeDisplay = "—"
+				}
+				descWidth := getDescriptionWidth()
+				fmt.Printf("  %s %s %s %s %s %s\n",
+					ui.Muted.Render(fmt.Sprintf("%d", entryNum)),
+					ui.Muted.Render(fmt.Sprintf("%-20s", e.DisplayKey())),
+					ui.Muted.Render(fmt.Sprintf("%-*s", descWidth, truncateString(e.Description, descWidth))),
+					ui.Muted.Render(fmt.Sprintf("%-8s", timeDisplay)),
+					ui.Muted.Render(fmt.Sprintf("%-12s", strings.Split(e.Date, " ")[0])),
 					ui.Muted.Render(statusDisplay))
 			} else {
 				// PENDING entries - normal colors
-				fmt.Printf("  %s %s %s %s %s ... %s\n",
-					ui.Muted.Render(fmt.Sprintf("%d/%d", entryNum, totalEntries)),
-					ui.Primary.Render(fmt.Sprintf("%-12s", e.IssueKey)),
-					ui.Muted.Render(fmt.Sprintf("%-30s", truncateString(e.Description, 30))),
+				descWidth := getDescriptionWidth()
+				fmt.Printf("  %s %s %s %s %s %s\n",
+					ui.Muted.Render(fmt.Sprintf("%d", entryNum)),
+					ui.Primary.Render(fmt.Sprintf("%-20s", e.DisplayKey())),
+					ui.Muted.Render(fmt.Sprintf("%-*s", descWidth, truncateString(e.Description, descWidth))),
 					ui.Success.Render(fmt.Sprintf("%-8s", e.TimeSpent)),
-					ui.Muted.Render(fmt.Sprintf("%-12s", e.Date)),
+					ui.Muted.Render(fmt.Sprintf("%-12s", strings.Split(e.Date, " ")[0])),
 					ui.Muted.Render("PENDING"))
 			}
 		}
 
 		// Print separator and total for this day
-		fmt.Println("  " + ui.Muted.Render("─────────────────────────────────────────────────────────────────────────────────────"))
+		fmt.Println("  " + ui.Divider(getContentWidth()-2))
 
 		// Calculate difference from expected
 		diff := group.total - expectedHours
@@ -930,9 +982,9 @@ func showDryRunGroupedByDay(entries []batch.Entry, expectedHours time.Duration) 
 		// Positions:     2   4   12           30                             8
 		// Total before time: 2 + 4 + 12 + 1 + 30 + 1 = 50
 		totalStr := duration.Format(group.total)
-		fmt.Printf("  %s%s%s    %s\n",
+		fmt.Printf("%s%s%s %s\n",
 			ui.Muted.Render(fmt.Sprintf("%-10s", dateKey)),
-			"                                      ", // 38 spaces to align with time column
+			strings.Repeat(" ", 16+getDescriptionWidth()), // dynamic spacing
 			ui.Success.Render(fmt.Sprintf("%-8s", totalStr)),
 			diffStr)
 
@@ -940,6 +992,33 @@ func showDryRunGroupedByDay(entries []batch.Entry, expectedHours time.Duration) 
 		if dateKey != dateOrder[len(dateOrder)-1] {
 			fmt.Println()
 		}
+	}
+
+	// Summary: count pending vs skipped entries
+	pendingCount := 0
+	draftCount := 0
+	var pendingTime time.Duration
+
+	for _, e := range entries {
+		if e.IsDraft() {
+			draftCount++
+		} else if e.NeedsProcessing() {
+			pendingCount++
+			dur, _ := duration.Parse(e.TimeSpent)
+			pendingTime += dur
+		}
+	}
+
+	fmt.Println()
+	if draftCount > 0 {
+		fmt.Printf("Summary: %s pending (%s will be posted), %s drafts (skipped)\n",
+			ui.Success.Render(fmt.Sprintf("%d", pendingCount)),
+			duration.Format(pendingTime),
+			ui.Muted.Render(fmt.Sprintf("%d", draftCount)))
+	} else {
+		fmt.Printf("Summary: %s pending (%s will be posted)\n",
+			ui.Success.Render(fmt.Sprintf("%d", pendingCount)),
+			duration.Format(pendingTime))
 	}
 }
 
@@ -979,7 +1058,6 @@ func showWorklogPreview(entries []batch.Entry, expectedHours time.Duration) {
 
 	// Print entries grouped by day
 	entryNum := 0
-	totalEntries := len(entries)
 
 	for _, dateKey := range dateOrder {
 		group := byDate[dateKey]
@@ -988,20 +1066,21 @@ func showWorklogPreview(entries []batch.Entry, expectedHours time.Duration) {
 		for _, e := range group.entries {
 			entryNum++
 
-			// Format date - show time only if present in the Date field
-			dateDisplay := e.Date
+			// Format date - show date only (strip time)
+			dateDisplay := strings.Split(e.Date, " ")[0]
+			descWidth := getDescriptionWidth()
 
-			fmt.Printf("  %s %s %s %s %s ... %s\n",
-				ui.Muted.Render(fmt.Sprintf("%d/%d", entryNum, totalEntries)),
-				ui.Primary.Render(fmt.Sprintf("%-12s", e.IssueKey)),
-				ui.Muted.Render(fmt.Sprintf("%-30s", truncateString(e.Description, 30))),
+			fmt.Printf("  %s %s %s %s %s %s\n",
+				ui.Muted.Render(fmt.Sprintf("%d", entryNum)),
+				ui.Primary.Render(fmt.Sprintf("%-20s", e.DisplayKey())),
+				ui.Muted.Render(fmt.Sprintf("%-*s", descWidth, truncateString(e.Description, descWidth))),
 				ui.Success.Render(fmt.Sprintf("%-8s", e.TimeSpent)),
-				ui.Muted.Render(fmt.Sprintf("%-16s", dateDisplay)),
+				ui.Muted.Render(fmt.Sprintf("%-12s", dateDisplay)),
 				ui.Muted.Render("PENDING"))
 		}
 
 		// Print separator and total for this day
-		fmt.Println("  " + ui.Muted.Render("─────────────────────────────────────────────────────────────────────────────────────"))
+		fmt.Println("  " + ui.Divider(getContentWidth()-2))
 
 		// Calculate difference from expected
 		diff := group.total - expectedHours
@@ -1015,9 +1094,9 @@ func showWorklogPreview(entries []batch.Entry, expectedHours time.Duration) {
 		}
 
 		totalStr := duration.Format(group.total)
-		fmt.Printf("  %s%s%s    %s\n",
+		fmt.Printf("%s%s%s %s\n",
 			ui.Muted.Render(fmt.Sprintf("%-10s", dateKey)),
-			"                                      ", // 38 spaces to align with time column
+			strings.Repeat(" ", 16+getDescriptionWidth()), // dynamic spacing
 			ui.Success.Render(fmt.Sprintf("%-8s", totalStr)),
 			diffStr)
 
