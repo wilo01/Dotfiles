@@ -11,7 +11,7 @@ var (
 	ColorSuccess   = lipgloss.Color("82")  // Green
 	ColorWarning   = lipgloss.Color("214") // Orange
 	ColorError     = lipgloss.Color("196") // Red
-	ColorMuted     = lipgloss.Color("241") // Gray
+	ColorMuted     = lipgloss.Color("246") // Gray (lighter for visibility)
 	ColorHighlight = lipgloss.Color("226") // Yellow
 )
 

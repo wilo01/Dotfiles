@@ -360,11 +360,11 @@ func runBatchLog(_ *cobra.Command, _ []string) {
 
 		descWidth := getDescriptionWidth()
 		fmt.Printf("  %s %s %s %s %s %s\n",
-			ui.Muted.Render(fmt.Sprintf("%d", current)),
-			ui.Primary.Render(fmt.Sprintf("%-20s", result.Entry.DisplayKey())),
-			ui.Muted.Render(fmt.Sprintf("%-*s", descWidth, truncateString(result.Entry.Description, descWidth))),
-			ui.Success.Render(fmt.Sprintf("%-8s", result.Entry.TimeSpent)),
-			ui.Muted.Render(fmt.Sprintf("%-12s", result.Entry.Date)),
+			ui.Muted.Render(padRight(fmt.Sprintf("%d", current), 2)),
+			ui.Primary.Render(padRight(result.Entry.DisplayKey(), 20)),
+			ui.Muted.Render(padRight(truncateString(result.Entry.Description, descWidth), descWidth)),
+			ui.Success.Render(padRight(result.Entry.TimeSpent, 8)),
+			ui.Muted.Render(padRight(result.Entry.Date, 12)),
 			status)
 	})
 
@@ -496,11 +496,11 @@ func runSyncLog(_ *cobra.Command, _ []string) {
 			for _, wl := range missing {
 				detail := details[wl.IssueKey]
 				fmt.Printf("  %s %s %s %s %s %s\n",
-					ui.Primary.Render("SYNC"),
-					ui.Primary.Render(fmt.Sprintf("%-12s", wl.IssueKey)),
-					ui.Muted.Render("["+detail.IssueType+"]"),
-					ui.Muted.Render(fmt.Sprintf("%-25s", truncateString(detail.Summary, 25))),
-					ui.Success.Render(fmt.Sprintf("%-8s", wl.TimeSpentStr)),
+					ui.Primary.Render(padRight("SYNC", 6)),
+					ui.Primary.Render(padRight(wl.IssueKey, 12)),
+					ui.Muted.Render(padRight("["+detail.IssueType+"]", 12)),
+					ui.Muted.Render(padRight(truncateString(detail.Summary, 25), 25)),
+					ui.Success.Render(padRight(wl.TimeSpentStr, 8)),
 					ui.Muted.Render(wl.Started.Format("02.01.2006 15:04")))
 			}
 			fmt.Println()
@@ -541,10 +541,10 @@ func runSyncLog(_ *cobra.Command, _ []string) {
 				if !exists {
 					draftPreviewCount++
 					fmt.Printf("  %s %s %s %s %s\n",
-						ui.Muted.Render("DRAFT"),
-						ui.Primary.Render(fmt.Sprintf("%-12s", issueKey)),
-						ui.Muted.Render("["+issueType+"]"),
-						ui.Muted.Render(truncateString(description, 25)),
+						ui.Muted.Render(padRight("DRAFT", 6)),
+						ui.Primary.Render(padRight(issueKey, 12)),
+						ui.Muted.Render(padRight("["+issueType+"]", 12)),
+						ui.Muted.Render(padRight(truncateString(description, 25), 25)),
 						ui.Muted.Render("("+lastLoggedDate+")"))
 				}
 			}
@@ -574,11 +574,11 @@ func runSyncLog(_ *cobra.Command, _ []string) {
 			}
 			addedCount++
 			fmt.Printf("  %s %s %s %s %s %s\n",
-				ui.Success.Render("SYNC"),
-				ui.Primary.Render(fmt.Sprintf("%-12s", wl.IssueKey)),
-				ui.Muted.Render("["+detail.IssueType+"]"),
-				ui.Muted.Render(fmt.Sprintf("%-25s", truncateString(detail.Summary, 25))),
-				ui.Success.Render(fmt.Sprintf("%-8s", wl.TimeSpentStr)),
+				ui.Success.Render(padRight("SYNC", 6)),
+				ui.Primary.Render(padRight(wl.IssueKey, 12)),
+				ui.Muted.Render(padRight("["+detail.IssueType+"]", 12)),
+				ui.Muted.Render(padRight(truncateString(detail.Summary, 25), 25)),
+				ui.Success.Render(padRight(wl.TimeSpentStr, 8)),
 				ui.Muted.Render(dateStr))
 		}
 
@@ -677,9 +677,9 @@ func runSyncLog(_ *cobra.Command, _ []string) {
 			if err == nil {
 				draftCount++
 				fmt.Printf("  %s %s %s %s\n",
-					ui.Muted.Render("DRAFT"),
-					ui.Primary.Render(fmt.Sprintf("%-12s", issueKey)),
-					ui.Muted.Render("["+issueType+"]"),
+					ui.Muted.Render(padRight("DRAFT", 6)),
+					ui.Primary.Render(padRight(issueKey, 12)),
+					ui.Muted.Render(padRight("["+issueType+"]", 12)),
 					ui.Muted.Render(truncateString(description, 35)))
 			}
 		}
@@ -752,15 +752,26 @@ func getUniqueWorklogKeys(worklogs []internalJira.Worklog) []string {
 }
 
 // truncateString truncates a string to maxLen, adding "..." if truncated
+// Uses rune count for correct handling of multibyte UTF-8 characters
 // TO REVIEW: Could move to shared utils (also in add.go) - skipped: only 2 occurrences
 func truncateString(s string, maxLen int) string {
-	if len(s) <= maxLen {
+	runes := []rune(s)
+	if len(runes) <= maxLen {
 		return s
 	}
 	if maxLen <= 3 {
-		return s[:maxLen]
+		return string(runes[:maxLen])
 	}
-	return s[:maxLen-3] + "..."
+	return string(runes[:maxLen-3]) + "..."
+}
+
+// padRight pads a string to width using rune count for consistent visual alignment
+func padRight(s string, width int) string {
+	runes := []rune(s)
+	if len(runes) >= width {
+		return s
+	}
+	return s + strings.Repeat(" ", width-len(runes))
 }
 
 // unique returns unique strings from a slice
@@ -944,22 +955,22 @@ func showDryRunGroupedByDay(entries []batch.Entry, expectedHours time.Duration) 
 				}
 				descWidth := getDescriptionWidth()
 				fmt.Printf("  %s %s %s %s %s %s\n",
-					ui.Muted.Render(fmt.Sprintf("%d", entryNum)),
-					ui.Muted.Render(fmt.Sprintf("%-20s", e.DisplayKey())),
-					ui.Muted.Render(fmt.Sprintf("%-*s", descWidth, truncateString(e.Description, descWidth))),
-					ui.Muted.Render(fmt.Sprintf("%-8s", timeDisplay)),
-					ui.Muted.Render(fmt.Sprintf("%-12s", strings.Split(e.Date, " ")[0])),
+					ui.Muted.Render(padRight(fmt.Sprintf("%d", entryNum), 2)),
+					ui.Muted.Render(padRight(e.DisplayKey(), 20)),
+					ui.Muted.Render(padRight(truncateString(e.Description, descWidth), descWidth)),
+					ui.Muted.Render(padRight(timeDisplay, 8)),
+					ui.Muted.Render(padRight(strings.Split(e.Date, " ")[0], 12)),
 					ui.Muted.Render(statusDisplay))
 			} else {
-				// PENDING entries - normal colors
+				// PENDING entries - normal colors with highlighted status
 				descWidth := getDescriptionWidth()
 				fmt.Printf("  %s %s %s %s %s %s\n",
-					ui.Muted.Render(fmt.Sprintf("%d", entryNum)),
-					ui.Primary.Render(fmt.Sprintf("%-20s", e.DisplayKey())),
-					ui.Muted.Render(fmt.Sprintf("%-*s", descWidth, truncateString(e.Description, descWidth))),
-					ui.Success.Render(fmt.Sprintf("%-8s", e.TimeSpent)),
-					ui.Muted.Render(fmt.Sprintf("%-12s", strings.Split(e.Date, " ")[0])),
-					ui.Muted.Render("PENDING"))
+					ui.Muted.Render(padRight(fmt.Sprintf("%d", entryNum), 2)),
+					ui.Primary.Render(padRight(e.DisplayKey(), 20)),
+					ui.Muted.Render(padRight(truncateString(e.Description, descWidth), descWidth)),
+					ui.Success.Render(padRight(e.TimeSpent, 8)),
+					ui.Muted.Render(padRight(strings.Split(e.Date, " ")[0], 12)),
+					ui.SuccessBold.Render("PENDING"))
 			}
 		}
 
@@ -977,15 +988,14 @@ func showDryRunGroupedByDay(entries []batch.Entry, expectedHours time.Duration) 
 			diffStr = ui.Success.Render("✓")
 		}
 
-		// Align total under time_spent column
-		// Entry format: "  X/X TICKET-KEY    DESCRIPTION                    TIME     DATE..."
-		// Positions:     2   4   12           30                             8
-		// Total before time: 2 + 4 + 12 + 1 + 30 + 1 = 50
+		// Align total under time column
+		// Time column at: 2 + 2 + 1 + 20 + 1 + descWidth + 1 = 27 + descWidth
 		totalStr := duration.Format(group.total)
-		fmt.Printf("%s%s%s %s\n",
-			ui.Muted.Render(fmt.Sprintf("%-10s", dateKey)),
-			strings.Repeat(" ", 16+getDescriptionWidth()), // dynamic spacing
-			ui.Success.Render(fmt.Sprintf("%-8s", totalStr)),
+		descWidth := getDescriptionWidth()
+		timeColStart := 27 + descWidth
+		fmt.Printf("%s%s %s\n",
+			strings.Repeat(" ", timeColStart),
+			ui.Success.Render(padRight(totalStr, 8)),
 			diffStr)
 
 		// Add blank line between days (except for last day)
@@ -1071,12 +1081,12 @@ func showWorklogPreview(entries []batch.Entry, expectedHours time.Duration) {
 			descWidth := getDescriptionWidth()
 
 			fmt.Printf("  %s %s %s %s %s %s\n",
-				ui.Muted.Render(fmt.Sprintf("%d", entryNum)),
-				ui.Primary.Render(fmt.Sprintf("%-20s", e.DisplayKey())),
-				ui.Muted.Render(fmt.Sprintf("%-*s", descWidth, truncateString(e.Description, descWidth))),
-				ui.Success.Render(fmt.Sprintf("%-8s", e.TimeSpent)),
-				ui.Muted.Render(fmt.Sprintf("%-12s", dateDisplay)),
-				ui.Muted.Render("PENDING"))
+				ui.Muted.Render(padRight(fmt.Sprintf("%d", entryNum), 2)),
+				ui.Primary.Render(padRight(e.DisplayKey(), 20)),
+				ui.Muted.Render(padRight(truncateString(e.Description, descWidth), descWidth)),
+				ui.Success.Render(padRight(e.TimeSpent, 8)),
+				ui.Muted.Render(padRight(dateDisplay, 12)),
+				ui.SuccessBold.Render("PENDING"))
 		}
 
 		// Print separator and total for this day
@@ -1094,10 +1104,11 @@ func showWorklogPreview(entries []batch.Entry, expectedHours time.Duration) {
 		}
 
 		totalStr := duration.Format(group.total)
-		fmt.Printf("%s%s%s %s\n",
-			ui.Muted.Render(fmt.Sprintf("%-10s", dateKey)),
-			strings.Repeat(" ", 16+getDescriptionWidth()), // dynamic spacing
-			ui.Success.Render(fmt.Sprintf("%-8s", totalStr)),
+		descWidth := getDescriptionWidth()
+		timeColStart := 27 + descWidth
+		fmt.Printf("%s%s %s\n",
+			strings.Repeat(" ", timeColStart),
+			ui.Success.Render(padRight(totalStr, 8)),
 			diffStr)
 
 		// Add blank line between days (except for last day)
