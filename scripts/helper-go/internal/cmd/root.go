@@ -9,6 +9,7 @@ import (
 	"github.com/dariuszw/hlp/internal/cmd/git"
 	"github.com/dariuszw/hlp/internal/cmd/jira"
 	"github.com/dariuszw/hlp/internal/cmd/namefinder"
+	"github.com/dariuszw/hlp/internal/cmd/qr"
 	"github.com/dariuszw/hlp/internal/cmd/standup"
 	"github.com/dariuszw/hlp/internal/cmd/timesheet"
 	"github.com/dariuszw/hlp/internal/config"
@@ -53,6 +54,7 @@ func init() {
 	rootCmd.AddCommand(standup.StandupCmd)
 	rootCmd.AddCommand(timesheet.TimesheetCmd)
 	rootCmd.AddCommand(namefinder.NameFinderCmd)
+	rootCmd.AddCommand(qr.QrCmd)
 }
 
 func initConfig() {
