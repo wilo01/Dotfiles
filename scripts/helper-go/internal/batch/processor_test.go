@@ -1,9 +1,11 @@
 package batch
 
 import (
+	"context"
 	"os"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestEntryExistsForTicket(t *testing.T) {
@@ -189,5 +191,162 @@ func TestCSVQuotingWithCommas(t *testing.T) {
 				t.Errorf("Round-trip failed: got %q, want %q", entries[0].Description, tt.description)
 			}
 		})
+	}
+}
+
+func TestWaitWithCountdown_ContextCancellation(t *testing.T) {
+	// Test that waitWithCountdown returns false when context is cancelled
+	ctx, cancel := context.WithCancel(context.Background())
+
+	// Cancel immediately
+	cancel()
+
+	start := time.Now()
+	result := waitWithCountdown(ctx, 60) // Would wait 60s if not cancelled
+	elapsed := time.Since(start)
+
+	if result != false {
+		t.Error("Expected waitWithCountdown to return false when context is cancelled")
+	}
+
+	if elapsed > 2*time.Second {
+		t.Errorf("Expected immediate return on cancelled context, but took %v", elapsed)
+	}
+}
+
+func TestWaitWithCountdown_ShortDuration(t *testing.T) {
+	// Test that waitWithCountdown completes normally for short duration
+	ctx := context.Background()
+
+	start := time.Now()
+	result := waitWithCountdown(ctx, 2) // Wait 2 seconds
+	elapsed := time.Since(start)
+
+	if result != true {
+		t.Error("Expected waitWithCountdown to return true on normal completion")
+	}
+
+	// Should take approximately 2 seconds (with some tolerance)
+	if elapsed < 1*time.Second || elapsed > 4*time.Second {
+		t.Errorf("Expected ~2s duration, got %v", elapsed)
+	}
+}
+
+func TestWaitWithCountdown_CancelDuringWait(t *testing.T) {
+	// Test that waitWithCountdown can be interrupted mid-wait
+	ctx, cancel := context.WithCancel(context.Background())
+
+	// Cancel after 500ms
+	go func() {
+		time.Sleep(500 * time.Millisecond)
+		cancel()
+	}()
+
+	start := time.Now()
+	result := waitWithCountdown(ctx, 60) // Would wait 60s if not cancelled
+	elapsed := time.Since(start)
+
+	if result != false {
+		t.Error("Expected waitWithCountdown to return false when cancelled mid-wait")
+	}
+
+	// Should return within ~1 second (500ms cancel + up to 1s sleep cycle)
+	if elapsed > 2*time.Second {
+		t.Errorf("Expected return within ~1s after cancel, but took %v", elapsed)
+	}
+}
+
+func TestProcessBatch_SlowModeWithMock(t *testing.T) {
+	// Test ProcessBatch with slowMode=true in mock mode
+	// Mock mode skips actual JIRA calls, so we can test the flow
+	processor := &Processor{
+		defaultTime: "09:00",
+		mockMode:    true,
+	}
+
+	entries := []Entry{
+		{IssueKey: "TEST-1", Date: "01.01.2025", TimeSpent: "1h", RowNumber: 1},
+		{IssueKey: "TEST-2", Date: "01.01.2025", TimeSpent: "2h", RowNumber: 2},
+	}
+
+	var progressCalls int
+	progressFn := func(current, total int, result Result) {
+		progressCalls++
+	}
+
+	// Note: This test will take ~40-240 seconds with real delays
+	// For unit testing, we test with slowMode=false to verify the parameter is accepted
+	results := processor.ProcessBatch(entries, false, false, progressFn)
+
+	if len(results) != 2 {
+		t.Errorf("Expected 2 results, got %d", len(results))
+	}
+
+	if progressCalls != 2 {
+		t.Errorf("Expected 2 progress calls, got %d", progressCalls)
+	}
+
+	for i, r := range results {
+		if !r.Success {
+			t.Errorf("Entry %d: expected success, got error: %s", i, r.ErrorMessage)
+		}
+		if r.NewStatus != StatusDone {
+			t.Errorf("Entry %d: expected status %s, got %s", i, StatusDone, r.NewStatus)
+		}
+	}
+}
+
+func TestProcessBatch_SlowModeSignature(t *testing.T) {
+	// Test that ProcessBatch accepts slowMode parameter
+	// This is a compile-time check essentially, but verifies the API
+	processor := &Processor{
+		defaultTime: "09:00",
+		mockMode:    true,
+	}
+
+	entries := []Entry{
+		{IssueKey: "TEST-1", Date: "01.01.2025", TimeSpent: "1h", RowNumber: 1},
+	}
+
+	// Test with slowMode=true (short test with single entry, no delay after last)
+	results := processor.ProcessBatch(entries, false, true, nil)
+
+	if len(results) != 1 {
+		t.Errorf("Expected 1 result, got %d", len(results))
+	}
+
+	if !results[0].Success {
+		t.Errorf("Expected success, got error: %s", results[0].ErrorMessage)
+	}
+}
+
+func TestProcessBatch_DryRunIgnoresSlowMode(t *testing.T) {
+	// Test that dry-run mode works regardless of slowMode setting
+	processor := &Processor{
+		defaultTime: "09:00",
+	}
+
+	entries := []Entry{
+		{IssueKey: "TEST-1", Date: "01.01.2025", TimeSpent: "1h", RowNumber: 1},
+		{IssueKey: "TEST-2", Date: "01.01.2025", TimeSpent: "2h", RowNumber: 2},
+	}
+
+	start := time.Now()
+	results := processor.ProcessBatch(entries, true, true, nil) // dryRun=true, slowMode=true
+	elapsed := time.Since(start)
+
+	// Dry-run should be fast even with slowMode=true
+	if elapsed > 2*time.Second {
+		t.Errorf("Dry-run with slowMode should be fast, but took %v", elapsed)
+	}
+
+	if len(results) != 2 {
+		t.Errorf("Expected 2 results, got %d", len(results))
+	}
+
+	for i, r := range results {
+		if !r.Success {
+			t.Errorf("Entry %d: expected success in dry-run, got error: %s", i, r.ErrorMessage)
+		}
 	}
 }

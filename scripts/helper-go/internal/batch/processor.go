@@ -1,12 +1,16 @@
 package batch
 
 import (
+	"context"
 	"encoding/csv"
 	"fmt"
+	"math/rand"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"sort"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/dariuszw/hlp/internal/config"
@@ -472,11 +476,37 @@ func (p *Processor) SyncWorklog(entry Entry) Result {
 }
 
 // ProcessBatch processes all entries
-func (p *Processor) ProcessBatch(entries []Entry, dryRun bool, progressFn func(current, total int, result Result)) []Result {
+// slowMode adds random delays (20-120s) between entries to make timestamps appear more organic
+func (p *Processor) ProcessBatch(entries []Entry, dryRun bool, slowMode bool, progressFn func(current, total int, result Result)) []Result {
 	var results []Result
 	total := len(entries)
 
+	// Setup signal handling for graceful Ctrl+C (only in slow mode)
+	ctx, cancel := context.WithCancel(context.Background())
+	if slowMode {
+		sigChan := make(chan os.Signal, 1)
+		signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+		go func() {
+			select {
+			case <-sigChan:
+				cancel()
+			case <-ctx.Done():
+				// Exit goroutine when context is cancelled (normal completion)
+			}
+		}()
+		defer signal.Stop(sigChan)
+	}
+	defer cancel()
+
 	for i, entry := range entries {
+		// Check for cancellation
+		select {
+		case <-ctx.Done():
+			fmt.Println("\n  Interrupted - stopping batch (already posted entries remain)")
+			return results
+		default:
+		}
+
 		var result Result
 
 		if dryRun {
@@ -509,9 +539,41 @@ func (p *Processor) ProcessBatch(entries []Entry, dryRun bool, progressFn func(c
 		if !result.Success && strings.Contains(result.ErrorMessage, "401") {
 			break
 		}
+
+		// Add delay between entries in slow mode (not after last one, not on failure, not in dry-run)
+		if slowMode && !dryRun && result.Success && i < len(entries)-1 {
+			delay := 20 + rand.Intn(101) // 20-120 seconds
+			if !waitWithCountdown(ctx, delay) {
+				fmt.Println("\n  Interrupted - stopping batch (already posted entries remain)")
+				return results
+			}
+		}
 	}
 
 	return results
+}
+
+// waitWithCountdown displays a countdown and waits, returning false if cancelled
+func waitWithCountdown(ctx context.Context, seconds int) bool {
+	for remaining := seconds; remaining > 0; remaining-- {
+		select {
+		case <-ctx.Done():
+			fmt.Println()
+			return false
+		default:
+			mins := remaining / 60
+			secs := remaining % 60
+			if mins > 0 {
+				fmt.Printf("\r  Waiting %dm%02ds before next entry... (Ctrl+C to cancel)", mins, secs)
+			} else {
+				fmt.Printf("\r  Waiting %ds before next entry... (Ctrl+C to cancel)    ", secs)
+			}
+			time.Sleep(1 * time.Second)
+		}
+	}
+	// Clear the countdown line
+	fmt.Print("\r" + strings.Repeat(" ", 60) + "\r")
+	return true
 }
 
 // UpdateCSVStatus updates the CSV file with new statuses

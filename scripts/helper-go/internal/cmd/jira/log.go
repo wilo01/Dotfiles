@@ -29,6 +29,7 @@ var (
 	logFromDate string
 	logToDate   string
 	logConfirm  bool
+	logSlow     bool // --slow: Add delays between batch entries
 )
 
 // getDescriptionWidth returns dynamic description column width based on terminal
@@ -64,6 +65,7 @@ Examples:
   hlp jira log 30m                          # Uses auto-detected ticket
   hlp jira log --batch                      # Process CSV file
   hlp jira log --batch --dry-run            # Preview batch without posting
+  hlp jira log --batch --slow               # Post with random delays (20s-2min)
   hlp jira log --sync                       # Sync worklogs from JIRA (last 7 days)
   hlp jira log --sync --from 2025-12-01     # Sync from specific date
   hlp jira log --sync --dry-run             # Preview sync without changes`,
@@ -82,6 +84,7 @@ func init() {
 	logCmd.Flags().StringVar(&logFromDate, "from", "", "Start date for sync (YYYY-MM-DD, default: 7 days ago)")
 	logCmd.Flags().StringVar(&logToDate, "to", "", "End date for sync (YYYY-MM-DD, default: today)")
 	logCmd.Flags().BoolVarP(&logConfirm, "confirm", "y", false, "Skip confirmation prompt for protected profiles")
+	logCmd.Flags().BoolVar(&logSlow, "slow", false, "Add 20s-2min random delays between entries")
 }
 
 func runLog(cmd *cobra.Command, args []string) {
@@ -346,7 +349,7 @@ func runBatchLog(_ *cobra.Command, _ []string) {
 		Profile:     profile,
 		MockMode:    mockMode,
 	})
-	results := processor.ProcessBatch(entries, false, func(current, total int, result batch.Result) {
+	results := processor.ProcessBatch(entries, false, logSlow, func(current, total int, result batch.Result) {
 		var status string
 		if result.Success {
 			if result.ErrorMessage != "" {
