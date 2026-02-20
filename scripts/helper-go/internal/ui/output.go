@@ -192,7 +192,9 @@ func ConfirmProtectedProfile(profileName, baseURL string, entryCount int) bool {
 	fmt.Println(Divider(50))
 	fmt.Printf("  Profile:  %s\n", Primary.Render(profileName))
 	fmt.Printf("  URL:      %s\n", Muted.Render(baseURL))
-	fmt.Printf("  Entries:  %s\n", Success.Render(fmt.Sprintf("%d", entryCount)))
+	if entryCount >= 0 {
+		fmt.Printf("  Entries:  %s\n", Success.Render(fmt.Sprintf("%d", entryCount)))
+	}
 	fmt.Println(Divider(50))
 	fmt.Println()
 
@@ -326,6 +328,44 @@ func FormatScheduleHeader(slotName, targetTime string, loop bool) string {
 	}
 	sb.WriteString("\n")
 	return sb.String()
+}
+
+// statusStyle returns the canonical lipgloss style for a worklog status label.
+func statusStyle(status string) lipgloss.Style {
+	switch status {
+	case "DONE", "SYNC", "UPDATED":
+		return Success
+	case "DRAFT":
+		return WarningText
+	case "PENDING":
+		return Primary
+	case "FAILED":
+		return ErrorText
+	default:
+		return SuccessBold
+	}
+}
+
+// FormatStatus applies canonical colors to worklog status labels.
+func FormatStatus(status string) string {
+	return statusStyle(status).Render(status)
+}
+
+// FormatStatusPadded applies canonical colors to a status label padded to a
+// fixed column width. Padding is applied BEFORE styling so that ANSI escape
+// codes do not break rune-counting alignment.
+func FormatStatusPadded(status string, width int) string {
+	padded := status
+	if len(status) < width {
+		padded = status + strings.Repeat(" ", width-len(status))
+	}
+	return statusStyle(status).Render(padded)
+}
+
+// Hyperlink wraps text in an OSC 8 terminal hyperlink escape sequence.
+// Supported by iTerm2, GNOME Terminal, Windows Terminal, Kitty, WezTerm, etc.
+func Hyperlink(text, url string) string {
+	return fmt.Sprintf("\033]8;;%s\a%s\033]8;;\a", url, text)
 }
 
 // ClearLine clears the current line in the terminal

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/dariuszw/hlp/internal/ui"
 )
 
 // View renders the TUI
@@ -258,11 +259,7 @@ func (m Model) renderDetailPanel(width int) string {
 	if status == "" {
 		status = "PENDING"
 	}
-	statusStyle := statusPendingStyle
-	if status == "DONE" || status == "SYNC" {
-		statusStyle = statusDoneStyle
-	}
-	sb.WriteString(statusStyle.Render(status))
+	sb.WriteString(ui.FormatStatus(status))
 	sb.WriteString("\n")
 
 	sb.WriteString("\n")

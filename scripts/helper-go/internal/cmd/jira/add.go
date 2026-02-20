@@ -156,26 +156,25 @@ func runAdd(cmd *cobra.Command, args []string) {
 			}
 		}
 
-		// Skip already-logged entries without fetching from JIRA
-		if existingEntry != nil {
-			if existingEntry.Status == batch.StatusDone ||
-				existingEntry.Status == batch.StatusSync ||
-				existingEntry.Status == batch.StatusUpdated ||
-				existingEntry.TimeSpent != "" {
-				if !addQuiet {
-					displayKey := existingEntry.IssueKey
-					if existingEntry.SubtaskKey != "" {
-						displayKey = existingEntry.IssueKey + " > " + existingEntry.SubtaskKey
-					}
-					fmt.Printf("%s %s - already logged today (%s %s)\n",
-						ui.Muted.Render("⊘"),
-						ui.Muted.Render(displayKey),
-						ui.Muted.Render(existingEntry.TimeSpent),
-						ui.Muted.Render(existingEntry.Status))
+		// Skip entries that already exist for today (any status except DRAFT which gets updated below)
+		if existingEntry != nil && existingEntry.Status != batch.StatusDraft {
+			if !addQuiet {
+				displayKey := existingEntry.IssueKey
+				if existingEntry.SubtaskKey != "" {
+					displayKey = existingEntry.IssueKey + " > " + existingEntry.SubtaskKey
 				}
-				skipped++
-				continue
+				statusDisplay := existingEntry.Status
+				if statusDisplay == "" {
+					statusDisplay = "PENDING"
+				}
+				fmt.Printf("%s %s - already exists today (%s %s)\n",
+					ui.Muted.Render("⊘"),
+					ui.Muted.Render(displayKey),
+					ui.Muted.Render(existingEntry.TimeSpent),
+					ui.Muted.Render(statusDisplay))
 			}
+			skipped++
+			continue
 		}
 
 		// Fetch ticket info (needed for new entries and DRAFT updates)
@@ -426,15 +425,10 @@ func RunAutoSync(quiet bool) error {
 			}
 		}
 
-		// Skip already-logged entries without fetching from JIRA
-		if existingEntry != nil {
-			if existingEntry.Status == batch.StatusDone ||
-				existingEntry.Status == batch.StatusSync ||
-				existingEntry.Status == batch.StatusUpdated ||
-				existingEntry.TimeSpent != "" {
-				skipped++
-				continue
-			}
+		// Skip entries that already exist for today (any status except DRAFT which gets updated below)
+		if existingEntry != nil && existingEntry.Status != batch.StatusDraft {
+			skipped++
+			continue
 		}
 
 		// Fetch ticket info (needed for new entries and DRAFT updates)

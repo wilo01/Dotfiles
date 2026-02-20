@@ -92,10 +92,13 @@ func (e Entry) GetLoggingTarget() string {
 }
 
 // EntryExistsForTicket checks if an entry exists for the given ticket on the specified date.
+// Matches on both IssueKey and SubtaskKey to handle subtask entries correctly.
 // For subtasks, it also checks if the description contains the subtask summary.
-func EntryExistsForTicket(entries []Entry, issueKey, date string, isSubtask bool, subtaskSummary string) bool {
+func EntryExistsForTicket(entries []Entry, ticketKey, date string, isSubtask bool, subtaskSummary string) bool {
 	for _, e := range entries {
-		if !strings.EqualFold(e.IssueKey, issueKey) {
+		keyMatches := strings.EqualFold(e.IssueKey, ticketKey) ||
+			(e.SubtaskKey != "" && strings.EqualFold(e.SubtaskKey, ticketKey))
+		if !keyMatches {
 			continue
 		}
 		entryDate := strings.Split(e.Date, " ")[0]
@@ -1045,7 +1048,7 @@ func SortEntries(entries []Entry, order EntryOrder) {
 			entries[i], entries[j] = entries[j], entries[i]
 		})
 	case OrderNewest:
-		sort.Slice(entries, func(i, j int) bool {
+		sort.SliceStable(entries, func(i, j int) bool {
 			dateI, _ := ParseDate(entries[i].Date, "00:00")
 			dateJ, _ := ParseDate(entries[j].Date, "00:00")
 			return dateJ.Before(dateI) // Descending (newest first)
@@ -1053,7 +1056,7 @@ func SortEntries(entries []Entry, order EntryOrder) {
 	case OrderOldest:
 		fallthrough
 	default:
-		sort.Slice(entries, func(i, j int) bool {
+		sort.SliceStable(entries, func(i, j int) bool {
 			dateI, _ := ParseDate(entries[i].Date, "00:00")
 			dateJ, _ := ParseDate(entries[j].Date, "00:00")
 			return dateI.Before(dateJ) // Ascending (oldest first)

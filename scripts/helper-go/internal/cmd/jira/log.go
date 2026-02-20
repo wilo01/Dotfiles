@@ -104,6 +104,7 @@ func init() {
 	logCmd.Flags().BoolVarP(&logConfirm, "confirm", "y", false, "Skip confirmation prompt for protected profiles")
 	logCmd.Flags().BoolVar(&logSlow, "slow", false, "Add 20s-2min random delays between entries")
 	logCmd.Flags().StringVar(&logSchedule, "schedule", "", "Wait for scheduled time: 'morning', 'afternoon', or empty for next slot")
+	logCmd.Flag("schedule").NoOptDefVal = "next" // bare --schedule (no value) means "next available slot"
 	logCmd.Flags().StringVar(&logOrder, "order", "oldest", "Entry order for slow mode: oldest (default), newest, random")
 }
 
@@ -234,8 +235,8 @@ func validateOrderFlag(order string) error {
 }
 
 // loadBatchProfile loads the active profile and displays profile info.
-// Returns the profile, CSV path, and any error.
-func loadBatchProfile() (*config.JiraProfile, string, error) {
+// Returns the profile and CSV path. Falls back to default profile on error.
+func loadBatchProfile() (*config.JiraProfile, string) {
 	profile, err := config.GetActiveProfile()
 	if err != nil {
 		fmt.Println(ui.Muted.Render("  (using default profile)"))
@@ -256,7 +257,7 @@ func loadBatchProfile() (*config.JiraProfile, string, error) {
 	}
 
 	fmt.Printf("Loading %s...\n", ui.Primary.Render(csvPath))
-	return profile, csvPath, nil
+	return profile, csvPath
 }
 
 func runBatchLog(_ *cobra.Command, _ []string) {
@@ -269,7 +270,7 @@ func runBatchLog(_ *cobra.Command, _ []string) {
 	// DRY-RUN MODE: Handle separately with ALL entries (including DRAFT)
 	// This must come BEFORE ParsePendingCSV() to avoid filtering out DRAFT entries
 	if logDryRun {
-		_, csvPath, _ := loadBatchProfile()
+		_, csvPath := loadBatchProfile()
 
 		allEntries, err := batch.ParseCSV(csvPath)
 		if err != nil {
@@ -360,7 +361,7 @@ func runBatchLog(_ *cobra.Command, _ []string) {
 
 // runBatchLogCore contains the shared batch processing logic
 func runBatchLogCore(cfg batchRunConfig) {
-	profile, csvPath, _ := loadBatchProfile()
+	profile, csvPath := loadBatchProfile()
 
 	// BATCH MODE: Use filtered entries (excludes DRAFT and DONE)
 	entries, err := batch.ParsePendingCSV(csvPath)
@@ -436,12 +437,12 @@ func runBatchLogCore(cfg batchRunConfig) {
 		var status string
 		if result.Success {
 			if result.ErrorMessage != "" {
-				status = ui.Success.Render(result.NewStatus) + " " + ui.Muted.Render(result.ErrorMessage)
+				status = ui.FormatStatus(result.NewStatus) + " " + ui.Muted.Render(result.ErrorMessage)
 			} else {
-				status = ui.Success.Render(result.NewStatus)
+				status = ui.FormatStatus(result.NewStatus)
 			}
 		} else {
-			status = ui.ErrorText.Render("FAILED") + " " + ui.Muted.Render("("+result.ErrorMessage+")")
+			status = ui.FormatStatus("FAILED") + " " + ui.Muted.Render("("+result.ErrorMessage+")")
 		}
 
 		descWidth := getDescriptionWidth()
@@ -508,6 +509,17 @@ func runScheduledBatchLog(_ *cobra.Command, _ []string) {
 		return
 	}
 
+	// Safety: require upfront confirmation for protected profiles
+	// This runs once at startup; subsequent loop iterations skip re-prompting.
+	profile, err := config.GetActiveProfile()
+	if err == nil && profile != nil && profile.Protected {
+		fmt.Println(ui.Warning("Scheduled mode will post worklogs to a PROTECTED profile"))
+		if !ui.ConfirmProtectedProfile(profile.Name, profile.BaseURL, -1) {
+			fmt.Println(ui.Info("Scheduled mode cancelled"))
+			return
+		}
+	}
+
 	// Load schedule configuration
 	schedule, err := config.GetScheduleConfig()
 	if err != nil {
@@ -522,7 +534,7 @@ func runScheduledBatchLog(_ *cobra.Command, _ []string) {
 
 	// Determine target slot name (empty string means "next available")
 	targetSlot := ""
-	if logSchedule != "next" && logSchedule != "true" && logSchedule != "" {
+	if logSchedule != "next" {
 		targetSlot = logSchedule
 	}
 
@@ -536,9 +548,13 @@ func runScheduledBatchLog(_ *cobra.Command, _ []string) {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 	go func() {
-		<-sigChan
-		fmt.Println("\n\n" + ui.Info("Interrupted - exiting scheduled mode"))
-		cancel()
+		select {
+		case <-sigChan:
+			fmt.Println("\n\n" + ui.Info("Interrupted - exiting scheduled mode"))
+			cancel()
+		case <-ctx.Done():
+			// Exit goroutine when context is cancelled (normal completion)
+		}
 	}()
 	defer signal.Stop(sigChan)
 	defer cancel()
@@ -684,7 +700,7 @@ func runSyncLog(_ *cobra.Command, _ []string) {
 			for _, wl := range missing {
 				detail := details[wl.IssueKey]
 				fmt.Printf("  %s %s %s %s %s %s\n",
-					ui.Primary.Render(padRight("SYNC", 6)),
+					ui.FormatStatusPadded("SYNC", 6),
 					ui.Primary.Render(padRight(wl.IssueKey, 12)),
 					ui.Muted.Render(padRight("["+detail.IssueType+"]", 12)),
 					ui.Muted.Render(padRight(truncateString(detail.Summary, 25), 25)),
@@ -729,7 +745,7 @@ func runSyncLog(_ *cobra.Command, _ []string) {
 				if !exists {
 					draftPreviewCount++
 					fmt.Printf("  %s %s %s %s %s\n",
-						ui.Muted.Render(padRight("DRAFT", 6)),
+						ui.FormatStatusPadded("DRAFT", 6),
 						ui.Primary.Render(padRight(issueKey, 12)),
 						ui.Muted.Render(padRight("["+issueType+"]", 12)),
 						ui.Muted.Render(padRight(truncateString(description, 25), 25)),
@@ -755,14 +771,14 @@ func runSyncLog(_ *cobra.Command, _ []string) {
 			detail := details[wl.IssueKey]
 			if err = batch.AppendEntryWithStatus(csvPath, wl.IssueKey, "", detail.IssueType, detail.Summary, wl.TimeSpentStr, dateStr, wl.Comment, "", batch.StatusSync); err != nil {
 				fmt.Printf("  %s %s - %s\n",
-					ui.ErrorText.Render("FAILED"),
+					ui.FormatStatus("FAILED"),
 					ui.Primary.Render(wl.IssueKey),
 					ui.Muted.Render(err.Error()))
 				continue
 			}
 			addedCount++
 			fmt.Printf("  %s %s %s %s %s %s\n",
-				ui.Success.Render(padRight("SYNC", 6)),
+				ui.FormatStatusPadded("SYNC", 6),
 				ui.Primary.Render(padRight(wl.IssueKey, 12)),
 				ui.Muted.Render(padRight("["+detail.IssueType+"]", 12)),
 				ui.Muted.Render(padRight(truncateString(detail.Summary, 25), 25)),
@@ -865,7 +881,7 @@ func runSyncLog(_ *cobra.Command, _ []string) {
 			if err == nil {
 				draftCount++
 				fmt.Printf("  %s %s %s %s\n",
-					ui.Muted.Render(padRight("DRAFT", 6)),
+					ui.FormatStatusPadded("DRAFT", 6),
 					ui.Primary.Render(padRight(issueKey, 12)),
 					ui.Muted.Render(padRight("["+issueType+"]", 12)),
 					ui.Muted.Render(truncateString(description, 35)))
@@ -1054,10 +1070,11 @@ func showBatchDailyWarnings(client *internalJira.Client, results []batch.Result)
 	analysis := worklog.AnalyzeDailyTotals(worklogs, expectedDur)
 
 	if analysis.HasWarnings {
-		cfg, _ := config.Load()
-		expectedStr := cfg.Preferences.ExpectedHoursPerDay
-		if expectedStr == "" {
-			expectedStr = "8h"
+		expectedStr := "8h"
+		if cfg, err := config.Load(); err == nil {
+			if cfg.Preferences.ExpectedHoursPerDay != "" {
+				expectedStr = cfg.Preferences.ExpectedHoursPerDay
+			}
 		}
 
 		fmt.Print(ui.DailyBreakdown(analysis.Summaries, expectedStr))
@@ -1158,7 +1175,7 @@ func showDryRunGroupedByDay(entries []batch.Entry, expectedHours time.Duration) 
 					ui.Muted.Render(padRight(truncateString(e.Description, descWidth), descWidth)),
 					ui.Success.Render(padRight(e.TimeSpent, 8)),
 					ui.Muted.Render(padRight(strings.Split(e.Date, " ")[0], 12)),
-					ui.SuccessBold.Render("PENDING"))
+					ui.FormatStatus("PENDING"))
 			}
 		}
 
@@ -1274,7 +1291,7 @@ func showWorklogPreview(entries []batch.Entry, expectedHours time.Duration) {
 				ui.Muted.Render(padRight(truncateString(e.Description, descWidth), descWidth)),
 				ui.Success.Render(padRight(e.TimeSpent, 8)),
 				ui.Muted.Render(padRight(dateDisplay, 12)),
-				ui.SuccessBold.Render("PENDING"))
+				ui.FormatStatus("PENDING"))
 		}
 
 		// Print separator and total for this day

@@ -45,7 +45,7 @@ Examples:
 			}
 		}
 
-		fmt.Println(result)
+		fmt.Println(ui.Code.Render(result))
 	},
 }
 

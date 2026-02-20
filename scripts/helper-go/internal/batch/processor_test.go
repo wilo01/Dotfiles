@@ -15,6 +15,8 @@ func TestEntryExistsForTicket(t *testing.T) {
 		{IssueKey: "VIS-300", Date: "14.12.2025", Status: "", TimeSpent: "", Description: "Old pending"},
 		{IssueKey: "VIS-400", Date: "15.12.2025", Status: StatusSync, Description: "Synced ticket"},
 		{IssueKey: "VIS-500", Date: "15.12.2025", Status: StatusDraft, Description: "Parent > Subtask A"},
+		{IssueKey: "VIS-600", SubtaskKey: "VIS-601", Date: "15.12.2025", Status: StatusDraft, Description: "Parent task > Child task"},
+		{IssueKey: "VIS-700", SubtaskKey: "VIS-701", Date: "15.12.2025", Status: StatusDone, TimeSpent: "1h", Description: "Logged parent > Logged child"},
 	}
 
 	tests := []struct {
@@ -102,6 +104,40 @@ func TestEntryExistsForTicket(t *testing.T) {
 			isSubtask:      false,
 			subtaskSummary: "Whatever",
 			expected:       true,
+		},
+		{
+			name:     "Match via SubtaskKey field",
+			issueKey: "VIS-601",
+			date:     "15.12.2025",
+			expected: true,
+		},
+		{
+			name:     "IssueKey still matches when SubtaskKey is present",
+			issueKey: "VIS-600",
+			date:     "15.12.2025",
+			expected: true,
+		},
+		{
+			name:           "Subtask summary check via SubtaskKey match",
+			issueKey:       "VIS-601",
+			date:           "15.12.2025",
+			isSubtask:      true,
+			subtaskSummary: "Child task",
+			expected:       true,
+		},
+		{
+			name:           "Subtask summary mismatch via SubtaskKey",
+			issueKey:       "VIS-601",
+			date:           "15.12.2025",
+			isSubtask:      true,
+			subtaskSummary: "Wrong child",
+			expected:       false,
+		},
+		{
+			name:     "Match DONE entry via SubtaskKey",
+			issueKey: "VIS-701",
+			date:     "01.01.2024",
+			expected: true,
 		},
 	}
 

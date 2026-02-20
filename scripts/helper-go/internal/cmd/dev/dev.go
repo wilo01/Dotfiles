@@ -19,6 +19,7 @@ func init() {
 	DevCmd.AddCommand(prCmd)
 	DevCmd.AddCommand(dashCmd)
 	DevCmd.AddCommand(filenameCmd)
+	DevCmd.AddCommand(cherryCmd)
 }
 
 // RegisterTopLevel registers dev commands at the top level of the CLI
@@ -29,4 +30,5 @@ func RegisterTopLevel(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(prCmd)
 	rootCmd.AddCommand(dashCmd)
 	rootCmd.AddCommand(filenameCmd)
+	rootCmd.AddCommand(cherryCmd)
 }

@@ -105,10 +105,10 @@ func NextScheduledTime(schedule ScheduleConfig, targetSlot string) (time.Time, i
 		return time.Time{}, -1, fmt.Errorf("no schedule slots configured")
 	}
 
-	// Load timezone
+	// Load timezone -- fail explicitly instead of silently falling back to UTC
 	loc, err := time.LoadLocation(schedule.Timezone)
 	if err != nil {
-		loc = time.UTC
+		return time.Time{}, -1, fmt.Errorf("invalid timezone %q: %w (check preferences.schedule.timezone in config)", schedule.Timezone, err)
 	}
 	now := time.Now().In(loc)
 
@@ -127,6 +127,10 @@ func NextScheduledTime(schedule ScheduleConfig, targetSlot string) (time.Time, i
 
 		hour, minute, err := ParseTimeString(slot.Time)
 		if err != nil {
+			// If targeting this specific slot, return the error instead of silently skipping
+			if targetSlot != "" && slot.Name == targetSlot {
+				return time.Time{}, -1, fmt.Errorf("slot %q has invalid time: %w", slot.Name, err)
+			}
 			continue
 		}
 

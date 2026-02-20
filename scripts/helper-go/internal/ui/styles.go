@@ -13,6 +13,7 @@ var (
 	ColorError     = lipgloss.Color("196") // Red
 	ColorMuted     = lipgloss.Color("246") // Gray (lighter for visibility)
 	ColorHighlight = lipgloss.Color("226") // Yellow
+	ColorLink      = lipgloss.Color("75")  // Light blue (hyperlink)
 )
 
 // Branch colors for git graph visualization (VSCode Git Graph style)
@@ -48,6 +49,7 @@ var (
 	ErrorText   = lipgloss.NewStyle().Foreground(ColorError)
 	Muted       = lipgloss.NewStyle().Foreground(ColorMuted)
 	Highlight   = lipgloss.NewStyle().Foreground(ColorHighlight)
+	Link        = lipgloss.NewStyle().Foreground(ColorLink)
 
 	// Combined styles
 	Title       = lipgloss.NewStyle().Bold(true).Foreground(ColorPrimary)

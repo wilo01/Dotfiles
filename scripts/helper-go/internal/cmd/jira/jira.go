@@ -30,8 +30,8 @@ func init() {
 
 // autoSyncIfNeeded checks conditions and runs auto-sync if appropriate
 func autoSyncIfNeeded(cmd *cobra.Command) {
-	// Skip if running add --sync (would be redundant)
-	if cmd.Name() == "add" && addSync {
+	// Skip for add command - it handles its own sprint sync
+	if cmd.Name() == "add" {
 		return
 	}
 

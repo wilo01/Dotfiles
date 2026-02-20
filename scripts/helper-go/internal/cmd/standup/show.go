@@ -81,5 +81,9 @@ func runShow(cmd *cobra.Command, args []string) error {
 			days = 1
 		}
 	}
-	return renderPlainEntries(entries, days)
+	var baseURL string
+	if profile != nil {
+		baseURL = profile.BaseURL
+	}
+	return renderPlainEntries(entries, days, baseURL)
 }

@@ -10,7 +10,7 @@ import (
 	"github.com/dariuszw/hlp/internal/ui"
 )
 
-func renderPlainEntries(entries []batch.Entry, limitDays int) error {
+func renderPlainEntries(entries []batch.Entry, limitDays int, baseURL string) error {
 	// Sort newest first (entries with parse errors go to end)
 	sort.Slice(entries, func(i, j int) bool {
 		di, erri := batch.ParseDate(entries[i].Date, "09:00")
@@ -56,9 +56,9 @@ func renderPlainEntries(entries []batch.Entry, limitDays int) error {
 	}
 
 	for i, e := range entries {
-		printPlainEntry(e)
+		printPlainEntry(e, baseURL)
 		if i < len(entries)-1 {
-			fmt.Println(ui.Divider(ui.GetTerminalWidth()))
+			fmt.Println()
 		}
 	}
 
@@ -74,42 +74,41 @@ func getIgnoredTickets() map[string]bool {
 	return ignored
 }
 
-func printPlainEntry(e batch.Entry) {
+func printPlainEntry(e batch.Entry, baseURL string) {
 	d, _ := batch.ParseDate(e.Date, "09:00")
 
 	// Line 1: Date [IssueType] Time Status (each with own color)
-	header := ui.Muted.Render(d.Format("02/01/2006"))
+	header := d.Format("02/01/2006")
 	if e.IssueType != "" {
 		header += " " + ui.Muted.Render(fmt.Sprintf("[%s]", e.IssueType))
 	}
 	if e.TimeSpent != "" {
 		header += " " + ui.Success.Render(e.TimeSpent)
 	}
-	if e.Status != "" {
-		header += " " + formatStatus(e.Status)
+	status := e.Status
+	if status == "" {
+		status = "PENDING"
+	}
+	header += " " + ui.FormatStatus(status)
+	if baseURL != "" {
+		header += "  " + ui.Link.Render(baseURL+"/browse/"+e.IssueKey)
 	}
 	fmt.Println(header)
 
 	// Line 2: Key + Description (one line)
-	keyLine := e.IssueKey
-	if e.SubtaskKey != "" {
-		keyLine = e.IssueKey + " > " + e.SubtaskKey
+	// Main issue key is a clickable terminal hyperlink; subtask stays plain
+	issueDisplay := ui.Primary.Render(e.IssueKey)
+	if baseURL != "" {
+		issueDisplay = ui.Hyperlink(issueDisplay, baseURL+"/browse/"+e.IssueKey)
 	}
-	fmt.Printf("%s %s\n", ui.Primary.Render(keyLine), e.Description)
+	keyLine := issueDisplay
+	if e.SubtaskKey != "" {
+		keyLine = issueDisplay + " > " + ui.Primary.Render(e.SubtaskKey)
+	}
+	fmt.Printf("%s %s\n", keyLine, e.Description)
 
 	// Line 4: Comment (only if present)
 	if e.Comment != "" {
 		fmt.Println(ui.Muted.Render(e.Comment))
-	}
-}
-
-func formatStatus(status string) string {
-	switch status {
-	case "DONE", "SYNC", "UPDATED":
-		return ui.Success.Render(status)
-	case "DRAFT":
-		return ui.Muted.Render(status)
-	default:
-		return ui.SuccessBold.Render(status)
 	}
 }
