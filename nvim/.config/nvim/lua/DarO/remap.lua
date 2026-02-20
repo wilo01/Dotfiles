@@ -366,7 +366,7 @@ vim.api.nvim_create_autocmd("FileType", {
             local main_win = nil
             for _, win in ipairs(vim.api.nvim_list_wins()) do
                local buf = vim.api.nvim_win_get_buf(win)
-               local ft = vim.api.nvim_buf_get_option(buf, 'filetype') -- [ ] TODO: Deprecated
+               local ft = vim.bo[buf].filetype
                if ft ~= 'qf' then
                   main_win = win
                   break
@@ -468,7 +468,8 @@ vim.keymap.set("n", "<leader>vA", function()
    vim.defer_fn(setup_float_keymaps, 50)
 end, { desc = "Gitsigns preview floating Git hunk" })
 vim.keymap.set("n", "<leader>vs", "<CMD>Gitsigns diffthis<CR>", { desc = "Gitsigns Diff current buffer" })
-vim.keymap.set("n", "<leader>bl", "<CMD>Gitsigns blame<CR>", { desc = "Gitsigns Blame current file" }) -- [ ] TODO: Add toggle blame
+vim.keymap.set("n", "<leader>bl", "<CMD>Gitsigns blame<CR>", { desc = "Gitsigns Blame current file" })
+vim.keymap.set("n", "<leader>bt", "<CMD>Gitsigns toggle_current_line_blame<CR>", { desc = "Toggle inline line blame" })
 vim.keymap.set("n", "<leader>vt", "<CMD>Gitsigns toggle_deleted<CR>", { desc = "Gitsigns Toggle deleted lines" })
 vim.keymap.set("n", "<leader>vb", "<CMD>Gitsigns blame_line<CR>", { desc = "Gitsigns Blame current line" })
 vim.keymap.set("n", "<leader>rg", "<CMD>Gitsigns reset_hunk<CR>", { desc = "Gitsigns Reset Hunk (Reset git, diff)" })

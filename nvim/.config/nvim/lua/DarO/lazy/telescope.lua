@@ -5,7 +5,6 @@ return {
       "nvim-lua/plenary.nvim",
       "nvim-telescope/telescope-file-browser.nvim",
       { "nvim-telescope/telescope-fzf-native.nvim", build = 'make' },
-      dependencies = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim" }
    },
    config = function()
       local utils = require("DarO.utils")
@@ -21,7 +20,7 @@ return {
 
       local function live_multigrep(opts)
          opts = opts or {}
-         opts.cwd = opts.cwd or vim.uv.cwd() -- [ ] TODO: Undefined field `cwd`.
+         opts.cwd = opts.cwd or vim.fn.getcwd()
 
          local finder = finders.new_async_job {
             command_generator = function(prompt)
@@ -41,11 +40,10 @@ return {
                   table.insert(args, pieces[2])
                end
 
-               ---@diagnostic disable-next-line: deprecated
-               return vim.tbl_flatten {
-                  args,
-                  { "--color=never", "--no-heading", "--with-filename", "--line-number", "--column", "--smart-case" },
-               }
+               return vim.list_extend(vim.list_extend({}, args), {
+                  "--color=never", "--no-heading", "--with-filename",
+                  "--line-number", "--column", "--smart-case",
+               })
             end,
             entry_maker = make_entry.gen_from_vimgrep(opts),
             cwd = opts.cwd,

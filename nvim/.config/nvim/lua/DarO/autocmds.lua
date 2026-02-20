@@ -206,9 +206,9 @@ local function csv_get_state(bufnr)
 end
 
 local function csv_prettify(lines)
-   local MAX_FORMAT_WIDTH = 144
    local max_lengths = {}
 
+   -- First pass: find the actual maximum length for each column
    for _, line in ipairs(lines) do
       local cols = csv_parse_line(line)
       for i, col in ipairs(cols) do
@@ -216,12 +216,13 @@ local function csv_prettify(lines)
       end
    end
 
+   -- Second pass: pad all columns to their calculated max width
    local prettified = {}
    for _, line in ipairs(lines) do
       local cols = csv_parse_line(line)
       for i, col in ipairs(cols) do
-         local max_len = math.min(max_lengths[i] or 0, MAX_FORMAT_WIDTH)
-         local padding = math.max(0, max_len - #col)
+         local target_width = max_lengths[i] or 0
+         local padding = target_width - #col
          cols[i] = col .. string.rep(" ", padding)
       end
       table.insert(prettified, table.concat(cols, " , "))
