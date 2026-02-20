@@ -290,13 +290,13 @@ alias cdweb="~/bin/.local/scripts/tmux-sessionizer ~/Dev/branch-opener/branches/
 alias cdwapp="~/bin/.local/scripts/tmux-sessionizer ~/Dev/branch-opener/branches/visitor-web-app"
 alias cdwebapp="~/bin/.local/scripts/tmux-sessionizer ~/Dev/branch-opener/branches/visitor-web-app"
 alias cdb="~/bin/.local/scripts/tmux-sessionizer ~/Dev/branch-opener/app/"
-alias cdy="~/bin/.local/scripts/tmux-sessionizer ~/Dev/branch-opener/branches/tds-suite/test/Cypress"
+alias cdy="~/bin/.local/scripts/tmux-sessionizer ~/tds-branch-opener/branches/tds-suite/test/Cypress"
 # CODE actions
-alias code_ks="echo code ~/Dev/branch-opener/branches/tds-suite/source/ui-kiosk/app/global/Settings.js ; code ~/Dev/branch-opener/branches/tds-suite/source/ui-kiosk/app/global/Settings.js"
-alias code_ka="echo code ~/Dev/branch-opener/branches/tds-suite/source/ui-kiosk/app/Application.js ; code ~/Dev/branch-opener/branches/tds-suite/source/ui-kiosk/app/Application.js"
-alias code_ksc="echo code ~/Dev/branch-opener/branches/tds-suite/source/ui-kiosk/app/view/settings/SettingsController.js ; code ~/Dev/branch-opener/branches/tds-suite/source/ui-kiosk/app/view/settings/SettingsController.js"
+alias code_ks="echo code ~/tds-branch-opener/branches/tds-suite/source/ui-kiosk/app/global/Settings.js ; code ~/tds-branch-opener/branches/tds-suite/source/ui-kiosk/app/global/Settings.js"
+alias code_ka="echo code ~/tds-branch-opener/branches/tds-suite/source/ui-kiosk/app/Application.js ; code ~/tds-branch-opener/branches/tds-suite/source/ui-kiosk/app/Application.js"
+alias code_ksc="echo code ~/tds-branch-opener/branches/tds-suite/source/ui-kiosk/app/view/settings/SettingsController.js ; code ~/tds-branch-opener/branches/tds-suite/source/ui-kiosk/app/view/settings/SettingsController.js"
 alias kiosk_settings="echo open kiosk settings at: ; code_ks ; sleep 1 ; code_ka ; sleep 1 ; code_ksc ;"
-alias liqui_valid="echo cd ~/Dev/branch-opener/branches/tds-suite/source/server/database/ ; echo ./liquibase --defaultsFile=validate.liquibase.properties validate ; cd ~/Dev/branch-opener/branches/tds-suite/source/server/database/ ; ./liquibase --defaultsFile=validate.liquibase.properties validate"
+alias liqui_valid="echo cd ~/tds-branch-opener/branches/tds-suite/source/server/database/ ; echo ./liquibase --defaultsFile=validate.liquibase.properties validate ; cd ~/tds-branch-opener/branches/tds-suite/source/server/database/ ; ./liquibase --defaultsFile=validate.liquibase.properties validate"
 alias sqldev="echo ~/SQLDeveloper/opt/sqldeveloper/sqldeveloper.sh ; ~/SQLDeveloper/opt/sqldeveloper/sqldeveloper.sh"
 alias br='echo npm start at: ; echo ~/Dev/branch-opener/app/ ; if [[ -n "$(find ~/Dev/branch-opener/app/apex/kiosk/bdb/ -maxdepth 0 -type f -o -type d -printf '%s')" ]]; then echo "Removing content from ~/Dev/branch-opener/app/apex/kiosk/bdb/" ; rm -rf ~/Dev/branch-opener/app/apex/kiosk/bdb/* ; else echo "No content found in ~/Dev/branch-opener/app/apex/kiosk/bdb/, skipping removal." ; fi ; ls ~/Dev/branch-opener/app/apex/kiosk/bdb/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; xdg-open http://localhost:3333/static/ ; npm start'
 function hx() {
@@ -318,8 +318,8 @@ alias liquibaseLocalDockerUpdate="echo cd ~/Dev/branch-opener/branches/safe ; ec
 alias npmliquibaseLocalDockerUpdate="echo cd ~/Dev/branch-opener/branches/safe ; echo npm run liquibaseLocalDockerUpdate ; cd ~/Dev/branch-opener/branches/safe && npm run liquibaseLocalDockerUpdate"
 alias apex_remove="echo rm -rf ~/Dev/branch-opener/app/apex/backoffice/bdb/* ; rm -rf ~/Dev/branch-opener/app/apex/backoffice/bdb/*"
 alias remove_apex="echo rm -rf ~/Dev/branch-opener/app/apex/backoffice/bdb/* ; rm -rf ~/Dev/branch-opener/app/apex/backoffice/bdb/*"
-alias apex_zip="echo zip -r rt.zip ~/Dev/branch-opener/branches/tds-suite/source/server/rt/* ; zip -r rt.zip ~/Dev/branch-opener/branches/tds-suite/source/server/rt/* && "
-alias zip_apex="echo zip -r rt.zip ~/Dev/branch-opener/branches/tds-suite/source/server/rt/* ; zip -r rt.zip ~/Dev/branch-opener/branches/tds-suite/source/server/rt/* && "
+alias apex_zip="echo zip -r rt.zip ~/tds-branch-opener/branches/tds-suite/source/server/rt/* ; zip -r rt.zip ~/tds-branch-opener/branches/tds-suite/source/server/rt/* && "
+alias zip_apex="echo zip -r rt.zip ~/tds-branch-opener/branches/tds-suite/source/server/rt/* ; zip -r rt.zip ~/tds-branch-opener/branches/tds-suite/source/server/rt/* && "
 # alias csp_hash="echo sha256-$(echo -n "$(xclip -o)" | openssl sha256 -binary | openssl base64)"
 # Git
 alias git_lens="git log --graph --oneline --decorate ; echo git log --graph --oneline --decorate"
@@ -382,7 +382,7 @@ alias claude-sonnet='claude --model claude-sonnet-4-20250514'
 alias claude-opus='claude --model claude-opus-4-1-20250805'
 alias claude-fast='claude-haiku'
 alias claude-haiku='claude --model claude-3-5-haiku-20241022'
-alias filepath='realpath'
+filepath() { realpath "${1:-.}"; }
 alias rm="sudo rm"
 alias rm_nvim="echo 'Removing Neovim data, cache, state, and lazy-lock.json...' ; command rm -rf ~/.local/share/nvim ~/.local/state/nvim ~/.cache/nvim ~/.config/nvim/lazy-lock.json ~/.var/app/io.neovim.nvim/cache/nvim ~/.var/app/io.neovim.nvim/data/nvim && echo 'Neovim reset complete! Restart nvim to reinstall plugins.'"
 alias nvim_rm="echo 'Removing Neovim data, cache, state, and lazy-lock.json...' ; command rm -rf ~/.local/share/nvim ~/.local/state/nvim ~/.cache/nvim ~/.config/nvim/lazy-lock.json ~/.var/app/io.neovim.nvim/cache/nvim ~/.var/app/io.neovim.nvim/data/nvim && echo 'Neovim reset complete! Restart nvim to reinstall plugins.'"
@@ -403,6 +403,7 @@ export USE_BUILTIN_RIPGREP=1
 # export MANWIDTH=999
 # export JAVA_HOME="/usr/lib/jvm/java-11-openjdk/"
 export JAVA_HOME="/usr/lib/jvm/java-21-openjdk"
+# export JAVA_HOME="/usr/lib/jvm/jdk1.8.0_471"  # for branch-opener (needs Java 8)
 export PATH="$JAVA_HOME/bin:$PATH"
 
 export PATH="$HOME/bin/Sencha/Cmd:$PATH"
