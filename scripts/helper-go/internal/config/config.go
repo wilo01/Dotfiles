@@ -33,16 +33,32 @@ type SheetsConfig struct {
 	SheetID string `mapstructure:"sheet_id" yaml:"sheet_id"`
 }
 
+// ScheduleSlot defines a named time slot for scheduled batch runs
+type ScheduleSlot struct {
+	Name string `mapstructure:"name" yaml:"name"` // "morning", "afternoon"
+	Time string `mapstructure:"time" yaml:"time"` // "08:45"
+}
+
+// ScheduleConfig holds scheduling configuration for batch operations
+type ScheduleConfig struct {
+	Slots          []ScheduleSlot `mapstructure:"slots" yaml:"slots"`                       // Named time slots
+	Loop           bool           `mapstructure:"loop" yaml:"loop"`                         // Continue after each run
+	Timezone       string         `mapstructure:"timezone" yaml:"timezone"`                 // "Europe/Dublin"
+	WorkHoursStart string         `mapstructure:"work_hours_start" yaml:"work_hours_start"` // "08:00"
+	WorkHoursEnd   string         `mapstructure:"work_hours_end" yaml:"work_hours_end"`     // "16:00"
+}
+
 // Preferences holds user preferences
 type Preferences struct {
-	AutoDetectContext     bool     `mapstructure:"auto_detect_context" yaml:"auto_detect_context"`
-	DefaultDuration       string   `mapstructure:"default_duration" yaml:"default_duration"`
-	WorkHoursStart        string   `mapstructure:"work_hours_start" yaml:"work_hours_start"`
-	WorkHoursEnd          string   `mapstructure:"work_hours_end" yaml:"work_hours_end"`
-	ExpectedHoursPerDay   string   `mapstructure:"expected_hours_per_day" yaml:"expected_hours_per_day"`
-	RichOutput            bool     `mapstructure:"rich_output" yaml:"rich_output"`
-	CopyToClipboard       bool     `mapstructure:"copy_to_clipboard" yaml:"copy_to_clipboard"`
-	StandupIgnoredTickets []string `mapstructure:"standup_ignored_tickets" yaml:"standup_ignored_tickets"`
+	AutoDetectContext     bool           `mapstructure:"auto_detect_context" yaml:"auto_detect_context"`
+	DefaultDuration       string         `mapstructure:"default_duration" yaml:"default_duration"`
+	WorkHoursStart        string         `mapstructure:"work_hours_start" yaml:"work_hours_start"`
+	WorkHoursEnd          string         `mapstructure:"work_hours_end" yaml:"work_hours_end"`
+	ExpectedHoursPerDay   string         `mapstructure:"expected_hours_per_day" yaml:"expected_hours_per_day"`
+	RichOutput            bool           `mapstructure:"rich_output" yaml:"rich_output"`
+	CopyToClipboard       bool           `mapstructure:"copy_to_clipboard" yaml:"copy_to_clipboard"`
+	StandupIgnoredTickets []string       `mapstructure:"standup_ignored_tickets" yaml:"standup_ignored_tickets"`
+	Schedule              ScheduleConfig `mapstructure:"schedule" yaml:"schedule"`
 }
 
 // GetConfigDir returns the configuration directory path
@@ -84,6 +100,16 @@ func Default() *Config {
 			RichOutput:            true,
 			CopyToClipboard:       true,
 			StandupIgnoredTickets: []string{"TDT-2", "TDT-26"},
+			Schedule: ScheduleConfig{
+				Slots: []ScheduleSlot{
+					{Name: "morning", Time: "08:45"},
+					{Name: "afternoon", Time: "15:45"},
+				},
+				Loop:           true,
+				Timezone:       "Europe/Dublin",
+				WorkHoursStart: "08:00",
+				WorkHoursEnd:   "16:00",
+			},
 		},
 	}
 }

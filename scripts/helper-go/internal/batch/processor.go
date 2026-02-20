@@ -15,6 +15,7 @@ import (
 
 	"github.com/dariuszw/hlp/internal/config"
 	"github.com/dariuszw/hlp/internal/jira"
+	"github.com/dariuszw/hlp/internal/ui"
 	"github.com/dariuszw/hlp/pkg/duration"
 )
 
@@ -572,8 +573,40 @@ func waitWithCountdown(ctx context.Context, seconds int) bool {
 		}
 	}
 	// Clear the countdown line
-	fmt.Print("\r" + strings.Repeat(" ", 60) + "\r")
+	ui.ClearLine()
 	return true
+}
+
+// WaitUntilTime waits until the target time, showing a countdown.
+// The progressFn is called immediately, then every second with the remaining duration.
+// Returns false if cancelled via context, true if target time was reached.
+func WaitUntilTime(ctx context.Context, target time.Time, progressFn func(remaining time.Duration)) bool {
+	// Immediate first display (before ticker starts)
+	remaining := time.Until(target)
+	if remaining <= 0 {
+		return true
+	}
+	if progressFn != nil {
+		progressFn(remaining)
+	}
+
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return false
+		case <-ticker.C:
+			remaining = time.Until(target)
+			if remaining <= 0 {
+				return true
+			}
+			if progressFn != nil {
+				progressFn(remaining)
+			}
+		}
+	}
 }
 
 // UpdateCSVStatus updates the CSV file with new statuses
@@ -992,6 +1025,40 @@ func unique(items []string) []string {
 		}
 	}
 	return result
+}
+
+// EntryOrder defines the order for processing entries
+type EntryOrder string
+
+const (
+	OrderOldest EntryOrder = "oldest" // Process oldest dates first (ascending)
+	OrderNewest EntryOrder = "newest" // Process newest dates first (descending)
+	OrderRandom EntryOrder = "random" // Shuffle entries randomly
+)
+
+// SortEntries sorts entries according to the specified order
+// Used with --slow mode to control processing order
+func SortEntries(entries []Entry, order EntryOrder) {
+	switch order {
+	case OrderRandom:
+		rand.Shuffle(len(entries), func(i, j int) {
+			entries[i], entries[j] = entries[j], entries[i]
+		})
+	case OrderNewest:
+		sort.Slice(entries, func(i, j int) bool {
+			dateI, _ := ParseDate(entries[i].Date, "00:00")
+			dateJ, _ := ParseDate(entries[j].Date, "00:00")
+			return dateJ.Before(dateI) // Descending (newest first)
+		})
+	case OrderOldest:
+		fallthrough
+	default:
+		sort.Slice(entries, func(i, j int) bool {
+			dateI, _ := ParseDate(entries[i].Date, "00:00")
+			dateJ, _ := ParseDate(entries[j].Date, "00:00")
+			return dateI.Before(dateJ) // Ascending (oldest first)
+		})
+	}
 }
 
 // EnrichAndRestructureCSV updates empty descriptions/types AND restructures subtask entries

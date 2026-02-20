@@ -1,7 +1,9 @@
 package jira
 
 import (
+	"errors"
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -12,7 +14,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var addSync bool
+var addNoSync bool
 var addQuiet bool
 var addDryRun bool
 
@@ -24,32 +26,37 @@ var addCmd = &cobra.Command{
 The tickets will be prepared for time logging but not processed by --batch
 until you fill in the TimeSpent and change the status from DRAFT to empty.
 
-Use --sync to automatically fetch tickets from your current sprint.
+Sprint sync happens by default on every invocation. Use --no-sync to skip it.
 
 Examples:
-  hlp jira add VIS-1234              # Add single ticket
-  hlp jira add VIS-1234 VIS-5678     # Add multiple tickets
-  hlp jira add --sync                # Sync tickets from current sprint
-  hlp jira add --sync VIS-extra      # Sync sprint + add extra ticket`,
+  hlp jira add                       # Sync sprint tickets only
+  hlp jira add VIS-1234              # Sync sprint + add VIS-1234
+  hlp jira add --no-sync VIS-1234    # Add VIS-1234 only (skip sprint sync)
+  hlp jira add --dry-run             # Preview sprint sync`,
 	Run: runAdd,
 }
 
 func init() {
-	addCmd.Flags().BoolVarP(&addSync, "sync", "s", false, "Sync tickets from current sprint")
+	addCmd.Flags().BoolVar(&addNoSync, "no-sync", false, "Skip sprint sync (only process manual ticket args)")
 	addCmd.Flags().BoolVarP(&addQuiet, "quiet", "q", false, "Suppress output unless errors (for cron)")
 	addCmd.Flags().BoolVar(&addDryRun, "dry-run", false, "Preview changes without modifying files")
+
+	// Deprecated: --sync is now the default behavior
+	var addSyncDeprecated bool
+	addCmd.Flags().BoolVarP(&addSyncDeprecated, "sync", "s", false, "Deprecated: sprint sync is now the default")
+	addCmd.Flags().MarkDeprecated("sync", "sprint sync is now the default; use --no-sync to skip")
 }
 
 // ticketKeyPattern validates JIRA ticket format (PROJECT-NUMBER)
 var ticketKeyPattern = regexp.MustCompile(`^[A-Z]+-\d+$`)
 
 func runAdd(cmd *cobra.Command, args []string) {
-	// Require either --sync or ticket keys
-	if !addSync && len(args) == 0 {
-		fmt.Println(ui.Error("Provide ticket keys or use --sync to fetch from sprint"))
+	// --no-sync without ticket keys is a no-op
+	if addNoSync && len(args) == 0 {
+		fmt.Println(ui.Error("--no-sync requires ticket keys"))
 		fmt.Println(ui.Muted.Render("Examples:"))
-		fmt.Println(ui.Muted.Render("  hlp jira add VIS-1234"))
-		fmt.Println(ui.Muted.Render("  hlp jira add --sync"))
+		fmt.Println(ui.Muted.Render("  hlp jira add                       # Sync sprint"))
+		fmt.Println(ui.Muted.Render("  hlp jira add --no-sync VIS-1234    # Add without sync"))
 		return
 	}
 
@@ -60,7 +67,10 @@ func runAdd(cmd *cobra.Command, args []string) {
 	}
 
 	// Get current profile for CSV path
-	profile, _ := config.GetActiveProfile()
+	profile, err := config.GetActiveProfile()
+	if err != nil && !addQuiet {
+		fmt.Println(ui.Warning(fmt.Sprintf("Could not load profile: %v", err)))
+	}
 	csvPath := batch.DefaultCSVPathForProfile(profile)
 
 	// Get JIRA client once for all tickets
@@ -72,19 +82,22 @@ func runAdd(cmd *cobra.Command, args []string) {
 
 	// Parse existing entries for duplicate checking
 	todayStr := time.Now().Format("02.01.2006")
-	entries, _ := batch.ParseCSV(csvPath)
+	entries, parseErr := batch.ParseCSV(csvPath)
+	if parseErr != nil && !errors.Is(parseErr, os.ErrNotExist) && !addQuiet {
+		fmt.Println(ui.Warning(fmt.Sprintf("Could not parse CSV: %v", parseErr)))
+	}
 
 	// Build list of tickets to process
 	var ticketKeys []string
 
-	// If --sync, fetch sprint tickets first
-	if addSync {
+	// Fetch sprint tickets (default behavior, skip with --no-sync)
+	if !addNoSync {
 		if !addQuiet {
 			fmt.Println("Fetching tickets from current sprint...")
 		}
-		sprintTickets, err := client.SearchSprintTickets()
-		if err != nil {
-			fmt.Println(ui.Error("Failed to fetch sprint tickets: " + err.Error()))
+		sprintTickets, sprintErr := client.SearchSprintTickets()
+		if sprintErr != nil {
+			fmt.Println(ui.Error("Failed to fetch sprint tickets: " + sprintErr.Error()))
 			return
 		}
 		if !addQuiet {
@@ -95,12 +108,20 @@ func runAdd(cmd *cobra.Command, args []string) {
 		for _, t := range sprintTickets {
 			ticketKeys = append(ticketKeys, t.Key)
 		}
+
+		// Update sync timestamp so other commands (log, status) skip redundant auto-sync
+		if syncErr := config.UpdateLastSyncTime(); syncErr != nil && !addQuiet {
+			fmt.Println(ui.Warning(fmt.Sprintf("Could not update sync timestamp: %v", syncErr)))
+		}
 	}
 
 	// Add manual ticket keys
 	for _, arg := range args {
 		ticketKeys = append(ticketKeys, strings.ToUpper(strings.TrimSpace(arg)))
 	}
+
+	// Deduplicate ticket keys (sprint keys first, case-insensitive)
+	ticketKeys = deduplicateKeys(ticketKeys)
 
 	// Track results
 	added := 0
@@ -121,92 +142,43 @@ func runAdd(cmd *cobra.Command, args []string) {
 		}
 
 		// Check if ticket exists for today
+		// Match on IssueKey (parent-only) OR SubtaskKey to handle both cases
 		var existingEntry *batch.Entry
 		for i, e := range entries {
-			if strings.EqualFold(e.IssueKey, ticketKey) {
-				entryDate := strings.Split(e.Date, " ")[0]
-				if entryDate == todayStr {
-					existingEntry = &entries[i]
-					break
-				}
+			entryDate := strings.Split(e.Date, " ")[0]
+			if entryDate != todayStr {
+				continue
+			}
+			if (strings.EqualFold(e.IssueKey, ticketKey) && e.SubtaskKey == "") ||
+				strings.EqualFold(e.SubtaskKey, ticketKey) {
+				existingEntry = &entries[i]
+				break
 			}
 		}
 
-		// Handle existing entry
+		// Skip already-logged entries without fetching from JIRA
 		if existingEntry != nil {
-			// If already has time logged (DONE/SYNC/UPDATED), skip
 			if existingEntry.Status == batch.StatusDone ||
 				existingEntry.Status == batch.StatusSync ||
 				existingEntry.Status == batch.StatusUpdated ||
 				existingEntry.TimeSpent != "" {
 				if !addQuiet {
+					displayKey := existingEntry.IssueKey
+					if existingEntry.SubtaskKey != "" {
+						displayKey = existingEntry.IssueKey + " > " + existingEntry.SubtaskKey
+					}
 					fmt.Printf("%s %s - already logged today (%s %s)\n",
 						ui.Muted.Render("⊘"),
-						ui.Muted.Render(ticketKey),
+						ui.Muted.Render(displayKey),
 						ui.Muted.Render(existingEntry.TimeSpent),
 						ui.Muted.Render(existingEntry.Status))
 				}
 				skipped++
 				continue
 			}
-
-			// If DRAFT, update description
-			if existingEntry.Status == batch.StatusDraft {
-				ticket, err := client.GetTicket(ticketKey)
-				if err != nil {
-					if !addQuiet {
-						fmt.Printf("%s %s - %s\n",
-							ui.ErrorText.Render("✗"),
-							ui.Primary.Render(ticketKey),
-							ui.Muted.Render(err.Error()))
-					}
-					skipped++
-					continue
-				}
-
-				// Update description (skip in dry-run)
-				if !addDryRun {
-					err = batch.UpdateEntryDescription(csvPath, existingEntry.RowNumber, ticket.Summary)
-					if err != nil {
-						if !addQuiet {
-							fmt.Printf("%s %s - %s\n",
-								ui.ErrorText.Render("✗"),
-								ui.Primary.Render(ticketKey),
-								ui.Muted.Render(err.Error()))
-						}
-						skipped++
-						continue
-					}
-				}
-
-				if !addQuiet {
-					if addDryRun {
-						fmt.Printf("%s %s %s - %s %s\n",
-							ui.Primary.Render("↻"),
-							ui.Primary.Render(ticketKey),
-							ui.Muted.Render("["+ticket.IssueType+"]"),
-							ui.Muted.Render(truncateString(ticket.Summary, 40)),
-							ui.Muted.Render("(would update)"))
-					} else {
-						fmt.Printf("%s %s %s - %s %s\n",
-							ui.Primary.Render("↻"),
-							ui.Primary.Render(ticketKey),
-							ui.Muted.Render("["+ticket.IssueType+"]"),
-							ui.Muted.Render(truncateString(ticket.Summary, 40)),
-							ui.Muted.Render("(updated)"))
-					}
-				}
-				updated++
-
-				// Update in-memory entry (no need to re-read CSV - row numbers don't change for description updates)
-				if !addDryRun {
-					existingEntry.Description = ticket.Summary
-				}
-				continue
-			}
 		}
 
-		// Fetch ticket info for new entry
+		// Fetch ticket info (needed for new entries and DRAFT updates)
 		ticket, err := client.GetTicket(ticketKey)
 		if err != nil {
 			if !addQuiet {
@@ -219,8 +191,7 @@ func runAdd(cmd *cobra.Command, args []string) {
 			continue
 		}
 
-		// Determine issue key, subtask key, type, and description
-		// For sub-tasks: use parent key/type and combined description
+		// Resolve subtask relationship
 		issueKey := ticket.Key
 		subtaskKey := ""
 		issueType := ticket.IssueType
@@ -236,6 +207,65 @@ func runAdd(cmd *cobra.Command, args []string) {
 				issueType = parentTicket.IssueType
 				description = parentTicket.Summary + " > " + ticket.Summary
 			}
+		}
+
+		displayKey := issueKey
+		if subtaskKey != "" {
+			displayKey = issueKey + " > " + subtaskKey
+		}
+
+		// Skip parent-only entries when parent already has subtask entries in CSV
+		if subtaskKey == "" {
+			if trackedVia := findSubtaskKey(entries, issueKey); trackedVia != "" {
+				if !addQuiet {
+					fmt.Printf("%s %s - already tracked via subtask\n",
+						ui.Muted.Render("⊘"),
+						ui.Muted.Render(issueKey+" > "+trackedVia))
+				}
+				skipped++
+				continue
+			}
+		}
+
+		// Handle DRAFT update
+		if existingEntry != nil && existingEntry.Status == batch.StatusDraft {
+			if !addDryRun {
+				err = batch.UpdateEntryDescription(csvPath, existingEntry.RowNumber, description)
+				if err != nil {
+					if !addQuiet {
+						fmt.Printf("%s %s - %s\n",
+							ui.ErrorText.Render("✗"),
+							ui.Primary.Render(ticketKey),
+							ui.Muted.Render(err.Error()))
+					}
+					skipped++
+					continue
+				}
+			}
+
+			if !addQuiet {
+				if addDryRun {
+					fmt.Printf("%s %s %s - %s %s\n",
+						ui.Primary.Render("↻"),
+						ui.Primary.Render(displayKey),
+						ui.Muted.Render("["+issueType+"]"),
+						ui.Muted.Render(truncateString(description, 40)),
+						ui.Muted.Render("(would update)"))
+				} else {
+					fmt.Printf("%s %s %s - %s %s\n",
+						ui.Primary.Render("↻"),
+						ui.Primary.Render(displayKey),
+						ui.Muted.Render("["+issueType+"]"),
+						ui.Muted.Render(truncateString(description, 40)),
+						ui.Muted.Render("(updated)"))
+				}
+			}
+			updated++
+
+			if !addDryRun {
+				existingEntry.Description = description
+			}
+			continue
 		}
 
 		// Prepend to CSV with DRAFT status (skip in dry-run)
@@ -267,10 +297,6 @@ func runAdd(cmd *cobra.Command, args []string) {
 
 		// Success
 		if !addQuiet {
-			displayKey := issueKey
-			if subtaskKey != "" {
-				displayKey = issueKey + " > " + subtaskKey
-			}
 			if addDryRun {
 				fmt.Printf("%s %s %s - %s %s\n",
 					ui.Success.Render("✓"),
@@ -344,7 +370,10 @@ func runAdd(cmd *cobra.Command, args []string) {
 // TO REVIEW: Ticket processing shares logic with runAdd() - skipped: only 2 occurrences
 func RunAutoSync(quiet bool) error {
 	// Get current profile for CSV path
-	profile, _ := config.GetActiveProfile()
+	profile, err := config.GetActiveProfile()
+	if err != nil && !quiet {
+		fmt.Println(ui.Warning(fmt.Sprintf("Could not load profile: %v", err)))
+	}
 	csvPath := batch.DefaultCSVPathForProfile(profile)
 
 	// Get JIRA client
@@ -355,7 +384,10 @@ func RunAutoSync(quiet bool) error {
 
 	// Parse existing entries for duplicate checking
 	todayStr := time.Now().Format("02.01.2006")
-	entries, _ := batch.ParseCSV(csvPath)
+	entries, parseErr := batch.ParseCSV(csvPath)
+	if parseErr != nil && !errors.Is(parseErr, os.ErrNotExist) && !quiet {
+		fmt.Println(ui.Warning(fmt.Sprintf("Could not parse CSV: %v", parseErr)))
+	}
 
 	// Fetch sprint tickets
 	if !quiet {
@@ -380,20 +412,22 @@ func RunAutoSync(quiet bool) error {
 		ticketKey := sprintTicket.Key
 
 		// Check if ticket exists for today
+		// Match on IssueKey (parent-only) OR SubtaskKey to handle both cases
 		var existingEntry *batch.Entry
 		for i, e := range entries {
-			if strings.EqualFold(e.IssueKey, ticketKey) {
-				entryDate := strings.Split(e.Date, " ")[0]
-				if entryDate == todayStr {
-					existingEntry = &entries[i]
-					break
-				}
+			entryDate := strings.Split(e.Date, " ")[0]
+			if entryDate != todayStr {
+				continue
+			}
+			if (strings.EqualFold(e.IssueKey, ticketKey) && e.SubtaskKey == "") ||
+				strings.EqualFold(e.SubtaskKey, ticketKey) {
+				existingEntry = &entries[i]
+				break
 			}
 		}
 
-		// Handle existing entry
+		// Skip already-logged entries without fetching from JIRA
 		if existingEntry != nil {
-			// If already has time logged, skip
 			if existingEntry.Status == batch.StatusDone ||
 				existingEntry.Status == batch.StatusSync ||
 				existingEntry.Status == batch.StatusUpdated ||
@@ -401,44 +435,16 @@ func RunAutoSync(quiet bool) error {
 				skipped++
 				continue
 			}
-
-			// If DRAFT, update description
-			if existingEntry.Status == batch.StatusDraft {
-				ticket, err := client.GetTicket(ticketKey)
-				if err != nil {
-					skipped++
-					continue
-				}
-
-				err = batch.UpdateEntryDescription(csvPath, existingEntry.RowNumber, ticket.Summary)
-				if err != nil {
-					skipped++
-					continue
-				}
-
-				if !quiet {
-					fmt.Printf("%s %s %s - %s %s\n",
-						ui.Primary.Render("↻"),
-						ui.Primary.Render(ticketKey),
-						ui.Muted.Render("["+ticket.IssueType+"]"),
-						ui.Muted.Render(truncateString(ticket.Summary, 40)),
-						ui.Muted.Render("(updated)"))
-				}
-				updated++
-				entries, _ = batch.ParseCSV(csvPath)
-				continue
-			}
 		}
 
-		// Fetch ticket info for new entry
+		// Fetch ticket info (needed for new entries and DRAFT updates)
 		ticket, err := client.GetTicket(ticketKey)
 		if err != nil {
 			skipped++
 			continue
 		}
 
-		// Determine issue key, subtask key, type, and description
-		// For sub-tasks: use parent key/type and combined description
+		// Resolve subtask relationship
 		issueKey := ticket.Key
 		subtaskKey := ""
 		issueType := ticket.IssueType
@@ -454,10 +460,40 @@ func RunAutoSync(quiet bool) error {
 			}
 		}
 
-		// Prepare entry
-		currentDateTime := time.Now().Format("02.01.2006 15:04")
+		displayKey := issueKey
+		if subtaskKey != "" {
+			displayKey = issueKey + " > " + subtaskKey
+		}
+
+		// Skip parent-only entries when parent already has subtask entries in CSV
+		if subtaskKey == "" && findSubtaskKey(entries, issueKey) != "" {
+			skipped++
+			continue
+		}
+
+		// Handle DRAFT update
+		if existingEntry != nil && existingEntry.Status == batch.StatusDraft {
+			err = batch.UpdateEntryDescription(csvPath, existingEntry.RowNumber, description)
+			if err != nil {
+				skipped++
+				continue
+			}
+
+			if !quiet {
+				fmt.Printf("%s %s %s - %s %s\n",
+					ui.Primary.Render("↻"),
+					ui.Primary.Render(displayKey),
+					ui.Muted.Render("["+issueType+"]"),
+					ui.Muted.Render(truncateString(description, 40)),
+					ui.Muted.Render("(updated)"))
+			}
+			updated++
+			entries, _ = batch.ParseCSV(csvPath) // Re-read after write; ignore error
+			continue
+		}
 
 		// Prepend to CSV with DRAFT status
+		currentDateTime := time.Now().Format("02.01.2006 15:04")
 		err = batch.PrependEntryWithStatus(
 			csvPath,
 			issueKey,
@@ -476,10 +512,6 @@ func RunAutoSync(quiet bool) error {
 		}
 
 		if !quiet {
-			displayKey := issueKey
-			if subtaskKey != "" {
-				displayKey = issueKey + " > " + subtaskKey
-			}
 			fmt.Printf("%s %s %s - %s\n",
 				ui.Success.Render("✓"),
 				ui.Primary.Render(displayKey),
@@ -487,7 +519,7 @@ func RunAutoSync(quiet bool) error {
 				ui.Muted.Render(truncateString(description, 40)))
 		}
 		added++
-		entries, _ = batch.ParseCSV(csvPath)
+		entries, _ = batch.ParseCSV(csvPath) // Re-read after write; ignore error
 	}
 
 	// Summary (only if not quiet and changes made)
@@ -496,9 +528,37 @@ func RunAutoSync(quiet bool) error {
 	}
 
 	// Update last sync time
-	config.UpdateLastSyncTime()
+	if syncErr := config.UpdateLastSyncTime(); syncErr != nil && !quiet {
+		fmt.Println(ui.Warning(fmt.Sprintf("Could not update sync timestamp: %v", syncErr)))
+	}
 
 	return nil
+}
+
+// findSubtaskKey returns the first subtask key tracked under issueKey, or "" if none.
+// Scans all dates — prevents parent-only entries when work is tracked via subtasks.
+func findSubtaskKey(entries []batch.Entry, issueKey string) string {
+	for _, e := range entries {
+		if strings.EqualFold(e.IssueKey, issueKey) && e.SubtaskKey != "" {
+			return e.SubtaskKey
+		}
+	}
+	return ""
+}
+
+// deduplicateKeys removes duplicate ticket keys (case-insensitive), preserving order.
+// Sprint keys come first (appended before manual args), so they take priority.
+func deduplicateKeys(keys []string) []string {
+	seen := make(map[string]bool, len(keys))
+	result := make([]string, 0, len(keys))
+	for _, k := range keys {
+		upper := strings.ToUpper(k)
+		if !seen[upper] {
+			seen[upper] = true
+			result = append(result, k)
+		}
+	}
+	return result
 }
 
 // IsQuietMode checks if --quiet flag is set on the command or its parents

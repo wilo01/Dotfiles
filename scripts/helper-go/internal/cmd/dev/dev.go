@@ -14,6 +14,7 @@ var DevCmd = &cobra.Command{
 func init() {
 	// Add subcommands
 	DevCmd.AddCommand(branchCmd)
+	DevCmd.AddCommand(commitCmd)
 	DevCmd.AddCommand(stashCmd)
 	DevCmd.AddCommand(prCmd)
 	DevCmd.AddCommand(dashCmd)
@@ -23,6 +24,7 @@ func init() {
 // RegisterTopLevel registers dev commands at the top level of the CLI
 func RegisterTopLevel(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(branchCmd)
+	rootCmd.AddCommand(commitCmd)
 	rootCmd.AddCommand(stashCmd)
 	rootCmd.AddCommand(prCmd)
 	rootCmd.AddCommand(dashCmd)

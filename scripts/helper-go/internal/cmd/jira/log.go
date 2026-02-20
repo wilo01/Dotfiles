@@ -2,13 +2,17 @@
 package jira
 
 import (
+	"context"
 	"fmt"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/dariuszw/hlp/internal/batch"
 	"github.com/dariuszw/hlp/internal/config"
-	"github.com/dariuszw/hlp/internal/context"
+	internalContext "github.com/dariuszw/hlp/internal/context"
 	internalJira "github.com/dariuszw/hlp/internal/jira"
 	"github.com/dariuszw/hlp/internal/ui"
 	"github.com/dariuszw/hlp/internal/worklog"
@@ -29,7 +33,9 @@ var (
 	logFromDate string
 	logToDate   string
 	logConfirm  bool
-	logSlow     bool // --slow: Add delays between batch entries
+	logSlow     bool   // --slow: Add delays between batch entries
+	logSchedule string // --schedule: Wait for scheduled time slot
+	logOrder    string // --order: Entry order for slow mode (oldest, newest, random)
 )
 
 // getDescriptionWidth returns dynamic description column width based on terminal
@@ -65,10 +71,22 @@ Examples:
   hlp jira log 30m                          # Uses auto-detected ticket
   hlp jira log --batch                      # Process CSV file
   hlp jira log --batch --dry-run            # Preview batch without posting
-  hlp jira log --batch --slow               # Post with random delays (20s-2min)
+  hlp jira log --batch --slow               # Post with random delays (oldest first)
+  hlp jira log --batch --slow --order=random  # Shuffle entries randomly
+  hlp jira log --batch --slow --order=newest  # Process newest dates first
   hlp jira log --sync                       # Sync worklogs from JIRA (last 7 days)
   hlp jira log --sync --from 2025-12-01     # Sync from specific date
-  hlp jira log --sync --dry-run             # Preview sync without changes`,
+  hlp jira log --sync --dry-run             # Preview sync without changes
+
+Scheduled mode (requires --batch, --slow is automatic):
+  hlp jira log --batch --schedule           # Next available slot (loops)
+  hlp jira log --batch --schedule morning   # Wait for morning slot
+  hlp jira log --batch --schedule afternoon # Wait for afternoon slot
+
+Entry order (for --slow mode):
+  --order=oldest   Process oldest dates first (default)
+  --order=newest   Process newest dates first
+  --order=random   Shuffle entries randomly`,
 	Args: cobra.MaximumNArgs(2),
 	Run:  runLog,
 }
@@ -85,11 +103,23 @@ func init() {
 	logCmd.Flags().StringVar(&logToDate, "to", "", "End date for sync (YYYY-MM-DD, default: today)")
 	logCmd.Flags().BoolVarP(&logConfirm, "confirm", "y", false, "Skip confirmation prompt for protected profiles")
 	logCmd.Flags().BoolVar(&logSlow, "slow", false, "Add 20s-2min random delays between entries")
+	logCmd.Flags().StringVar(&logSchedule, "schedule", "", "Wait for scheduled time: 'morning', 'afternoon', or empty for next slot")
+	logCmd.Flags().StringVar(&logOrder, "order", "oldest", "Entry order for slow mode: oldest (default), newest, random")
 }
 
 func runLog(cmd *cobra.Command, args []string) {
 	if logSync {
 		runSyncLog(cmd, args)
+		return
+	}
+
+	// Handle --schedule flag (requires --batch)
+	if logSchedule != "" {
+		if !logBatch {
+			fmt.Println(ui.Error("--schedule requires --batch flag"))
+			return
+		}
+		runScheduledBatchLog(cmd, args)
 		return
 	}
 
@@ -123,7 +153,7 @@ func runLog(cmd *cobra.Command, args []string) {
 	// Get ticket
 	ticket := logTicket
 	if ticket == "" {
-		detector := context.NewDetector()
+		detector := internalContext.NewDetector()
 		ticket, _ = detector.DetectTicket()
 	}
 
@@ -187,15 +217,31 @@ func runLog(cmd *cobra.Command, args []string) {
 	showDailyWarning(client, startTime)
 }
 
-func runBatchLog(_ *cobra.Command, _ []string) {
-	// Get current profile for CSV path and auto-create decision
+// batchRunConfig controls batch execution behavior
+type batchRunConfig struct {
+	skipConfirmation bool   // Skip protected profile confirmation (for scheduled mode)
+	forceSlow        bool   // Force slow mode regardless of --slow flag (for scheduled mode)
+	order            string // Entry order for slow mode (oldest, newest, random)
+}
+
+// validateOrderFlag returns an error if the order flag value is invalid
+func validateOrderFlag(order string) error {
+	validOrders := map[string]bool{"oldest": true, "newest": true, "random": true}
+	if !validOrders[order] {
+		return fmt.Errorf("invalid --order value '%s'. Valid options: oldest, newest, random", order)
+	}
+	return nil
+}
+
+// loadBatchProfile loads the active profile and displays profile info.
+// Returns the profile, CSV path, and any error.
+func loadBatchProfile() (*config.JiraProfile, string, error) {
 	profile, err := config.GetActiveProfile()
 	if err != nil {
 		fmt.Println(ui.Muted.Render("  (using default profile)"))
 	}
 	csvPath := batch.DefaultCSVPathForProfile(profile)
 
-	// Show current profile with CSV info
 	if profile != nil {
 		modeStr := ui.Success.Render(" [READ/WRITE]")
 		csvInfo := ui.Muted.Render(" → worklogs.csv")
@@ -209,12 +255,22 @@ func runBatchLog(_ *cobra.Command, _ []string) {
 		fmt.Printf("Profile: %s%s%s\n", ui.Primary.Render(profile.Name), modeStr, csvInfo)
 	}
 
-	// Show loading message
 	fmt.Printf("Loading %s...\n", ui.Primary.Render(csvPath))
+	return profile, csvPath, nil
+}
+
+func runBatchLog(_ *cobra.Command, _ []string) {
+	// Validate --order flag early
+	if err := validateOrderFlag(logOrder); err != nil {
+		fmt.Println(ui.Error(err.Error()))
+		return
+	}
 
 	// DRY-RUN MODE: Handle separately with ALL entries (including DRAFT)
 	// This must come BEFORE ParsePendingCSV() to avoid filtering out DRAFT entries
 	if logDryRun {
+		_, csvPath, _ := loadBatchProfile()
+
 		allEntries, err := batch.ParseCSV(csvPath)
 		if err != nil {
 			fmt.Println(ui.Error("Failed to parse CSV: " + err.Error()))
@@ -277,13 +333,34 @@ func runBatchLog(_ *cobra.Command, _ []string) {
 			}
 		}
 
+		// Sort entries if slow mode is enabled (for preview of processing order)
+		if logSlow && logOrder != "" {
+			batch.SortEntries(relevantEntries, batch.EntryOrder(logOrder))
+		}
+
 		fmt.Println()
-		fmt.Println("Processing worklogs " + ui.Muted.Render("(dry run)") + ":")
+		orderInfo := ""
+		if logSlow {
+			orderInfo = " " + ui.Muted.Render("[order: "+logOrder+"]")
+		}
+		fmt.Println("Processing worklogs " + ui.Muted.Render("(dry run)") + orderInfo + ":")
 		showDryRunGroupedByDay(relevantEntries, getExpectedHoursPerDay())
 		fmt.Println()
 		fmt.Println(ui.Warning("Dry run - no entries posted"))
 		return
 	}
+
+	// Run batch with normal settings
+	runBatchLogCore(batchRunConfig{
+		skipConfirmation: logConfirm,
+		forceSlow:        false,
+		order:            logOrder,
+	})
+}
+
+// runBatchLogCore contains the shared batch processing logic
+func runBatchLogCore(cfg batchRunConfig) {
+	profile, csvPath, _ := loadBatchProfile()
 
 	// BATCH MODE: Use filtered entries (excludes DRAFT and DONE)
 	entries, err := batch.ParsePendingCSV(csvPath)
@@ -319,13 +396,19 @@ func runBatchLog(_ *cobra.Command, _ []string) {
 		}
 	}
 
+	// Sort entries if slow mode is enabled
+	slowMode := cfg.forceSlow || logSlow
+	if slowMode && cfg.order != "" {
+		batch.SortEntries(entries, batch.EntryOrder(cfg.order))
+	}
+
 	// Show preview before confirmation
 	fmt.Println()
 	fmt.Println("Processing worklogs " + ui.Muted.Render("(preview)") + ":")
 	showWorklogPreview(entries, getExpectedHoursPerDay())
 
-	// Safety guard for protected profiles
-	if !logConfirm {
+	// Safety guard for protected profiles (unless confirmation is skipped)
+	if !cfg.skipConfirmation {
 		if profile != nil && profile.Protected {
 			if !ui.ConfirmProtectedProfile(profile.Name, profile.BaseURL, len(entries)) {
 				fmt.Println(ui.Info("Operation cancelled"))
@@ -335,13 +418,13 @@ func runBatchLog(_ *cobra.Command, _ []string) {
 	}
 
 	fmt.Println()
-
 	fmt.Println("Processing worklogs:")
 
 	// Track results for summary
 	var failedEntries []batch.Result
 
 	// Process batch with profile config (mock mode for LOCAL)
+	// Use slow mode if forced or if --slow flag is set
 	mockMode := profile != nil && profile.IsLocal()
 	processor := batch.NewProcessorWithConfig(batch.ProcessorConfig{
 		Client:      client,
@@ -349,7 +432,7 @@ func runBatchLog(_ *cobra.Command, _ []string) {
 		Profile:     profile,
 		MockMode:    mockMode,
 	})
-	results := processor.ProcessBatch(entries, false, logSlow, func(current, total int, result batch.Result) {
+	results := processor.ProcessBatch(entries, false, slowMode, func(current, total int, result batch.Result) {
 		var status string
 		if result.Success {
 			if result.ErrorMessage != "" {
@@ -415,6 +498,108 @@ func runBatchLog(_ *cobra.Command, _ []string) {
 
 	// Show daily total warnings for batch
 	showBatchDailyWarnings(client, results)
+}
+
+// runScheduledBatchLog waits for scheduled time slots and runs batch processing
+func runScheduledBatchLog(_ *cobra.Command, _ []string) {
+	// Validate --order flag early
+	if err := validateOrderFlag(logOrder); err != nil {
+		fmt.Println(ui.Error(err.Error()))
+		return
+	}
+
+	// Load schedule configuration
+	schedule, err := config.GetScheduleConfig()
+	if err != nil {
+		fmt.Println(ui.Error("Failed to load schedule config: " + err.Error()))
+		return
+	}
+
+	if len(schedule.Slots) == 0 {
+		fmt.Println(ui.Error("No schedule slots configured. Add slots to config.yaml under preferences.schedule.slots"))
+		return
+	}
+
+	// Determine target slot name (empty string means "next available")
+	targetSlot := ""
+	if logSchedule != "next" && logSchedule != "true" && logSchedule != "" {
+		targetSlot = logSchedule
+	}
+
+	// Determine if we should loop
+	// If targeting a specific slot, don't loop (single execution)
+	// If using "next available", respect config.loop setting
+	shouldLoop := schedule.Loop && targetSlot == ""
+
+	// Setup signal handling for graceful Ctrl+C
+	ctx, cancel := context.WithCancel(context.Background())
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-sigChan
+		fmt.Println("\n\n" + ui.Info("Interrupted - exiting scheduled mode"))
+		cancel()
+	}()
+	defer signal.Stop(sigChan)
+	defer cancel()
+
+	for {
+		// Calculate next scheduled time
+		targetTime, slotIdx, err := config.NextScheduledTime(*schedule, targetSlot)
+		if err != nil {
+			fmt.Println(ui.Error(err.Error()))
+			return
+		}
+
+		slot := schedule.Slots[slotIdx]
+
+		// Validate slot is within work hours
+		if schedule.WorkHoursStart != "" && schedule.WorkHoursEnd != "" {
+			if err := config.ValidateSlotWithinWorkHours(slot.Time, schedule.WorkHoursStart, schedule.WorkHoursEnd); err != nil {
+				fmt.Println(ui.Warning(err.Error()))
+			}
+		}
+
+		// Show schedule header
+		fmt.Print(ui.FormatScheduleHeader(slot.Name, targetTime.Format("Mon 02 Jan 15:04"), shouldLoop))
+
+		// Wait until scheduled time
+		if !batch.WaitUntilTime(ctx, targetTime, func(remaining time.Duration) {
+			fmt.Print(ui.FormatScheduleCountdown(slot.Name, targetTime, remaining))
+		}) {
+			// Cancelled
+			return
+		}
+
+		// Clear countdown line
+		ui.ClearLine()
+		fmt.Println(ui.SuccessMsg("Scheduled time reached - starting batch"))
+		fmt.Println()
+
+		// Run batch processing with scheduled mode settings
+		runBatchLogCore(batchRunConfig{
+			skipConfirmation: true,     // Skip confirmation in scheduled mode
+			forceSlow:        true,     // Always use slow mode in scheduled mode
+			order:            logOrder, // Use configured order
+		})
+
+		// Exit loop if not looping or targeting specific slot
+		if !shouldLoop {
+			fmt.Println()
+			fmt.Println(ui.Info("Single scheduled run completed"))
+			return
+		}
+
+		// Check for cancellation before looping
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			fmt.Println()
+			fmt.Println(ui.Info("Waiting for next scheduled slot..."))
+			fmt.Println()
+		}
+	}
 }
 
 func runSyncLog(_ *cobra.Command, _ []string) {

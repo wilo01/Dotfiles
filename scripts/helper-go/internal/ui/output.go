@@ -288,3 +288,48 @@ func FormatDailyWarning(date time.Time, totalLogged, expected time.Duration) str
 		duration.Format(totalLogged),
 		expectedStr))
 }
+
+// FormatScheduleCountdown formats the schedule wait countdown line
+func FormatScheduleCountdown(slotName string, targetTime time.Time, remaining time.Duration) string {
+	hours := int(remaining.Hours())
+	minutes := int(remaining.Minutes()) % 60
+	seconds := int(remaining.Seconds()) % 60
+
+	var timeStr string
+	if hours > 0 {
+		timeStr = fmt.Sprintf("%dh%02dm%02ds", hours, minutes, seconds)
+	} else if minutes > 0 {
+		timeStr = fmt.Sprintf("%dm%02ds", minutes, seconds)
+	} else {
+		timeStr = fmt.Sprintf("%ds", seconds)
+	}
+
+	return fmt.Sprintf("\r  %s Next run: %s (%s) in %s (Ctrl+C to cancel)",
+		SpinnerFrames[0],
+		Primary.Render(slotName),
+		Muted.Render(targetTime.Format("15:04")),
+		Success.Render(timeStr))
+}
+
+// FormatScheduleHeader formats the schedule mode header
+func FormatScheduleHeader(slotName, targetTime string, loop bool) string {
+	var sb strings.Builder
+	sb.WriteString("\n")
+	sb.WriteString(Header("Scheduled Batch Mode"))
+	sb.WriteString("\n\n")
+	sb.WriteString(fmt.Sprintf("  Slot:    %s\n", Primary.Render(slotName)))
+	sb.WriteString(fmt.Sprintf("  Target:  %s\n", Primary.Render(targetTime)))
+	if loop {
+		sb.WriteString(fmt.Sprintf("  Mode:    %s\n", Muted.Render("loop (will continue after run)")))
+	} else {
+		sb.WriteString(fmt.Sprintf("  Mode:    %s\n", Muted.Render("single run")))
+	}
+	sb.WriteString("\n")
+	return sb.String()
+}
+
+// ClearLine clears the current line in the terminal
+func ClearLine() {
+	width := GetTerminalWidth()
+	fmt.Print("\r" + strings.Repeat(" ", width) + "\r")
+}
