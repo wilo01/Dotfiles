@@ -4,8 +4,8 @@
 # made some changes to the original script to support greek
 
 import json
-import requests
-import string as str
+import requests  # [ ] TODO: Library stubs not installed for "requests"
+import string as str  # [ ] TODO: "str" is not accessed; `string` imported but unused
 from datetime import datetime
 
 localization = {
@@ -91,11 +91,14 @@ def format_time(time):
     return time.replace("00", "").zfill(2)
 
 
-def format_temp(temp):
+def format_temp(temp):  # [ ] TODO: "temp" is not accessed
     return (hour['FeelsLikeC']+"°").ljust(3)
 
 def format_event(event):
-    return chances[event]+" "+hour[event]+"%"
+    return (
+        chances[event] + " " + hour[event] + "%"
+    )  # [ ] TODO: "chances" is not defined; Undefined name `chances`
+
 
 def format_chances(hour):
     chances = [
@@ -110,7 +113,9 @@ def format_chances(hour):
     ]
 
     probs = {text[e]: int(prob) for e, prob in hour.items() if e in chances and int(prob) > 0}
-    sorted_probs = {e: probs[e] for e in sorted(probs, key=probs.get, reverse=True)}
+    sorted_probs = {
+        e: probs[e] for e in sorted(probs, key=probs.get, reverse=True)
+    }  # [ ] TODO: No overloads for "sorted" match the provided arguments; Argument of type "Overload[(key: str, default: None = None, /) -> (int | None...
     conditions = [f"{event} {prob}%" for event, prob in sorted_probs.items()]
     return ", ".join(conditions)
 
@@ -123,7 +128,7 @@ data['tooltip'] += f"{text['feels_like']}: {weather['current_condition'][0]['Fee
 data['tooltip'] += f"{text['wind']}: {weather['current_condition'][0]['windspeedKmph']}Km/h\n"
 data['tooltip'] += f"{text['humidity']}: {weather['current_condition'][0]['humidity']}%\n"
 for i, day in enumerate(weather['weather']):
-    data['tooltip'] += f"\n<b>"
+    data["tooltip"] += f"\n<b>"  # [ ] TODO: f-string without any placeholders
     if i == 0:
         data['tooltip'] += f"{text['today']}, "
     if i == 1:

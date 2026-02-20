@@ -16,7 +16,7 @@ cleanup() { exit 0; }
 trap cleanup SIGTERM SIGINT SIGPIPE
 
 # Event loop with improved debounce (process substitution = single bash process)
-while read -r event; do
+while read -r event; do  # [ ] TODO: event appears unused. Verify use (or export if used externally).; event appears unused. Verify use (or export if used externally).
     sleep 1
     # Drain events accumulated during debounce
     while read -r -t 0.1 _; do :; done

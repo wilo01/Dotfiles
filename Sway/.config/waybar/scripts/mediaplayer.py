@@ -1,20 +1,28 @@
 #!/usr/bin/env python3
-import gi
+import gi  # [ ] TODO: Import "gi" could not be resolved; Cannot find implementation or library stub for module named "gi"
+
 gi.require_version("Playerctl", "2.0")
-from gi.repository import Playerctl, GLib
-from gi.repository.Playerctl import Player
-import argparse
-import logging
-import sys
-import signal
-import gi
-import json
-import os
-from typing import List
+from gi.repository import (
+    Playerctl,
+    GLib,
+)  # [ ] TODO: Import "gi.repository" could not be resolved; Module level import not at top of file; Cannot find implementation or library stub for module named "gi.repository"
+from gi.repository.Playerctl import (
+    Player,
+)  # [ ] TODO: Import "gi.repository.Playerctl" could not be resolved; Module level import not at top of file; Cannot find implementation or library stub for module named "gi.repository.Pl...
+import argparse  # [ ] TODO: Module level import not at top of file
+import logging  # [ ] TODO: Module level import not at top of file
+import sys  # [ ] TODO: Module level import not at top of file
+import signal  # [ ] TODO: Module level import not at top of file
+import gi  # [ ] TODO: Import "gi" could not be resolved; Module level import not at top of file
+import json  # [ ] TODO: Module level import not at top of file
+import os  # [ ] TODO: Module level import not at top of file
+from typing import List  # [ ] TODO: Module level import not at top of file
 
 logger = logging.getLogger(__name__)
 
-def signal_handler(sig, frame):
+def signal_handler(
+    sig, frame
+):  # [ ] TODO: "sig" is not accessed; "frame" is not accessed
     logger.info("Received signal to stop, exiting")
     sys.stdout.write("\n")
     sys.stdout.flush()

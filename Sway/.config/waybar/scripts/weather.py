@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
-import subprocess
-from pyquery import PyQuery  # install using `pip install pyquery`
+import subprocess  # [ ] TODO: `subprocess` imported but unused
+from pyquery import (
+    PyQuery,
+)  # install using `pip install pyquery`  # [ ] TODO: Cannot find implementation or library stub for module named "pyquery"; Import "pyquery" could not be resolved
 import json
 
 # weather icons

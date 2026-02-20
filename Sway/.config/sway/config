@@ -269,9 +269,9 @@ exec swayidle -w \
     bindsym $mod+a focus parent
     bindsym $mod+z focus child
 
-    # Dynamic gap controls
-    bindsym $mod+equal gaps inner current plus 5
-    bindsym $mod+minus gaps inner current minus 5
+    # Dynamic gap controls (also resizes PIP when focused)
+    bindsym $mod+equal exec ~/.config/sway/scripts/pip-resize.sh grow
+    bindsym $mod+minus exec ~/.config/sway/scripts/pip-resize.sh shrink
     bindsym $mod+Shift+equal gaps outer current plus 5
     bindsym $mod+Shift+minus gaps outer current minus 5
 

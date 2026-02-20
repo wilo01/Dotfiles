@@ -19,7 +19,7 @@ get_window_info() {
 get_output_for_window() {
     # Get the output name where the focused window is located
     local win_x win_y
-    read _ _ win_x win_y <<< "$(get_window_info)"
+    read _ _ win_x win_y <<< "$(get_window_info)"  # [ ] TODO: read without -r will mangle backslashes.; read without -r will mangle backslashes.
 
     # Find output that contains this position
     swaymsg -t get_outputs | jq -r --argjson wx "${win_x:-0}" --argjson wy "${win_y:-0}" '
@@ -33,8 +33,8 @@ get_output_for_window() {
 # Calculate corner position (keeps window fully on-screen)
 calc_position() {
     local corner=$1
-    read win_w win_h _ _ <<< "$(get_window_info)"
-    read out_w out_h <<< "$(get_output_for_window)"
+    read win_w win_h _ _ <<< "$(get_window_info)"  # [ ] TODO: read without -r will mangle backslashes.; read without -r will mangle backslashes.
+    read out_w out_h <<< "$(get_output_for_window)"  # [ ] TODO: read without -r will mangle backslashes.; read without -r will mangle backslashes.
 
     # Fallback if output detection fails
     out_w=${out_w:-1920}
@@ -55,7 +55,7 @@ is_pip=$(swaymsg -t get_tree | jq -r '.. | select(.focused? == true) | .marks //
 
 if [ "$is_pip" = "true" ]; then
     if [ -f "$STATE_FILE" ]; then
-        source "$STATE_FILE"
+        source "$STATE_FILE"  # [ ] TODO: ShellCheck can't follow non-constant source. Use a directive to specify locat...; ShellCheck can't follow non-constant source. Use a directive to specify locat...
     else
         corner="br"
     fi
@@ -68,7 +68,7 @@ if [ "$is_pip" = "true" ]; then
     esac
 
     if [ "$next" = "exit" ]; then
-        read width height _ _ <<< "$(get_window_info)"
+        read width height _ _ <<< "$(get_window_info)"  # [ ] TODO: read without -r will mangle backslashes.; read without -r will mangle backslashes.
         echo "pip_width=$width" > "$STATE_FILE"
         echo "pip_height=$height" >> "$STATE_FILE"
         swaymsg "unmark $PIPMARK; floating disable; sticky disable"
@@ -83,7 +83,7 @@ if [ "$is_pip" = "true" ]; then
     fi
 else
     if [ -f "$STATE_FILE" ]; then
-        source "$STATE_FILE"
+        source "$STATE_FILE"  # [ ] TODO: ShellCheck can't follow non-constant source. Use a directive to specify locat...; ShellCheck can't follow non-constant source. Use a directive to specify locat...
     fi
 
     width=${pip_width:-400}
