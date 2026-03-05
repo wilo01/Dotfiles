@@ -13,6 +13,12 @@ type Config struct {
 	Timesheet   TimesheetConfig `mapstructure:"timesheet" yaml:"timesheet"`
 	Sheets      SheetsConfig    `mapstructure:"google_sheets" yaml:"google_sheets"`
 	Preferences Preferences     `mapstructure:"preferences" yaml:"preferences"`
+	Dev         DevConfig       `mapstructure:"dev" yaml:"dev"`
+}
+
+// DevConfig holds developer workflow settings
+type DevConfig struct {
+	CommitsFile string `mapstructure:"commits_file" yaml:"commits_file"`
 }
 
 // JiraConfig holds JIRA connection settings
@@ -58,6 +64,7 @@ type Preferences struct {
 	RichOutput            bool           `mapstructure:"rich_output" yaml:"rich_output"`
 	CopyToClipboard       bool           `mapstructure:"copy_to_clipboard" yaml:"copy_to_clipboard"`
 	StandupIgnoredTickets []string       `mapstructure:"standup_ignored_tickets" yaml:"standup_ignored_tickets"`
+	DailyTickets          []string       `mapstructure:"daily_tickets" yaml:"daily_tickets"`
 	Schedule              ScheduleConfig `mapstructure:"schedule" yaml:"schedule"`
 }
 
@@ -90,6 +97,9 @@ func Default() *Config {
 		},
 		Sheets: SheetsConfig{
 			SheetID: "",
+		},
+		Dev: DevConfig{
+			CommitsFile: "~/Dev/Private/Commits.md",
 		},
 		Preferences: Preferences{
 			AutoDetectContext:     true,
@@ -137,6 +147,7 @@ func Save(cfg *Config) error {
 	viper.Set("timesheet", cfg.Timesheet)
 	viper.Set("google_sheets", cfg.Sheets)
 	viper.Set("preferences", cfg.Preferences)
+	viper.Set("dev", cfg.Dev)
 
 	return viper.WriteConfigAs(configPath)
 }

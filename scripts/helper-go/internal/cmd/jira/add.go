@@ -51,9 +51,20 @@ func init() {
 var ticketKeyPattern = regexp.MustCompile(`^[A-Z]+-\d+$`)
 
 func runAdd(cmd *cobra.Command, args []string) {
-	// --no-sync without ticket keys is a no-op
-	if addNoSync && len(args) == 0 {
-		fmt.Println(ui.Error("--no-sync requires ticket keys"))
+	// Load daily tickets from config
+	cfg, cfgErr := config.Load()
+	var dailyTickets []string
+	if cfgErr != nil {
+		if !addQuiet {
+			fmt.Println(ui.Warning(fmt.Sprintf("Could not load config: %v (using defaults)", cfgErr)))
+		}
+	} else {
+		dailyTickets = cfg.Preferences.DailyTickets
+	}
+
+	// --no-sync without ticket keys or daily tickets is a no-op
+	if addNoSync && len(args) == 0 && len(dailyTickets) == 0 {
+		fmt.Println(ui.Error("--no-sync requires ticket keys (or configure daily_tickets)"))
 		fmt.Println(ui.Muted.Render("Examples:"))
 		fmt.Println(ui.Muted.Render("  hlp jira add                       # Sync sprint"))
 		fmt.Println(ui.Muted.Render("  hlp jira add --no-sync VIS-1234    # Add without sync"))
@@ -118,6 +129,14 @@ func runAdd(cmd *cobra.Command, args []string) {
 	// Add manual ticket keys
 	for _, arg := range args {
 		ticketKeys = append(ticketKeys, strings.ToUpper(strings.TrimSpace(arg)))
+	}
+
+	// Append daily tickets from config (normalize and validate)
+	for _, dt := range dailyTickets {
+		upper := strings.ToUpper(strings.TrimSpace(dt))
+		if ticketKeyPattern.MatchString(upper) {
+			ticketKeys = append(ticketKeys, upper)
+		}
 	}
 
 	// Deduplicate ticket keys (sprint keys first, case-insensitive)
@@ -315,7 +334,14 @@ func runAdd(cmd *cobra.Command, args []string) {
 
 		// Re-read entries for next iteration (skip in dry-run)
 		if !addDryRun {
-			entries, _ = batch.ParseCSV(csvPath)
+			var rereadErr error
+			entries, rereadErr = batch.ParseCSV(csvPath)
+			if rereadErr != nil {
+				if !addQuiet {
+					fmt.Println(ui.Error(fmt.Sprintf("Failed to re-read CSV after write: %v", rereadErr)))
+				}
+				return
+			}
 		}
 	}
 
@@ -401,14 +427,32 @@ func RunAutoSync(quiet bool) error {
 		fmt.Printf("Found %d tickets in sprint\n", len(sprintTickets))
 	}
 
+	// Build combined ticket key list: sprint + daily
+	var ticketKeys []string
+	for _, t := range sprintTickets {
+		ticketKeys = append(ticketKeys, t.Key)
+	}
+
+	// Append daily tickets from config (normalize and validate)
+	if cfg, cfgErr := config.Load(); cfgErr == nil {
+		for _, dt := range cfg.Preferences.DailyTickets {
+			upper := strings.ToUpper(strings.TrimSpace(dt))
+			if ticketKeyPattern.MatchString(upper) {
+				ticketKeys = append(ticketKeys, upper)
+			}
+		}
+	} else if !quiet {
+		fmt.Println(ui.Warning(fmt.Sprintf("Could not load config for daily tickets: %v", cfgErr)))
+	}
+	ticketKeys = deduplicateKeys(ticketKeys)
+
 	// Track results
 	added := 0
 	updated := 0
 	skipped := 0
 
 	// Process each ticket
-	for _, sprintTicket := range sprintTickets {
-		ticketKey := sprintTicket.Key
+	for _, ticketKey := range ticketKeys {
 
 		// Check if ticket exists for today
 		// Match on IssueKey (parent-only) OR SubtaskKey to handle both cases
@@ -482,7 +526,14 @@ func RunAutoSync(quiet bool) error {
 					ui.Muted.Render("(updated)"))
 			}
 			updated++
-			entries, _ = batch.ParseCSV(csvPath) // Re-read after write; ignore error
+			var rereadErr error
+			entries, rereadErr = batch.ParseCSV(csvPath)
+			if rereadErr != nil {
+				if !quiet {
+					fmt.Println(ui.Error(fmt.Sprintf("Failed to re-read CSV: %v", rereadErr)))
+				}
+				return fmt.Errorf("CSV re-read failed: %w", rereadErr)
+			}
 			continue
 		}
 
@@ -513,7 +564,14 @@ func RunAutoSync(quiet bool) error {
 				ui.Muted.Render(truncateString(description, 40)))
 		}
 		added++
-		entries, _ = batch.ParseCSV(csvPath) // Re-read after write; ignore error
+		var rereadErr error
+		entries, rereadErr = batch.ParseCSV(csvPath)
+		if rereadErr != nil {
+			if !quiet {
+				fmt.Println(ui.Error(fmt.Sprintf("Failed to re-read CSV: %v", rereadErr)))
+			}
+			return fmt.Errorf("CSV re-read failed: %w", rereadErr)
+		}
 	}
 
 	// Summary (only if not quiet and changes made)

@@ -174,15 +174,55 @@ func ProgressBar(current, total int, width int) string {
 }
 
 // ConfirmAction prompts user for Y/N confirmation
-// Returns true if user confirms, false otherwise
+// Returns true if user confirms, false otherwise.
+// Returns false on read error (e.g. stdin closed).
 func ConfirmAction(message string) bool {
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Printf("%s [y/N]: ", message)
-	input, _ := reader.ReadString('\n')
+	input, err := reader.ReadString('\n')
+	if err != nil {
+		fmt.Println(Warning("Could not read input, defaulting to No"))
+		return false
+	}
 	input = strings.TrimSpace(strings.ToLower(input))
 
 	return input == "y" || input == "yes"
+}
+
+// PromptChoice displays a message and reads a single line from stdin.
+// Returns the trimmed, lowercased input string and any read error.
+func PromptChoice(message string) (string, error) {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print(message)
+	input, err := reader.ReadString('\n')
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(strings.ToLower(input)), nil
+}
+
+// Spinner displays an animated spinner with a message.
+// Returns a stop function that clears the spinner line.
+func Spinner(message string) func() {
+	done := make(chan struct{})
+	go func() {
+		i := 0
+		for {
+			select {
+			case <-done:
+				return
+			default:
+				fmt.Printf("\r  %s %s", Primary.Render(SpinnerFrames[i%len(SpinnerFrames)]), message)
+				i++
+				time.Sleep(80 * time.Millisecond)
+			}
+		}
+	}()
+	return func() {
+		close(done)
+		ClearLine()
+	}
 }
 
 // ConfirmProtectedProfile shows a warning and prompts for confirmation

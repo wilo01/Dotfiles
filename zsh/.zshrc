@@ -366,6 +366,20 @@ function git() {
 
     return $ret
 }
+
+# gh wrapper - pull latest master before pr checkout
+function gh() {
+    command git status
+    if [[ "$1" == "pr" && "$2" == "checkout" ]]; then
+        echo "Syncing master before PR checkout..."
+        command git checkout master && command git pull || {
+            echo "Failed to sync master. Aborting PR checkout."
+            return 1
+        }
+    fi
+    command gh "$@"
+}
+
 # Linux Setup
 alias sshkey="echo cat ~/.ssh/id_ed25519.pub ; cat ~/.ssh/id_ed25519.pub"
 alias ssh_key="echo cat ~/.ssh/id_ed25519.pub ; cat ~/.ssh/id_ed25519.pub"
