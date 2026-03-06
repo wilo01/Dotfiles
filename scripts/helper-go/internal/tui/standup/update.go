@@ -24,6 +24,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.viewport.Height = msg.Height - headerHeight - footerHeight
 
 		m.ready = true
+		m.viewport.SetContent(m.renderPresentationContent())
 		return m, nil
 	}
 
@@ -39,16 +40,24 @@ func (m Model) handleKeyMsg(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, tea.Quit
 
 	case key.Matches(msg, m.keys.Left):
-		return m.moveDayLeft(), nil
+		m = m.moveDayLeft()
+		m.viewport.SetContent(m.renderPresentationContent())
+		return m, nil
 
 	case key.Matches(msg, m.keys.Right):
-		return m.moveDayRight(), nil
+		m = m.moveDayRight()
+		m.viewport.SetContent(m.renderPresentationContent())
+		return m, nil
 
 	case key.Matches(msg, m.keys.Up):
-		return m.moveItemUp(), nil
+		m = m.moveItemUp()
+		m.viewport.SetContent(m.renderPresentationContent())
+		return m, nil
 
 	case key.Matches(msg, m.keys.Down):
-		return m.moveItemDown(), nil
+		m = m.moveItemDown()
+		m.viewport.SetContent(m.renderPresentationContent())
+		return m, nil
 	}
 
 	return m, nil
