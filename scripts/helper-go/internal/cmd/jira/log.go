@@ -3,6 +3,7 @@ package jira
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -672,7 +673,11 @@ func runSyncLog(_ *cobra.Command, _ []string) {
 	// Load existing CSV entries using profile-aware path
 	profile, _ := config.GetActiveProfile()
 	csvPath := batch.DefaultCSVPathForProfile(profile)
-	csvEntries, _ := batch.ParseCSV(csvPath) // Empty if file doesn't exist
+	csvEntries, parseErr := batch.ParseCSV(csvPath)
+	if parseErr != nil && !errors.Is(parseErr, os.ErrNotExist) {
+		fmt.Println(ui.Error("Failed to parse CSV: " + parseErr.Error()))
+		return
+	}
 
 	// Find missing worklogs
 	missing := batch.FindMissingWorklogs(jiraWorklogs, csvEntries)
@@ -716,45 +721,52 @@ func runSyncLog(_ *cobra.Command, _ []string) {
 		if err != nil {
 			fmt.Println(ui.Warning("Failed to fetch sprint tickets: " + err.Error()))
 		} else {
-			entries, _ := batch.ParseCSV(csvPath)
-			draftPreviewCount := 0
-
-			// Find last logged date (same logic as actual run)
-			lastLoggedDate := time.Now().Format("02.01.2006")
-			for _, e := range entries {
-				if e.TimeSpent != "" || e.Status == batch.StatusDone ||
-					e.Status == batch.StatusSync || e.Status == batch.StatusUpdated {
-					lastLoggedDate = strings.Split(e.Date, " ")[0]
-					break
+			entries, parseErr := batch.ParseCSV(csvPath)
+			if parseErr != nil && !errors.Is(parseErr, os.ErrNotExist) {
+				fmt.Println(ui.Warning("Could not parse CSV for draft preview: " + parseErr.Error()))
+			} else {
+				if errors.Is(parseErr, os.ErrNotExist) {
+					fmt.Println(ui.Muted.Render("  No existing CSV found — showing all sprint tickets as DRAFT"))
 				}
-			}
+				draftPreviewCount := 0
 
-			for _, ticket := range sprintTickets {
-				// For sub-tasks: show that it will use parent key
-				issueKey := ticket.Key
-				issueType := ticket.IssueType
-				description := ticket.Summary
-
-				if ticket.IsSubtask && ticket.ParentKey != "" {
-					issueKey = ticket.ParentKey
-					description = "... > " + ticket.Summary // Preview shows parent will be fetched
+				// Find last logged date (same logic as actual run)
+				lastLoggedDate := time.Now().Format("02.01.2006")
+				for _, e := range entries {
+					if e.TimeSpent != "" || e.Status == batch.StatusDone ||
+						e.Status == batch.StatusSync || e.Status == batch.StatusUpdated {
+						lastLoggedDate = strings.Split(e.Date, " ")[0]
+						break
+					}
 				}
 
-				exists := batch.EntryExistsForTicket(entries, issueKey, lastLoggedDate, ticket.IsSubtask, ticket.Summary)
+				for _, ticket := range sprintTickets {
+					// For sub-tasks: show that it will use parent key
+					issueKey := ticket.Key
+					issueType := ticket.IssueType
+					description := ticket.Summary
 
-				if !exists {
-					draftPreviewCount++
-					fmt.Printf("  %s %s %s %s %s\n",
-						ui.FormatStatusPadded("DRAFT", 6),
-						ui.Primary.Render(padRight(issueKey, 12)),
-						ui.Muted.Render(padRight("["+issueType+"]", 12)),
-						ui.Muted.Render(padRight(truncateString(description, 25), 25)),
-						ui.Muted.Render("("+lastLoggedDate+")"))
+					if ticket.IsSubtask && ticket.ParentKey != "" {
+						issueKey = ticket.ParentKey
+						description = "... > " + ticket.Summary // Preview shows parent will be fetched
+					}
+
+					exists := batch.EntryExistsForTicket(entries, issueKey, lastLoggedDate, ticket.IsSubtask, ticket.Summary)
+
+					if !exists {
+						draftPreviewCount++
+						fmt.Printf("  %s %s %s %s %s\n",
+							ui.FormatStatusPadded("DRAFT", 6),
+							ui.Primary.Render(padRight(issueKey, 12)),
+							ui.Muted.Render(padRight("["+issueType+"]", 12)),
+							ui.Muted.Render(padRight(truncateString(description, 25), 25)),
+							ui.Muted.Render("("+lastLoggedDate+")"))
+					}
 				}
-			}
 
-			if draftPreviewCount == 0 {
-				fmt.Println(ui.Muted.Render("  No new DRAFT entries needed"))
+				if draftPreviewCount == 0 {
+					fmt.Println(ui.Muted.Render("  No new DRAFT entries needed"))
+				}
 			}
 		}
 
@@ -795,21 +807,31 @@ func runSyncLog(_ *cobra.Command, _ []string) {
 		}
 
 		// Fill missing descriptions for existing entries
-		entries, _ := batch.ParseCSV(csvPath)
-		var keysNeedingDesc []string
-		for _, e := range entries {
-			if e.Description == "" {
-				keysNeedingDesc = append(keysNeedingDesc, e.IssueKey)
+		entries, parseErr := batch.ParseCSV(csvPath)
+		if parseErr != nil {
+			fmt.Println(ui.Warning("Could not re-read CSV for descriptions: " + parseErr.Error()))
+		} else {
+			var keysNeedingDesc []string
+			for _, e := range entries {
+				if e.Description == "" {
+					keysNeedingDesc = append(keysNeedingDesc, e.IssueKey)
+				}
 			}
-		}
-		if len(keysNeedingDesc) > 0 {
-			fmt.Print("Fetching missing descriptions...")
-			descSummaries, _ := client.GetIssueSummaries(unique(keysNeedingDesc))
-			updatedCount, _ := batch.UpdateCSVDescriptions(csvPath, descSummaries)
-			if updatedCount > 0 {
-				fmt.Printf(" updated %d entries\n", updatedCount)
-			} else {
-				fmt.Println(" done")
+			if len(keysNeedingDesc) > 0 {
+				fmt.Print("Fetching missing descriptions...")
+				descSummaries, descErr := client.GetIssueSummaries(unique(keysNeedingDesc))
+				if descErr != nil {
+					fmt.Println(" " + ui.Warning("failed: "+descErr.Error()))
+				} else {
+					updatedCount, updateErr := batch.UpdateCSVDescriptions(csvPath, descSummaries)
+					if updateErr != nil {
+						fmt.Println(" " + ui.Warning("failed to update: "+updateErr.Error()))
+					} else if updatedCount > 0 {
+						fmt.Printf(" updated %d entries\n", updatedCount)
+					} else {
+						fmt.Println(" done")
+					}
+				}
 			}
 		}
 
@@ -826,7 +848,11 @@ func runSyncLog(_ *cobra.Command, _ []string) {
 	}
 
 	// Re-parse CSV to get updated entries after sync
-	entries, _ := batch.ParseCSV(csvPath)
+	entries, parseErr := batch.ParseCSV(csvPath)
+	if parseErr != nil && !errors.Is(parseErr, os.ErrNotExist) {
+		fmt.Println(ui.Error("Failed to re-read CSV for draft entries: " + parseErr.Error()))
+		return
+	}
 	draftCount := 0
 
 	// Find last logged date from CSV (excluding DRAFT entries)
