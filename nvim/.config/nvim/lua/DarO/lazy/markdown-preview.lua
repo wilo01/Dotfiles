@@ -4,6 +4,10 @@ return {
    ft = { "markdown" },
    build = function() vim.fn["mkdp#util#install"]() end,
    config = function()
+      local plugin_dir = vim.fn.stdpath("data") .. "/lazy/markdown-preview.nvim/app"
+      if vim.fn.isdirectory(plugin_dir .. "/node_modules") == 0 then
+         vim.fn["mkdp#util#install"]()
+      end
       vim.cmd([[do FileType]])
       vim.cmd([[
          function OpenMarkdownPreview (url)
