@@ -850,6 +850,38 @@ func PrependEntryWithStatus(path, issueKey, subtaskKey, issueType, description, 
 	return writer.WriteAll(result)
 }
 
+// RemoveEntryByRow removes a CSV row by its 1-based row number
+func RemoveEntryByRow(path string, rowNumber int) error {
+	f, err := os.Open(path)
+	if err != nil {
+		return fmt.Errorf("remove entry: open CSV: %w", err)
+	}
+
+	reader := csv.NewReader(f)
+	reader.FieldsPerRecord = -1
+	records, err := reader.ReadAll()
+	f.Close()
+	if err != nil {
+		return fmt.Errorf("remove entry: read CSV: %w", err)
+	}
+
+	idx := rowNumber - 1
+	if idx < 0 || idx >= len(records) {
+		return fmt.Errorf("row %d out of range (1-%d)", rowNumber, len(records))
+	}
+
+	records = append(records[:idx], records[idx+1:]...)
+
+	f, err = os.Create(path)
+	if err != nil {
+		return fmt.Errorf("remove entry: write CSV: %w", err)
+	}
+	defer f.Close()
+
+	writer := csv.NewWriter(f)
+	return writer.WriteAll(records)
+}
+
 // UpdateEntryDescription updates the description of an existing entry by row number
 func UpdateEntryDescription(path string, rowNumber int, newDescription string) error {
 	// Read all records

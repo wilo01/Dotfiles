@@ -286,6 +286,11 @@ func runAdd(cmd *cobra.Command, args []string) {
 			continue
 		}
 
+		// Clean up redundant parent-only entry BEFORE prepend (row numbers are still valid)
+		if !addDryRun && subtaskKey != "" {
+			removeParentOnlyEntry(csvPath, entries, issueKey, todayStr, addQuiet)
+		}
+
 		// Prepend to CSV with DRAFT status (skip in dry-run)
 		if !addDryRun {
 			currentDateTime := time.Now().Format("02.01.2006 15:04")
@@ -537,6 +542,11 @@ func RunAutoSync(quiet bool) error {
 			continue
 		}
 
+		// Clean up redundant parent-only entry BEFORE prepend (row numbers are still valid)
+		if subtaskKey != "" {
+			removeParentOnlyEntry(csvPath, entries, issueKey, todayStr, quiet)
+		}
+
 		// Prepend to CSV with DRAFT status
 		currentDateTime := time.Now().Format("02.01.2006 15:04")
 		err = batch.PrependEntryWithStatus(
@@ -585,6 +595,32 @@ func RunAutoSync(quiet bool) error {
 	}
 
 	return nil
+}
+
+// removeParentOnlyEntry removes a today's parent-only DRAFT entry when a subtask entry
+// now covers it. Returns true if an entry was removed.
+func removeParentOnlyEntry(csvPath string, entries []batch.Entry, issueKey string, todayStr string, quiet bool) bool {
+	for _, e := range entries {
+		entryDate := strings.Split(e.Date, " ")[0]
+		if entryDate == todayStr &&
+			strings.EqualFold(e.IssueKey, issueKey) &&
+			e.SubtaskKey == "" &&
+			e.Status == batch.StatusDraft {
+			if !quiet {
+				fmt.Printf("%s %s - removed (now tracked via subtask)\n",
+					ui.Muted.Render("⊘"),
+					ui.Muted.Render(issueKey))
+			}
+			if err := batch.RemoveEntryByRow(csvPath, e.RowNumber); err != nil {
+				if !quiet {
+					fmt.Println(ui.Warning(fmt.Sprintf("Could not remove parent-only entry for %s: %v", issueKey, err)))
+				}
+				return false
+			}
+			return true
+		}
+	}
+	return false
 }
 
 // findSubtaskKey returns the first subtask key tracked under issueKey, or "" if none.

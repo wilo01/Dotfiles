@@ -152,6 +152,125 @@ func TestEntryExistsForTicket(t *testing.T) {
 	}
 }
 
+func TestRemoveEntryByRow(t *testing.T) {
+	t.Run("removes middle row", func(t *testing.T) {
+		tmpFile, err := os.CreateTemp("", "remove_row_test_*.csv")
+		if err != nil {
+			t.Fatal(err)
+		}
+		tmpPath := tmpFile.Name()
+		tmpFile.Close()
+		defer os.Remove(tmpPath)
+
+		// Write 3 entries
+		_ = AppendEntryWithStatus(tmpPath, "VIS-100", "", "Story", "First", "1h", "06.03.2026 09:00", "", "", StatusDraft)
+		_ = AppendEntryWithStatus(tmpPath, "VIS-200", "", "Bug", "Second", "2h", "06.03.2026 10:00", "", "", StatusDraft)
+		_ = AppendEntryWithStatus(tmpPath, "VIS-300", "VIS-301", "Task", "Third", "3h", "06.03.2026 11:00", "", "", StatusDraft)
+
+		// Remove row 2 (the VIS-200 entry)
+		err = RemoveEntryByRow(tmpPath, 2)
+		if err != nil {
+			t.Fatalf("RemoveEntryByRow failed: %v", err)
+		}
+
+		entries, err := ParseCSV(tmpPath)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(entries) != 2 {
+			t.Fatalf("Expected 2 entries after removal, got %d", len(entries))
+		}
+		if entries[0].IssueKey != "VIS-100" {
+			t.Errorf("Expected first entry VIS-100, got %s", entries[0].IssueKey)
+		}
+		if entries[1].IssueKey != "VIS-300" {
+			t.Errorf("Expected second entry VIS-300, got %s", entries[1].IssueKey)
+		}
+	})
+
+	t.Run("removes first row", func(t *testing.T) {
+		tmpFile, err := os.CreateTemp("", "remove_row_test_*.csv")
+		if err != nil {
+			t.Fatal(err)
+		}
+		tmpPath := tmpFile.Name()
+		tmpFile.Close()
+		defer os.Remove(tmpPath)
+
+		_ = AppendEntryWithStatus(tmpPath, "VIS-100", "", "Story", "First", "", "06.03.2026 09:00", "", "", StatusDraft)
+		_ = AppendEntryWithStatus(tmpPath, "VIS-200", "", "Bug", "Second", "", "06.03.2026 10:00", "", "", StatusDraft)
+
+		err = RemoveEntryByRow(tmpPath, 1)
+		if err != nil {
+			t.Fatalf("RemoveEntryByRow failed: %v", err)
+		}
+
+		entries, err := ParseCSV(tmpPath)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(entries) != 1 {
+			t.Fatalf("Expected 1 entry, got %d", len(entries))
+		}
+		if entries[0].IssueKey != "VIS-200" {
+			t.Errorf("Expected VIS-200, got %s", entries[0].IssueKey)
+		}
+	})
+
+	t.Run("removes last row", func(t *testing.T) {
+		tmpFile, err := os.CreateTemp("", "remove_row_test_*.csv")
+		if err != nil {
+			t.Fatal(err)
+		}
+		tmpPath := tmpFile.Name()
+		tmpFile.Close()
+		defer os.Remove(tmpPath)
+
+		_ = AppendEntryWithStatus(tmpPath, "VIS-100", "", "Story", "First", "", "06.03.2026 09:00", "", "", StatusDraft)
+		_ = AppendEntryWithStatus(tmpPath, "VIS-200", "", "Bug", "Second", "", "06.03.2026 10:00", "", "", StatusDraft)
+		_ = AppendEntryWithStatus(tmpPath, "VIS-300", "", "Task", "Third", "", "06.03.2026 11:00", "", "", StatusDraft)
+
+		err = RemoveEntryByRow(tmpPath, 3)
+		if err != nil {
+			t.Fatalf("RemoveEntryByRow failed: %v", err)
+		}
+
+		entries, err := ParseCSV(tmpPath)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(entries) != 2 {
+			t.Fatalf("Expected 2 entries after removing last row, got %d", len(entries))
+		}
+		if entries[0].IssueKey != "VIS-100" {
+			t.Errorf("Expected first entry VIS-100, got %s", entries[0].IssueKey)
+		}
+		if entries[1].IssueKey != "VIS-200" {
+			t.Errorf("Expected second entry VIS-200, got %s", entries[1].IssueKey)
+		}
+	})
+
+	t.Run("out of range returns error", func(t *testing.T) {
+		tmpFile, err := os.CreateTemp("", "remove_row_test_*.csv")
+		if err != nil {
+			t.Fatal(err)
+		}
+		tmpPath := tmpFile.Name()
+		tmpFile.Close()
+		defer os.Remove(tmpPath)
+
+		_ = AppendEntryWithStatus(tmpPath, "VIS-100", "", "Story", "Only", "", "06.03.2026 09:00", "", "", StatusDraft)
+
+		err = RemoveEntryByRow(tmpPath, 5)
+		if err == nil {
+			t.Error("Expected error for out-of-range row, got nil")
+		}
+	})
+}
+
 func TestCSVQuotingWithCommas(t *testing.T) {
 	tests := []struct {
 		name        string
