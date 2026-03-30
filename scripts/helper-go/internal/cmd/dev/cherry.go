@@ -3,6 +3,7 @@ package dev
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -17,8 +18,9 @@ import (
 )
 
 var (
-	cherryBranches string
-	cherryDryRun   bool
+	cherryBranches    string
+	cherryDryRun      bool
+	cherryOpenBrowser bool
 )
 
 var cherryCmd = &cobra.Command{
@@ -49,6 +51,7 @@ Examples:
 func init() {
 	cherryCmd.Flags().StringVarP(&cherryBranches, "branches", "b", "", "comma-separated target branches (required)")
 	cherryCmd.Flags().BoolVar(&cherryDryRun, "dry-run", false, "test cherry-pick/patch feasibility without pushing or creating PRs")
+	cherryCmd.Flags().BoolVar(&cherryOpenBrowser, "open", false, "open created PR URLs in the browser")
 	cherryCmd.MarkFlagRequired("branches")
 }
 
@@ -785,5 +788,29 @@ func printCherrySummary(results []gitops.BranchResult) {
 	} else {
 		fmt.Printf("  %s\n", ui.Error(summary))
 	}
+
+	// Collect successful PR URLs
+	var urls []string
+	for _, r := range results {
+		if r.Success && r.PRURL != "" {
+			urls = append(urls, r.PRURL)
+		}
+	}
+
+	// Print URL list for easy copying
+	if len(urls) > 0 {
+		fmt.Println()
+		for _, u := range urls {
+			fmt.Println(u)
+		}
+	}
+
+	// Open in browser if --open flag
+	if cherryOpenBrowser {
+		for _, u := range urls {
+			_ = exec.Command("xdg-open", u).Start()
+		}
+	}
+
 	fmt.Println()
 }
