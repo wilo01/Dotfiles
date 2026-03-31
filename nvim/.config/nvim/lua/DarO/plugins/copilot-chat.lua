@@ -1,0 +1,183 @@
+local gh = function(x) return 'https://github.com/' .. x end
+local loaded = false
+
+local copilot_cmds = { "CopilotChat", "CopilotChatOpen", "CopilotChatToggle", "CopilotChatModels" }
+
+local function ensure_loaded()
+   if loaded then return end
+   loaded = true
+   for _, c in ipairs(copilot_cmds) do
+      pcall(vim.api.nvim_del_user_command, c)
+   end
+   vim.pack.add({ gh('CopilotC-Nvim/CopilotChat.nvim') })
+   require("CopilotChat").setup({
+      model = "claude-sonnet-4",
+      agent = "copilot",
+      remember_as_sticky = true,
+      auto_insert_mode = true,
+      selection = function(source)
+         local select = require("CopilotChat.select")
+         return select.visual(source) or select.buffer(source)
+      end,
+      mappings = {
+         complete = {
+            insert = '<CR>',
+         },
+         close = {
+            normal = 'q',
+            insert = '<C-c>',
+         },
+         reset = {
+            normal = '<C-l>',
+            insert = '<C-l>',
+         },
+         submit_prompt = {
+            normal = '<CR>',
+            insert = '<C-s>',
+         },
+         toggle_sticky = {
+            normal = 'grr',
+         },
+         clear_stickies = {
+            normal = 'grx',
+         },
+         accept_diff = {
+            normal = '<C-y>',
+            insert = '<C-y>',
+         },
+         jump_to_diff = {
+            normal = 'gj',
+         },
+         quickfix_answers = {
+            normal = 'gqa',
+         },
+         quickfix_diffs = {
+            normal = 'gqd',
+         },
+         yank_diff = {
+            normal = 'gy',
+            register = '"',
+         },
+         show_diff = {
+            normal = 'gd',
+            full_diff = false,
+         },
+         show_info = {
+            normal = 'gi',
+         },
+         show_context = {
+            normal = 'gc',
+         },
+         show_help = {
+            normal = 'gh',
+         },
+      },
+
+      system_prompt = 'COPILOT_INSTRUCTIONS',
+      context = nil,
+      sticky = nil,
+
+      temperature = 0.1,
+      headless = false,
+      stream = nil,
+      callback = nil,
+      window = {
+         layout = 'float',
+         width = 0.8,
+         height = 0.8,
+
+         relative = 'editor',
+         border = 'single',
+         row = nil,
+         col = nil,
+         title = 'Copilot Chat',
+         footer = nil,
+         zindex = 1,
+      },
+
+      show_help = true,
+      highlight_selection = true,
+      highlight_headers = true,
+      references_display = 'virtual',
+      auto_follow_cursor = true,
+      clear_chat_on_new_prompt = false,
+
+      debug = false,
+      log_level = 'info',
+      proxy = nil,
+      allow_insecure = false,
+
+      chat_autocomplete = false,
+
+      log_path = vim.fn.stdpath('state') .. '/CopilotChat.log',
+      history_path = vim.fn.stdpath('data') .. '/copilotchat_history',
+
+      question_header = '# User ',
+      answer_header = '# Copilot ',
+      error_header = '# Error ',
+      separator = '───',
+
+      prompts = {
+         Explain = {
+            prompt = 'Write an explanation for the selected code as paragraphs of text.',
+            system_prompt = 'COPILOT_EXPLAIN',
+         },
+         Review = {
+            prompt = 'Review the selected code.',
+            system_prompt = 'COPILOT_REVIEW',
+         },
+         Fix = {
+            prompt =
+            'There is a problem in this code. Identify the issues and rewrite the code with fixes. Explain what was wrong and how your changes address the problems.',
+         },
+         Optimize = {
+            prompt =
+            'Optimize the selected code to improve performance and readability. Explain your optimization strategy and the benefits of your changes.',
+         },
+         Docs = {
+            prompt = 'Please add documentation comments to the selected code.',
+         },
+         Tests = {
+            prompt = 'Please generate tests for my code.',
+         },
+         Commit = {
+            prompt =
+            'Write commit message for the change with commitizen convention. Keep the title under 50 characters and wrap message at 72 characters. Format as a gitcommit code block. If there are other bullet points do not change them but add your points bellow to the list. Please do not duplicate the previous logs',
+            context = 'git:staged',
+         },
+      },
+   })
+end
+
+-- Stub commands
+for _, cmd in ipairs(copilot_cmds) do
+   vim.api.nvim_create_user_command(cmd, function(info)
+      vim.api.nvim_del_user_command(cmd)
+      ensure_loaded()
+      vim.cmd({ cmd = cmd, args = { info.args }, bang = info.bang })
+   end, { nargs = "*", bang = true })
+end
+
+-- Keymaps
+vim.keymap.set("n", "<c-s>", "<CR>", { desc = "Submit Prompt" })
+vim.keymap.set({ "n", "v" }, "<leader>A", "", { desc = "+ai" })
+
+vim.keymap.set({ "n", "v" }, "<leader>gc", function()
+   ensure_loaded()
+   require("CopilotChat").toggle()
+end, { desc = "Toggle (CopilotChat)" })
+
+vim.keymap.set({ "n", "v" }, "<leader>gx", function()
+   ensure_loaded()
+   require("CopilotChat").reset()
+end, { desc = "Clear (CopilotChat)" })
+
+vim.keymap.set({ "n", "v" }, "<leader>GP", function()
+   ensure_loaded()
+   require("CopilotChat").select_prompt()
+end, { desc = "Prompt Actions (CopilotChat)" })
+
+vim.keymap.set({ "n", "v" }, "<leader>gm", function()
+   ensure_loaded()
+   require("CopilotChat").select_model()
+end, { desc = "Select model (CopilotChat)" })
