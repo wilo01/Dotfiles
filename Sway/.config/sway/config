@@ -300,6 +300,7 @@ exec swayidle -w \
     default_floating_border none
     titlebar_padding 1
     titlebar_border_thickness 0
+    hide_edge_borders --i3 smart
 #
 # Resizing containers:
 #
