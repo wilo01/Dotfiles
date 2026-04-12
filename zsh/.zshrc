@@ -238,3 +238,4 @@ export NVM_DIR="$HOME/.nvm"
 export PATH="$HOME/.luaver/bin:$PATH"
 source "$HOME/.luaver/luaver"
 setopt ignore_eof
+export PATH="$HOME/.local/bin:$PATH"

@@ -43,11 +43,15 @@ alias-finder() {
       filter="^'?.{1,$((cmdLen - 1))}'?=" # some aliases is surrounded by single quotes
     fi
 
-    alias | grep -E "$filter" | grep -E "=$finder"
+    if (( $+commands[rg] )); then
+      alias | rg "$filter" | rg "=$finder"
+    else
+      alias | grep -E "$filter" | grep -E "=$finder"
+    fi
 
     if [[ $exact == true ]]; then
       break # because exact case is only one
-    elif [[ $longer = true ]]; then
+    elif [[ $longer == true ]]; then
       break # because above grep command already found every longer aliases during first cycle
     fi
 
