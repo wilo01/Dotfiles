@@ -151,8 +151,7 @@ button:hover {
 }
 
 #power-profiles-daemon.performance {
-    background-color: #f53c3c;
-    color: #ffffff;
+    color: #ff0000;
 }
 
 #power-profiles-daemon.balanced {
