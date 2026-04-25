@@ -1,0 +1,20 @@
+[Unit]
+Description=Watch /proc/pressure and notify on threshold crossings
+Documentation=file://%h/.Dotfiles/scripts/pressure-watch.sh
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.Dotfiles/scripts/pressure-watch.sh
+Restart=on-failure
+RestartSec=5
+
+# Override these with `systemctl --user edit pressure-watch.service`
+Environment=INTERVAL_SEC=5
+Environment=MEM_SOME_AVG10_PCT=10.00
+Environment=CPU_SOME_AVG60_PCT=50.00
+Environment=COOLDOWN_SEC=600
+
+[Install]
+WantedBy=default.target

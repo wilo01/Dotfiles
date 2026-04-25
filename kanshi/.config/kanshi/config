@@ -1,0 +1,42 @@
+# Kanshi output profiles for sway on ThinkPad X270
+# Adding a new external monitor: add three profiles (docked_X / ext_only_X /
+# int_only_X) here AND extend the family suffix mapping in
+# ~/.config/sway/scripts/cycle-display.sh
+
+# Mobile: laptop alone, no external connected
+profile mobile {
+    output eDP-1 enable mode 1920x1080 position 0,0
+}
+
+# Auto-applied when each external is connected (extend mode)
+profile docked_samsung {
+    output eDP-1 enable position 0,0
+    output "Samsung Electric Company Smart M80C H1AK500000" enable mode 2560x1440 position 1920,0
+}
+
+profile docked_iiyama {
+    output eDP-1 enable position 0,0
+    output "Iiyama North America PL2792Q 1152104402964" enable mode 2560x1440 position 1920,0
+}
+
+# External-only: reached via `kanshictl switch ext_only_<family>` from F7
+profile ext_only_samsung {
+    output eDP-1 disable
+    output "Samsung Electric Company Smart M80C H1AK500000" enable mode 2560x1440 position 0,0
+}
+
+profile ext_only_iiyama {
+    output eDP-1 disable
+    output "Iiyama North America PL2792Q 1152104402964" enable mode 2560x1440 position 0,0
+}
+
+# Internal-only while an external is plugged in: reached via F7
+profile int_only_samsung {
+    output eDP-1 enable position 0,0
+    output "Samsung Electric Company Smart M80C H1AK500000" disable
+}
+
+profile int_only_iiyama {
+    output eDP-1 enable position 0,0
+    output "Iiyama North America PL2792Q 1152104402964" disable
+}
