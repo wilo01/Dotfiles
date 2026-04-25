@@ -12,14 +12,15 @@ command -v swaymsg >/dev/null || { echo "swaymsg required" >&2; exit 1; }
 
 # Notification helper (graceful fallback if notify-send missing)
 notify() {
-    command -v notify-send >/dev/null && notify-send "$@" || echo "$*" >&2
+    local icon="$1"; shift
+    command -v notify-send >/dev/null && notify-send --icon="$icon" "$@" || echo "$*" >&2
 }
 
 # Find external monitor (not eDP-1, must be active)
 EXTERNAL=$(swaymsg -t get_outputs | jq -r '.[] | select(.name != "eDP-1" and .active == true) | .name' | head -1)
 
 if [[ -z "$EXTERNAL" ]]; then
-    notify "Swap Workspaces" "No external monitor connected"
+    notify "dialog-warning-symbolic" "Swap Workspaces" "No external monitor connected"
     exit 0
 fi
 
@@ -33,4 +34,4 @@ for ws in {8..20}; do
     swaymsg "[workspace=$ws]" move workspace to output "$LAPTOP" 2>/dev/null || true
 done
 
-notify "Swap Workspaces" "WS 1-7 → $EXTERNAL, WS 8-20 → $LAPTOP"
+notify "object-flip-horizontal-symbolic" "Swap Workspaces" "WS 1-7 → $EXTERNAL, WS 8-20 → $LAPTOP"
