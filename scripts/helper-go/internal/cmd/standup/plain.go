@@ -2,7 +2,10 @@ package standup
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/dariuszw/hlp/internal/batch"
@@ -10,8 +13,117 @@ import (
 	"github.com/dariuszw/hlp/internal/ui"
 )
 
-func renderPlainEntries(entries []batch.Entry, limitDays int, baseURL string) error {
-	// Sort newest first (entries with parse errors go to end)
+// entryFormatOpts controls presentation toggles for formatEntry.
+// Color enables lipgloss/ANSI styling; Hyperlinks emits OSC-8 escapes on
+// issue keys. Both are off in the publish path so the spreadsheet cell
+// receives plain text.
+type entryFormatOpts struct {
+	Color      bool
+	Hyperlinks bool
+}
+
+// formatEntry renders one worklog entry to w. Field order, exact text, and
+// line breaks match `hlp standup show`'s historic output. The single source
+// of truth shared by terminal (`show`) and webhook (`publish`) paths — toggling
+// opts is the only difference between them.
+func formatEntry(w io.Writer, e batch.Entry, baseURL string, opts entryFormatOpts) {
+	d, _ := batch.ParseDate(e.Date, "09:00")
+
+	// Line 1: Date [IssueType] TimeSpent Status  URL
+	header := d.Format("02/01/2006")
+	if e.IssueType != "" {
+		typeLabel := fmt.Sprintf("[%s]", e.IssueType)
+		if opts.Color {
+			typeLabel = ui.Muted.Render(typeLabel)
+		}
+		header += " " + typeLabel
+	}
+	if e.TimeSpent != "" {
+		ts := e.TimeSpent
+		if opts.Color {
+			ts = ui.Success.Render(ts)
+		}
+		header += " " + ts
+	}
+	status := e.Status
+	if status == "" {
+		status = "PENDING"
+	}
+	if opts.Color {
+		header += " " + ui.FormatStatus(status)
+	} else {
+		header += " " + status
+	}
+	if baseURL != "" {
+		jiraURL := baseURL + "/browse/" + e.IssueKey
+		if opts.Color {
+			jiraURL = ui.Link.Render(jiraURL)
+		}
+		header += "  " + jiraURL
+	}
+	fmt.Fprintln(w, header)
+
+	// Line 2: Key[ > SubtaskKey] Description
+	issueDisplay := e.IssueKey
+	if opts.Color {
+		issueDisplay = ui.Primary.Render(e.IssueKey)
+	}
+	if opts.Hyperlinks && baseURL != "" {
+		issueDisplay = ui.Hyperlink(issueDisplay, baseURL+"/browse/"+e.IssueKey)
+	}
+	keyLine := issueDisplay
+	if e.SubtaskKey != "" {
+		subtask := e.SubtaskKey
+		if opts.Color {
+			subtask = ui.Primary.Render(subtask)
+		}
+		keyLine = issueDisplay + " > " + subtask
+	}
+	fmt.Fprintf(w, "%s %s\n", keyLine, e.Description)
+
+	// Line 3: Comment (if present)
+	if e.Comment != "" {
+		comment := e.Comment
+		if opts.Color {
+			comment = ui.Muted.Render(comment)
+		}
+		fmt.Fprintln(w, comment)
+	}
+}
+
+// filterStandupEntries applies the standup visibility rule.
+// Drop ignored tickets unless the row carries a non-empty Comment ("promoted
+// by note"). Used by show, publish, and notify so the rule lives in one place.
+func filterStandupEntries(entries []batch.Entry, ignored map[string]bool) []batch.Entry {
+	out := make([]batch.Entry, 0, len(entries))
+	for _, e := range entries {
+		if ignored[e.IssueKey] && strings.TrimSpace(e.Comment) == "" {
+			continue
+		}
+		out = append(out, e)
+	}
+	return out
+}
+
+// applyDayWindow returns entries whose date is within the last `limitDays` days.
+// limitDays <= 0 disables the window (returns input unchanged).
+func applyDayWindow(entries []batch.Entry, limitDays int) []batch.Entry {
+	if limitDays <= 0 {
+		return entries
+	}
+	cutoff := time.Now().AddDate(0, 0, -limitDays)
+	out := make([]batch.Entry, 0, len(entries))
+	for _, e := range entries {
+		d, err := batch.ParseDate(e.Date, "09:00")
+		if err == nil && !d.Before(cutoff) {
+			out = append(out, e)
+		}
+	}
+	return out
+}
+
+// sortEntriesNewestFirst sorts in place; entries with parse errors sink to end.
+func sortEntriesNewestFirst(entries []batch.Entry) {
 	sort.Slice(entries, func(i, j int) bool {
 		di, erri := batch.ParseDate(entries[i].Date, "09:00")
 		dj, errj := batch.ParseDate(entries[j].Date, "09:00")
@@ -19,36 +131,19 @@ func renderPlainEntries(entries []batch.Entry, limitDays int, baseURL string) er
 			return false
 		}
 		if erri != nil {
-			return false // i goes after j
+			return false
 		}
 		if errj != nil {
-			return true // i goes before j
+			return true
 		}
 		return di.After(dj)
 	})
+}
 
-	// Filter by days if specified
-	if limitDays > 0 {
-		cutoff := time.Now().AddDate(0, 0, -limitDays)
-		filtered := []batch.Entry{}
-		for _, e := range entries {
-			d, err := batch.ParseDate(e.Date, "09:00")
-			if err == nil && !d.Before(cutoff) {
-				filtered = append(filtered, e)
-			}
-		}
-		entries = filtered
-	}
-
-	// Filter out ignored tickets from config
-	ignored := getIgnoredTickets()
-	filtered := []batch.Entry{}
-	for _, e := range entries {
-		if !ignored[e.IssueKey] {
-			filtered = append(filtered, e)
-		}
-	}
-	entries = filtered
+func renderPlainEntries(entries []batch.Entry, limitDays int, baseURL string) error {
+	sortEntriesNewestFirst(entries)
+	entries = applyDayWindow(entries, limitDays)
+	entries = filterStandupEntries(entries, getIgnoredTickets())
 
 	if len(entries) == 0 {
 		fmt.Println(ui.Warning("No entries found"))
@@ -56,7 +151,7 @@ func renderPlainEntries(entries []batch.Entry, limitDays int, baseURL string) er
 	}
 
 	for i, e := range entries {
-		printPlainEntry(e, baseURL)
+		formatEntry(os.Stdout, e, baseURL, entryFormatOpts{Color: true, Hyperlinks: true})
 		if i < len(entries)-1 {
 			fmt.Println()
 		}
@@ -72,43 +167,4 @@ func getIgnoredTickets() map[string]bool {
 		ignored[ticket] = true
 	}
 	return ignored
-}
-
-func printPlainEntry(e batch.Entry, baseURL string) {
-	d, _ := batch.ParseDate(e.Date, "09:00")
-
-	// Line 1: Date [IssueType] Time Status (each with own color)
-	header := d.Format("02/01/2006")
-	if e.IssueType != "" {
-		header += " " + ui.Muted.Render(fmt.Sprintf("[%s]", e.IssueType))
-	}
-	if e.TimeSpent != "" {
-		header += " " + ui.Success.Render(e.TimeSpent)
-	}
-	status := e.Status
-	if status == "" {
-		status = "PENDING"
-	}
-	header += " " + ui.FormatStatus(status)
-	if baseURL != "" {
-		header += "  " + ui.Link.Render(baseURL+"/browse/"+e.IssueKey)
-	}
-	fmt.Println(header)
-
-	// Line 2: Key + Description (one line)
-	// Main issue key is a clickable terminal hyperlink; subtask stays plain
-	issueDisplay := ui.Primary.Render(e.IssueKey)
-	if baseURL != "" {
-		issueDisplay = ui.Hyperlink(issueDisplay, baseURL+"/browse/"+e.IssueKey)
-	}
-	keyLine := issueDisplay
-	if e.SubtaskKey != "" {
-		keyLine = issueDisplay + " > " + ui.Primary.Render(e.SubtaskKey)
-	}
-	fmt.Printf("%s %s\n", keyLine, e.Description)
-
-	// Line 4: Comment (only if present)
-	if e.Comment != "" {
-		fmt.Println(ui.Muted.Render(e.Comment))
-	}
 }

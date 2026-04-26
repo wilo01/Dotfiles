@@ -36,7 +36,9 @@ type TimesheetConfig struct {
 
 // SheetsConfig holds Google Sheets settings
 type SheetsConfig struct {
-	SheetID string `mapstructure:"sheet_id" yaml:"sheet_id"`
+	SheetID     string `mapstructure:"sheet_id" yaml:"sheet_id"`
+	DailyTabURL string `mapstructure:"daily_tab_url" yaml:"daily_tab_url"`
+	DailyTabGID string `mapstructure:"daily_tab_gid" yaml:"daily_tab_gid"`
 }
 
 // ScheduleSlot defines a named time slot for scheduled batch runs
@@ -64,7 +66,9 @@ type Preferences struct {
 	RichOutput            bool           `mapstructure:"rich_output" yaml:"rich_output"`
 	CopyToClipboard       bool           `mapstructure:"copy_to_clipboard" yaml:"copy_to_clipboard"`
 	StandupIgnoredTickets []string       `mapstructure:"standup_ignored_tickets" yaml:"standup_ignored_tickets"`
+	StandupWebhookURL     string         `mapstructure:"standup_webhook_url" yaml:"standup_webhook_url"`
 	DailyTickets          []string       `mapstructure:"daily_tickets" yaml:"daily_tickets"`
+	LogToSubtask          bool           `mapstructure:"log_to_subtask" yaml:"log_to_subtask"`
 	Schedule              ScheduleConfig `mapstructure:"schedule" yaml:"schedule"`
 }
 
@@ -96,7 +100,9 @@ func Default() *Config {
 			JiraURL: "",
 		},
 		Sheets: SheetsConfig{
-			SheetID: "",
+			SheetID:     "",
+			DailyTabURL: "",
+			DailyTabGID: "",
 		},
 		Dev: DevConfig{
 			CommitsFile: "~/Dev/Private/Commits.md",
@@ -110,6 +116,8 @@ func Default() *Config {
 			RichOutput:            true,
 			CopyToClipboard:       true,
 			StandupIgnoredTickets: []string{"TDT-2", "TDT-26"},
+			StandupWebhookURL:     "",
+			LogToSubtask:          false,
 			Schedule: ScheduleConfig{
 				Slots: []ScheduleSlot{
 					{Name: "morning", Time: "08:45"},

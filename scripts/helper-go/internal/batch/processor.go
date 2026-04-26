@@ -754,13 +754,9 @@ func AppendEntryWithStatus(path, issueKey, subtaskKey, issueType, description, t
 	writer := csv.NewWriter(f)
 	defer writer.Flush()
 
-	// Default subtaskLogInd based on subtaskKey presence
+	// Default: log to parent. Callers opt into subtask logging via explicit "Y".
 	if subtaskLogInd == "" {
-		if subtaskKey != "" {
-			subtaskLogInd = "Y"
-		} else {
-			subtaskLogInd = "N"
-		}
+		subtaskLogInd = "N"
 	}
 
 	return writer.Write([]string{
@@ -798,13 +794,9 @@ func PrependEntryWithStatus(path, issueKey, subtaskKey, issueType, description, 
 		f.Close()
 	}
 
-	// Default subtaskLogInd based on subtaskKey presence
+	// Default: log to parent. Callers opt into subtask logging via explicit "Y".
 	if subtaskLogInd == "" {
-		if subtaskKey != "" {
-			subtaskLogInd = "Y"
-		} else {
-			subtaskLogInd = "N"
-		}
+		subtaskLogInd = "N"
 	}
 
 	// Create new entry (9-column format)

@@ -3,7 +3,6 @@ package standup
 import (
 	"fmt"
 	"os"
-	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/dariuszw/hlp/internal/batch"
@@ -72,15 +71,7 @@ func runShow(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	// Plain text output (smart default: Monday=3 days, otherwise=1 day)
-	days := showDays
-	if days == 0 {
-		if time.Now().Weekday() == time.Monday {
-			days = 3
-		} else {
-			days = 1
-		}
-	}
+	days := smartDefaultDays(showDays)
 	var baseURL string
 	if profile != nil {
 		baseURL = profile.BaseURL

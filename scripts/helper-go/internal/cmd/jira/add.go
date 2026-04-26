@@ -17,6 +17,7 @@ import (
 var addNoSync bool
 var addQuiet bool
 var addDryRun bool
+var addToSubtask bool
 
 var addCmd = &cobra.Command{
 	Use:   "add [ticket-key...]",
@@ -40,6 +41,7 @@ func init() {
 	addCmd.Flags().BoolVar(&addNoSync, "no-sync", false, "Skip sprint sync (only process manual ticket args)")
 	addCmd.Flags().BoolVarP(&addQuiet, "quiet", "q", false, "Suppress output unless errors (for cron)")
 	addCmd.Flags().BoolVar(&addDryRun, "dry-run", false, "Preview changes without modifying files")
+	addCmd.Flags().BoolVar(&addToSubtask, "to-subtask", false, "Log time against the subtask instead of the parent (overrides preferences.log_to_subtask)")
 
 	// Deprecated: --sync is now the default behavior
 	var addSyncDeprecated bool
@@ -54,12 +56,18 @@ func runAdd(cmd *cobra.Command, args []string) {
 	// Load daily tickets from config
 	cfg, cfgErr := config.Load()
 	var dailyTickets []string
+	logToSubtask := false
 	if cfgErr != nil {
 		if !addQuiet {
 			fmt.Println(ui.Warning(fmt.Sprintf("Could not load config: %v (using defaults)", cfgErr)))
 		}
 	} else {
 		dailyTickets = cfg.Preferences.DailyTickets
+		logToSubtask = cfg.Preferences.LogToSubtask
+	}
+	// CLI flag wins over config / env
+	if cmd.Flags().Changed("to-subtask") {
+		logToSubtask = addToSubtask
 	}
 
 	// --no-sync without ticket keys or daily tickets is a no-op
@@ -232,11 +240,11 @@ func runAdd(cmd *cobra.Command, args []string) {
 			displayKey = issueKey + " > " + subtaskKey
 		}
 
-		// Skip parent-only entries when parent already has subtask entries in CSV
+		// Skip parent-only entries when parent already has a subtask entry today
 		if subtaskKey == "" {
-			if trackedVia := findSubtaskKey(entries, issueKey); trackedVia != "" {
+			if trackedVia := findSubtaskKey(entries, issueKey, todayStr); trackedVia != "" {
 				if !addQuiet {
-					fmt.Printf("%s %s - already tracked via subtask\n",
+					fmt.Printf("%s %s - already tracked via subtask today\n",
 						ui.Muted.Render("⊘"),
 						ui.Muted.Render(issueKey+" > "+trackedVia))
 				}
@@ -294,6 +302,10 @@ func runAdd(cmd *cobra.Command, args []string) {
 		// Prepend to CSV with DRAFT status (skip in dry-run)
 		if !addDryRun {
 			currentDateTime := time.Now().Format("02.01.2006 15:04")
+			subtaskLogInd := "N"
+			if logToSubtask && subtaskKey != "" {
+				subtaskLogInd = "Y"
+			}
 			err = batch.PrependEntryWithStatus(
 				csvPath,
 				issueKey,
@@ -303,7 +315,7 @@ func runAdd(cmd *cobra.Command, args []string) {
 				"",              // timeSpent - empty for draft
 				currentDateTime,
 				"",              // comment
-				"",              // subtaskLogInd - defaults to N
+				subtaskLogInd,
 				batch.StatusDraft,
 			)
 			if err != nil {
@@ -399,6 +411,12 @@ func runAdd(cmd *cobra.Command, args []string) {
 // If quiet=true, suppresses output except errors.
 // TO REVIEW: Ticket processing shares logic with runAdd() - skipped: only 2 occurrences
 func RunAutoSync(quiet bool) error {
+	// Load config (for log_to_subtask preference; daily tickets loaded later)
+	logToSubtask := false
+	if cfg, cfgErr := config.Load(); cfgErr == nil {
+		logToSubtask = cfg.Preferences.LogToSubtask
+	}
+
 	// Get current profile for CSV path
 	profile, err := config.GetActiveProfile()
 	if err != nil && !quiet {
@@ -508,8 +526,8 @@ func RunAutoSync(quiet bool) error {
 			displayKey = issueKey + " > " + subtaskKey
 		}
 
-		// Skip parent-only entries when parent already has subtask entries in CSV
-		if subtaskKey == "" && findSubtaskKey(entries, issueKey) != "" {
+		// Skip parent-only entries when parent already has a subtask entry today
+		if subtaskKey == "" && findSubtaskKey(entries, issueKey, todayStr) != "" {
 			skipped++
 			continue
 		}
@@ -549,6 +567,10 @@ func RunAutoSync(quiet bool) error {
 
 		// Prepend to CSV with DRAFT status
 		currentDateTime := time.Now().Format("02.01.2006 15:04")
+		subtaskLogInd := "N"
+		if logToSubtask && subtaskKey != "" {
+			subtaskLogInd = "Y"
+		}
 		err = batch.PrependEntryWithStatus(
 			csvPath,
 			issueKey,
@@ -558,7 +580,7 @@ func RunAutoSync(quiet bool) error {
 			"",              // timeSpent - empty for draft
 			currentDateTime,
 			"",              // comment
-			"",              // subtaskLogInd - defaults to N
+			subtaskLogInd,
 			batch.StatusDraft,
 		)
 		if err != nil {
@@ -623,10 +645,14 @@ func removeParentOnlyEntry(csvPath string, entries []batch.Entry, issueKey strin
 	return false
 }
 
-// findSubtaskKey returns the first subtask key tracked under issueKey, or "" if none.
-// Scans all dates — prevents parent-only entries when work is tracked via subtasks.
-func findSubtaskKey(entries []batch.Entry, issueKey string) string {
+// findSubtaskKey returns the first subtask key tracked under issueKey for today, or "" if none.
+// Scoped to today so historical subtask rows don't block parent-only adds on a fresh day.
+func findSubtaskKey(entries []batch.Entry, issueKey, todayStr string) string {
 	for _, e := range entries {
+		entryDate := strings.Split(e.Date, " ")[0]
+		if entryDate != todayStr {
+			continue
+		}
 		if strings.EqualFold(e.IssueKey, issueKey) && e.SubtaskKey != "" {
 			return e.SubtaskKey
 		}
