@@ -620,6 +620,14 @@ func runScheduledBatchLog(_ *cobra.Command, _ []string) {
 }
 
 func runSyncLog(_ *cobra.Command, _ []string) {
+	// Load log_to_subtask preference (warn-and-continue mirrors runAdd)
+	logToSubtask := false
+	if cfg, cfgErr := config.Load(); cfgErr != nil {
+		fmt.Println(ui.Warning(fmt.Sprintf("Could not load config: %v (using defaults)", cfgErr)))
+	} else {
+		logToSubtask = cfg.Preferences.LogToSubtask
+	}
+
 	// Determine date range (default: last 7 days)
 	toDate := time.Now()
 	fromDate := toDate.AddDate(0, 0, -7)
@@ -781,7 +789,9 @@ func runSyncLog(_ *cobra.Command, _ []string) {
 		for _, wl := range missing {
 			dateStr := wl.Started.Format("02.01.2006 15:04")
 			detail := details[wl.IssueKey]
-			if err = batch.AppendEntryWithStatus(csvPath, wl.IssueKey, "", detail.IssueType, detail.Summary, wl.TimeSpentStr, dateStr, wl.Comment, "", batch.StatusSync); err != nil {
+			// Sync path has no subtask context (subtaskKey always ""), so
+			// subtaskLogInd is always "N" regardless of logToSubtask.
+			if err = batch.AppendEntryWithStatus(csvPath, wl.IssueKey, "", detail.IssueType, detail.Summary, wl.TimeSpentStr, dateStr, wl.Comment, "N", batch.StatusSync); err != nil {
 				fmt.Printf("  %s %s - %s\n",
 					ui.FormatStatus("FAILED"),
 					ui.Primary.Render(wl.IssueKey),
@@ -892,6 +902,10 @@ func runSyncLog(_ *cobra.Command, _ []string) {
 		exists := batch.EntryExistsForTicket(entries, issueKey, lastLoggedDate, ticket.IsSubtask, ticket.Summary)
 
 		if !exists {
+			subtaskLogInd := "N"
+			if logToSubtask && subtaskKey != "" {
+				subtaskLogInd = "Y"
+			}
 			err = batch.PrependEntryWithStatus(
 				csvPath,
 				issueKey,
@@ -901,7 +915,7 @@ func runSyncLog(_ *cobra.Command, _ []string) {
 				"",
 				draftDateTime,
 				"",
-				"",
+				subtaskLogInd,
 				batch.StatusDraft,
 			)
 			if err == nil {

@@ -38,7 +38,6 @@ type TimesheetConfig struct {
 type SheetsConfig struct {
 	SheetID     string `mapstructure:"sheet_id" yaml:"sheet_id"`
 	DailyTabURL string `mapstructure:"daily_tab_url" yaml:"daily_tab_url"`
-	DailyTabGID string `mapstructure:"daily_tab_gid" yaml:"daily_tab_gid"`
 }
 
 // ScheduleSlot defines a named time slot for scheduled batch runs
@@ -102,7 +101,6 @@ func Default() *Config {
 		Sheets: SheetsConfig{
 			SheetID:     "",
 			DailyTabURL: "",
-			DailyTabGID: "",
 		},
 		Dev: DevConfig{
 			CommitsFile: "~/Dev/Private/Commits.md",

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -177,7 +178,23 @@ func printPublishResult(count, days int, webhook, sheetURL string, respBody []by
 	if sheetURL != "" {
 		fmt.Println("  " + ui.Link.Render(sheetURL))
 	}
-	fmt.Println("  " + ui.Muted.Render(webhook))
+	if host := webhookHost(webhook); host != "" {
+		fmt.Println("  " + ui.Muted.Render("via "+host))
+	}
+}
+
+// webhookHost extracts only the host (and scheme) from a webhook URL so the
+// path (which can contain token-like segments on services like n8n) isn't
+// printed to terminal logs.
+func webhookHost(raw string) string {
+	u, err := url.Parse(raw)
+	if err != nil || u.Host == "" {
+		return ""
+	}
+	if u.Scheme != "" {
+		return u.Scheme + "://" + u.Host
+	}
+	return u.Host
 }
 
 func plural(n int) string {
