@@ -8,8 +8,11 @@ local augroup = vim.api.nvim_create_augroup
 local general = augroup("General Settings", { clear = true })
 
 local CSV_STATE_COMPACT = 0
-local CSV_STATE_FULL = 1
+local CSV_STATE_NARROW = 1
+local CSV_STATE_WIDE = 2
+local CSV_COL_CAP = 24 -- Narrow-state cap; longer cells show first 23 chars + "…"
 local csv_buffer_data = {}
+local csv_ns = vim.api.nvim_create_namespace("DarO_csv_align")
 
 autocmd("BufEnter", {
    callback = function()
@@ -205,113 +208,152 @@ local function csv_get_state(bufnr)
    return csv_buffer_data[bufnr]
 end
 
-local function csv_prettify(lines)
-   local max_lengths = {}
+local function csv_show_alignment(buf, cap)
+   local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+   local visual_widths = {}
 
-   -- First pass: find the actual maximum length for each column
    for _, line in ipairs(lines) do
-      local cols = csv_parse_line(line)
-      for i, col in ipairs(cols) do
-         max_lengths[i] = math.max(max_lengths[i] or 0, #col)
+      if line:find(",", 1, true) then
+         local cols = csv_parse_line(line)
+         for i, col in ipairs(cols) do
+            local vw = cap and math.min(#col, cap) or #col
+            visual_widths[i] = math.max(visual_widths[i] or 0, vw)
+         end
       end
    end
 
-   -- Second pass: pad all columns to their calculated max width
-   local prettified = {}
-   for _, line in ipairs(lines) do
-      local cols = csv_parse_line(line)
-      for i, col in ipairs(cols) do
-         local target_width = max_lengths[i] or 0
-         local padding = target_width - #col
-         cols[i] = col .. string.rep(" ", padding)
+   vim.api.nvim_buf_clear_namespace(buf, csv_ns, 0, -1)
+
+   for lnum, line in ipairs(lines) do
+      if line:find(",", 1, true) then
+         local cols = csv_parse_line(line)
+         local byte_pos = 0
+         for i, col in ipairs(cols) do
+            if cap and #col > cap then
+               vim.api.nvim_buf_set_extmark(buf, csv_ns, lnum - 1,
+                  byte_pos + cap - 1, {
+                     end_col = byte_pos + #col,
+                     conceal = "…",
+                  })
+            end
+
+            if i < #cols then
+               local visual_len = cap and math.min(#col, cap) or #col
+               local pad = (visual_widths[i] or 0) - visual_len
+               if pad > 0 then
+                  vim.api.nvim_buf_set_extmark(buf, csv_ns, lnum - 1,
+                     byte_pos + #col, {
+                        virt_text = { { string.rep(" ", pad), "NonText" } },
+                        virt_text_pos = "inline",
+                     })
+               end
+            end
+
+            byte_pos = byte_pos + #col + 1
+         end
       end
-      table.insert(prettified, table.concat(cols, " , "))
    end
-   return prettified
 end
 
-local function csv_compact(lines)
-   local compacted = {}
-   for _, line in ipairs(lines) do
-      local cleaned = line:gsub("%s*,%s*", ",")
-      cleaned = cleaned:gsub("%s+$", "")
-      compacted[#compacted + 1] = cleaned
+local function csv_clear_alignment(buf)
+   vim.api.nvim_buf_clear_namespace(buf, csv_ns, 0, -1)
+end
+
+local function csv_cell_at_cursor(buf)
+   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+   local line = vim.api.nvim_buf_get_lines(buf, row - 1, row, false)[1]
+   if not line or not line:find(",", 1, true) then return nil end
+
+   local cells = csv_parse_line(line)
+   local byte_pos = 0
+   for _, cell in ipairs(cells) do
+      if col >= byte_pos and col <= byte_pos + #cell then
+         return cell
+      end
+      byte_pos = byte_pos + #cell + 1
    end
-   return compacted
+   return cells[#cells]
+end
+
+local function csv_show_cell_popup(buf)
+   local content = csv_cell_at_cursor(buf)
+   if not content or content == "" then
+      vim.notify("CSV: empty or no cell under cursor", vim.log.levels.INFO)
+      return
+   end
+
+   local lines = vim.split(content, "\n", { plain = true })
+   local pbuf = vim.api.nvim_create_buf(false, true)
+   vim.api.nvim_buf_set_lines(pbuf, 0, -1, false, lines)
+   vim.bo[pbuf].bufhidden = "wipe"
+
+   local max_w = 0
+   for _, l in ipairs(lines) do
+      max_w = math.max(max_w, vim.fn.strdisplaywidth(l))
+   end
+   local width = math.max(10, math.min(max_w, vim.o.columns - 6))
+   local height = math.min(#lines, math.floor(vim.o.lines * 0.4))
+
+   local win = vim.api.nvim_open_win(pbuf, false, {
+      relative = "cursor",
+      row = 1,
+      col = 0,
+      width = width,
+      height = height,
+      border = "rounded",
+      style = "minimal",
+      focusable = false,
+   })
+
+   vim.api.nvim_create_autocmd({ "CursorMoved", "InsertEnter", "BufLeave" }, {
+      once = true,
+      callback = function()
+         if vim.api.nvim_win_is_valid(win) then
+            vim.api.nvim_win_close(win, true)
+         end
+      end,
+   })
 end
 
 autocmd("FileType", {
    pattern = "csv",
    callback = function()
       vim.defer_fn(function()
-         vim.notify("CSV: <leader>t toggles Compact ↔ Full", vim.log.levels.INFO)
+         vim.notify("CSV: <leader>t cycles Compact → Narrow → Wide", vim.log.levels.INFO)
       end, 100)
 
       vim.keymap.set("n", "<leader>t", function()
          local buf = vim.api.nvim_get_current_buf()
          local data = csv_get_state(buf)
 
-         if data.needs_restore and data.prettified_for_restore then
-            vim.api.nvim_buf_set_lines(buf, 0, -1, false, data.prettified_for_restore)
-            data.prettified_for_restore = nil
-            data.needs_restore = nil
-            vim.notify("[CSV: Full] Recovered from failed save", vim.log.levels.WARN)
-            return
-         end
-
-         local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-
          if data.state == CSV_STATE_COMPACT then
-            local prettified = csv_prettify(lines)
-            vim.api.nvim_buf_set_lines(buf, 0, -1, false, prettified)
-            data.state = CSV_STATE_FULL
-            vim.notify("[CSV: Full] Pretty view - editable", vim.log.levels.INFO)
+            local narrow_cap = vim.g.csv_col_cap_narrow or CSV_COL_CAP
+            data.prev_conceallevel = vim.wo.conceallevel
+            data.prev_concealcursor = vim.wo.concealcursor
+            vim.wo.conceallevel = 2
+            vim.wo.concealcursor = "nc"
+            csv_show_alignment(buf, narrow_cap)
+            data.state = CSV_STATE_NARROW
+            vim.notify("[CSV: Narrow] Aligned, " .. narrow_cap .. "-byte cap (…)", vim.log.levels.INFO)
+         elseif data.state == CSV_STATE_NARROW then
+            local wide_cap = vim.g.csv_col_cap_wide -- nil = uncapped/full
+            csv_show_alignment(buf, wide_cap)
+            data.state = CSV_STATE_WIDE
+            vim.notify("[CSV: Wide] " .. (wide_cap and (wide_cap .. "-byte cap (…)") or "full content"), vim.log.levels.INFO)
          else
-            local compacted = csv_compact(lines)
-            vim.api.nvim_buf_set_lines(buf, 0, -1, false, compacted)
+            csv_clear_alignment(buf)
+            vim.wo.conceallevel = data.prev_conceallevel or 0
+            vim.wo.concealcursor = data.prev_concealcursor or ""
             data.state = CSV_STATE_COMPACT
             vim.notify("[CSV: Compact] Raw CSV", vim.log.levels.INFO)
          end
-      end, { buffer = true, desc = "Toggle CSV: Compact ↔ Full", noremap = true, silent = true })
+      end, { buffer = true, desc = "Toggle CSV: Compact → Narrow → Wide", noremap = true, silent = true })
+
+      vim.keymap.set("n", "K", function()
+         csv_show_cell_popup(vim.api.nvim_get_current_buf())
+      end, { buffer = true, desc = "CSV: Preview full cell under cursor", noremap = true, silent = true })
    end,
-   desc = "Setup CSV 2-state toggle",
-})
-
-autocmd("BufWritePre", {
-   pattern = "*.csv",
-   callback = function()
-      if not vim.g.csv_prettify_ind then return end
-
-      local bufnr = vim.api.nvim_get_current_buf()
-      local data = csv_buffer_data[bufnr]
-      if not data or data.state == CSV_STATE_COMPACT then return end
-
-      local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-      data.prettified_for_restore = lines
-      data.needs_restore = true
-
-      local compacted = csv_compact(lines)
-      vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, compacted)
-   end,
-   desc = "CSV: Compact before save",
-})
-
-autocmd("BufWritePost", {
-   pattern = "*.csv",
-   callback = function()
-      if not vim.g.csv_prettify_ind then return end
-
-      local bufnr = vim.api.nvim_get_current_buf()
-      local data = csv_buffer_data[bufnr]
-      if not data or not data.needs_restore then return end
-
-      vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, data.prettified_for_restore)
-      vim.bo[bufnr].modified = false
-      data.prettified_for_restore = nil
-      data.needs_restore = nil
-      vim.notify("Saved compacted CSV", vim.log.levels.INFO)
-   end,
-   desc = "CSV: Restore Full view after save",
+   desc = "Setup CSV 3-state toggle",
 })
 
 autocmd({ "BufUnload", "BufWipeout" }, {
@@ -327,15 +369,20 @@ autocmd("BufReadPost", {
    pattern = "*.csv",
    callback = function()
       local bufnr = vim.api.nvim_get_current_buf()
-      csv_buffer_data[bufnr] = { state = CSV_STATE_COMPACT }
-   end,
-   desc = "CSV: Reset state on file reload",
-})
+      local data = csv_buffer_data[bufnr]
 
-vim.api.nvim_create_user_command("CSVformatting", function()
-   vim.g.csv_prettify_ind = not vim.g.csv_prettify_ind
-   print("CSV prettify functionality is now " .. (vim.g.csv_prettify_ind and "enabled" or "disabled") .. ".")
-end, { desc = "Toggle CSV prettify functionality globally" })
+      vim.api.nvim_buf_clear_namespace(bufnr, csv_ns, 0, -1)
+
+      if data and data.state == CSV_STATE_NARROW then
+         csv_show_alignment(bufnr, vim.g.csv_col_cap_narrow or CSV_COL_CAP)
+      elseif data and data.state == CSV_STATE_WIDE then
+         csv_show_alignment(bufnr, vim.g.csv_col_cap_wide)
+      else
+         csv_buffer_data[bufnr] = { state = CSV_STATE_COMPACT }
+      end
+   end,
+   desc = "CSV: Re-apply alignment after file reload",
+})
 
 autocmd('BufReadPost', {
    callback = function(args)

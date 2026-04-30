@@ -54,8 +54,13 @@ vim.g.netrw_keepdir = 1
 
 -- Other
 vim.g.loaded_perl_provider = 0
-vim.g.csv_prettify_ind = true
 vim.g.hide_startup_info = false
 
+-- CSV <leader>t alignment caps (see autocmds.lua csv_show_alignment)
+-- Narrow: cap per column in BYTES; cells longer show first N-1 bytes + …
+--         (bytes == chars only for ASCII; non-ASCII cells may misalign)
+-- Wide:   nil = no cap, full content; or set a number to cap+truncate
+vim.g.csv_col_cap_narrow = 68
+vim.g.csv_col_cap_wide = nil
 -- Set default commentstring for built-in commenting (gcc/gc)
 vim.opt.commentstring = "// %s" -- Default to C-style comments
