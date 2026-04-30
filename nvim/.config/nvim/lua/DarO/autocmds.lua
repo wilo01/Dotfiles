@@ -203,7 +203,7 @@ end
 
 local function csv_get_state(bufnr)
    if not csv_buffer_data[bufnr] then
-      csv_buffer_data[bufnr] = { state = CSV_STATE_COMPACT }
+      csv_buffer_data[bufnr] = { state = CSV_STATE_COMPACT, last_cursor = nil }
    end
    return csv_buffer_data[bufnr]
 end
@@ -315,12 +315,87 @@ local function csv_show_cell_popup(buf)
    })
 end
 
+--- Snap cursor past concealed cell tails so h/l/w/e/b feel natural in narrow/wide.
+local function csv_handle_cursor_moved(buf)
+   local data = csv_buffer_data[buf]
+   if not data or data.state == CSV_STATE_COMPACT then return end
+   if vim.api.nvim_get_mode().mode ~= "n" then return end
+
+   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+   local prev = data.last_cursor
+
+   local marks = vim.api.nvim_buf_get_extmarks(buf, csv_ns,
+      { row - 1, 0 }, { row - 1, -1 }, { details = true })
+
+   for _, m in ipairs(marks) do
+      local mcol, det = m[3], m[4]
+      if det and det.conceal and col > mcol and col < det.end_col then
+         local target
+         if prev and prev.row == row and prev.col >= det.end_col then
+            target = mcol
+         else
+            target = det.end_col
+         end
+         vim.api.nvim_win_set_cursor(0, { row, target })
+         data.last_cursor = { row = row, col = target }
+         return
+      end
+   end
+
+   data.last_cursor = { row = row, col = col }
+end
+
+--- Jump cursor to the start of the next/previous CSV cell.
+local function csv_jump_cell(buf, dir)
+   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+   local line = vim.api.nvim_buf_get_lines(buf, row - 1, row, false)[1]
+   if not line or not line:find(",", 1, true) then return end
+
+   local cells = csv_parse_line(line)
+   local boundaries = { 0 }
+   local pos = 0
+   for i = 1, #cells - 1 do
+      pos = pos + #cells[i] + 1
+      table.insert(boundaries, pos)
+   end
+
+   local target
+   if dir == "next" then
+      for _, b in ipairs(boundaries) do
+         if b > col then target = b break end
+      end
+      target = target or boundaries[#boundaries]
+   else
+      for i = #boundaries, 1, -1 do
+         if boundaries[i] < col then target = boundaries[i] break end
+      end
+      target = target or boundaries[1]
+   end
+
+   vim.api.nvim_win_set_cursor(0, { row, target })
+end
+
 autocmd("FileType", {
    pattern = "csv",
    callback = function()
+      local bufnr = vim.api.nvim_get_current_buf()
+
       vim.defer_fn(function()
-         vim.notify("CSV: <leader>t cycles Compact → Narrow → Wide", vim.log.levels.INFO)
+         vim.notify("CSV: <leader>t toggles view · <Tab>/<S-Tab> jump cells · K previews cell", vim.log.levels.INFO)
       end, 100)
+
+      local motion_group = augroup("DarO_csv_motion_" .. bufnr, { clear = true })
+      autocmd("CursorMoved", {
+         group = motion_group,
+         buffer = bufnr,
+         callback = function() csv_handle_cursor_moved(bufnr) end,
+         desc = "CSV: snap cursor past concealed cell tails",
+      })
+
+      vim.keymap.set("n", "<Tab>", function() csv_jump_cell(bufnr, "next") end,
+         { buffer = bufnr, desc = "CSV: jump to next cell", noremap = true, silent = true })
+      vim.keymap.set("n", "<S-Tab>", function() csv_jump_cell(bufnr, "prev") end,
+         { buffer = bufnr, desc = "CSV: jump to previous cell", noremap = true, silent = true })
 
       vim.keymap.set("n", "<leader>t", function()
          local buf = vim.api.nvim_get_current_buf()
