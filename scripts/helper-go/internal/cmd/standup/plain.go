@@ -26,10 +26,24 @@ type entryFormatOpts struct {
 // line breaks match `hlp standup show`'s historic output. The single source
 // of truth shared by terminal (`show`) and webhook (`publish`) paths — toggling
 // opts is the only difference between them.
+//
+// Implementation is a thin caller of writeHeaderLine / writeKeyLine /
+// writeCommentLine so the merged-group formatter (formatGroup in merge.go)
+// can reuse the same writers and stay consistent with single-row output.
 func formatEntry(w io.Writer, e batch.Entry, baseURL string, opts entryFormatOpts) {
+	writeHeaderLine(w, e, baseURL, opts, true /* includeURL */)
+	writeKeyLine(w, e, baseURL, opts, true /* includeSubtask */)
+	if strings.TrimSpace(e.Comment) != "" {
+		writeCommentLine(w, e, opts, "" /* no prefix */)
+	}
+}
+
+// writeHeaderLine emits the "Date [Type] TimeSpent Status  URL" line.
+// includeURL=false suppresses the trailing URL (used by formatGroup on the
+// 2nd+ stacked headers to avoid repeating the same /browse/<key> link).
+func writeHeaderLine(w io.Writer, e batch.Entry, baseURL string, opts entryFormatOpts, includeURL bool) {
 	d, _ := batch.ParseDate(e.Date, "09:00")
 
-	// Line 1: Date [IssueType] TimeSpent Status  URL
 	header := d.Format("02/01/2006")
 	if e.IssueType != "" {
 		typeLabel := fmt.Sprintf("[%s]", e.IssueType)
@@ -54,7 +68,7 @@ func formatEntry(w io.Writer, e batch.Entry, baseURL string, opts entryFormatOpt
 	} else {
 		header += " " + status
 	}
-	if baseURL != "" {
+	if includeURL && baseURL != "" {
 		jiraURL := baseURL + "/browse/" + e.IssueKey
 		if opts.Color {
 			jiraURL = ui.Link.Render(jiraURL)
@@ -62,8 +76,12 @@ func formatEntry(w io.Writer, e batch.Entry, baseURL string, opts entryFormatOpt
 		header += "  " + jiraURL
 	}
 	fmt.Fprintln(w, header)
+}
 
-	// Line 2: Key[ > SubtaskKey] Description
+// writeKeyLine emits the "IssueKey[ > SubtaskKey] Description" line.
+// includeSubtask=false is used by formatGroup when collapsing rows with
+// differing subtasks under their shared parent IssueKey.
+func writeKeyLine(w io.Writer, e batch.Entry, baseURL string, opts entryFormatOpts, includeSubtask bool) {
 	issueDisplay := e.IssueKey
 	if opts.Color {
 		issueDisplay = ui.Primary.Render(e.IssueKey)
@@ -72,7 +90,7 @@ func formatEntry(w io.Writer, e batch.Entry, baseURL string, opts entryFormatOpt
 		issueDisplay = ui.Hyperlink(issueDisplay, baseURL+"/browse/"+e.IssueKey)
 	}
 	keyLine := issueDisplay
-	if e.SubtaskKey != "" {
+	if includeSubtask && e.SubtaskKey != "" {
 		subtask := e.SubtaskKey
 		if opts.Color {
 			subtask = ui.Primary.Render(subtask)
@@ -80,15 +98,16 @@ func formatEntry(w io.Writer, e batch.Entry, baseURL string, opts entryFormatOpt
 		keyLine = issueDisplay + " > " + subtask
 	}
 	fmt.Fprintf(w, "%s %s\n", keyLine, e.Description)
+}
 
-	// Line 3: Comment (if present)
-	if e.Comment != "" {
-		comment := e.Comment
-		if opts.Color {
-			comment = ui.Muted.Render(comment)
-		}
-		fmt.Fprintln(w, comment)
+// writeCommentLine emits a comment, optionally prefixed (used by formatGroup
+// to render "  · DD/MM — " before each per-row comment).
+func writeCommentLine(w io.Writer, e batch.Entry, opts entryFormatOpts, prefix string) {
+	comment := prefix + e.Comment
+	if opts.Color {
+		comment = ui.Muted.Render(comment)
 	}
+	fmt.Fprintln(w, comment)
 }
 
 // filterStandupEntries applies the standup visibility rule.
@@ -140,7 +159,7 @@ func sortEntriesNewestFirst(entries []batch.Entry) {
 	})
 }
 
-func renderPlainEntries(entries []batch.Entry, limitDays int, baseURL string) error {
+func renderPlainEntries(entries []batch.Entry, limitDays int, baseURL string, merge bool) error {
 	sortEntriesNewestFirst(entries)
 	entries = applyDayWindow(entries, limitDays)
 	entries = filterStandupEntries(entries, getIgnoredTickets())
@@ -150,13 +169,24 @@ func renderPlainEntries(entries []batch.Entry, limitDays int, baseURL string) er
 		return nil
 	}
 
-	for i, e := range entries {
-		formatEntry(os.Stdout, e, baseURL, entryFormatOpts{Color: true, Hyperlinks: true})
-		if i < len(entries)-1 {
+	opts := entryFormatOpts{Color: true, Hyperlinks: true}
+	if !merge {
+		for i, e := range entries {
+			formatEntry(os.Stdout, e, baseURL, opts)
+			if i < len(entries)-1 {
+				fmt.Println()
+			}
+		}
+		return nil
+	}
+
+	groups := mergeEntriesByIssueKey(entries)
+	for i, g := range groups {
+		formatGroup(os.Stdout, g, baseURL, opts)
+		if i < len(groups)-1 {
 			fmt.Println()
 		}
 	}
-
 	return nil
 }
 

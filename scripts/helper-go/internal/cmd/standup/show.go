@@ -13,13 +13,15 @@ import (
 )
 
 var (
-	showTUI  bool
-	showDays int
+	showTUI     bool
+	showDays    int
+	showNoMerge bool
 )
 
 func init() {
 	showCmd.Flags().BoolVar(&showTUI, "tui", false, "Launch interactive TUI dashboard")
 	showCmd.Flags().IntVar(&showDays, "days", 0, "Limit to last N days (0=all)")
+	showCmd.Flags().BoolVar(&showNoMerge, "no-merge", false, "Disable merging duplicate JIRA tickets into one group")
 }
 
 var showCmd = &cobra.Command{
@@ -76,5 +78,5 @@ func runShow(cmd *cobra.Command, args []string) error {
 	if profile != nil {
 		baseURL = profile.BaseURL
 	}
-	return renderPlainEntries(entries, days, baseURL)
+	return renderPlainEntries(entries, days, baseURL, !showNoMerge)
 }

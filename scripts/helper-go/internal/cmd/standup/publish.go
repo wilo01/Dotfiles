@@ -21,12 +21,14 @@ var (
 	publishDays    int
 	publishDryRun  bool
 	publishWebhook string
+	publishNoMerge bool
 )
 
 func init() {
 	publishCmd.Flags().IntVar(&publishDays, "days", 0, "Limit to last N days (0=smart default: Mon=3, else=1)")
 	publishCmd.Flags().BoolVar(&publishDryRun, "dry-run", false, "Print payload without posting")
 	publishCmd.Flags().StringVar(&publishWebhook, "webhook", "", "Override webhook URL (defaults to HLP_STANDUP_WEBHOOK_URL env)")
+	publishCmd.Flags().BoolVar(&publishNoMerge, "no-merge", false, "Disable merging duplicate JIRA tickets into one group")
 }
 
 var publishCmd = &cobra.Command{
@@ -92,7 +94,7 @@ func doPublish() error {
 		baseURL = profile.BaseURL
 	}
 
-	blob, count := buildStandupBlob(entries, days, baseURL)
+	blob, count, groupCount := buildStandupBlob(entries, days, baseURL, !publishNoMerge)
 	if count == 0 {
 		return fmt.Errorf("no entries in last %d day(s)", days)
 	}
@@ -101,6 +103,7 @@ func doPublish() error {
 		"publish_date": time.Now().Format("2006-01-02"),
 		"blob":         blob,
 		"entry_count":  count,
+		"group_count":  groupCount,
 		"days":         days,
 	}
 
@@ -206,18 +209,31 @@ func plural(n int) string {
 
 // buildStandupBlob renders entries as plain text matching `hlp standup show` output,
 // stripped of ANSI/hyperlinks since the destination is a spreadsheet cell.
-// Returns the blob and the number of entries (CSV rows) included.
-func buildStandupBlob(entries []batch.Entry, limitDays int, baseURL string) (string, int) {
+// Returns the blob, the number of CSV rows included (entry_count), and the
+// number of merged groups emitted (group_count). When merge is false,
+// group_count == entry_count.
+func buildStandupBlob(entries []batch.Entry, limitDays int, baseURL string, merge bool) (string, int, int) {
 	sortEntriesNewestFirst(entries)
 	entries = applyDayWindow(entries, limitDays)
 	entries = filterStandupEntries(entries, getIgnoredTickets())
 
 	var b strings.Builder
-	for i, e := range entries {
-		formatEntry(&b, e, baseURL, entryFormatOpts{})
-		if i < len(entries)-1 {
+	if !merge {
+		for i, e := range entries {
+			formatEntry(&b, e, baseURL, entryFormatOpts{})
+			if i < len(entries)-1 {
+				b.WriteString("\n")
+			}
+		}
+		return b.String(), len(entries), len(entries)
+	}
+
+	groups := mergeEntriesByIssueKey(entries)
+	for i, g := range groups {
+		formatGroup(&b, g, baseURL, entryFormatOpts{})
+		if i < len(groups)-1 {
 			b.WriteString("\n")
 		}
 	}
-	return b.String(), len(entries)
+	return b.String(), len(entries), len(groups)
 }
