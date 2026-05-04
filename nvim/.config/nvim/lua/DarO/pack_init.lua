@@ -1,4 +1,4 @@
-local gh = function(x) return 'https://github.com/' .. x end
+local gh = require("DarO.utils").gh
 
 -----------------------------------------------------
 -- 1. Build hooks (MUST come before vim.pack.add)
@@ -26,7 +26,12 @@ vim.api.nvim_create_autocmd('PackChanged', { callback = function(ev)
       end,
    }
 
-   if builds[name] then builds[name]() end
+   if builds[name] then
+      local ok, err = pcall(builds[name])
+      if not ok then
+         vim.notify(name .. " build failed: " .. tostring(err), vim.log.levels.ERROR)
+      end
+   end
 end })
 
 -----------------------------------------------------
@@ -71,7 +76,7 @@ vim.pack.add({
    -- Telescope
    gh('nvim-telescope/telescope-file-browser.nvim'),
    gh('nvim-telescope/telescope-fzf-native.nvim'),
-   { src = gh('nvim-telescope/telescope.nvim'), version = '0.1.8' },
+   { src = gh('nvim-telescope/telescope.nvim'), version = 'v0.2.2' },
 
    -- Navigation
    { src = gh('ThePrimeagen/harpoon'), version = 'harpoon2' },
@@ -83,14 +88,25 @@ vim.pack.add({
    gh('brenoprata10/nvim-highlight-colors'),
    gh('mg979/vim-visual-multi'),
    gh('folke/trouble.nvim'),
-   gh('folke/todo-comments.nvim'),
    gh('github/copilot.vim'),
    gh('akinsho/toggleterm.nvim'),
-
-   -- Fun
-   gh('eandrju/cellular-automaton.nvim'),
 })
 
+-----------------------------------------------------
+-- 2b. Scheduled (non-critical, off startup path)
+-----------------------------------------------------
+vim.schedule(function()
+   local ok, err = pcall(function()
+      vim.pack.add({
+         gh('eandrju/cellular-automaton.nvim'),
+         gh('folke/todo-comments.nvim'),
+      })
+      require("DarO.plugins.todo-comments")
+   end)
+   if not ok then
+      vim.notify("Deferred plugin load failed (todo-comments/cellular-automaton): " .. tostring(err), vim.log.levels.WARN)
+   end
+end)
 -----------------------------------------------------
 -- 3. Plugin configs (order matters)
 -----------------------------------------------------
@@ -105,6 +121,7 @@ require("DarO.plugins.fugitive")
 require("DarO.plugins.gitgraph")
 require("DarO.plugins.treesitter")
 require("DarO.plugins.lsp")
+require("DarO.plugins.copilot")
 require("DarO.plugins.snippets")
 require("DarO.plugins.telescope")
 require("DarO.plugins.harpoon")
@@ -114,7 +131,6 @@ require("DarO.plugins.conform")
 require("DarO.plugins.highlight-color")
 require("DarO.plugins.vim-visual-multi")
 require("DarO.plugins.trouble")
-require("DarO.plugins.todo-comments")
 
 -- Deferred configs (set up autocommand/keymap triggers)
 require("DarO.plugins.copilot-chat")
@@ -125,3 +141,53 @@ require("DarO.plugins.dotenv")
 require("DarO.plugins.undotree")
 require("DarO.plugins.vimbegood")
 require("DarO.plugins.snipe")
+
+-----------------------------------------------------
+-- 5. Pack management commands
+-----------------------------------------------------
+local pack_dir = vim.fn.stdpath('data') .. '/site/pack/core/opt'
+
+vim.api.nvim_create_user_command('PackClean', function()
+   local input = vim.fn.input('Delete all plugins and re-download? (y/N): ')
+   if input:lower() ~= 'y' then
+      vim.notify('Cancelled', vim.log.levels.INFO)
+      return
+   end
+   vim.fn.delete(pack_dir, 'rf')
+   vim.notify('Plugins removed. Restart nvim to re-download.', vim.log.levels.WARN)
+end, { desc = 'Remove all plugins for a clean re-download on next startup' })
+
+vim.api.nvim_create_user_command('PackUpdate', function()
+   local ok, err = pcall(vim.pack.update)
+   if not ok then
+      vim.notify("PackUpdate error: " .. tostring(err), vim.log.levels.ERROR)
+   end
+end, { desc = 'Update all plugins' })
+
+vim.api.nvim_create_user_command('PackStatus', function()
+   local ok, err = pcall(function()
+      local plugins = vim.pack.get(nil, { info = true })
+      local lines = {}
+      for _, p in ipairs(plugins) do
+         local spec = p.spec or {}
+         local status = p.active and '✓' or '✗'
+         local pinned = (spec.version or ''):gsub("^'", ''):gsub("'$", '')
+         local tags = p.tags or {}
+         local latest_tag = tags[#tags] or ''
+         local version = pinned ~= '' and pinned or latest_tag
+         table.insert(lines, string.format(
+            '%s %-30s %s  %s', status, spec.name or "?", (p.rev or "unknown"):sub(1, 8), version
+         ))
+      end
+      table.sort(lines)
+      vim.notify(string.format('%d plugins\n%s', #plugins, table.concat(lines, '\n')), vim.log.levels.INFO)
+   end)
+   if not ok then
+      vim.notify("PackStatus error: " .. tostring(err), vim.log.levels.ERROR)
+   end
+end, { desc = 'Show installed plugins with status' })
+
+vim.keymap.set('n', '<leader>pc', '<cmd>PackClean<CR>', { desc = 'Pack: clean reinstall' })
+vim.keymap.set('n', '<leader>pr', '<cmd>restart<CR>', { desc = 'Pack: restart nvim' })
+vim.keymap.set('n', '<leader>pu', '<cmd>PackUpdate<CR>', { desc = 'Pack: update all' })
+vim.keymap.set('n', '<leader>ps', '<cmd>PackStatus<CR>', { desc = 'Pack: status' })

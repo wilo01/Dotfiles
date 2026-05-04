@@ -855,8 +855,15 @@ cmp.setup({
 
       ["<Tab>"] = cmp.mapping(function(fallback)
          local col = vim.fn.col(".") - 1
-         if cmp.visible() then
-            cmp.select_next_item(select_opts)
+         local ok, sug = pcall(vim.fn["copilot#GetDisplayedSuggestion"])
+         if ok and sug and sug.text and sug.text ~= "" then
+            vim.api.nvim_feedkeys(vim.fn["copilot#Accept"](""), "n", true)
+         elseif cmp.visible() then
+            if cmp.get_selected_entry() then
+               cmp.confirm({ select = false })
+            else
+               cmp.select_next_item(select_opts)
+            end
          elseif vim.snippet.active({ direction = 1 }) then
             vim.snippet.jump(1)
          elseif col == 0 or vim.fn.getline("."):sub(col, col):match("%s") then
