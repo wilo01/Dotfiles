@@ -16,6 +16,7 @@
 [safe]
 	directory = /home/dariuszw/.local/share/nvim/site/pack/packer/start/packer.nvim
 	directory = /home/dariuszw/Dev/branch-opener/branches/tds-suite/
+	directory = /home/dariuszw/homeassistant
 [maintenance]
 	repo =/home/dariuszw/Dev/branch-opener/branches/tds-suite/
 [init]

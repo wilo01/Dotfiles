@@ -68,12 +68,18 @@ id_ed25519.pub
 # AI
 .claude/
 .taskmaster
+jira-cache.skill
 # CLAUDE.md
 # .cursor/
 # .gemini/
 # GEMINI.md
 # AI_INSTRUCTIONS/
 .serena/
+.context/
 
 # Project-specific absolute paths
 source/server/database/sql/safe/after-install/custom_default_data.sql
+
+# Codex
+.codex
+.fix-codex/
