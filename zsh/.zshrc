@@ -436,6 +436,7 @@ export NVM_DIR="$HOME/.nvm"
 [[ -f "$HOME/.linuxbrew/bin/brew" ]] && eval "$("$HOME/.linuxbrew/bin/brew" shellenv)"
 export LD_LIBRARY_PATH=/opt/oracle/instantclient_21_14:$LD_LIBRARY_PATH
 export PATH=$LD_LIBRARY_PATH:$PATH
+export PATH=/home/dariuszw/.opencode/bin:$PATH
 
 # pnpm
 export PNPM_HOME="$HOME/.local/share/pnpm"
