@@ -303,9 +303,12 @@ function hx() {
     local variant="${1:-dev}"
     pkill -f "pnpm run dev"
     echo "pnpm start at: ~/tds-hexer/"
+    echo "Pulling latest changes..."
     echo "Running: pnpm run $variant"
     cd ~/tds-hexer/
+    command git pull || return 1
     pnpm install
+    pnpm --dir src/web install
     pnpm run "$variant"
     xdg-open http://localhost:3005/safe/
 }
