@@ -4,8 +4,8 @@ vim.g.mapleader = " "
 -- Text Actions
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selected text down" })
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selected text up" })
-vim.keymap.set("n", "H", "gt0", { desc = "Move cursor to the begginig of the current line" })
-vim.keymap.set("n", "L", "gt$", { desc = "Move cursor to the end of the current line" })
+vim.keymap.set("n", "H", "g^", { desc = "Move cursor to the beginning of the current line" })
+vim.keymap.set("n", "L", "g$", { desc = "Move cursor to the end of the current line" })
 vim.keymap.set("n", "<A-h>", "mzJ`z", { desc = "Move text lines without moving cursor" })
 vim.keymap.set('n', '<leader>/', '/<C-r>+<CR>zz', { desc = "Search with clipboard text" })
 vim.keymap.set('n', '<C-i>', '"+yi[', { desc = "Yank inside square brackets" })
@@ -227,7 +227,7 @@ vim.keymap.set("n", "<leader>[", function()
       vim.notify("No diagnostics in current buffer", vim.log.levels.INFO)
       return
    end
-   vim.diagnostic.goto_prev({ wrap = true })
+   vim.diagnostic.jump({ count = -1, wrap = true })
    vim.cmd("normal! zz")
 end, { desc = "Go to previous diagnostic and center" })
 vim.keymap.set("n", "<leader>]", function()
@@ -236,7 +236,7 @@ vim.keymap.set("n", "<leader>]", function()
       vim.notify("No diagnostics in current buffer", vim.log.levels.INFO)
       return
    end
-   vim.diagnostic.goto_next({ wrap = true })
+   vim.diagnostic.jump({ count = 1, wrap = true })
    vim.cmd("normal! zz")
 end, { desc = "Go to next diagnostic and center" })
 vim.keymap.set("n", "<leader>D", function()
@@ -412,6 +412,9 @@ vim.keymap.set("n", "<leader>ov", function()
    local filepath = vim.fn.expand('%:p')
    vim.system({ 'code', filepath })
 end, { desc = "Open current file in VSCode" })
+vim.keymap.set("n", "<leader>of", function()
+   vim.system({ 'xdg-open', vim.fn.expand('%:p:h') })
+end, { desc = "Open folder of current file in file manager" })
 
 -- Markdown Preview
 vim.keymap.set("n", "<leader>m", "<CMD>MarkdownPreview<CR>", { desc = "Start Markdown preview" })

@@ -221,7 +221,7 @@ local function get_git_stash_count()
 end
 
 local function update_git_cache()
-   local current_time = vim.loop.now()
+   local current_time = vim.uv.now()
 
    if current_time - git_cache.last_update < CACHE_DURATION then
       return
@@ -282,8 +282,8 @@ local function update_git_cache()
       git_cache.ahead, git_cache.behind = get_git_ahead_behind()
       git_cache.staged, git_cache.modified, git_cache.untracked = get_git_status_counts()
       git_cache.stashed = get_git_stash_count()
-      git_cache.last_update = current_time
    end)
+   git_cache.last_update = current_time
 end
 
 local function format_git_status()
@@ -464,7 +464,7 @@ function M.setup()
    })
 
    -- Safer timer with error handling
-   local timer = vim.loop.new_timer()
+   local timer = vim.uv.new_timer()
    if timer then
       timer:start(5000, 5000, vim.schedule_wrap(function()
          pcall(function()

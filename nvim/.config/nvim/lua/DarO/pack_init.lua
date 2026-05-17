@@ -107,6 +107,7 @@ vim.schedule(function()
       vim.notify("Deferred plugin load failed (todo-comments/cellular-automaton): " .. tostring(err), vim.log.levels.WARN)
    end
 end)
+
 -----------------------------------------------------
 -- 3. Plugin configs (order matters)
 -----------------------------------------------------
@@ -171,7 +172,7 @@ vim.api.nvim_create_user_command('PackStatus', function()
       for _, p in ipairs(plugins) do
          local spec = p.spec or {}
          local status = p.active and '✓' or '✗'
-         local pinned = (spec.version or ''):gsub("^'", ''):gsub("'$", '')
+         local pinned = spec.version or ''
          local tags = p.tags or {}
          local latest_tag = tags[#tags] or ''
          local version = pinned ~= '' and pinned or latest_tag

@@ -263,7 +263,7 @@ function M.format_buffer()
 
    local format_client = nil
    for _, client in ipairs(clients) do
-      if client:supports_method("textDocument/rangeFormatting", bufnr) then
+      if client:supports_method("textDocument/rangeFormatting", { bufnr = bufnr }) then
          format_client = client
          break
       end
@@ -280,7 +280,7 @@ function M.format_buffer()
                   timeout_ms = 5000,
                   filter = function(client)
                      return not vim.g.disable_autoformat
-                         and client:supports_method("textDocument/rangeFormatting", bufnr)
+                         and client:supports_method("textDocument/rangeFormatting", { bufnr = bufnr })
                   end
                }))
             end,
@@ -298,9 +298,14 @@ function M.format_buffer()
       timeout_ms = 5000,
       filter = function(client)
          return not vim.g.disable_autoformat
-             and client:supports_method("textDocument/formatting", bufnr)
+             and client:supports_method("textDocument/formatting", { bufnr = bufnr })
       end
    })
 end
+
+--- GitHub URL shorthand for vim.pack.add
+--- @param x string Repository path (e.g. "org/repo")
+--- @return string url Full GitHub URL
+M.gh = function(x) return 'https://github.com/' .. x end
 
 return M

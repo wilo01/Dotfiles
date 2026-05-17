@@ -1,10 +1,8 @@
-local gh = function(x) return 'https://github.com/' .. x end
-local loaded = false
+local defer = require("DarO.defer")
 
-vim.keymap.set("n", "<leader>sn", function()
-   if not loaded then
-      loaded = true
-      vim.pack.add({ gh('leath-dub/snipe.nvim') })
+defer.on_cmd({
+   repo = "leath-dub/snipe.nvim",
+   setup = function()
       require("snipe").setup({
          hints = {
             dictionary = "asfghl;wertyuiop",
@@ -15,6 +13,11 @@ vim.keymap.set("n", "<leader>sn", function()
          },
          sort = "default",
       })
-   end
-   require("snipe").open_buffer_menu()
-end, { desc = "Open Snipe buffer menu" })
+   end,
+   keymaps = function(ensure)
+      vim.keymap.set("n", "<leader>sn", function()
+         if not ensure() then return end
+         require("snipe").open_buffer_menu()
+      end, { desc = "Open Snipe buffer menu" })
+   end,
+})

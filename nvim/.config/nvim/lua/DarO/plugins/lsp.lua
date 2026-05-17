@@ -1,3 +1,4 @@
+local gh = require("DarO.utils").gh
 local LSP_SERVERS = {
    'gopls', 'lua_ls', 'ts_ls', 'eslint',
    'dockerls', 'yamlls', 'zls', 'bashls',
@@ -52,7 +53,6 @@ vim.api.nvim_create_autocmd("FileType", {
    pattern = "lua",
    once = true,
    callback = function()
-      local gh = function(x) return 'https://github.com/' .. x end
       vim.pack.add({ gh('folke/lazydev.nvim') })
       require("lazydev").setup({
          library = {
@@ -289,8 +289,9 @@ vim.diagnostic.config({
 vim.api.nvim_create_autocmd("LspAttach", {
    group = vim.api.nvim_create_augroup("UserLspConfig", { clear = true }),
    callback = function(args)
+      if not args.data or not args.data.client_id then return end
       local bufnr = args.buf
-      local client = vim.lsp.get_client_by_id(args.data.client_id)
+      local client = vim.lsp.get_clients({ id = args.data.client_id })[1]
 
       if not client then return end
 
@@ -303,13 +304,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
       end
 
       if client:supports_method("textDocument/codeLens") then
-         vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "InsertLeave" }, {
-            group = vim.api.nvim_create_augroup("LspCodelens", { clear = false }),
-            buffer = bufnr,
-            callback = function()
-               vim.lsp.codelens.refresh({ bufnr = bufnr })
-            end,
-         })
+         vim.lsp.codelens.enable(true, { bufnr = bufnr })
       end
 
       if client.name == "ruff" then
