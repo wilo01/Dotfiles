@@ -301,16 +301,30 @@ alias sqldev="echo ~/SQLDeveloper/opt/sqldeveloper/sqldeveloper.sh ; ~/SQLDevelo
 alias br='echo npm start at: ; echo ~/Dev/branch-opener/app/ ; if [[ -n "$(find ~/Dev/branch-opener/app/apex/kiosk/bdb/ -maxdepth 0 -type f -o -type d -printf '%s')" ]]; then echo "Removing content from ~/Dev/branch-opener/app/apex/kiosk/bdb/" ; rm -rf ~/Dev/branch-opener/app/apex/kiosk/bdb/* ; else echo "No content found in ~/Dev/branch-opener/app/apex/kiosk/bdb/, skipping removal." ; fi ; ls ~/Dev/branch-opener/app/apex/kiosk/bdb/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; xdg-open http://localhost:3333/static/ ; npm start'
 function hx() {
     local variant="${1:-dev}"
+    local env="${HX_ENV:-dev}"
+
+    if ! curl -sf http://localhost:80/api/status >/dev/null 2>&1; then
+        echo "[hx] Starting Infisical..."
+        docker compose -f ~/.infisical/docker-compose.yml up -d
+        echo -n "[hx] Waiting for Infisical..."
+        local i=0
+        until curl -sf http://localhost:80/api/status >/dev/null 2>&1; do
+            (( i++ )); [[ $i -ge 30 ]] && { echo " timed out." >&2; return 1; }
+            echo -n "."; sleep 1
+        done
+        echo " ready"
+    fi
+
     pkill -f "pnpm run dev"
     echo "pnpm start at: ~/tds-hexer/"
     echo "Pulling latest changes..."
-    echo "Running: pnpm run $variant"
+    echo "Running: pnpm run $variant (env: $env)"
     cd ~/tds-hexer/
     command git pull || return 1
     pnpm install
     pnpm --dir src/web install
-    pnpm run "$variant"
-    xdg-open http://localhost:3005/safe/
+    infisical run --env="$env" --domain=http://localhost:80 -- pnpm run "$variant"
+    xdg-open https://trunk.acrid.dev:3443/safe
 }
 alias ksw='echo kiosk start at: ; echo ~/tds-branch-opener/branches/tds-suite/source/ui-kiosk/ ; cd ~/tds-branch-opener/branches/tds-suite/source/ui-kiosk/ ; sencha app watch ; xdg-open http://localhost:3005/kiosk/'
 alias vsw='echo visitor-web-app start at: ; echo ~/tds-branch-opener/branches/tds-visitor-web-app/ui ; cd ~/tds-branch-opener/branches/tds-visitor-web-app/ui ; sencha app watch ; xdg-open http://localhost:3005/kiosk/'
@@ -399,6 +413,31 @@ alias claude-sonnet='claude --model claude-sonnet-4-20250514'
 alias claude-opus='claude --model claude-opus-4-1-20250805'
 alias claude-fast='claude-haiku'
 alias claude-haiku='claude --model claude-3-5-haiku-20241022'
+# alias fcc-claude='fcc-claude'
+
+# Auto-start fcc-server if not already running
+fcc-claude() {
+    local original_dir="$PWD"
+    local log_dir="$HOME/tmp/fcc-logs"
+
+    # Check if fcc-server is already healthy
+    if ! curl -s -o /dev/null --max-time 2 http://127.0.0.1:8082/health 2>/dev/null; then
+        echo "Starting fcc-server in background..."
+        mkdir -p "$log_dir"
+        cd "$log_dir" || return 1
+        nohup fcc-server > "$log_dir/server-stdout.log" 2>&1 &
+        cd "$original_dir" || return 1
+        # Wait up to 10s for it to become healthy
+        for i in $(seq 1 10); do
+            if curl -s -o /dev/null --max-time 1 http://127.0.0.1:8082/health 2>/dev/null; then
+                echo "fcc-server is ready"
+                break
+            fi
+            sleep 1
+        done
+    fi
+    command fcc-claude "$@"
+}
 filepath() { realpath "${1:-.}"; }
 alias rm="sudo rm"
 alias rm_nvim="echo 'Removing Neovim data, cache, state, and lazy-lock.json...' ; command rm -rf ~/.local/share/nvim ~/.local/state/nvim ~/.cache/nvim ~/.config/nvim/lazy-lock.json ~/.var/app/io.neovim.nvim/cache/nvim ~/.var/app/io.neovim.nvim/data/nvim && echo 'Neovim reset complete! Restart nvim to reinstall plugins.'"
@@ -508,3 +547,4 @@ add-zsh-hook preexec _git_cleanup_stale_lock
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 alias ga="git add \"\$@\" && git status"
+export INFISICAL_API_URL="http://localhost"

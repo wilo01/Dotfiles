@@ -1,4 +1,4 @@
-theme = "tokyonight_night"
+theme = "TokyoNight Night"
 command = tmux
 confirm-close-surface = false
 font-family = "MesloLGS NF"
