@@ -23,8 +23,9 @@ type DevConfig struct {
 
 // JiraConfig holds JIRA connection settings
 type JiraConfig struct {
-	BaseURL string `mapstructure:"base_url" yaml:"base_url"`
-	Email   string `mapstructure:"email" yaml:"email"`
+	BaseURL      string `mapstructure:"base_url" yaml:"base_url"`
+	Email        string `mapstructure:"email" yaml:"email"`
+	WorklogsFile string `mapstructure:"worklogs_file" yaml:"worklogs_file"`
 	// APIToken is stored in keyring, not config file
 }
 
@@ -66,6 +67,7 @@ type Preferences struct {
 	CopyToClipboard       bool           `mapstructure:"copy_to_clipboard" yaml:"copy_to_clipboard"`
 	StandupIgnoredTickets []string       `mapstructure:"standup_ignored_tickets" yaml:"standup_ignored_tickets"`
 	StandupWebhookURL     string         `mapstructure:"standup_webhook_url" yaml:"standup_webhook_url"`
+	StandupWorkflowURL    string         `mapstructure:"standup_workflow_url" yaml:"standup_workflow_url"`
 	DailyTickets          []string       `mapstructure:"daily_tickets" yaml:"daily_tickets"`
 	LogToSubtask          bool           `mapstructure:"log_to_subtask" yaml:"log_to_subtask"`
 	Schedule              ScheduleConfig `mapstructure:"schedule" yaml:"schedule"`
@@ -92,8 +94,9 @@ func GetConfigPath(filename string) string {
 func Default() *Config {
 	return &Config{
 		Jira: JiraConfig{
-			BaseURL: "",
-			Email:   "",
+			BaseURL:      "",
+			Email:        "",
+			WorklogsFile: "~/.config/hlp/worklogs.csv",
 		},
 		Timesheet: TimesheetConfig{
 			JiraURL: "",
@@ -115,6 +118,7 @@ func Default() *Config {
 			CopyToClipboard:       true,
 			StandupIgnoredTickets: []string{"TDT-2", "TDT-26"},
 			StandupWebhookURL:     "",
+			StandupWorkflowURL:    "",
 			LogToSubtask:          false,
 			Schedule: ScheduleConfig{
 				Slots: []ScheduleSlot{

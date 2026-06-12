@@ -68,6 +68,8 @@ func doPublish() error {
 		return fmt.Errorf("no webhook URL: set --webhook, HLP_STANDUP_WEBHOOK_URL, or preferences.standup_webhook_url in ~/.config/hlp/config.yaml")
 	}
 
+	workflowEditor := cfg.Preferences.StandupWorkflowURL
+
 	sheetURL := cfg.Sheets.DailyTabURL
 	if sheetURL == "" && !publishDryRun {
 		return fmt.Errorf("no sheet URL: set google_sheets.daily_tab_url in ~/.config/hlp/config.yaml")
@@ -94,18 +96,7 @@ func doPublish() error {
 		baseURL = profile.BaseURL
 	}
 
-	blob, count, groupCount := buildStandupBlob(entries, days, baseURL, !publishNoMerge)
-	if count == 0 {
-		return fmt.Errorf("no entries in last %d day(s)", days)
-	}
-
-	payload := map[string]any{
-		"publish_date": time.Now().Format("2006-01-02"),
-		"blob":         blob,
-		"entry_count":  count,
-		"group_count":  groupCount,
-		"days":         days,
-	}
+	merge := !publishNoMerge
 
 	if publishDryRun {
 		webhookDisplay := webhook
@@ -116,8 +107,81 @@ func doPublish() error {
 		if sheetDisplay == "" {
 			sheetDisplay = "<unset>"
 		}
-		fmt.Printf("--- DRY RUN ---\nwebhook: %s\nsheet:   %s\nentries: %d, days: %d\n---\n%s\n", webhookDisplay, sheetDisplay, count, days, blob)
+		workflowDisplay := workflowEditor
+		if workflowDisplay == "" {
+			workflowDisplay = "<unset>"
+		}
+
+		// Count entries to show in header
+		entriesCopy := make([]batch.Entry, len(entries))
+		copy(entriesCopy, entries)
+		sortEntriesNewestFirst(entriesCopy)
+		filtered := filterStandupEntries(applyDayWindow(entriesCopy, days), getIgnoredTickets())
+		count := len(filtered)
+		if count == 0 {
+			return fmt.Errorf("no entries in last %d day(s)", days)
+		}
+
+		fmt.Printf("%s\n%s\n%s\n%s\n",
+			ui.Title.Render("--- DRY RUN ---"),
+			ui.KeyValue("webhook", webhookDisplay),
+			ui.KeyValue("sheet", sheetDisplay),
+			ui.KeyValue("workflow", workflowDisplay))
+		if workflowEditor == "" {
+			fmt.Println(ui.Warning("workflow URL not configured - add preferences.standup_workflow_url to config to see editor link on errors"))
+		}
+		fmt.Println(ui.Muted.Render("───"))
+
+		// Render entries with same colors as hlp standup show
+		if err := renderPlainEntries(entries, days, baseURL, merge); err != nil {
+			return err
+		}
+
+		fmt.Printf("\n%s\n%s\n",
+			ui.KeyValuePadded("entries", fmt.Sprintf("%d", count), 5),
+			ui.KeyValuePadded("days", fmt.Sprintf("%d", days), 5))
+		// Test webhook and show response
+		if webhook != "" {
+			testPayload := map[string]any{
+				"publish_date": time.Now().Format("2006-01-02"),
+				"blob":         "[Dry-run test - no data pushed]",
+				"entry_count":  count,
+				"group_count":  0,
+				"days":         days,
+			}
+			testBody, _ := json.Marshal(testPayload)
+			req, _ := http.NewRequest(http.MethodPost, webhook, bytes.NewReader(testBody))
+			req.Header.Set("Content-Type", "application/json")
+			client := &http.Client{Timeout: 10 * time.Second}
+			resp, err := client.Do(req)
+			if err != nil {
+				fmt.Println(ui.Warning("webhook unreachable: " + err.Error()))
+			} else {
+				defer resp.Body.Close()
+				respBody, _ := io.ReadAll(resp.Body)
+				if resp.StatusCode >= 300 {
+					fmt.Println(ui.Warning(fmt.Sprintf("webhook would FAIL (HTTP %d):", resp.StatusCode)))
+					fmt.Println(colorizeJSONResponse(respBody))
+				} else {
+					fmt.Println(ui.Success.Render("webhook responded OK"))
+				}
+			}
+		}
+
 		return nil
+	}
+
+	blob, count, groupCount := buildStandupBlob(entries, days, baseURL, merge, entryFormatOpts{})
+	if count == 0 {
+		return fmt.Errorf("no entries in last %d day(s)", days)
+	}
+
+	payload := map[string]any{
+		"publish_date": time.Now().Format("2006-01-02"),
+		"blob":         blob,
+		"entry_count":  count,
+		"group_count":  groupCount,
+		"days":         days,
 	}
 
 	body, err := json.Marshal(payload)
@@ -140,7 +204,22 @@ func doPublish() error {
 
 	respBody, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode >= 300 {
-		return fmt.Errorf("webhook returned %d: %s", resp.StatusCode, string(respBody))
+		var prettyErr string
+		var pp json.RawMessage
+		if json.Unmarshal(respBody, &pp) == nil {
+			indented, _ := json.MarshalIndent(pp, "", "  ")
+			prettyErr = colorizeJSON(string(indented))
+		} else {
+			prettyErr = string(respBody)
+		}
+		errMsg := fmt.Sprintf("webhook returned %d:\n%s", resp.StatusCode, prettyErr)
+		if workflowEditor != "" {
+			errMsg += fmt.Sprintf("\n  n8n editor: %s", workflowEditor)
+		}
+		if resp.StatusCode == 401 || resp.StatusCode == 403 {
+			errMsg += "\n  n8n auth may have expired - open the n8n URL and re-login"
+		}
+		return fmt.Errorf("%s", errMsg)
 	}
 
 	printPublishResult(count, days, webhook, sheetURL, respBody)
@@ -207,20 +286,80 @@ func plural(n int) string {
 	return "s"
 }
 
+// colorizeJSONResponse unmarshals raw JSON bytes, re-indents, and colorizes for terminal display.
+func colorizeJSONResponse(body []byte) string {
+	var pp json.RawMessage
+	if json.Unmarshal(body, &pp) != nil {
+		return string(body)
+	}
+	indented, err := json.MarshalIndent(pp, "", "  ")
+	if err != nil {
+		return string(body)
+	}
+	return colorizeJSON(string(indented))
+}
+
+// colorizeJSON applies ANSI color codes to indented JSON text for terminal display.
+// Keys are cyan, string values are green, numbers are bold cyan, booleans/null are yellow,
+// and structural characters ({ } [ ] ,) are gray.
+func colorizeJSON(text string) string {
+	lines := strings.Split(text, "\n")
+	var colored []string
+	for _, line := range lines {
+		// Find the key: pattern
+		colonIdx := strings.Index(line, ":")
+		if colonIdx >= 0 {
+			keyPart := line[:colonIdx]
+			valPart := strings.TrimSpace(line[colonIdx+1:])
+			// Color the key (everything before the colon)
+			keyPart = ui.Primary.Render(keyPart)
+			// Color the colon
+			coloredLine := keyPart + " " + ui.Muted.Render(":")
+			if valPart != "" {
+				coloredLine += " " + colorizeJSONValue(valPart)
+			}
+			colored = append(colored, coloredLine)
+		} else {
+			// Line with just structural chars — pass through as-is
+			colored = append(colored, line)
+		}
+	}
+	return strings.Join(colored, "\n")
+}
+
+func colorizeJSONValue(val string) string {
+	if strings.HasPrefix(val, "\"") {
+		return ui.Success.Render(val)
+	}
+	if val == "true" || val == "false" || val == "null" {
+		return ui.Highlight.Render(val)
+	}
+	// Number — includes potential trailing comma
+	if len(val) > 0 && (val[0] >= '0' && val[0] <= '9' || val[0] == '-') {
+		return ui.Value.Render(val)
+	}
+	return val
+}
+
 // buildStandupBlob renders entries as plain text matching `hlp standup show` output,
 // stripped of ANSI/hyperlinks since the destination is a spreadsheet cell.
 // Returns the blob, the number of CSV rows included (entry_count), and the
 // number of merged groups emitted (group_count). When merge is false,
 // group_count == entry_count.
-func buildStandupBlob(entries []batch.Entry, limitDays int, baseURL string, merge bool) (string, int, int) {
+func buildStandupBlob(entries []batch.Entry, limitDays int, baseURL string, merge bool, opts ...entryFormatOpts) (string, int, int) {
 	sortEntriesNewestFirst(entries)
 	entries = applyDayWindow(entries, limitDays)
 	entries = filterStandupEntries(entries, getIgnoredTickets())
 
+	o := entryFormatOpts{}
+	if len(opts) > 0 {
+		o = opts[0]
+	}
+
 	var b strings.Builder
 	if !merge {
 		for i, e := range entries {
-			formatEntry(&b, e, baseURL, entryFormatOpts{})
+			formatEntry(&b, e, baseURL, o)
 			if i < len(entries)-1 {
 				b.WriteString("\n")
 			}
@@ -230,7 +369,7 @@ func buildStandupBlob(entries []batch.Entry, limitDays int, baseURL string, merg
 
 	groups := mergeEntriesByIssueKey(entries)
 	for i, g := range groups {
-		formatGroup(&b, g, baseURL, entryFormatOpts{})
+		formatGroup(&b, g, baseURL, o)
 		if i < len(groups)-1 {
 			b.WriteString("\n")
 		}

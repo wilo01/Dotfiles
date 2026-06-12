@@ -548,3 +548,28 @@ add-zsh-hook preexec _git_cleanup_stale_lock
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 alias ga="git add \"\$@\" && git status"
 export INFISICAL_API_URL="http://localhost"
+
+infisical-run() {
+   local compose_dir="$HOME/.infisical"
+   local api_url="http://localhost/api/status"
+   local max_wait=30
+
+   echo "▶ Starting Infisical backend..."
+   (cd "$compose_dir" && docker compose up -d backend 2>&1)
+
+   echo "⏳ Waiting for Infisical API to be ready..."
+   local i=0
+   until curl -sf "$api_url" > /dev/null 2>&1; do
+      if (( i >= max_wait )); then
+         echo "✗ Infisical did not start within ${max_wait}s — check: docker logs infisical-backend"
+         return 1
+      fi
+      sleep 1
+      (( i++ ))
+   done
+
+   echo "✓ Infisical is ready (${i}s)"
+   echo "→ Opening http://localhost in browser..."
+   xdg-open "http://localhost" 2>/dev/null || echo "  Open manually: http://localhost"
+}
+alias infisical-stop='(cd ~/.infisical && docker compose stop backend) && echo "Infisical stopped"'

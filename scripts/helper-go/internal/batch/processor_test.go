@@ -271,6 +271,85 @@ func TestRemoveEntryByRow(t *testing.T) {
 	})
 }
 
+func TestWriteWorklogRecords(t *testing.T) {
+	tests := []struct {
+		name   string
+		record []string
+		want   string
+	}{
+		{
+			name:   "header row is not force-quoted",
+			record: []string{"issue_key", "subtask_key", "issue_type", "description", "comment", "date", "time_spent", "subtask_log_ind", "status"},
+			want:   "issue_key,subtask_key,issue_type,description,comment,date,time_spent,subtask_log_ind,status",
+		},
+		{
+			name:   "empty comment is quoted",
+			record: []string{"TDT-26", "", "Story", "Dariusz - adm work", "", "10.06.2026 08:56", "", "N", "DRAFT"},
+			want:   `TDT-26,,Story,Dariusz - adm work,"",10.06.2026 08:56,,N,DRAFT`,
+		},
+		{
+			name:   "comment with commas is quoted",
+			record: []string{"SUITE-1", "", "Bug", "Some bug", "fixed a, b, and c", "10.06.2026", "1h", "N", "DONE"},
+			want:   `SUITE-1,,Bug,Some bug,"fixed a, b, and c",10.06.2026,1h,N,DONE`,
+		},
+		{
+			name:   "embedded quotes in comment are doubled",
+			record: []string{"SUITE-2", "", "Bug", "Other bug", `triggers a "go back" action`, "10.06.2026", "1h", "N", "DONE"},
+			want:   `SUITE-2,,Bug,Other bug,"triggers a ""go back"" action",10.06.2026,1h,N,DONE`,
+		},
+		{
+			name:   "description with comma still minimally quoted",
+			record: []string{"SUITE-3", "", "Story", "Parent > Child, with comma", "note", "10.06.2026", "1h", "N", "DONE"},
+			want:   `SUITE-3,,Story,"Parent > Child, with comma","note",10.06.2026,1h,N,DONE`,
+		},
+		{
+			name:   "legacy 7-column row uses minimal quoting",
+			record: []string{"OLD-1", "Bug", "Old format", "note", "01.01.2025", "1h", "DONE"},
+			want:   "OLD-1,Bug,Old format,note,01.01.2025,1h,DONE",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var buf strings.Builder
+			if err := writeWorklogRecords(&buf, [][]string{tt.record}); err != nil {
+				t.Fatalf("writeWorklogRecords failed: %v", err)
+			}
+			got := strings.TrimRight(buf.String(), "\n")
+			if got != tt.want {
+				t.Errorf("got  %s\nwant %s", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestWriteWorklogRecordsRoundTrip(t *testing.T) {
+	comment := `1. SUITE-8737 — swipe triggers a "go back" action, includes video, and a comma`
+
+	tmpFile, err := os.CreateTemp("", "csv_roundtrip_test_*.csv")
+	if err != nil {
+		t.Fatalf("Failed to create temp file: %v", err)
+	}
+	tmpPath := tmpFile.Name()
+	tmpFile.Close()
+	defer os.Remove(tmpPath)
+
+	if err := AppendEntryWithStatus(tmpPath, "SUITE-8567", "SUITE-8743", "Story", "IWA End to end QA > QA", "1h", "10.06.2026 08:56", comment, "Y", StatusDone); err != nil {
+		t.Fatalf("AppendEntryWithStatus failed: %v", err)
+	}
+
+	entries, err := ParseCSV(tmpPath)
+	if err != nil {
+		t.Fatalf("ParseCSV failed: %v", err)
+	}
+	if len(entries) != 1 {
+		t.Fatalf("Expected 1 entry, got %d", len(entries))
+	}
+	if entries[0].Comment != comment {
+		t.Errorf("Comment round-trip failed:\ngot  %q\nwant %q", entries[0].Comment, comment)
+	}
+}
+
 func TestCSVQuotingWithCommas(t *testing.T) {
 	tests := []struct {
 		name        string

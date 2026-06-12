@@ -22,7 +22,6 @@ load_hook_config
 echo "   AI_MAX_TIMEOUT: $AI_MAX_TIMEOUT"
 echo "   AI_INACTIVITY_TIMEOUT: $AI_INACTIVITY_TIMEOUT"
 echo "   AI_SHOW_PROGRESS: $AI_SHOW_PROGRESS"
-echo "   AI_PARALLEL_MODE: $AI_PARALLEL_MODE"
 echo "   ENABLE_GLOBAL_HOOKS: $ENABLE_GLOBAL_HOOKS"
 echo "   ENABLE_AI_COMMIT: $ENABLE_AI_COMMIT"
 
@@ -43,19 +42,9 @@ echo "   JIRA tag: $(get_jira_tag)"
 echo "   Project root: $(get_project_root)"
 echo "   Has staged changes: $(has_staged_changes && echo "Yes" || echo "No")"
 
-# Test progress indicator
-echo ""
-echo "5. Testing progress indicator (3 seconds)..."
-for i in {1..3}; do
-    show_progress "Testing progress" "$i"
-    sleep 1
-done
-clear_progress
-echo "   ✅ Progress indicator test complete"
-
 # Test command validation
 echo ""
-echo "6. Testing command validation..."
+echo "5. Testing command validation..."
 if validate_commands git bash mktemp; then
     echo "   ✅ Required commands are available"
 else
@@ -64,24 +53,19 @@ fi
 
 # Test AI command availability
 echo ""
-echo "7. Testing AI tool availability..."
-ai_tools_found=""
-if command_exists claude; then
-    echo "   ✅ Claude CLI found at: $(which claude)"
-    ai_tools_found="yes"
+echo "6. Testing AI tool availability..."
+if command_exists or-cli; then
+    echo "   ✅ or-cli found at: $(command -v or-cli)"
+    echo "   ✅ curl available: $(command -v curl)"
+    echo "   ✅ jq available: $(command -v jq)"
+elif [[ -x "$HOME/.local/bin/or-cli" ]]; then
+    echo "   ✅ or-cli found at: $HOME/.local/bin/or-cli"
+    echo "   ✅ curl available: $(command -v curl)"
+    echo "   ✅ jq available: $(command -v jq)"
 else
-    echo "   ⚠️  Claude CLI not found"
-fi
-
-if command_exists gemini; then
-    echo "   ✅ Gemini CLI found at: $(which gemini)"
-    ai_tools_found="yes"
-else
-    echo "   ⚠️  Gemini CLI not found"
-fi
-
-if [[ -z "$ai_tools_found" ]]; then
-    echo "   ⚠️  No AI tools found - AI commit generation will not work"
+    echo "   ⚠️  or-cli not found - AI commit generation will not work"
+    echo "   📦 Install: place or-cli script in ~/.local/bin/"
+    echo "   🔧 Requires: curl, jq, and OPENROUTER_API_KEY env var"
 fi
 
 # Summary
@@ -93,14 +77,10 @@ echo ""
 echo "Configuration Settings:"
 echo "  - Hooks enabled: $ENABLE_GLOBAL_HOOKS"
 echo "  - AI commits: $ENABLE_AI_COMMIT"
-echo "  - Parallel mode: $AI_PARALLEL_MODE"
 echo "  - Timeout: ${AI_INACTIVITY_TIMEOUT}s"
 echo ""
 echo "To enable AI commit messages:"
 echo "  git config --local hooks.enableAiCommit true"
-echo ""
-echo "To disable parallel AI racing (race mode is default):"
-echo "  git config --local hooks.aiParallelMode false"
 echo ""
 echo "To adjust timeout (default 30s):"
 echo "  git config --local hooks.aiInactivityTimeout 45"

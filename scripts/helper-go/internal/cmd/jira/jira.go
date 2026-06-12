@@ -23,6 +23,7 @@ var JiraCmd = &cobra.Command{
 func init() {
 	JiraCmd.AddCommand(addCmd)
 	JiraCmd.AddCommand(configCmd)
+	JiraCmd.AddCommand(editCmd)
 	JiraCmd.AddCommand(logCmd)
 	JiraCmd.AddCommand(statusCmd)
 	JiraCmd.AddCommand(profileCmd)

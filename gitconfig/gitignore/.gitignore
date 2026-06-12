@@ -55,6 +55,8 @@ todo.md
 mcp.json
 .env
 .dbenv
+.infisical.json
+server.log
 
 # SSH Keys
 github
@@ -89,3 +91,5 @@ source/server/database/sql/safe/after-install/custom_default_data.sql
 # Codex
 .codex
 .fix-codex/
+
+.playwright-mcp/

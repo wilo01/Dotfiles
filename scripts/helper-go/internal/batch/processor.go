@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/csv"
 	"fmt"
+	"io"
 	"math/rand"
 	"os"
 	"os/signal"
@@ -193,6 +194,51 @@ const (
 	ColSubtaskLogInd = 7
 	ColStatus      = 8
 )
+
+// forceQuote CSV-encodes a field, always wrapping it in double quotes.
+func forceQuote(s string) string {
+	return `"` + strings.ReplaceAll(s, `"`, `""`) + `"`
+}
+
+// encodeField CSV-encodes a field, quoting only when the content requires it.
+func encodeField(s string) string {
+	if strings.ContainsAny(s, ",\"\n\r") {
+		return forceQuote(s)
+	}
+	return s
+}
+
+// isHeaderRecord reports whether a record is the CSV header row.
+func isHeaderRecord(record []string) bool {
+	if len(record) == 0 {
+		return false
+	}
+	first := strings.ToLower(record[0])
+	return first == "issue_key" || first == "issue" || first == "ticket"
+}
+
+// writeWorklogRecords writes CSV records to w, always quoting the comment
+// column (ColComment) in 9-column data rows — even when empty — so the
+// comment field is visually consistent and safe for naive downstream parsers.
+// The header row and legacy short rows use standard minimal quoting.
+// Use this instead of csv.Writer for the worklogs file.
+func writeWorklogRecords(w io.Writer, records [][]string) error {
+	for _, record := range records {
+		fields := make([]string, len(record))
+		forceComment := len(record) >= 9 && !isHeaderRecord(record)
+		for i, field := range record {
+			if forceComment && i == ColComment {
+				fields[i] = forceQuote(field)
+			} else {
+				fields[i] = encodeField(field)
+			}
+		}
+		if _, err := fmt.Fprintln(w, strings.Join(fields, ",")); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
 // ParseCSV parses a CSV file into entries
 // Supports 9-column (new), 7-column, and old 6-column formats for backward compatibility
@@ -663,8 +709,7 @@ func UpdateCSVStatus(path string, results []Result) error {
 	}
 	defer f.Close()
 
-	writer := csv.NewWriter(f)
-	return writer.WriteAll(records)
+	return writeWorklogRecords(f, records)
 }
 
 // UpdateCSVDescriptions updates empty description fields in the CSV
@@ -718,8 +763,7 @@ func UpdateCSVDescriptions(path string, descriptions map[string]string) (int, er
 	}
 	defer f.Close()
 
-	writer := csv.NewWriter(f)
-	if err := writer.WriteAll(records); err != nil {
+	if err := writeWorklogRecords(f, records); err != nil {
 		return 0, err
 	}
 
@@ -751,15 +795,12 @@ func AppendEntryWithStatus(path, issueKey, subtaskKey, issueType, description, t
 	}
 	defer f.Close()
 
-	writer := csv.NewWriter(f)
-	defer writer.Flush()
-
 	// Default: log to parent. Callers opt into subtask logging via explicit "Y".
 	if subtaskLogInd == "" {
 		subtaskLogInd = "N"
 	}
 
-	return writer.Write([]string{
+	return writeWorklogRecords(f, [][]string{{
 		strings.ToUpper(issueKey),
 		strings.ToUpper(subtaskKey),
 		issueType,
@@ -769,7 +810,7 @@ func AppendEntryWithStatus(path, issueKey, subtaskKey, issueType, description, t
 		timeSpent,
 		strings.ToUpper(subtaskLogInd),
 		status,
-	})
+	}})
 }
 
 // PrependEntryWithStatus adds a new entry at the top of the CSV file (after header)
@@ -838,8 +879,7 @@ func PrependEntryWithStatus(path, issueKey, subtaskKey, issueType, description, 
 	}
 	defer f.Close()
 
-	writer := csv.NewWriter(f)
-	return writer.WriteAll(result)
+	return writeWorklogRecords(f, result)
 }
 
 // RemoveEntryByRow removes a CSV row by its 1-based row number
@@ -870,8 +910,7 @@ func RemoveEntryByRow(path string, rowNumber int) error {
 	}
 	defer f.Close()
 
-	writer := csv.NewWriter(f)
-	return writer.WriteAll(records)
+	return writeWorklogRecords(f, records)
 }
 
 // UpdateEntryDescription updates the description of an existing entry by row number
@@ -905,8 +944,7 @@ func UpdateEntryDescription(path string, rowNumber int, newDescription string) e
 	}
 	defer f.Close()
 
-	writer := csv.NewWriter(f)
-	return writer.WriteAll(records)
+	return writeWorklogRecords(f, records)
 }
 
 // FindMissingWorklogs compares JIRA worklogs with CSV entries and returns missing ones
@@ -1005,18 +1043,11 @@ func SortCSVByDate(path string) error {
 	}
 	defer f.Close()
 
-	writer := csv.NewWriter(f)
-	defer writer.Flush()
-
-	// Write header if present
+	// Write header (if present) followed by sorted records
 	if hasHeader {
-		if err := writer.Write(header); err != nil {
-			return err
-		}
+		records = append([][]string{header}, records...)
 	}
-
-	// Write sorted records
-	return writer.WriteAll(records)
+	return writeWorklogRecords(f, records)
 }
 
 // sortRecordsByDate sorts CSV records by date column (index 2) in descending order
@@ -1218,8 +1249,7 @@ func updateCSVWithRestructure(path string, details map[string]jira.IssueDetails,
 	}
 	defer f.Close()
 
-	writer := csv.NewWriter(f)
-	if err := writer.WriteAll(records); err != nil {
+	if err := writeWorklogRecords(f, records); err != nil {
 		return 0, 0, err
 	}
 

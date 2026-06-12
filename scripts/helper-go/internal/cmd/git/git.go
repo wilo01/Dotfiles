@@ -13,4 +13,5 @@ var GitCmd = &cobra.Command{
 
 func init() {
 	GitCmd.AddCommand(compareCmd)
+	GitCmd.AddCommand(ignoreCmd)
 }
