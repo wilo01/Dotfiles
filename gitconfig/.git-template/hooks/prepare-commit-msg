@@ -246,7 +246,7 @@ run_ai_llm() {
    log_info "🤖 Calling AI ($(basename "$AI_LLM_CMD"), model: $AI_LLM_MODEL, timeout: ${AI_MAX_TIMEOUT}s)..."
 
    local response
-   response=$(timeout "$AI_MAX_TIMEOUT" "$AI_LLM_CMD" "$prompt" 2>&1)
+   response=$(OLLAMA_MODEL="$AI_LLM_MODEL" OPENCODE_MODEL="$AI_LLM_MODEL" timeout "$AI_MAX_TIMEOUT" "$AI_LLM_CMD" "$prompt" 2>&1)
    local exit_code=$?
    local elapsed=$(($(date +%s) - start_time))
 
@@ -283,7 +283,11 @@ prompt_commit_mode() {
    fi
 
    echo "" >&2
-   echo "🎫 JIRA branch detected: $jira_tag" >&2
+   if is_jira_branch; then
+      echo "🎫 JIRA branch detected: $jira_tag" >&2
+   else
+      echo "✍️  Prepare commit message" >&2
+   fi
    echo "   [s]kip AI - use default template" >&2
    echo "   [l]ookup - search Commits.md for $jira_tag" >&2
    echo "   [g]enerate or Enter - run AI generation" >&2
@@ -390,12 +394,11 @@ main() {
    }
 
    if [[ -z "$first_line" ]]; then
-      local mode="generate"
-
-      # Check if JIRA branch and prompt for mode
-      if is_jira_branch; then
-         mode=$(prompt_commit_mode "$jira_tag")
-      fi
+      # Always prompt — user picks skip/lookup/generate on any branch.
+      # Enter/timeout => "generate"; if AI is unavailable or fails, the AI
+      # block below falls back to the default template (lines ~487-492).
+      local mode
+      mode=$(prompt_commit_mode "$jira_tag")
 
       case "$mode" in
          skip)

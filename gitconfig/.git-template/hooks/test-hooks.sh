@@ -54,18 +54,14 @@ fi
 # Test AI command availability
 echo ""
 echo "6. Testing AI tool availability..."
-if command_exists or-cli; then
-    echo "   ✅ or-cli found at: $(command -v or-cli)"
-    echo "   ✅ curl available: $(command -v curl)"
-    echo "   ✅ jq available: $(command -v jq)"
-elif [[ -x "$HOME/.local/bin/or-cli" ]]; then
-    echo "   ✅ or-cli found at: $HOME/.local/bin/or-cli"
-    echo "   ✅ curl available: $(command -v curl)"
-    echo "   ✅ jq available: $(command -v jq)"
+echo "   AI_LLM_CMD: $AI_LLM_CMD"
+echo "   AI_LLM_MODEL: $AI_LLM_MODEL"
+if [[ -x "$AI_LLM_CMD" ]]; then
+    echo "   ✅ Backend: $(basename "$AI_LLM_CMD")"
 else
-    echo "   ⚠️  or-cli not found - AI commit generation will not work"
-    echo "   📦 Install: place or-cli script in ~/.local/bin/"
-    echo "   🔧 Requires: curl, jq, and OPENROUTER_API_KEY env var"
+    echo "   ⚠️  AI command not executable: $AI_LLM_CMD"
+    echo "   📦 Install opencode: https://opencode.ai"
+    echo "   📦 Or install ollama: https://ollama.ai"
 fi
 
 # Summary

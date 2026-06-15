@@ -9,7 +9,7 @@
 # Load hook configuration from git config with defaults
 load_hook_config() {
    # AI Configuration
-   AI_MAX_TIMEOUT=$(git config --local hooks.aiMaxTimeout || echo "${AI_MAX_TIMEOUT:-60}")
+   AI_MAX_TIMEOUT=$(git config --local hooks.aiMaxTimeout || echo "${AI_MAX_TIMEOUT:-120}")
    AI_INACTIVITY_TIMEOUT=$(git config --local hooks.aiInactivityTimeout || echo "${AI_INACTIVITY_TIMEOUT:-60}")
    AI_SHOW_PROGRESS=$(git config --local hooks.aiShowProgress || echo "${AI_SHOW_PROGRESS:-true}")
    AI_DEBUG=$(git config --local hooks.aiDebug || echo "${AI_DEBUG:-false}")
@@ -17,21 +17,39 @@ load_hook_config() {
    # Hook Settings
    ENABLE_GLOBAL_HOOKS=$(git config --local hooks.enableGlobalHooks || echo "true")
    ENABLE_LOCAL_HOOKS=$(git config --local hooks.enableLocalHooks || echo "false")
-   ENABLE_AI_COMMIT=$(git config --local hooks.enableAiCommit || echo "false")
+   ENABLE_AI_COMMIT=$(git config --local hooks.enableAiCommit || echo "true")
 
    # Maintenance branch prompt timeout (seconds)
    MAINTENANCE_TIMEOUT=$(git config --local hooks.maintenanceTimeout || echo "${MAINTENANCE_TIMEOUT:-10}")
 
-   # AI Command Path - auto-detect if not configured
+   # AI Command Path - auto-detect with fallback chain
+   # Prefer opencode-commit (free cloud model) over ollama-commit (local)
    AI_LLM_CMD=$(git config --local hooks.aiLlmCmd 2>/dev/null)
    if [[ -z "$AI_LLM_CMD" ]]; then
-      AI_LLM_CMD=$(command -v or-cli 2>/dev/null || echo "$HOME/.local/bin/or-cli")
+      if [[ -x "$HOME/.Dotfiles/bin/opencode-commit" ]]; then
+         AI_LLM_CMD="$HOME/.Dotfiles/bin/opencode-commit"
+      elif command -v opencode-commit >/dev/null 2>&1; then
+         AI_LLM_CMD=$(command -v opencode-commit)
+      elif [[ -x "$HOME/.Dotfiles/bin/ollama-commit" ]]; then
+         AI_LLM_CMD="$HOME/.Dotfiles/bin/ollama-commit"
+      elif command -v ollama-commit >/dev/null 2>&1; then
+         AI_LLM_CMD=$(command -v ollama-commit)
+      else
+         AI_LLM_CMD="$HOME/.Dotfiles/bin/ollama-commit"
+      fi
    fi
 
-   # AI Model selection (Open Router model name)
+   # AI Model selection - default depends on which backend is active
    AI_LLM_MODEL=$(git config --local hooks.aiModel 2>/dev/null)
    if [[ -z "$AI_LLM_MODEL" ]]; then
-      AI_LLM_MODEL="${OR_MODEL:-deepseek/deepseek-chat}"
+      case "$(basename "$AI_LLM_CMD")" in
+         opencode-commit)
+            AI_LLM_MODEL="${OPENCODE_MODEL:-opencode/deepseek-v4-flash-free}"
+            ;;
+         *)
+            AI_LLM_MODEL="${OLLAMA_MODEL:-qwen3:1.7b}"
+            ;;
+      esac
    fi
 
    # File Paths
@@ -48,10 +66,12 @@ load_hook_config() {
 debug_config() {
    if [[ "$AI_DEBUG" == "true" ]]; then
       log_info "🔧 AI Hook Configuration:"
+      log_info "  Backend: $(basename "$AI_LLM_CMD")"
+      log_info "  Model: $AI_LLM_MODEL"
       log_info "  Max Timeout: ${AI_MAX_TIMEOUT}s"
       log_info "  Inactivity Timeout: ${AI_INACTIVITY_TIMEOUT}s"
       log_info "  Show Progress: $AI_SHOW_PROGRESS"
-         fi
+   fi
 }
 
 # -----------------------------------------------------------------------------

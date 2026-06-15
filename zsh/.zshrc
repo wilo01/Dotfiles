@@ -573,3 +573,4 @@ infisical-run() {
    xdg-open "http://localhost" 2>/dev/null || echo "  Open manually: http://localhost"
 }
 alias infisical-stop='(cd ~/.infisical && docker compose stop backend) && echo "Infisical stopped"'
+alias isync='~/.Dotfiles/scripts/infisical-sync'
