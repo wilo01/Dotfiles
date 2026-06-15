@@ -724,17 +724,17 @@ func runSyncLog(_ *cobra.Command, _ []string) {
 		}
 
 		// Preview DRAFT entries
-		fmt.Println("Checking sprint tickets for DRAFT entries " + ui.Muted.Render("(dry run)") + ":")
-		sprintTickets, err := client.SearchSprintTickets()
+		fmt.Println("Checking assigned tickets for DRAFT entries " + ui.Muted.Render("(dry run)") + ":")
+		sprintTickets, err := fetchAssignedTickets(client)
 		if err != nil {
-			fmt.Println(ui.Warning("Failed to fetch sprint tickets: " + err.Error()))
+			fmt.Println(ui.Warning("Failed to fetch assigned tickets: " + err.Error()))
 		} else {
 			entries, parseErr := batch.ParseCSV(csvPath)
 			if parseErr != nil && !errors.Is(parseErr, os.ErrNotExist) {
 				fmt.Println(ui.Warning("Could not parse CSV for draft preview: " + parseErr.Error()))
 			} else {
 				if errors.Is(parseErr, os.ErrNotExist) {
-					fmt.Println(ui.Muted.Render("  No existing CSV found — showing all sprint tickets as DRAFT"))
+					fmt.Println(ui.Muted.Render("  No existing CSV found — showing all assigned tickets as DRAFT"))
 				}
 				draftPreviewCount := 0
 
@@ -849,11 +849,11 @@ func runSyncLog(_ *cobra.Command, _ []string) {
 			ui.Success.Render(fmt.Sprintf("%d", addedCount)))
 	}
 
-	// Add sprint tickets as DRAFT entries (at TOP of CSV)
-	fmt.Println("\nChecking sprint tickets for DRAFT entries...")
-	sprintTickets, err := client.SearchSprintTickets()
+	// Add assigned tickets as DRAFT entries (at TOP of CSV)
+	fmt.Println("\nChecking assigned tickets for DRAFT entries...")
+	sprintTickets, err := fetchAssignedTickets(client)
 	if err != nil {
-		fmt.Println(ui.Warning("Failed to fetch sprint tickets: " + err.Error()))
+		fmt.Println(ui.Warning("Failed to fetch assigned tickets: " + err.Error()))
 		return
 	}
 
@@ -967,6 +967,18 @@ func getJiraClient() (*internalJira.Client, error) {
 	}
 
 	return internalJira.NewClient(profile.BaseURL, profile.Email, token), nil
+}
+
+// fetchAssignedTickets returns the user's tracked tickets using the configurable
+// preferences.ticket_fetch_jql. Defaults to all assigned, non-Done tickets so
+// non-sprint work (e.g. Escalations board) is included. The literal fallback
+// mirrors the config default so the helper is safe even if config.Load() errors.
+func fetchAssignedTickets(client *internalJira.Client) ([]internalJira.Ticket, error) {
+	jql := "assignee = currentUser() AND status != Done ORDER BY updated DESC"
+	if cfg, err := config.Load(); err == nil && cfg.Preferences.TicketFetchJQL != "" {
+		jql = cfg.Preferences.TicketFetchJQL
+	}
+	return client.Search(jql, 50)
 }
 
 // getUniqueTicketKeys returns unique ticket keys from entries

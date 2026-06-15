@@ -70,6 +70,7 @@ type Preferences struct {
 	StandupWorkflowURL    string         `mapstructure:"standup_workflow_url" yaml:"standup_workflow_url"`
 	DailyTickets          []string       `mapstructure:"daily_tickets" yaml:"daily_tickets"`
 	LogToSubtask          bool           `mapstructure:"log_to_subtask" yaml:"log_to_subtask"`
+	TicketFetchJQL        string         `mapstructure:"ticket_fetch_jql" yaml:"ticket_fetch_jql"`
 	Schedule              ScheduleConfig `mapstructure:"schedule" yaml:"schedule"`
 }
 
@@ -120,6 +121,7 @@ func Default() *Config {
 			StandupWebhookURL:     "",
 			StandupWorkflowURL:    "",
 			LogToSubtask:          false,
+			TicketFetchJQL:        "assignee = currentUser() AND status != Done ORDER BY updated DESC",
 			Schedule: ScheduleConfig{
 				Slots: []ScheduleSlot{
 					{Name: "morning", Time: "08:45"},

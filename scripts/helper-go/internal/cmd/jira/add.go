@@ -112,15 +112,15 @@ func runAdd(cmd *cobra.Command, args []string) {
 	// Fetch sprint tickets (default behavior, skip with --no-sync)
 	if !addNoSync {
 		if !addQuiet {
-			fmt.Println("Fetching tickets from current sprint...")
+			fmt.Println("Fetching assigned tickets...")
 		}
-		sprintTickets, sprintErr := client.SearchSprintTickets()
+		sprintTickets, sprintErr := fetchAssignedTickets(client)
 		if sprintErr != nil {
-			fmt.Println(ui.Error("Failed to fetch sprint tickets: " + sprintErr.Error()))
+			fmt.Println(ui.Error("Failed to fetch assigned tickets: " + sprintErr.Error()))
 			return
 		}
 		if !addQuiet {
-			fmt.Printf("Found %s tickets in sprint\n", ui.Success.Render(fmt.Sprintf("%d", len(sprintTickets))))
+			fmt.Printf("Found %s assigned tickets\n", ui.Success.Render(fmt.Sprintf("%d", len(sprintTickets))))
 			fmt.Println()
 		}
 
@@ -437,20 +437,20 @@ func RunAutoSync(quiet bool) error {
 		fmt.Println(ui.Warning(fmt.Sprintf("Could not parse CSV: %v", parseErr)))
 	}
 
-	// Fetch sprint tickets
+	// Fetch assigned tickets
 	if !quiet {
-		fmt.Println("Fetching tickets from current sprint...")
+		fmt.Println("Fetching assigned tickets...")
 	}
-	sprintTickets, err := client.SearchSprintTickets()
+	sprintTickets, err := fetchAssignedTickets(client)
 	if err != nil {
-		return fmt.Errorf("failed to fetch sprint tickets: %w", err)
+		return fmt.Errorf("failed to fetch assigned tickets: %w", err)
 	}
 
 	if !quiet {
-		fmt.Printf("Found %d tickets in sprint\n", len(sprintTickets))
+		fmt.Printf("Found %d assigned tickets\n", len(sprintTickets))
 	}
 
-	// Build combined ticket key list: sprint + daily
+	// Build combined ticket key list: assigned + daily
 	var ticketKeys []string
 	for _, t := range sprintTickets {
 		ticketKeys = append(ticketKeys, t.Key)

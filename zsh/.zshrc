@@ -476,6 +476,7 @@ export NVM_DIR="$HOME/.nvm"
 export LD_LIBRARY_PATH=/opt/oracle/instantclient_21_14:$LD_LIBRARY_PATH
 export PATH=$LD_LIBRARY_PATH:$PATH
 export PATH=/home/dariuszw/.opencode/bin:$PATH
+alias opencode='infisical run --domain=http://localhost --projectId=fe560626-91f2-427b-a402-8473e61943ad --env=dev --path=/opencode --path=/opencode/mcp -- /home/dariuszw/.opencode/bin/opencode'
 
 # pnpm
 export PNPM_HOME="$HOME/.local/share/pnpm"
