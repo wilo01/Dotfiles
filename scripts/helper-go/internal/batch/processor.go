@@ -422,7 +422,14 @@ func (p *Processor) SyncWorklog(entry Entry) Result {
 		return result
 	}
 
-	// 2. Mock mode - skip JIRA calls for LOCAL testing
+	// 2. Reject entries with no time spent before any JIRA call
+	if strings.TrimSpace(entry.TimeSpent) == "" {
+		result.Success = false
+		result.ErrorMessage = "no time spent specified"
+		return result
+	}
+
+	// 3. Mock mode - skip JIRA calls for LOCAL testing
 	if p.mockMode {
 		result.Success = true
 		result.NewStatus = StatusDone
@@ -430,7 +437,7 @@ func (p *Processor) SyncWorklog(entry Entry) Result {
 		return result
 	}
 
-	// 3. Fetch existing worklogs for this issue/date
+	// 4. Fetch existing worklogs for this issue/date
 	existing, err := p.client.GetWorklogsByDate(targetKey, csvTime)
 	if err != nil {
 		errStr := err.Error()
@@ -445,11 +452,11 @@ func (p *Processor) SyncWorklog(entry Entry) Result {
 		return result
 	}
 
-	// 3. Parse CSV duration for comparison
+	// 5. Parse CSV duration for comparison
 	csvDuration, _ := duration.Parse(entry.TimeSpent)
 	csvHour, csvMin := csvTime.Hour(), csvTime.Minute()
 
-	// 4. Look for a worklog with matching time
+	// 6. Look for a worklog with matching time
 	for _, jiraWL := range existing {
 		jiraHour, jiraMin := jiraWL.Started.Hour(), jiraWL.Started.Minute()
 
@@ -496,7 +503,7 @@ func (p *Processor) SyncWorklog(entry Entry) Result {
 		}
 	}
 
-	// 5. No matching time found - check for conflicts
+	// 7. No matching time found - check for conflicts
 	if len(existing) > 0 {
 		// There are worklogs for this date, but at different times
 		// This is a conflict - CSV says one time, JIRA has another
@@ -507,7 +514,7 @@ func (p *Processor) SyncWorklog(entry Entry) Result {
 		return result
 	}
 
-	// 6. No worklogs for this date - create new
+	// 8. No worklogs for this date - create new
 	worklogEntry := jira.WorklogEntry{
 		TimeSpent: entry.TimeSpent,
 		Started:   csvTime,
