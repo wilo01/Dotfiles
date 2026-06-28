@@ -4,7 +4,19 @@
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
-# If you come from bash you might have to change your $PATH. export PATH=$HOME/bin:/usr/local/bin:$PATH
+
+# -----------------------------------------------------------------------------
+# OS detection - guards below use [[ -n $IS_MAC ]] / [[ -n $IS_LINUX ]]
+# -----------------------------------------------------------------------------
+unset IS_MAC IS_LINUX
+case "$OSTYPE" in
+  darwin*) IS_MAC=1   ;;
+  linux*)  IS_LINUX=1 ;;
+esac
+
+# If you come from bash you might have to change your $PATH.
+# export PATH=$HOME/bin:/usr/local/bin:$PATH
+
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 export LC_ALL=en_US.UTF-8
@@ -17,6 +29,7 @@ export LANG=en_US.UTF-8
 ZSH_THEME="powerlevel10k/powerlevel10k"
 POWERLEVEL9K_MODE="nerdfont-complete"
 plugins=(git zsh-autosuggestions zsh-syntax-highlighting evalcache git-extras debian screen history extract colorize web-search)
+[[ -n $IS_LINUX ]] && plugins+=(tmux docker direnv)
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -89,11 +102,15 @@ source $ZSH/oh-my-zsh.sh
 # export LANG=en_US.UTF-8
 
 # Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
+if [[ -n $SSH_CONNECTION ]]; then
+  if command -v nvim >/dev/null 2>&1; then
+    export EDITOR='nvim'
+  else
+    export EDITOR='vim'
+  fi
+else
+  export EDITOR='nvim'
+fi
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
@@ -110,13 +127,19 @@ source $ZSH/oh-my-zsh.sh
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-# # nvim swithcer
-# Dynamic Nvim switcher based on configuration folders in ~/.config
+# nvim switcher
+#
+# To add new nvim config (for Flatpak Neovim on Linux):
+# 1. Clone/create config: ~/.Dotfiles/nvim/.config/nvim-<name>/
+# 2. Run: nvims-update (Linux only) - automatically syncs configs
+#
+# Manual sync (if needed):
+# - Stow: cd ~/.Dotfiles && stow nvim
+# - Flatpak: ln -s ~/.config/nvim-<name> ~/.var/app/io.neovim.nvim/config/nvim-<name>
+#
+# Dynamic Nvim switcher: generate an alias per ~/.config/nvim-* config folder
 function generate_nvim_aliases() {
     local config_path="$HOME/.config"
-    local nvim_prefix="nvim-"
-
-    # Generate aliases for each found nvim configuration directory
     for config_dir in "$config_path"/nvim-*; do
         if [[ -d $config_dir ]]; then
             local config_name="${config_dir##*/}"
@@ -127,34 +150,72 @@ function generate_nvim_aliases() {
 }
 
 function nvims() {
-    # Generate a list of configurations dynamically
+    if ! command -v fzf &>/dev/null; then
+        echo "Error: fzf is not installed"
+        return 1
+    fi
     local config_path="$HOME/.config"
     local items=()
-    for config_dir in "$config_path"/nvim-*; do
+    local numbered_items=()
+    local configs=()
+
+    for config_dir in "$config_path"/nv*; do
         if [[ -d $config_dir ]]; then
-            items+=("${config_dir##*/}")
+            configs+=("${config_dir##*/}")
         fi
     done
-    # Add the default nvim as an option
-    items+=("nvim")
 
-    local config=$(printf "%s\n" "${items[@]}" | fzf --prompt=" Neovim Config  " --height=50% --layout=reverse --border --exit-0)
-    if [[ -z $config ]]; then
+    IFS=$'\n' configs=($(sort <<<"${configs[*]}"))
+    unset IFS
+
+    local i=1
+    local bind_cmds=""
+    for name in "${configs[@]}"; do
+        items+=("$name")
+        numbered_items+=("$i) $name")
+
+        if [[ $i -le 9 ]]; then
+            if [[ -n "$bind_cmds" ]]; then
+                bind_cmds+=","
+            fi
+
+            local pos=$((i - 1))
+            bind_cmds+="$i:pos($i)+accept"
+        fi
+        ((i++))
+    done
+
+    local selected
+    selected=$(printf "%s\n" "${numbered_items[@]}" | \
+        fzf --prompt=" Neovim Config  " \
+            --height=50% \
+            --layout=reverse \
+            --border \
+            --exit-0 \
+            --bind="$bind_cmds")
+
+    if [[ -z "$selected" ]]; then
         echo "Nothing selected"
         return 0
-    elif [[ $config == "nvim" ]]; then
-        config=""
     fi
-    NVIM_APPNAME=$config nvim $@
+
+    local config=$(echo "$selected" | sed 's/^[0-9]*) //')
+
+    if [[ "$config" == "nvim" ]]; then
+        NVIM_APPNAME="" nvim $@
+    else
+        NVIM_APPNAME="$config" nvim $@
+    fi
 }
 
-# Generate aliases when this script is sourced
+# Generate per-config aliases when this script is sourced
 generate_nvim_aliases
 
-# bindkey -s ^a "nvims\n"
-# end
+bindkey -s ^a "nvims\n"
+bindkey "^[[1;2C" forward-word
+bindkey "^[[1;2D" backward-word
 
-# Attach to a Tmux window by it's name or create new one
+# Attach to a Tmux window by its name or create new one
 function @ {
     local window_name="$1"
     if ! tmux has-session -t "$window_name" 2>/dev/null; then
@@ -169,8 +230,6 @@ function json() {
 }
 
 # cd & ls movements
-# alias LS="echo la -lha -F --show-control-chars --time-style=locale --color=auto ; la -lha -F --show-control-chars --time-style=locale --color=auto"
-# alias ls="echo la -lha -F --show-control-chars --time-style=locale --color=auto ; la -lha -F --show-control-chars --time-style=locale --color=auto"
 # alias cd="~/bin/.local/scripts/tmux-sessionizer"
 # alias CD="~/bin/.local/scripts/tmux-sessionizer"
 alias CD="cd"
@@ -182,20 +241,17 @@ alias cdweb="~/bin/.local/scripts/tmux-sessionizer ~/Dev/branch-opener/branches/
 alias cdwapp="~/bin/.local/scripts/tmux-sessionizer ~/Dev/branch-opener/branches/visitor-web-app"
 alias cdwebapp="~/bin/.local/scripts/tmux-sessionizer ~/Dev/branch-opener/branches/visitor-web-app"
 alias cdb="~/bin/.local/scripts/tmux-sessionizer ~/Dev/branch-opener/app/"
-alias cdy="~/bin/.local/scripts/tmux-sessionizer ~/Dev/branch-opener/branches/safe/test/Cypress"
+alias cdy="~/bin/.local/scripts/tmux-sessionizer ~/tds-branch-opener/branches/tds-suite/test/Cypress"
 # CODE actions
-alias code_ks="echo code ~/Dev/branch-opener/branches/safe/source/ui-kiosk/app/global/Settings.js ; code ~/Dev/branch-opener/branches/safe/source/ui-kiosk/app/global/Settings.js"
-alias code_ka="echo code ~/Dev/branch-opener/branches/safe/source/ui-kiosk/app/Application.js ; code ~/Dev/branch-opener/branches/safe/source/ui-kiosk/app/Application.js"
-alias code_ksc="echo code ~/Dev/branch-opener/branches/safe/source/ui-kiosk/app/view/settings/SettingsController.js ; code ~/Dev/branch-opener/branches/safe/source/ui-kiosk/app/view/settings/SettingsController.js"
+alias code_ks="echo code ~/tds-branch-opener/branches/tds-suite/source/ui-kiosk/app/global/Settings.js ; code ~/tds-branch-opener/branches/tds-suite/source/ui-kiosk/app/global/Settings.js"
+alias code_ka="echo code ~/tds-branch-opener/branches/tds-suite/source/ui-kiosk/app/Application.js ; code ~/tds-branch-opener/branches/tds-suite/source/ui-kiosk/app/Application.js"
+alias code_ksc="echo code ~/tds-branch-opener/branches/tds-suite/source/ui-kiosk/app/view/settings/SettingsController.js ; code ~/tds-branch-opener/branches/tds-suite/source/ui-kiosk/app/view/settings/SettingsController.js"
 alias kiosk_settings="echo open kiosk settings at: ; code_ks ; sleep 1 ; code_ka ; sleep 1 ; code_ksc ;"
-alias liqui_valid="echo cd ~/Dev/branch-opener/branches/safe/source/server/database/ ; echo ./liquibase --defaultsFile=validate.liquibase.properties validate ; cd ~/branch-opener/branches/safe/source/server/database/ ; ./liquibase --defaultsFile=validate.liquibase.properties validate"
+alias liqui_valid="echo cd ~/tds-branch-opener/branches/tds-suite/source/server/database/ ; echo ./liquibase --defaultsFile=validate.liquibase.properties validate ; cd ~/tds-branch-opener/branches/tds-suite/source/server/database/ ; ./liquibase --defaultsFile=validate.liquibase.properties validate"
 alias sqldev="echo ~/SQLDeveloper/opt/sqldeveloper/sqldeveloper.sh ; ~/SQLDeveloper/opt/sqldeveloper/sqldeveloper.sh"
-alias br="echo npm start at: ; echo ~/Dev/branch-opener/app/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
-alias bo="echo npm start at: ; echo ~/Dev/branch-opener/app/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
-alias BR="echo npm start at: ; echo ~/Dev/branch-opener/app/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
-alias BO="echo npm start at: ; echo ~/Dev/branch-opener/app/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; killall node ; xdg-open http://localhost:3333/static/ ; npm start"
 alias cy="echo Cypress open at: ; cdy ; sleep 1 ; echo ./node_modules/cypress/bin/cypress open ; ./node_modules/cypress/bin/cypress open"
 alias cy_all="echo Cypress run all tests at: ; cdy ; sleep 1 ; echo npx cypress run --headless --spec cypress/integration/tdsvisitor/rt/*.js ; npx cypress run --headless --spec cypress/integration/tdsvisitor/rt/*.js"
+
 # Git
 alias git_lens="git log --graph --oneline --decorate ; echo git log --graph --oneline --decorate"
 alias git_graph="git log --graph --oneline --decorate ; echo git log --graph --oneline --decorate"
@@ -213,29 +269,413 @@ alias git_pop="echo git stash pop ; echo Apply last stash ; git stash pop"
 alias git_clear="echo git restore . ; echo Git clear changes ; git restore . "
 alias git_clean="echo git restore . ; echo Git clear changes ; git restore . "
 alias git_branch="echo git branch --show-current ; echo Git show current branch ; echo ; git branch --show-current ; echo ;"
-alias git_undo="echo git commit --amend ; echo Git undo commit ; git commit --amend"
-# Ubuntu Setup
-alias sshkey="echo cat ~/.ssh/id_ed25519.pub ; cat ~/.ssh/id_ed25519.pub"
-# alias open="echo xdg-open; xdg-open"
-alias gnome-terminal='gnome-terminal --full-screen'
-alias zshrc="echo sudo nvim ~/.zshrc ; sudo nvim ~/.zshrc "
-# Other exports
-export MANPAGER='nvim +Man!'
-# export MANWIDTH=999
-export PATH="/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH"
-export PATH="/home/dariusz/bin/Sencha/Cmd:$PATH"
+alias git_amend="echo git commit --amend ; echo Git undo commit ; git commit --amend"
+alias git_undo="echo git reset --soft HEAD~1 ; echo Git undo commit ; git reset --soft HEAD~1"
+alias git_reset="echo git reset --soft HEAD~1 ; echo Git undo commit ; git reset --soft HEAD~1"
+alias git_merge_abort="echo git merge --abort ; echo Git abort merge ; git merge --abort"
+alias git_abort_merge="echo git merge --abort ; echo Git abort merge ; git merge --abort"
+alias git_undo_merge="echo git merge --abort ; echo Git abort merge ; git merge --abort"
+alias git_merge_undo="echo git merge --abort ; echo Git abort merge ; git merge --abort"
 
-# Load Angular CLI autocompletion.
-source <(ng completion script)
-export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
-export PATH="/opt/homebrew/bin:$PATH"
-export PATH="/opt/homebrew/bin:$PATH"
-export PATH="/opt/homebrew/opt/lua@5.1/bin:$PATH"
+# Git wrapper - bisect helper + status after add
+function git() {
+    # Handle git bisect stop/exit
+    if [[ $1 == "bisect" && ($2 == "stop" || $2 == "exit") ]]; then
+        echo "❗ 'git bisect reset' is the proper way to exit bisect mode. Executing it for you now..."
+        command git bisect reset
+        return $?
+    fi
+
+    # Execute git command
+    command git "$@"
+    local ret=$?
+
+    # Show status after add
+    if [[ "$1" == "add" && $ret -eq 0 ]]; then
+        command git status
+    fi
+
+    return $ret
+}
+
+# gh wrapper - pull latest master before pr checkout
+function gh() {
+    command git status
+    if [[ "$1" == "pr" && "$2" == "checkout" ]]; then
+        echo "Syncing master before PR checkout..."
+        command git checkout master && command git pull || {
+            echo "Failed to sync master. Aborting PR checkout."
+            return 1
+        }
+    fi
+    command gh "$@"
+}
+
+# Common setup
+alias sshkey="echo cat ~/.ssh/id_ed25519.pub ; cat ~/.ssh/id_ed25519.pub"
+alias ssh_key="echo cat ~/.ssh/id_ed25519.pub ; cat ~/.ssh/id_ed25519.pub"
+alias zshrc="echo nvim ~/.zshrc ; nvim ~/.zshrc "
+alias tm='task-master'
+alias taskmaster='task-master'
+alias gemini-fast='gemini -m gemini-2.0-flash'
+alias clauded='claude --dangerously-skip-permissions'
+alias claude-sonnet='claude --model claude-sonnet-4-20250514'
+alias claude-opus='claude --model claude-opus-4-1-20250805'
+alias claude-fast='claude-haiku'
+alias claude-haiku='claude --model claude-3-5-haiku-20241022'
+
+# Auto-start fcc-server if not already running
+fcc-claude() {
+    local original_dir="$PWD"
+    local log_dir="$HOME/tmp/fcc-logs"
+
+    # Check if fcc-server is already healthy
+    if ! curl -s -o /dev/null --max-time 2 http://127.0.0.1:8082/health 2>/dev/null; then
+        echo "Starting fcc-server in background..."
+        mkdir -p "$log_dir"
+        cd "$log_dir" || return 1
+        nohup fcc-server > "$log_dir/server-stdout.log" 2>&1 &
+        cd "$original_dir" || return 1
+        # Wait up to 10s for it to become healthy
+        for i in $(seq 1 10); do
+            if curl -s -o /dev/null --max-time 1 http://127.0.0.1:8082/health 2>/dev/null; then
+                echo "fcc-server is ready"
+                break
+            fi
+            sleep 1
+        done
+    fi
+    command fcc-claude "$@"
+}
+filepath() { realpath "${1:-.}"; }
+
+# lazygit and lazydocker aliases
+alias lg="lazygit"
+alias ld="lazydocker"
+
+# hlp (helper) build alias
+alias hlp-build="(cd ~/.Dotfiles/scripts/helper-go && go build -o ~/go/bin/hlp ./cmd/hlp) && echo 'Built: ~/go/bin/hlp'"
+alias hlp-install="cd ~/.Dotfiles/scripts/helper-go && go install ./cmd/hlp && echo 'Installed to: $(go env GOPATH)/bin/hlp'"
+
+# Common exports
+export MANPAGER='nvim +Man!'
+export USE_BUILTIN_RIPGREP=1
+# export MANWIDTH=999
+export PATH="$HOME/bin/Sencha/Cmd:$PATH"
+export PATH="$HOME/.cargo/bin:$PATH"
+export PATH=$PATH:/usr/local/go/bin
+export PATH="$PATH:$HOME/bin/.local/scripts"
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.npm-global/bin:$PATH"
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-export PATH="$HOME/.luaver/bin:$PATH"
-source "$HOME/.luaver/luaver"
+
+# Load Angular CLI autocompletion (only if ng is installed).
+command -v ng >/dev/null 2>&1 && source <(ng completion script)
+
+export GOTOOLCHAIN=auto
+command -v go >/dev/null 2>&1 && export PATH=$PATH:$(go env GOPATH)/bin
+command -v direnv >/dev/null 2>&1 && eval "$(direnv hook zsh)"
+
+export PATH=$PATH:$HOME/.spicetify
 setopt ignore_eof
-export PATH="$HOME/.local/bin:$PATH"
+
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+command -v pyenv >/dev/null 2>&1 && eval "$(pyenv init --path)"
+command -v pyenv >/dev/null 2>&1 && eval "$(pyenv init -)"
+command -v pyenv >/dev/null 2>&1 && eval "$(pyenv virtualenv-init -)"
+
+# pnpm (PNPM_HOME set per-OS below; this dedup-appends it to PATH)
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) [[ -n $PNPM_HOME ]] && export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+
+# -----------------------------------------------------------------------------
+# Git stale lock cleanup - runs before any git command
+# -----------------------------------------------------------------------------
+_git_cleanup_stale_lock() {
+   local cmd="$1"
+   # Only run for git commands
+   [[ "$cmd" != git\ * ]] && return
+
+   # Get git dir (works even in subdirectories)
+   local git_dir
+   git_dir=$(git rev-parse --git-dir 2>/dev/null) || return
+
+   local lock_file="$git_dir/index.lock"
+   [[ ! -f "$lock_file" ]] && return
+
+   # Check if any process holds the lock
+   if lsof "$lock_file" &>/dev/null; then
+      echo "⚠️  Lock file in use by another process: $lock_file" >&2
+      return
+   fi
+
+   # Show lock file info (stat/date flags differ between BSD/macOS and GNU/Linux)
+   local lock_age
+   if [[ -n $IS_MAC ]]; then
+      lock_age=$(stat -f %m "$lock_file" 2>/dev/null)
+   else
+      lock_age=$(stat -c %Y "$lock_file" 2>/dev/null)
+   fi
+   local now=$(date +%s)
+   local age_mins=$(( (now - lock_age) / 60 ))
+   local lock_time
+   if [[ -n $IS_MAC ]]; then
+      lock_time=$(date -r "$lock_age" '+%H:%M:%S')
+   else
+      lock_time=$(date -d @"$lock_age" '+%H:%M:%S')
+   fi
+
+   echo "" >&2
+   echo "🔒 Stale git lock detected: $lock_file" >&2
+   echo "   Age: ${age_mins} minutes (created: $lock_time)" >&2
+   echo "" >&2
+
+   # Ask for confirmation
+   echo -n "Remove stale lock and continue? [Y/n] " >&2
+   read -r response
+   if [[ "$response" =~ ^[Nn] ]]; then
+      echo "Aborted. Lock file kept." >&2
+      return 1
+   fi
+
+   rm -f "$lock_file"
+   echo "🔓 Removed stale lock. Continuing..." >&2
+}
+autoload -Uz add-zsh-hook
+add-zsh-hook preexec _git_cleanup_stale_lock
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+alias ga="git add \"\$@\" && git status"
+
+# =============================================================================
+# macOS only
+# =============================================================================
+if [[ -n $IS_MAC ]]; then
+    # Homebrew (Apple Silicon) + formula paths
+    export PATH="/opt/homebrew/bin:$PATH"
+    export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
+    export PATH="/opt/homebrew/opt/lua@5.1/bin:$PATH"
+
+    # luaver
+    export PATH="$HOME/.luaver/bin:$PATH"
+    [ -s "$HOME/.luaver/luaver" ] && source "$HOME/.luaver/luaver"
+
+    # BSD ls
+    alias ls='ls -G'
+    alias ll='ls -lahG'
+
+    # Java (resolve via macOS java_home if available)
+    export JAVA_HOME="$(/usr/libexec/java_home 2>/dev/null)"
+    [[ -n $JAVA_HOME ]] && export PATH="$JAVA_HOME/bin:$PATH"
+
+    # pnpm home
+    export PNPM_HOME="$HOME/Library/pnpm"
+    case ":$PATH:" in
+      *":$PNPM_HOME:"*) ;;
+      *) export PATH="$PNPM_HOME:$PATH" ;;
+    esac
+fi
+
+# =============================================================================
+# Linux only
+# =============================================================================
+if [[ -n $IS_LINUX ]]; then
+    # GNU ls
+    alias ls="ls --group-directories-first --color=auto"
+    alias ll="ls -lha -F --show-control-chars --time-style=locale --color=auto"
+
+    # nvim Flatpak sync
+    function nvims-update() {
+        local dotfiles_path="$HOME/.Dotfiles"
+        local config_path="$HOME/.config"
+        local flatpak_config_path="$HOME/.var/app/io.neovim.nvim/config"
+        local original_dir="$(pwd)"
+        local synced=0
+        local skipped=0
+        local errors=0
+
+        echo "🔄 Syncing Neovim configurations..."
+        echo ""
+
+        if [[ ! -d "$dotfiles_path" ]]; then
+            echo "❌ Error: $dotfiles_path directory not found"
+            return 1
+        fi
+
+        if ! command -v stow >/dev/null 2>&1; then
+            echo "❌ Error: stow command not found. Please install stow."
+            return 1
+        fi
+
+        echo "📦 Running stow to sync configs to ~/.config/..."
+        cd "$dotfiles_path" || { echo "❌ Failed to cd to $dotfiles_path"; return 1; }
+
+        if stow nvim 2>/dev/null; then
+            echo "✅ Stow completed successfully"
+        else
+            echo "⚠️  Stow completed with warnings (configs may already be linked)"
+        fi
+        echo ""
+
+        mkdir -p "$flatpak_config_path" 2>/dev/null
+        echo "🔗 Creating symlinks for Flatpak Neovim..."
+        echo ""
+
+        for config_dir in "$config_path"/nvim*; do
+            if [[ -d "$config_dir" ]]; then
+                local config_name="${config_dir##*/}"
+                local flatpak_link="$flatpak_config_path/$config_name"
+
+                if [[ -L "$flatpak_link" ]]; then
+                    local current_target="$(readlink "$flatpak_link")"
+                    if [[ "$current_target" == "$config_dir" ]]; then
+                        echo "⏭️  $config_name (already synced)"
+                        ((skipped++))
+                    else
+                        echo "⚠️  $config_name (updating symlink)"
+                        rm "$flatpak_link"
+                        if ln -s "$config_dir" "$flatpak_link" 2>/dev/null; then
+                            echo "✅ $config_name (updated)"
+                            ((synced++))
+                        else
+                            echo "❌ $config_name (failed to update)"
+                            ((errors++))
+                        fi
+                    fi
+                elif [[ -e "$flatpak_link" ]]; then
+                    echo "❌ $config_name (path exists but is not a symlink)"
+                    ((errors++))
+                else
+                    if ln -s "$config_dir" "$flatpak_link" 2>/dev/null; then
+                        echo "✅ $config_name (synced)"
+                        ((synced++))
+                    else
+                        echo "❌ $config_name (failed to create symlink)"
+                        ((errors++))
+                    fi
+                fi
+            fi
+        done
+
+        cd "$original_dir" || true
+
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "📊 Summary: $synced synced, $skipped skipped, $errors errors"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+        if [[ $errors -gt 0 ]]; then
+            return 1
+        fi
+    }
+
+    # Project build / workflow aliases (use GNU tooling + xdg-open)
+    alias br='echo npm start at: ; echo ~/Dev/branch-opener/app/ ; if [[ -n "$(find ~/Dev/branch-opener/app/apex/kiosk/bdb/ -maxdepth 0 -type f -o -type d -printf '%s')" ]]; then echo "Removing content from ~/Dev/branch-opener/app/apex/kiosk/bdb/" ; rm -rf ~/Dev/branch-opener/app/apex/kiosk/bdb/* ; else echo "No content found in ~/Dev/branch-opener/app/apex/kiosk/bdb/, skipping removal." ; fi ; ls ~/Dev/branch-opener/app/apex/kiosk/bdb/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; xdg-open http://localhost:3333/static/ ; npm start'
+    alias bo='echo npm start at: ; echo ~/Dev/branch-opener/app/ ; if [[ -n "$(find ~/Dev/branch-opener/app/apex/kiosk/bdb/ -maxdepth 0 -type f -o -type d -printf '%s')" ]]; then echo "Removing content from ~/Dev/branch-opener/app/apex/kiosk/bdb/" ; rm -rf ~/Dev/branch-opener/app/apex/kiosk/bdb/* ; else echo "No content found in ~/Dev/branch-opener/app/apex/kiosk/bdb/, skipping removal." ; fi ; ls ~/Dev/branch-opener/app/apex/kiosk/bdb/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; xdg-open http://localhost:3333/static/ ; npm start'
+
+    function hx() {
+        local variant="${1:-dev}"
+        local env="${HX_ENV:-dev}"
+
+        if ! curl -sf http://localhost:80/api/status >/dev/null 2>&1; then
+            echo "[hx] Starting Infisical..."
+            docker compose -f ~/.infisical/docker-compose.yml up -d
+            echo -n "[hx] Waiting for Infisical..."
+            local i=0
+            until curl -sf http://localhost:80/api/status >/dev/null 2>&1; do
+                (( i++ )); [[ $i -ge 30 ]] && { echo " timed out." >&2; return 1; }
+                echo -n "."; sleep 1
+            done
+            echo " ready"
+        fi
+
+        pkill -f "pnpm run dev"
+        echo "pnpm start at: ~/tds-hexer/"
+        echo "Pulling latest changes..."
+        echo "Running: pnpm run $variant (env: $env)"
+        cd ~/tds-hexer/
+        command git pull || return 1
+        pnpm install
+        pnpm --dir src/web install
+        infisical run --env="$env" --domain=http://localhost:80 -- pnpm run "$variant"
+        xdg-open https://trunk.acrid.dev:3443/safe
+    }
+    alias ksw='echo kiosk start at: ; echo ~/tds-branch-opener/branches/tds-suite/source/ui-kiosk/ ; cd ~/tds-branch-opener/branches/tds-suite/source/ui-kiosk/ ; sencha app watch ; xdg-open http://localhost:3005/kiosk/'
+    alias vsw='echo visitor-web-app start at: ; echo ~/tds-branch-opener/branches/tds-visitor-web-app/ui ; cd ~/tds-branch-opener/branches/tds-visitor-web-app/ui ; sencha app watch ; xdg-open http://localhost:3005/kiosk/'
+    alias docker_start_trunk="echo cd ~/Dev/branch-opener/branches/safe ; echo sudo docker start -ai trunk ; cd ~/Dev/branch-opener/branches/safe && sudo docker start -ai trunk"
+    alias liquibaseLocalDockerUpdate="echo cd ~/Dev/branch-opener/branches/safe ; echo npm run liquibaseLocalDockerUpdate ; cd ~/Dev/branch-opener/branches/safe && npm run liquibaseLocalDockerUpdate"
+    alias npmliquibaseLocalDockerUpdate="echo cd ~/Dev/branch-opener/branches/safe ; echo npm run liquibaseLocalDockerUpdate ; cd ~/Dev/branch-opener/branches/safe && npm run liquibaseLocalDockerUpdate"
+    alias apex_remove="echo rm -rf ~/Dev/branch-opener/app/apex/backoffice/bdb/* ; rm -rf ~/Dev/branch-opener/app/apex/backoffice/bdb/*"
+    alias remove_apex="echo rm -rf ~/Dev/branch-opener/app/apex/backoffice/bdb/* ; rm -rf ~/Dev/branch-opener/app/apex/backoffice/bdb/*"
+    alias apex_zip="echo zip -r rt.zip ~/tds-branch-opener/branches/tds-suite/source/server/rt/* ; zip -r rt.zip ~/tds-branch-opener/branches/tds-suite/source/server/rt/* && "
+    alias zip_apex="echo zip -r rt.zip ~/tds-branch-opener/branches/tds-suite/source/server/rt/* ; zip -r rt.zip ~/tds-branch-opener/branches/tds-suite/source/server/rt/* && "
+
+    # Linux desktop / system
+    alias open="echo xdg-open; xdg-open"
+    alias gnome-terminal='gnome-terminal --full-screen'
+    alias recat="echo ~/recatest/recatest_run.sh ; ~/recatest/recatest_run.sh"
+    alias clear_cache="echo free -h ; echo ; echo Before clean:; free -h ; echo ; echo After clean: ; echo sync \&\& echo 3 \| sudo tee /proc/sys/vm/drop_caches \&\& free -h ; sync && echo 3 | sudo tee /proc/sys/vm/drop_caches && free -h"
+    alias rm="sudo rm"
+    alias rm_nvim="echo 'Removing Neovim data, cache, state, and lazy-lock.json...' ; command rm -rf ~/.local/share/nvim ~/.local/state/nvim ~/.cache/nvim ~/.config/nvim/lazy-lock.json ~/.var/app/io.neovim.nvim/cache/nvim ~/.var/app/io.neovim.nvim/data/nvim && echo 'Neovim reset complete! Restart nvim to reinstall plugins.'"
+    alias nvim_rm="echo 'Removing Neovim data, cache, state, and lazy-lock.json...' ; command rm -rf ~/.local/share/nvim ~/.local/state/nvim ~/.cache/nvim ~/.config/nvim/lazy-lock.json ~/.var/app/io.neovim.nvim/cache/nvim ~/.var/app/io.neovim.nvim/data/nvim && echo 'Neovim reset complete! Restart nvim to reinstall plugins.'"
+    alias dnf="sudo dnf"
+
+    # Java (Linux)
+    export JAVA_HOME="/usr/lib/jvm/java-21-openjdk"
+    export PATH="$JAVA_HOME/bin:$PATH"
+
+    # linuxbrew
+    [[ -f "$HOME/.linuxbrew/bin/brew" ]] && eval "$("$HOME/.linuxbrew/bin/brew" shellenv)"
+
+    # Oracle instantclient
+    export LD_LIBRARY_PATH=/opt/oracle/instantclient_21_14:$LD_LIBRARY_PATH
+    export PATH=$LD_LIBRARY_PATH:$PATH
+
+    # opencode
+    export PATH=/home/dariuszw/.opencode/bin:$PATH
+    alias opencode='infisical run --domain=http://localhost --projectId=fe560626-91f2-427b-a402-8473e61943ad --env=dev --path=/opencode --path=/opencode/mcp -- /home/dariuszw/.opencode/bin/opencode'
+
+    # pnpm home
+    export PNPM_HOME="$HOME/.local/share/pnpm"
+    case ":$PATH:" in
+      *":$PNPM_HOME:"*) ;;
+      *) export PATH="$PNPM_HOME:$PATH" ;;
+    esac
+
+    export BROWSER="google-chrome --profile-directory=Default"
+
+    # Infisical helpers
+    export INFISICAL_API_URL="http://localhost"
+    infisical-run() {
+       local compose_dir="$HOME/.infisical"
+       local api_url="http://localhost/api/status"
+       local max_wait=30
+
+       echo "▶ Starting Infisical backend..."
+       (cd "$compose_dir" && docker compose up -d backend 2>&1)
+
+       echo "⏳ Waiting for Infisical API to be ready..."
+       local i=0
+       until curl -sf "$api_url" > /dev/null 2>&1; do
+          if (( i >= max_wait )); then
+             echo "✗ Infisical did not start within ${max_wait}s — check: docker logs infisical-backend"
+             return 1
+          fi
+          sleep 1
+          (( i++ ))
+       done
+
+       echo "✓ Infisical is ready (${i}s)"
+       echo "→ Opening http://localhost in browser..."
+       xdg-open "http://localhost" 2>/dev/null || echo "  Open manually: http://localhost"
+    }
+    alias infisical-stop='(cd ~/.infisical && docker compose stop backend) && echo "Infisical stopped"'
+    alias isync='~/.Dotfiles/scripts/infisical-sync'
+fi
