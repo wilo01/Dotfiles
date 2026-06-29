@@ -546,6 +546,19 @@ _git_cleanup_stale_lock() {
 autoload -Uz add-zsh-hook
 add-zsh-hook preexec _git_cleanup_stale_lock
 
+# Nested-tmux passthrough: mute local leader while running ssh, auto-restore after
+_tmux_passthrough_preexec() {
+  [[ -n "$TMUX" ]] || return
+  case "$1" in
+    ssh|ssh\ *|mosh|mosh\ *|autossh|autossh\ *|et|et\ *)
+      tmux set prefix None \; set key-table off \; \
+           set status-style 'bg=#5e5e5e fg=#999999' \; refresh-client -S ;;
+  esac
+}
+_tmux_passthrough_precmd() { [[ -n "$TMUX" ]] && ~/bin/.local/scripts/tmux-ssh-passthrough; }
+add-zsh-hook preexec _tmux_passthrough_preexec
+add-zsh-hook precmd  _tmux_passthrough_precmd
+
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 alias ga="git add \"\$@\" && git status"
 export INFISICAL_API_URL="http://localhost"
