@@ -173,14 +173,17 @@ func ProgressBar(current, total int, width int) string {
 	return fmt.Sprintf("[%s] %d/%d", Primary.Render(bar), current, total)
 }
 
+// stdinReader is shared by all prompt functions. Each prompt creating its
+// own bufio.Reader would let the first one buffer ahead and swallow input
+// meant for later prompts (breaks piped/redirected stdin).
+var stdinReader = bufio.NewReader(os.Stdin)
+
 // ConfirmAction prompts user for Y/N confirmation
 // Returns true if user confirms, false otherwise.
 // Returns false on read error (e.g. stdin closed).
 func ConfirmAction(message string) bool {
-	reader := bufio.NewReader(os.Stdin)
-
 	fmt.Printf("%s [y/N]: ", message)
-	input, err := reader.ReadString('\n')
+	input, err := stdinReader.ReadString('\n')
 	if err != nil {
 		fmt.Println(Warning("Could not read input, defaulting to No"))
 		return false
@@ -193,9 +196,8 @@ func ConfirmAction(message string) bool {
 // PromptChoice displays a message and reads a single line from stdin.
 // Returns the trimmed, lowercased input string and any read error.
 func PromptChoice(message string) (string, error) {
-	reader := bufio.NewReader(os.Stdin)
 	fmt.Print(message)
-	input, err := reader.ReadString('\n')
+	input, err := stdinReader.ReadString('\n')
 	if err != nil {
 		return "", err
 	}
@@ -379,7 +381,7 @@ func statusStyle(status string) lipgloss.Style {
 		return WarningText
 	case "PENDING":
 		return Primary
-	case "FAILED":
+	case "FAILED", "DELETE":
 		return ErrorText
 	default:
 		return SuccessBold

@@ -58,6 +58,7 @@ var (
 	Value       = lipgloss.NewStyle().Foreground(ColorPrimary).Bold(true)
 	Code        = lipgloss.NewStyle().Background(lipgloss.Color("236")).Padding(0, 1)
 	SuccessBold = lipgloss.NewStyle().Bold(true).Foreground(ColorSuccess)
+	WarningBold = lipgloss.NewStyle().Bold(true).Foreground(ColorWarning)
 	ErrorBold   = lipgloss.NewStyle().Bold(true).Foreground(ColorError)
 
 	// Box styles

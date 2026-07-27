@@ -102,8 +102,10 @@ func runAdd(cmd *cobra.Command, args []string) {
 	// Parse existing entries for duplicate checking
 	todayStr := time.Now().Format("02.01.2006")
 	entries, parseErr := batch.ParseCSV(csvPath)
-	if parseErr != nil && !errors.Is(parseErr, os.ErrNotExist) && !addQuiet {
-		fmt.Println(ui.Warning(fmt.Sprintf("Could not parse CSV: %v", parseErr)))
+	if parseErr != nil && !errors.Is(parseErr, os.ErrNotExist) {
+		fmt.Println(ui.Error(fmt.Sprintf("Worklog CSV is unreadable, aborting so it isn't overwritten: %v", parseErr)))
+		fmt.Println(ui.Muted.Render("Fix the CSV (hlp jira edit) and re-run."))
+		return
 	}
 
 	// Build list of tickets to process
@@ -433,8 +435,8 @@ func RunAutoSync(quiet bool) error {
 	// Parse existing entries for duplicate checking
 	todayStr := time.Now().Format("02.01.2006")
 	entries, parseErr := batch.ParseCSV(csvPath)
-	if parseErr != nil && !errors.Is(parseErr, os.ErrNotExist) && !quiet {
-		fmt.Println(ui.Warning(fmt.Sprintf("Could not parse CSV: %v", parseErr)))
+	if parseErr != nil && !errors.Is(parseErr, os.ErrNotExist) {
+		return fmt.Errorf("worklog CSV is unreadable, aborting sync so it isn't overwritten: %w", parseErr)
 	}
 
 	// Fetch assigned tickets

@@ -584,3 +584,112 @@ func TestProcessBatch_DryRunIgnoresSlowMode(t *testing.T) {
 		}
 	}
 }
+
+func TestSetCSVStatusByRows(t *testing.T) {
+	tmpFile, err := os.CreateTemp("", "worklogs-*.csv")
+	if err != nil {
+		t.Fatalf("create temp file: %v", err)
+	}
+	defer os.Remove(tmpFile.Name())
+
+	csvContent := `issue_key,subtask_key,issue_type,description,comment,date,time_spent,subtask_log_ind,status
+VI-2836,,Story,SCIM Change,"note",10.07.2026 15:14,1h 30m,N,DRAFT
+TDT-2,,Story,Agile Daily Meetings,"",10.07.2026 15:14,,N,DRAFT
+SUITE-8602,,Story,Update jspdf.js,"",10.07.2026 15:14,4h,N,DONE
+`
+	if _, err := tmpFile.WriteString(csvContent); err != nil {
+		t.Fatalf("write temp csv: %v", err)
+	}
+	tmpFile.Close()
+
+	// Row 2 = VI-2836 (header is row 1). Promote it to pending (empty status).
+	if err := SetCSVStatusByRows(tmpFile.Name(), []int{2}, ""); err != nil {
+		t.Fatalf("SetCSVStatusByRows: %v", err)
+	}
+
+	entries, err := ParseCSV(tmpFile.Name())
+	if err != nil {
+		t.Fatalf("re-parse csv: %v", err)
+	}
+	if len(entries) != 3 {
+		t.Fatalf("len(entries) = %d, want 3", len(entries))
+	}
+
+	byKey := make(map[string]Entry)
+	for _, e := range entries {
+		byKey[e.IssueKey] = e
+	}
+	if got := byKey["VI-2836"].Status; got != "" {
+		t.Errorf("VI-2836 status = %q, want empty (pending)", got)
+	}
+	if got := byKey["TDT-2"].Status; got != StatusDraft {
+		t.Errorf("TDT-2 status = %q, want DRAFT (untouched)", got)
+	}
+	if got := byKey["SUITE-8602"].Status; got != StatusDone {
+		t.Errorf("SUITE-8602 status = %q, want DONE (untouched)", got)
+	}
+	if got := byKey["VI-2836"].TimeSpent; got != "1h 30m" {
+		t.Errorf("VI-2836 time_spent = %q, want preserved", got)
+	}
+	if got := byKey["VI-2836"].Comment; got != "note" {
+		t.Errorf("VI-2836 comment = %q, want preserved", got)
+	}
+}
+
+func TestSetCSVStatusByRows_noRowsIsNoop(t *testing.T) {
+	if err := SetCSVStatusByRows("/nonexistent/path.csv", nil, ""); err != nil {
+		t.Errorf("empty rowNumbers must be a no-op, got error: %v", err)
+	}
+}
+
+func TestPrependEntryWithStatus_CorruptedCSVIsNotDestroyed(t *testing.T) {
+	tmpFile, err := os.CreateTemp("", "prepend_corrupt_test_*.csv")
+	if err != nil {
+		t.Fatal(err)
+	}
+	tmpPath := tmpFile.Name()
+	tmpFile.Close()
+	defer os.Remove(tmpPath)
+
+	// Unescaped quote inside a quoted field makes the CSV unparseable —
+	// the exact corruption that wiped worklogs.csv on 2026-07-15.
+	corrupted := "issue_key,subtask_key,issue_type,description,comment,date,time_spent,subtask_log_ind,status\n" +
+		"SUITE-9017,,Bug,Prod issue,\"a \"broken\" comment\",14.07.2026 16:32,4h 30m,N,DONE\n" +
+		"TDT-2,,Story,Agile Daily Meetings,,14.07.2026 08:30,30m,N,DONE\n"
+	if err := os.WriteFile(tmpPath, []byte(corrupted), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	err = PrependEntryWithStatus(tmpPath, "VIS-999", "", "Story", "New entry", "", "15.07.2026 10:45", "", "N", StatusDraft)
+	if err == nil {
+		t.Fatal("PrependEntryWithStatus must fail on an unparseable CSV instead of rewriting it")
+	}
+
+	after, readErr := os.ReadFile(tmpPath)
+	if readErr != nil {
+		t.Fatal(readErr)
+	}
+	if string(after) != corrupted {
+		t.Errorf("corrupted CSV was modified; must be left byte-identical\ngot:\n%s", string(after))
+	}
+}
+
+func TestNeedsProcessing_SyncIsNotPending(t *testing.T) {
+	cases := []struct {
+		status string
+		want   bool
+	}{
+		{"", true},
+		{StatusDone, false},
+		{StatusDraft, false},
+		{StatusSync, false},
+		{"sync", false},
+		{StatusUpdated, true}, // reconciled against JIRA on the next run by design
+	}
+	for _, c := range cases {
+		e := Entry{IssueKey: "VIS-1", Status: c.status}
+		if got := e.NeedsProcessing(); got != c.want {
+			t.Errorf("NeedsProcessing() with status %q = %v, want %v", c.status, got, c.want)
+		}
+	}
+}

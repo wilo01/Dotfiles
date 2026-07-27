@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ENV_NAME="${1:?Usage: $0 <env-name>}"
+
+if [[ "$ENV_NAME" == "docker" ]]; then
+    if ! nc -z localhost 6021 2>/dev/null; then
+        echo "oracle-docker: local Oracle XE not running on port 6021" >&2
+        exit 1
+    fi
+fi
+
+DOMAIN="http://localhost"
+PROJECT_ID="fe560626-91f2-427b-a402-8473e61943ad"
+
+if ! curl -sf "$DOMAIN/api/status" >/dev/null 2>&1; then
+    (cd ~/.infisical && docker compose up -d 2>/dev/null)
+    for i in $(seq 1 30); do
+        curl -sf "$DOMAIN/api/status" >/dev/null 2>&1 && break
+        sleep 1
+    done
+fi
+
+exec infisical run \
+    --domain="$DOMAIN" \
+    --projectId="$PROJECT_ID" \
+    --env=dev \
+    --path="/oracle/$ENV_NAME" \
+    --silent \
+    -- docker run --rm -i --network=host \
+        -e ORACLE_CONNECTION_STRING \
+        -e READ_ONLY_MODE \
+        -e TARGET_SCHEMA \
+        dmeppiel/oracle-mcp-server

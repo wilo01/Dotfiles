@@ -14,11 +14,13 @@ import (
 var (
 	notifyDays    int
 	notifyTimeout int
+	notifyAll     bool
 )
 
 func init() {
 	notifyCmd.Flags().IntVar(&notifyDays, "days", 0, "Limit to last N days (0=smart default: Mon=3, else=1)")
 	notifyCmd.Flags().IntVar(&notifyTimeout, "timeout", 30000, "Notification expire timeout in ms (0=persistent)")
+	notifyCmd.Flags().BoolVar(&notifyAll, "all", false, "Include tickets that have no comment in the window")
 }
 
 var notifyCmd = &cobra.Command{
@@ -50,9 +52,7 @@ func runNotify(cmd *cobra.Command, args []string) error {
 
 	// Apply the same pipeline as publish so the count and preview match what
 	// will actually get sent to the sheet.
-	sortEntriesNewestFirst(entries)
-	entries = applyDayWindow(entries, days)
-	entries = filterStandupEntries(entries, getIgnoredTickets())
+	entries = prepareStandupEntries(entries, days, notifyAll)
 
 	count := len(entries)
 	keys := uniqueIssueKeys(entries, 8)

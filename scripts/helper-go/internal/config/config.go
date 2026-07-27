@@ -7,6 +7,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+// DefaultDraftRetentionDays is how long a DRAFT worklog placeholder survives on
+// a day that never filled up, before it is treated as abandoned and pruned.
+const DefaultDraftRetentionDays = 7
+
 // Config represents the application configuration
 type Config struct {
 	Jira        JiraConfig      `mapstructure:"jira" yaml:"jira"`
@@ -14,6 +18,35 @@ type Config struct {
 	Sheets      SheetsConfig    `mapstructure:"google_sheets" yaml:"google_sheets"`
 	Preferences Preferences     `mapstructure:"preferences" yaml:"preferences"`
 	Dev         DevConfig       `mapstructure:"dev" yaml:"dev"`
+	Agent       AgentConfig     `mapstructure:"agent" yaml:"agent"`
+	Token       TokenConfig     `mapstructure:"token" yaml:"token"`
+}
+
+// TokenConfig holds TDS OAuth token endpoint settings
+type TokenConfig struct {
+	OAuthURL string `mapstructure:"oauth_url" yaml:"oauth_url"`
+	Resource string `mapstructure:"resource" yaml:"resource"`
+	ClientID string `mapstructure:"client_id" yaml:"client_id"`
+	// ClientSecret comes from HLP_TDS_CLIENT_SECRET / TDS_CLIENT_SECRET env vars, never the config file
+}
+
+// AgentRepoOverride holds optional per-repo settings for agent worktrees.
+// Source is the main checkout the worktree is created from; Base overrides
+// the branch new work is based on (default: origin/HEAD).
+type AgentRepoOverride struct {
+	Source string `mapstructure:"source" yaml:"source"`
+	Base   string `mapstructure:"base" yaml:"base"`
+}
+
+// AgentConfig holds settings for the parallel ticket-agent workflow (hlp agent)
+type AgentConfig struct {
+	JQL          string                       `mapstructure:"jql" yaml:"jql"`
+	MaxParallel  int                          `mapstructure:"max_parallel" yaml:"max_parallel"`
+	ClaudeCmd    string                       `mapstructure:"claude_cmd" yaml:"claude_cmd"`
+	Prompt       string                       `mapstructure:"prompt" yaml:"prompt"`
+	TriageCmd    string                       `mapstructure:"triage_cmd" yaml:"triage_cmd"`
+	WorktreeRoot string                       `mapstructure:"worktree_root" yaml:"worktree_root"`
+	Repos        map[string]AgentRepoOverride `mapstructure:"repos" yaml:"repos"`
 }
 
 // DevConfig holds developer workflow settings
@@ -71,6 +104,7 @@ type Preferences struct {
 	DailyTickets          []string       `mapstructure:"daily_tickets" yaml:"daily_tickets"`
 	LogToSubtask          bool           `mapstructure:"log_to_subtask" yaml:"log_to_subtask"`
 	TicketFetchJQL        string         `mapstructure:"ticket_fetch_jql" yaml:"ticket_fetch_jql"`
+	DraftRetentionDays    int            `mapstructure:"draft_retention_days" yaml:"draft_retention_days"`
 	Schedule              ScheduleConfig `mapstructure:"schedule" yaml:"schedule"`
 }
 
@@ -109,6 +143,20 @@ func Default() *Config {
 		Dev: DevConfig{
 			CommitsFile: "~/Dev/Private/Commits.md",
 		},
+		Agent: AgentConfig{
+			JQL:          "assignee = currentUser() AND statusCategory != Done",
+			MaxParallel:  5,
+			ClaudeCmd:    "claude --dangerously-skip-permissions",
+			Prompt:       "/agent-run {{KEY}}",
+			TriageCmd:    "claude -p --model haiku",
+			WorktreeRoot: "~/tds-branch-opener/worktrees",
+			Repos:        map[string]AgentRepoOverride{},
+		},
+		Token: TokenConfig{
+			OAuthURL: "https://oauth.tdscloud.io/oauth/v1/authenticate",
+			Resource: "suite-api",
+			ClientID: "tds_integrations",
+		},
 		Preferences: Preferences{
 			AutoDetectContext:     true,
 			DefaultDuration:       "1h",
@@ -122,6 +170,7 @@ func Default() *Config {
 			StandupWorkflowURL:    "",
 			LogToSubtask:          false,
 			TicketFetchJQL:        "assignee = currentUser() AND status != Done ORDER BY updated DESC",
+			DraftRetentionDays:    DefaultDraftRetentionDays,
 			Schedule: ScheduleConfig{
 				Slots: []ScheduleSlot{
 					{Name: "morning", Time: "08:45"},
@@ -160,6 +209,8 @@ func Save(cfg *Config) error {
 	viper.Set("google_sheets", cfg.Sheets)
 	viper.Set("preferences", cfg.Preferences)
 	viper.Set("dev", cfg.Dev)
+	viper.Set("agent", cfg.Agent)
+	viper.Set("token", cfg.Token)
 
 	return viper.WriteConfigAs(configPath)
 }

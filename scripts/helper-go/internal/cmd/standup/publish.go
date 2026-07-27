@@ -22,6 +22,7 @@ var (
 	publishDryRun  bool
 	publishWebhook string
 	publishNoMerge bool
+	publishAll     bool
 )
 
 func init() {
@@ -29,6 +30,7 @@ func init() {
 	publishCmd.Flags().BoolVar(&publishDryRun, "dry-run", false, "Print payload without posting")
 	publishCmd.Flags().StringVar(&publishWebhook, "webhook", "", "Override webhook URL (defaults to HLP_STANDUP_WEBHOOK_URL env)")
 	publishCmd.Flags().BoolVar(&publishNoMerge, "no-merge", false, "Disable merging duplicate JIRA tickets into one group")
+	publishCmd.Flags().BoolVar(&publishAll, "all", false, "Include tickets that have no comment in the window")
 }
 
 var publishCmd = &cobra.Command{
@@ -39,9 +41,13 @@ configured n8n webhook, which appends them to the Daily TDS Google Sheet.
 
 The webhook URL is taken from --webhook flag or HLP_STANDUP_WEBHOOK_URL env var.
 
+Tickets with no comment inside the day window are skipped; a single commented
+row keeps the whole ticket visible. Use --all to include everything.
+
 Examples:
   hlp standup publish                       # Smart-default range (Mon=3 days, else=1)
   hlp standup publish --days 3              # Last 3 days (Friday + weekend + today)
+  hlp standup publish --days 3 --all        # Include tickets without comments
   hlp standup publish --dry-run             # See what would be sent`,
 	RunE: runPublish,
 }
@@ -113,10 +119,7 @@ func doPublish() error {
 		}
 
 		// Count entries to show in header
-		entriesCopy := make([]batch.Entry, len(entries))
-		copy(entriesCopy, entries)
-		sortEntriesNewestFirst(entriesCopy)
-		filtered := filterStandupEntries(applyDayWindow(entriesCopy, days), getIgnoredTickets())
+		filtered := prepareStandupEntries(entries, days, publishAll)
 		count := len(filtered)
 		if count == 0 {
 			return fmt.Errorf("no entries in last %d day(s)", days)
@@ -133,7 +136,7 @@ func doPublish() error {
 		fmt.Println(ui.Muted.Render("───"))
 
 		// Render entries with same colors as hlp standup show
-		if err := renderPlainEntries(entries, days, baseURL, merge); err != nil {
+		if err := renderPlainEntries(entries, days, baseURL, merge, publishAll); err != nil {
 			return err
 		}
 
@@ -171,7 +174,7 @@ func doPublish() error {
 		return nil
 	}
 
-	blob, count, groupCount := buildStandupBlob(entries, days, baseURL, merge, entryFormatOpts{})
+	blob, count, groupCount := buildStandupBlob(entries, days, baseURL, merge, publishAll, entryFormatOpts{})
 	if count == 0 {
 		return fmt.Errorf("no entries in last %d day(s)", days)
 	}
@@ -346,10 +349,8 @@ func colorizeJSONValue(val string) string {
 // Returns the blob, the number of CSV rows included (entry_count), and the
 // number of merged groups emitted (group_count). When merge is false,
 // group_count == entry_count.
-func buildStandupBlob(entries []batch.Entry, limitDays int, baseURL string, merge bool, opts ...entryFormatOpts) (string, int, int) {
-	sortEntriesNewestFirst(entries)
-	entries = applyDayWindow(entries, limitDays)
-	entries = filterStandupEntries(entries, getIgnoredTickets())
+func buildStandupBlob(entries []batch.Entry, limitDays int, baseURL string, merge bool, includeAll bool, opts ...entryFormatOpts) (string, int, int) {
+	entries = prepareStandupEntries(entries, limitDays, includeAll)
 
 	o := entryFormatOpts{}
 	if len(opts) > 0 {

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DOMAIN="http://localhost"
+PROJECT_ID="fe560626-91f2-427b-a402-8473e61943ad"
+
+export HOMEASSISTANT_URL=$(infisical secrets get HOMEASSISTANT_URL \
+    --path=/homeassistant --env=dev --plain \
+    --domain="$DOMAIN" --projectId="$PROJECT_ID" --silent 2>/dev/null)
+
+export HOMEASSISTANT_TOKEN=$(infisical secrets get HOMEASSISTANT_TOKEN \
+    --path=/homeassistant --env=dev --plain \
+    --domain="$DOMAIN" --projectId="$PROJECT_ID" --silent 2>/dev/null)
+
+exec uvx ha-mcp@7.7.0 "$@"

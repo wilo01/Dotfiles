@@ -71,6 +71,9 @@ vim.filetype.add({
    },
    pattern = {
       ['.*%.env[^/]*'] = 'dotenv', -- Matches any file starting with .env
+      -- Outranks snacks bigfile's ".*" pattern (priority 0) so wide CSV
+      -- exports keep ft=csv and the <leader>t toggle stays available
+      ['.*%.csv'] = { 'csv', { priority = 10 } },
    }
 })
 

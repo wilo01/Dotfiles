@@ -300,10 +300,15 @@ alias liqui_valid="echo cd ~/tds-branch-opener/branches/tds-suite/source/server/
 alias sqldev="echo ~/SQLDeveloper/opt/sqldeveloper/sqldeveloper.sh ; ~/SQLDeveloper/opt/sqldeveloper/sqldeveloper.sh"
 alias br='echo npm start at: ; echo ~/Dev/branch-opener/app/ ; if [[ -n "$(find ~/Dev/branch-opener/app/apex/kiosk/bdb/ -maxdepth 0 -type f -o -type d -printf '%s')" ]]; then echo "Removing content from ~/Dev/branch-opener/app/apex/kiosk/bdb/" ; rm -rf ~/Dev/branch-opener/app/apex/kiosk/bdb/* ; else echo "No content found in ~/Dev/branch-opener/app/apex/kiosk/bdb/, skipping removal." ; fi ; ls ~/Dev/branch-opener/app/apex/kiosk/bdb/ ; cd ~/Dev/branch-opener/app/ ; sleep 1 ; xdg-open http://localhost:3333/static/ ; npm start'
 function hx() {
-    local variant="${1:-dev}"
+    local variant
+    case "${1:-dev}" in
+        dev|local|"") variant="dev" ;;
+        cloud|c|dev:cloud) variant="dev:cloud" ;;
+        *) echo "[hx] Unknown variant '$1' (use: hx | hx cloud)" >&2; return 1 ;;
+    esac
     local env="${HX_ENV:-dev}"
 
-    if ! curl -sf http://localhost:80/api/status >/dev/null 2>&1; then
+    if [[ $variant == dev ]] && ! curl -sf http://localhost:80/api/status >/dev/null 2>&1; then
         echo "[hx] Starting Infisical..."
         docker compose -f ~/.infisical/docker-compose.yml up -d
         echo -n "[hx] Waiting for Infisical..."
@@ -316,14 +321,27 @@ function hx() {
     fi
 
     pkill -f "pnpm run dev"
-    echo "pnpm start at: ~/tds-hexer/"
+    echo "pnpm start at: ~/tds-branch-opener/tds-hexer/"
     echo "Pulling latest changes..."
     echo "Running: pnpm run $variant (env: $env)"
-    cd ~/tds-hexer/
-    command git pull || return 1
+    cd ~/tds-branch-opener/tds-hexer/
+    if command git rev-parse --abbrev-ref '@{upstream}' >/dev/null 2>&1; then
+        command git pull || echo "[hx] git pull failed — continuing anyway" >&2
+    else
+        echo "[hx] No upstream for branch $(command git branch --show-current) — skipping pull"
+    fi
     pnpm install
     pnpm --dir src/web install
-    infisical run --env="$env" --domain=http://localhost:80 -- pnpm run "$variant"
+    if [[ $variant == dev ]]; then
+        infisical run --env="$env" --domain=http://localhost:80 -- pnpm run "$variant"
+    else
+        if [[ -f .env ]]; then
+            echo "[hx] .env found in $PWD — dev:cloud must not use it (dotenv in server.js loads it for any unset vars)." >&2
+            echo "[hx] Move it aside first: mv .env .env.local-only" >&2
+            return 1
+        fi
+        pnpm run "$variant"
+    fi
     xdg-open https://trunk.acrid.dev:3443/safe
 }
 alias ksw='echo kiosk start at: ; echo ~/tds-branch-opener/branches/tds-suite/source/ui-kiosk/ ; cd ~/tds-branch-opener/branches/tds-suite/source/ui-kiosk/ ; sencha app watch ; xdg-open http://localhost:3005/kiosk/'
@@ -413,6 +431,8 @@ alias claude-sonnet='claude --model claude-sonnet-4-20250514'
 alias claude-opus='claude --model claude-opus-4-1-20250805'
 alias claude-fast='claude-haiku'
 alias claude-haiku='claude --model claude-3-5-haiku-20241022'
+# Personal Claude Code account (isolated config dir; first run will prompt /login)
+alias claude-daro='CLAUDE_CONFIG_DIR="$HOME/.claude-personal" claude'
 # alias fcc-claude='fcc-claude'
 
 # Auto-start fcc-server if not already running
@@ -477,6 +497,22 @@ export LD_LIBRARY_PATH=/opt/oracle/instantclient_21_14:$LD_LIBRARY_PATH
 export PATH=$LD_LIBRARY_PATH:$PATH
 export PATH=/home/dariuszw/.opencode/bin:$PATH
 alias opencode='infisical run --domain=http://localhost --projectId=fe560626-91f2-427b-a402-8473e61943ad --env=dev --path=/opencode --path=/opencode/mcp -- /home/dariuszw/.opencode/bin/opencode'
+function hlp-token {
+   local json token
+   json=$(infisical run --domain=http://localhost --projectId=fe560626-91f2-427b-a402-8473e61943ad --env=dev --path=/hlp -- hlp token) || return 1
+   token=$(printf '%s' "$json" | jq -r '.accessToken // empty')
+   if [[ -z "$token" ]]; then
+      echo "hlp-token: no accessToken in response: $json" >&2
+      return 1
+   fi
+   export SUITE_API_TOKEN="$token"
+   if [[ -t 1 ]]; then
+      printf '%s\n' "$json" | jq .
+      echo "✓ exported: SUITE_API_TOKEN=$SUITE_API_TOKEN" >&2
+   else
+      printf '%s\n' "$json"
+   fi
+}
 
 # pnpm
 export PNPM_HOME="$HOME/.local/share/pnpm"
@@ -575,3 +611,8 @@ infisical-run() {
 }
 alias infisical-stop='(cd ~/.infisical && docker compose stop backend) && echo "Infisical stopped"'
 alias isync='~/.Dotfiles/scripts/infisical-sync'
+
+# Oracle SQLcl for the Identity Builder oracle-sqlcl MCP server
+export SQLCL_PATH=/home/dariuszw/.local/sqlcl/bin/sql
+
+if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init zsh)"; fi

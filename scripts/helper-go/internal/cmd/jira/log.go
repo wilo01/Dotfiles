@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"sort"
 	"strings"
 	"syscall"
 	"time"
@@ -14,6 +15,7 @@ import (
 	"github.com/dariuszw/hlp/internal/batch"
 	"github.com/dariuszw/hlp/internal/config"
 	internalContext "github.com/dariuszw/hlp/internal/context"
+	"github.com/dariuszw/hlp/internal/gitsync"
 	internalJira "github.com/dariuszw/hlp/internal/jira"
 	"github.com/dariuszw/hlp/internal/ui"
 	"github.com/dariuszw/hlp/internal/worklog"
@@ -37,6 +39,7 @@ var (
 	logSlow     bool   // --slow: Add delays between batch entries
 	logSchedule string // --schedule: Wait for scheduled time slot
 	logOrder    string // --order: Entry order for slow mode (oldest, newest, random)
+	logPrune    bool   // --prune: Delete stale DRAFT placeholder rows
 )
 
 // getDescriptionWidth returns dynamic description column width based on terminal
@@ -78,6 +81,12 @@ Examples:
   hlp jira log --sync                       # Sync worklogs from JIRA (last 7 days)
   hlp jira log --sync --from 2025-12-01     # Sync from specific date
   hlp jira log --sync --dry-run             # Preview sync without changes
+  hlp jira log --prune                      # Delete stale DRAFT placeholder rows
+  hlp jira log --prune --dry-run            # List stale drafts without deleting
+
+Stale drafts are empty DRAFT rows (no time, no comment) on a past day that is
+either already fully logged, or older than preferences.draft_retention_days
+(default 7). The prune runs automatically after --batch and --sync.
 
 Scheduled mode (requires --batch, --slow is automatic):
   hlp jira log --batch --schedule           # Next available slot (loops)
@@ -107,11 +116,17 @@ func init() {
 	logCmd.Flags().StringVar(&logSchedule, "schedule", "", "Wait for scheduled time: 'morning', 'afternoon', or empty for next slot")
 	logCmd.Flag("schedule").NoOptDefVal = "next" // bare --schedule (no value) means "next available slot"
 	logCmd.Flags().StringVar(&logOrder, "order", "oldest", "Entry order for slow mode: oldest (default), newest, random")
+	logCmd.Flags().BoolVar(&logPrune, "prune", false, "Delete stale DRAFT rows (full days, or aged past retention)")
 }
 
 func runLog(cmd *cobra.Command, args []string) {
 	if logSync {
 		runSyncLog(cmd, args)
+		return
+	}
+
+	if logPrune {
+		runPruneLog()
 		return
 	}
 
@@ -217,6 +232,24 @@ func runLog(cmd *cobra.Command, args []string) {
 
 	// Show daily total warning
 	showDailyWarning(client, startTime)
+}
+
+// runPruneLog runs the stale-draft cleanup on its own, outside a batch or sync.
+func runPruneLog() {
+	_, csvPath := loadBatchProfile()
+
+	found, err := pruneStaleDrafts(csvPath, logDryRun)
+	if err != nil {
+		fmt.Println(ui.Error("Prune failed: " + err.Error()))
+		return
+	}
+	if found == 0 {
+		fmt.Println(ui.Info("No stale drafts to remove"))
+		return
+	}
+	if logDryRun {
+		fmt.Println(ui.Warning("Dry run - nothing deleted"))
+	}
 }
 
 // batchRunConfig controls batch execution behavior
@@ -345,9 +378,26 @@ func runBatchLog(_ *cobra.Command, _ []string) {
 		if logSlow {
 			orderInfo = " " + ui.Muted.Render("[order: "+logOrder+"]")
 		}
+		// Stale drafts are shown as DELETE inside the table below rather than
+		// as a separate list, so every entry's fate is visible in one place.
+		stale := batch.FindStaleDrafts(allEntries, getExpectedHoursPerDay(), getDraftRetentionDays(), time.Now())
+		markedForDeletion := staleRowSet(stale)
+
 		fmt.Println("Processing worklogs " + ui.Muted.Render("(dry run)") + orderInfo + ":")
-		showDryRunGroupedByDay(relevantEntries, getExpectedHoursPerDay())
+		showDryRunGroupedByDay(relevantEntries, getExpectedHoursPerDay(), markedForDeletion)
 		fmt.Println()
+
+		// Same per-ticket promotion as the real batch run — fixing statuses
+		// here only rewrites the CSV; posting still needs a non-dry run.
+		if err := promoteDraftsWithTime(csvPath); err != nil {
+			fmt.Println(ui.Warning("Draft promotion failed: " + err.Error()))
+		}
+
+		if len(stale) > 0 {
+			fmt.Println(ui.Muted.Render(fmt.Sprintf(
+				"Run without --dry-run to delete the %d row(s) marked DELETE", len(stale))))
+		}
+
 		fmt.Println(ui.Warning("Dry run - no entries posted"))
 		return
 	}
@@ -363,6 +413,15 @@ func runBatchLog(_ *cobra.Command, _ []string) {
 // runBatchLogCore contains the shared batch processing logic
 func runBatchLogCore(cfg batchRunConfig) {
 	profile, csvPath := loadBatchProfile()
+
+	// Offer to promote DRAFT rows that already carry logged time — they
+	// would otherwise be silently skipped by ParsePendingCSV below.
+	// Skipped under -y/--confirm so automated runs stay non-interactive.
+	if !cfg.skipConfirmation {
+		if err := promoteDraftsWithTime(csvPath); err != nil {
+			fmt.Println(ui.Warning("Draft promotion failed: " + err.Error()))
+		}
+	}
 
 	// BATCH MODE: Use filtered entries (excludes DRAFT and DONE)
 	entries, err := batch.ParsePendingCSV(csvPath)
@@ -498,6 +557,17 @@ func runBatchLogCore(cfg batchRunConfig) {
 		}
 	}
 
+	// Sweep placeholders last, once the run's entries are marked DONE, so a day
+	// this batch just completed is cleaned up in the same pass and the prompt
+	// doesn't interrupt the result summary. Skipped when confirmation is
+	// suppressed, since scheduled runs have no one to answer it.
+	if !cfg.skipConfirmation {
+		fmt.Println()
+		if _, err := pruneStaleDrafts(csvPath, false); err != nil {
+			fmt.Println(ui.Warning("Stale draft prune failed: " + err.Error()))
+		}
+	}
+
 	// Show daily total warnings for batch
 	showBatchDailyWarnings(client, results)
 }
@@ -599,6 +669,10 @@ func runScheduledBatchLog(_ *cobra.Command, _ []string) {
 			forceSlow:        true,     // Always use slow mode in scheduled mode
 			order:            logOrder, // Use configured order
 		})
+
+		// The process-exit sync in cmd.Execute() may be hours away in loop
+		// mode, so push each batch's worklog changes immediately.
+		gitsync.SyncWorklogs(config.GetConfigDir())
 
 		// Exit loop if not looping or targeting specific slot
 		if !shouldLoop {
@@ -877,6 +951,15 @@ func runSyncLog(_ *cobra.Command, _ []string) {
 	}
 	draftDateTime := lastLoggedDate + " 09:00"
 
+	// A day that already holds a full day of work needs no new placeholders.
+	// Without this guard, sync would re-create exactly the drafts the prune
+	// step deletes from that day, and the two would fight every run.
+	if lastDay, dayErr := batch.ParseDate(lastLoggedDate, "09:00"); dayErr == nil &&
+		batch.DayIsCovered(batch.LoggedTimeByDate(entries), lastDay, getExpectedHoursPerDay()) {
+		fmt.Println(ui.Muted.Render(fmt.Sprintf("  %s is fully logged - no new drafts needed", lastLoggedDate)))
+		sprintTickets = nil
+	}
+
 	for _, ticket := range sprintTickets {
 		// Determine issue key, subtask key, type, and description
 		// For sub-tasks: use parent key/type and combined description, store subtask key
@@ -945,6 +1028,11 @@ func runSyncLog(_ *cobra.Command, _ []string) {
 		fmt.Printf(" updated %d, restructured %d subtasks\n", enriched, restructured)
 	} else {
 		fmt.Println(" all entries up to date")
+	}
+
+	fmt.Println()
+	if _, err := pruneStaleDrafts(csvPath, false); err != nil {
+		fmt.Println(ui.Warning("Stale draft prune failed: " + err.Error()))
 	}
 }
 
@@ -1159,17 +1247,112 @@ func getUniqueDatesFromResults(results []batch.Result) []time.Time {
 	return dates
 }
 
-// showDryRunGroupedByDay shows entries grouped by day with totals
-func showDryRunGroupedByDay(entries []batch.Entry, expectedHours time.Duration) {
-	// Group entries by date
-	type dayGroup struct {
-		date    string
-		entries []batch.Entry
-		total   time.Duration
+// printWorklogRow renders one entry as a table row. Rows already staged for
+// deletion report DELETE rather than DRAFT, so the main list is the single place
+// that shows what will happen to every entry.
+func printWorklogRow(num int, e batch.Entry, markedForDeletion bool) {
+	statusDisplay := e.Status
+	if statusDisplay == "" {
+		statusDisplay = "PENDING"
+	}
+	timeDisplay := e.TimeSpent
+	if timeDisplay == "" {
+		timeDisplay = "—"
 	}
 
+	rowStyle := ui.Muted
+	statusCol := ui.Muted.Render(statusDisplay)
+
+	switch {
+	case markedForDeletion:
+		statusDisplay = "DELETE"
+		rowStyle = ui.ErrorText
+		statusCol = ui.FormatStatus(statusDisplay)
+	// A DRAFT with hours filled in is almost certainly a forgotten status flip —
+	// it would be silently skipped, so paint the whole row in warning color.
+	case isDraftWithTime(e):
+		rowStyle = ui.WarningText
+		statusCol = ui.WarningBold.Render(statusDisplay) + " " + ui.WarningText.Render("⚠")
+	case e.Status == batch.StatusDone:
+		rowStyle = ui.Success
+		statusCol = ui.Success.Render(statusDisplay)
+	case e.NeedsProcessing():
+		rowStyle = ui.Primary
+		statusCol = ui.FormatStatus("PENDING")
+	}
+
+	descWidth := getDescriptionWidth()
+	fmt.Printf("  %s %s %s %s %s %s\n",
+		rowStyle.Render(padRight(fmt.Sprintf("%d", num), 2)),
+		rowStyle.Render(padRight(e.DisplayKey(), 20)),
+		rowStyle.Render(padRight(truncateString(e.Description, descWidth), descWidth)),
+		rowStyle.Render(padRight(timeDisplay, 8)),
+		rowStyle.Render(padRight(strings.Split(e.Date, " ")[0], 12)),
+		statusCol)
+}
+
+// staleRowSet indexes stale drafts by CSV row number so the table renderer can
+// mark them without re-running the scan per row.
+func staleRowSet(stale []batch.StaleDraft) map[int]bool {
+	rows := make(map[int]bool, len(stale))
+	for _, s := range stale {
+		rows[s.Entry.RowNumber] = true
+	}
+	return rows
+}
+
+// entriesOnDaysOf returns every entry falling on a day that contains at least
+// one stale draft, so a deletion prompt shows those rows in their day's context.
+func entriesOnDaysOf(entries []batch.Entry, stale []batch.StaleDraft) []batch.Entry {
+	days := make(map[string]bool, len(stale))
+	for _, s := range stale {
+		days[strings.Split(s.Entry.Date, " ")[0]] = true
+	}
+
+	var onDays []batch.Entry
+	for _, e := range entries {
+		if days[strings.Split(e.Date, " ")[0]] {
+			onDays = append(onDays, e)
+		}
+	}
+	return onDays
+}
+
+// pruneReasonSummary collapses the per-row reasons into one line, since within a
+// single run they are nearly always the same handful of values.
+func pruneReasonSummary(stale []batch.StaleDraft) string {
+	var reasons []string
+	seen := make(map[string]bool)
+	for _, s := range stale {
+		if !seen[s.Reason] {
+			seen[s.Reason] = true
+			reasons = append(reasons, s.Reason)
+		}
+	}
+	return strings.Join(reasons, ", ")
+}
+
+// showDryRunGroupedByDay shows the worklog table followed by a summary line.
+func showDryRunGroupedByDay(entries []batch.Entry, expectedHours time.Duration, markedForDeletion map[int]bool) {
+	showWorklogTable(entries, expectedHours, markedForDeletion)
+	showWorklogSummary(entries, markedForDeletion)
+}
+
+// dayGroup collects one calendar day's entries together with its logged total.
+type dayGroup struct {
+	date    string
+	day     time.Time
+	entries []batch.Entry
+	total   time.Duration
+}
+
+// groupEntriesByDay buckets entries per calendar day, oldest day first, so the
+// most recent day prints last — next to the summary and any prompt, where it is
+// visible without scrolling back up. Sorting is on the parsed date rather than
+// the CSV's own order, so the display is stable however the file is arranged.
+func groupEntriesByDay(entries []batch.Entry, newestFirst bool) []*dayGroup {
 	byDate := make(map[string]*dayGroup)
-	dateOrder := []string{}
+	var groups []*dayGroup
 
 	for _, e := range entries {
 		t, err := batch.ParseDate(e.Date, "09:00")
@@ -1178,97 +1361,93 @@ func showDryRunGroupedByDay(entries []batch.Entry, expectedHours time.Duration) 
 		}
 		dateKey := t.Format("02.01.2006")
 
-		dur, _ := duration.Parse(e.TimeSpent)
-
-		if _, exists := byDate[dateKey]; !exists {
-			byDate[dateKey] = &dayGroup{date: dateKey}
-			dateOrder = append(dateOrder, dateKey)
+		group, exists := byDate[dateKey]
+		if !exists {
+			group = &dayGroup{date: dateKey, day: t}
+			byDate[dateKey] = group
+			groups = append(groups, group)
 		}
-		byDate[dateKey].entries = append(byDate[dateKey].entries, e)
-		byDate[dateKey].total += dur
+		group.entries = append(group.entries, e)
+
+		dur, _ := duration.Parse(e.TimeSpent)
+		group.total += dur
 	}
 
-	// Print entries grouped by day
+	sort.SliceStable(groups, func(i, j int) bool {
+		if newestFirst {
+			return groups[j].day.Before(groups[i].day)
+		}
+		return groups[i].day.Before(groups[j].day)
+	})
+	return groups
+}
+
+// showDayTotal prints the per-day divider, total, and variance from expected.
+func showDayTotal(group *dayGroup, expectedHours time.Duration) {
+	fmt.Println("  " + ui.Divider(getContentWidth()-2))
+
+	diff := group.total - expectedHours
+	var diffStr string
+	switch {
+	case diff > 0:
+		diffStr = ui.WarningText.Render(fmt.Sprintf("(+%s over %s)", duration.Format(diff), duration.Format(expectedHours)))
+	case diff < 0:
+		diffStr = ui.ErrorText.Render(fmt.Sprintf("(need %s for %s)", duration.Format(-diff), duration.Format(expectedHours)))
+	default:
+		diffStr = ui.Success.Render("✓")
+	}
+
+	// Align total under the time column: 2 + 2 + 1 + 20 + 1 + descWidth + 1
+	timeColStart := 27 + getDescriptionWidth()
+	fmt.Printf("%s%s %s\n",
+		strings.Repeat(" ", timeColStart),
+		ui.Success.Render(padRight(duration.Format(group.total), 8)),
+		diffStr)
+}
+
+// showWorklogTable shows entries grouped by day with per-day totals. Rows in
+// markedForDeletion (keyed by CSV row number) render as DELETE.
+func showWorklogTable(entries []batch.Entry, expectedHours time.Duration, markedForDeletion map[int]bool) {
+	groups := groupEntriesByDay(entries, previewNewestFirst())
+
 	entryNum := 0
-
-	for _, dateKey := range dateOrder {
-		group := byDate[dateKey]
-
-		// Print entries for this day
+	for i, group := range groups {
 		for _, e := range group.entries {
 			entryNum++
-			// Check if entry is skipped (DONE/SYNC/UPDATED/DRAFT - grayed out) or PENDING (normal)
-			isSkipped := e.Status == batch.StatusDone || e.Status == batch.StatusUpdated || e.Status == batch.StatusSync || e.Status == batch.StatusDraft
-			if isSkipped {
-				// Skipped entries - all grayed out
-				statusDisplay := e.Status
-				if statusDisplay == "" {
-					statusDisplay = "PENDING"
-				}
-				// Show "—" for DRAFT entries without TimeSpent
-				timeDisplay := e.TimeSpent
-				if timeDisplay == "" {
-					timeDisplay = "—"
-				}
-				descWidth := getDescriptionWidth()
-				fmt.Printf("  %s %s %s %s %s %s\n",
-					ui.Muted.Render(padRight(fmt.Sprintf("%d", entryNum), 2)),
-					ui.Muted.Render(padRight(e.DisplayKey(), 20)),
-					ui.Muted.Render(padRight(truncateString(e.Description, descWidth), descWidth)),
-					ui.Muted.Render(padRight(timeDisplay, 8)),
-					ui.Muted.Render(padRight(strings.Split(e.Date, " ")[0], 12)),
-					ui.Muted.Render(statusDisplay))
-			} else {
-				// PENDING entries - normal colors with highlighted status
-				descWidth := getDescriptionWidth()
-				fmt.Printf("  %s %s %s %s %s %s\n",
-					ui.Muted.Render(padRight(fmt.Sprintf("%d", entryNum), 2)),
-					ui.Primary.Render(padRight(e.DisplayKey(), 20)),
-					ui.Muted.Render(padRight(truncateString(e.Description, descWidth), descWidth)),
-					ui.Success.Render(padRight(e.TimeSpent, 8)),
-					ui.Muted.Render(padRight(strings.Split(e.Date, " ")[0], 12)),
-					ui.FormatStatus("PENDING"))
-			}
+			printWorklogRow(entryNum, e, markedForDeletion[e.RowNumber])
 		}
+		showDayTotal(group, expectedHours)
 
-		// Print separator and total for this day
-		fmt.Println("  " + ui.Divider(getContentWidth()-2))
-
-		// Calculate difference from expected
-		diff := group.total - expectedHours
-		var diffStr string
-		if diff > 0 {
-			diffStr = ui.WarningText.Render(fmt.Sprintf("(+%s over %s)", duration.Format(diff), duration.Format(expectedHours)))
-		} else if diff < 0 {
-			diffStr = ui.ErrorText.Render(fmt.Sprintf("(need %s for %s)", duration.Format(-diff), duration.Format(expectedHours)))
-		} else {
-			diffStr = ui.Success.Render("✓")
-		}
-
-		// Align total under time column
-		// Time column at: 2 + 2 + 1 + 20 + 1 + descWidth + 1 = 27 + descWidth
-		totalStr := duration.Format(group.total)
-		descWidth := getDescriptionWidth()
-		timeColStart := 27 + descWidth
-		fmt.Printf("%s%s %s\n",
-			strings.Repeat(" ", timeColStart),
-			ui.Success.Render(padRight(totalStr, 8)),
-			diffStr)
-
-		// Add blank line between days (except for last day)
-		if dateKey != dateOrder[len(dateOrder)-1] {
+		if i < len(groups)-1 {
 			fmt.Println()
 		}
 	}
+}
 
-	// Summary: count pending vs skipped entries
+// previewNewestFirst reports whether the day order should be flipped. Days print
+// oldest-first by default; --slow --order=newest is the one case where the
+// preview must mirror the processing order instead.
+func previewNewestFirst() bool {
+	return logSlow && logOrder == "newest"
+}
+
+// showWorklogSummary counts entries by fate. Rows staged for deletion are
+// counted as DELETE, not as drafts, so the totals match the table above.
+func showWorklogSummary(entries []batch.Entry, markedForDeletion map[int]bool) {
 	pendingCount := 0
 	draftCount := 0
+	draftWithTimeCount := 0
+	deleteCount := 0
 	var pendingTime time.Duration
 
 	for _, e := range entries {
-		if e.IsDraft() {
+		if markedForDeletion[e.RowNumber] {
+			deleteCount++
+		} else if e.IsDraft() {
 			draftCount++
+			if isDraftWithTime(e) {
+				draftWithTimeCount++
+			}
 		} else if e.NeedsProcessing() {
 			pendingCount++
 			dur, _ := duration.Parse(e.TimeSpent)
@@ -1277,100 +1456,192 @@ func showDryRunGroupedByDay(entries []batch.Entry, expectedHours time.Duration) 
 	}
 
 	fmt.Println()
+	summary := fmt.Sprintf("Summary: %s pending (%s will be posted)",
+		ui.Success.Render(fmt.Sprintf("%d", pendingCount)),
+		duration.Format(pendingTime))
 	if draftCount > 0 {
-		fmt.Printf("Summary: %s pending (%s will be posted), %s drafts (skipped)\n",
-			ui.Success.Render(fmt.Sprintf("%d", pendingCount)),
-			duration.Format(pendingTime),
-			ui.Muted.Render(fmt.Sprintf("%d", draftCount)))
-	} else {
-		fmt.Printf("Summary: %s pending (%s will be posted)\n",
-			ui.Success.Render(fmt.Sprintf("%d", pendingCount)),
-			duration.Format(pendingTime))
+		summary += fmt.Sprintf(", %s drafts (skipped)", ui.Muted.Render(fmt.Sprintf("%d", draftCount)))
+	}
+	if deleteCount > 0 {
+		summary += fmt.Sprintf(", %s marked DELETE", ui.ErrorText.Render(fmt.Sprintf("%d", deleteCount)))
+	}
+	fmt.Println(summary)
+
+	if draftWithTimeCount > 0 {
+		fmt.Println(ui.Warning(fmt.Sprintf(
+			"%d draft(s) have time logged but will NOT be posted — promote them below",
+			draftWithTimeCount)))
 	}
 }
 
-// showWorklogPreview displays pending entries before confirmation prompt
-// TO REVIEW: Similar to showDryRunGroupedByDay() - skipped: only 2 occurrences
+// isDraftWithTime reports a DRAFT row that already has hours filled in —
+// the "forgot to flip the status" state the dry-run highlights so the user
+// fixes it before the real batch run silently skips it.
+func isDraftWithTime(e batch.Entry) bool {
+	return e.IsDraft() && strings.TrimSpace(e.TimeSpent) != ""
+}
+
+// promoteDraftsWithTime lists DRAFT entries that already carry logged time
+// and, after confirmation, flips their status to empty (pending) in the CSV
+// so the current batch run posts them. Declining leaves the CSV untouched.
+func promoteDraftsWithTime(csvPath string) error {
+	allEntries, err := batch.ParseCSV(csvPath)
+	if err != nil {
+		return err
+	}
+
+	var drafts []batch.Entry
+	for _, e := range allEntries {
+		if isDraftWithTime(e) {
+			drafts = append(drafts, e)
+		}
+	}
+	if len(drafts) == 0 {
+		return nil
+	}
+
+	fmt.Println(ui.Warning(fmt.Sprintf("%d draft(s) have time logged:", len(drafts))))
+	descWidth := getDescriptionWidth()
+	for _, e := range drafts {
+		fmt.Printf("  %s %s %s %s\n",
+			ui.WarningText.Render(padRight(e.DisplayKey(), 20)),
+			ui.WarningText.Render(padRight(truncateString(e.Description, descWidth), descWidth)),
+			ui.WarningBold.Render(padRight(e.TimeSpent, 8)),
+			ui.WarningText.Render(strings.Split(e.Date, " ")[0]))
+	}
+
+	choice, err := ui.PromptChoice(fmt.Sprintf(
+		"Change to PENDING? [%s]: ",
+		ui.Muted.Render("y=all / i=individually / N=none")))
+	if err != nil {
+		choice = ""
+	}
+
+	rows := selectRows(choice, drafts, func(e batch.Entry) bool {
+		return ui.ConfirmAction(fmt.Sprintf("  Change %s to PENDING (remove DRAFT)?", e.DisplayKey()))
+	})
+	if len(rows) == 0 {
+		fmt.Println(ui.Muted.Render("Drafts left unchanged (still skipped)"))
+		return nil
+	}
+
+	if err := batch.SetCSVStatusByRows(csvPath, rows, ""); err != nil {
+		return err
+	}
+	fmt.Printf("Changed %s of %d draft(s) to PENDING in the CSV %s\n\n",
+		ui.Success.Render(fmt.Sprintf("%d", len(rows))),
+		len(drafts),
+		ui.Muted.Render("(status only — nothing posted yet)"))
+	return nil
+}
+
+// selectRows maps a bulk-prompt answer to the CSV rows to act on:
+// y/yes selects every entry, i/individual asks confirmOne per entry, and
+// anything else (the N default) selects none. Shared by the promote and prune
+// flows so both answer the same keys.
+func selectRows(choice string, entries []batch.Entry, confirmOne func(batch.Entry) bool) []int {
+	var rows []int
+	switch choice {
+	case "y", "yes":
+		for _, e := range entries {
+			rows = append(rows, e.RowNumber)
+		}
+	case "i", "individual":
+		for _, e := range entries {
+			if confirmOne(e) {
+				rows = append(rows, e.RowNumber)
+			}
+		}
+	}
+	return rows
+}
+
+// getDraftRetentionDays returns how many days a DRAFT placeholder survives on a
+// day that never filled up. A missing or nonsensical config value falls back to
+// the default rather than pruning everything or nothing.
+func getDraftRetentionDays() int {
+	cfg, err := config.Load()
+	if err != nil || cfg.Preferences.DraftRetentionDays <= 0 {
+		return config.DefaultDraftRetentionDays
+	}
+	return cfg.Preferences.DraftRetentionDays
+}
+
+// pruneStaleDrafts deletes DRAFT rows that can no longer become worklogs: their
+// day is already fully logged, or it aged past the retention window without
+// filling up. Rows carrying time or a comment are never offered — those hold
+// something the user typed. In report mode nothing is written, since silently
+// deleting rows during a --dry-run would be a surprise.
+// Returns how many stale drafts were found, so callers can distinguish "nothing
+// to do" from "found some" without re-parsing the CSV.
+func pruneStaleDrafts(csvPath string, reportOnly bool) (int, error) {
+	entries, err := batch.ParseCSV(csvPath)
+	if err != nil {
+		return 0, err
+	}
+
+	stale := batch.FindStaleDrafts(entries, getExpectedHoursPerDay(), getDraftRetentionDays(), time.Now())
+	if len(stale) == 0 {
+		return 0, nil
+	}
+
+	marked := staleRowSet(stale)
+
+	verb := "will be removed"
+	if reportOnly {
+		verb = "would be removed"
+	}
+	fmt.Printf("%s stale draft(s) %s %s:\n",
+		ui.ErrorText.Render(fmt.Sprintf("%d", len(stale))),
+		verb,
+		ui.Muted.Render("(shown as DELETE below)"))
+	fmt.Println()
+
+	// Show the affected days in full, not just the doomed rows, so the reason a
+	// day qualified (its DONE entries adding up) is visible next to them.
+	showWorklogTable(entriesOnDaysOf(entries, stale), getExpectedHoursPerDay(), marked)
+	fmt.Println()
+	fmt.Println(ui.Muted.Render("Reason: " + pruneReasonSummary(stale)))
+
+	if reportOnly {
+		fmt.Println(ui.Muted.Render("(run without --dry-run to delete them)"))
+		fmt.Println()
+		return len(stale), nil
+	}
+
+	choice, err := ui.PromptChoice(fmt.Sprintf(
+		"Delete? [%s]: ",
+		ui.Muted.Render("y=all / i=individually / N=none")))
+	if err != nil {
+		choice = ""
+	}
+
+	candidates := make([]batch.Entry, len(stale))
+	for i, s := range stale {
+		candidates[i] = s.Entry
+	}
+	rows := selectRows(choice, candidates, func(e batch.Entry) bool {
+		return ui.ConfirmAction(fmt.Sprintf("  Delete %s (%s)?", e.DisplayKey(), strings.Split(e.Date, " ")[0]))
+	})
+	if len(rows) == 0 {
+		fmt.Println(ui.Muted.Render("Drafts left unchanged"))
+		return len(stale), nil
+	}
+
+	if err := batch.RemoveEntriesByRows(csvPath, rows); err != nil {
+		return len(stale), err
+	}
+	fmt.Printf("Removed %s of %d stale draft(s) %s\n\n",
+		ui.Success.Render(fmt.Sprintf("%d", len(rows))),
+		len(stale),
+		ui.Muted.Render("(a backup was written to worklogs.csv.autobak)"))
+	return len(stale), nil
+}
+
+// showWorklogPreview displays pending entries before the confirmation prompt.
 func showWorklogPreview(entries []batch.Entry, expectedHours time.Duration) {
 	if len(entries) == 0 {
 		return
 	}
-
-	// Group entries by date
-	type dayGroup struct {
-		date    string
-		entries []batch.Entry
-		total   time.Duration
-	}
-
-	byDate := make(map[string]*dayGroup)
-	dateOrder := []string{}
-
-	for _, e := range entries {
-		t, err := batch.ParseDate(e.Date, "09:00")
-		if err != nil {
-			continue
-		}
-		dateKey := t.Format("02.01.2006")
-
-		dur, _ := duration.Parse(e.TimeSpent)
-
-		if _, exists := byDate[dateKey]; !exists {
-			byDate[dateKey] = &dayGroup{date: dateKey}
-			dateOrder = append(dateOrder, dateKey)
-		}
-		byDate[dateKey].entries = append(byDate[dateKey].entries, e)
-		byDate[dateKey].total += dur
-	}
-
-	// Print entries grouped by day
-	entryNum := 0
-
-	for _, dateKey := range dateOrder {
-		group := byDate[dateKey]
-
-		// Print entries for this day
-		for _, e := range group.entries {
-			entryNum++
-
-			// Format date - show date only (strip time)
-			dateDisplay := strings.Split(e.Date, " ")[0]
-			descWidth := getDescriptionWidth()
-
-			fmt.Printf("  %s %s %s %s %s %s\n",
-				ui.Muted.Render(padRight(fmt.Sprintf("%d", entryNum), 2)),
-				ui.Primary.Render(padRight(e.DisplayKey(), 20)),
-				ui.Muted.Render(padRight(truncateString(e.Description, descWidth), descWidth)),
-				ui.Success.Render(padRight(e.TimeSpent, 8)),
-				ui.Muted.Render(padRight(dateDisplay, 12)),
-				ui.FormatStatus("PENDING"))
-		}
-
-		// Print separator and total for this day
-		fmt.Println("  " + ui.Divider(getContentWidth()-2))
-
-		// Calculate difference from expected
-		diff := group.total - expectedHours
-		var diffStr string
-		if diff > 0 {
-			diffStr = ui.WarningText.Render(fmt.Sprintf("(+%s over %s)", duration.Format(diff), duration.Format(expectedHours)))
-		} else if diff < 0 {
-			diffStr = ui.ErrorText.Render(fmt.Sprintf("(need %s for %s)", duration.Format(-diff), duration.Format(expectedHours)))
-		} else {
-			diffStr = ui.Success.Render("✓")
-		}
-
-		totalStr := duration.Format(group.total)
-		descWidth := getDescriptionWidth()
-		timeColStart := 27 + descWidth
-		fmt.Printf("%s%s %s\n",
-			strings.Repeat(" ", timeColStart),
-			ui.Success.Render(padRight(totalStr, 8)),
-			diffStr)
-
-		// Add blank line between days (except for last day)
-		if dateKey != dateOrder[len(dateOrder)-1] {
-			fmt.Println()
-		}
-	}
+	showWorklogTable(entries, expectedHours, nil)
 }

@@ -10,6 +10,7 @@ else
         ~/tds-hexer/
         ~/tds-branch-opener/branches/tds-suite/
         ~/tds-branch-opener/branches
+        ~/tds-branch-opener/branches/tasks/
         ~/tds-branch-opener/worktrees/
         ~/tds-branch-opener/worktrees/tds-access-integrations
         ~/tds-branch-opener/worktrees/tds-acre-qrcode-generator
@@ -45,7 +46,7 @@ else
         ~/Dev/DarO/note-app/
         ~/Dev/Private
     )
-    selected=$(find "${search_paths[@]}" -mindepth 0 -maxdepth 2 -type d | fzf)
+    selected=$(find "${search_paths[@]}" -mindepth 0 -maxdepth 2 -type d | fzf -i)
 fi
 
 if [[ -z $selected ]]; then

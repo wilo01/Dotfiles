@@ -79,9 +79,12 @@ func (e Entry) DisplayKey() string {
 	return e.IssueKey
 }
 
-// NeedsProcessing returns true if entry needs processing
+// NeedsProcessing returns true if entry needs processing.
+// SYNC entries already match what's in JIRA, so posting them again would
+// duplicate worklogs; UPDATED stays processable — the batch run reconciles
+// it against JIRA instead of blindly re-posting.
 func (e Entry) NeedsProcessing() bool {
-	return !e.IsDone() && !e.IsDraft()
+	return !e.IsDone() && !e.IsDraft() && !e.IsSync()
 }
 
 // GetLoggingTarget returns the key where worklog should be posted
@@ -215,6 +218,16 @@ func isHeaderRecord(record []string) bool {
 	}
 	first := strings.ToLower(record[0])
 	return first == "issue_key" || first == "issue" || first == "ticket"
+}
+
+// createForRewrite snapshots the current file to <path>.autobak (best-effort,
+// single rotating copy) before truncating it, so a buggy full-file rewrite can
+// never destroy the only copy of the worklog history.
+func createForRewrite(path string) (*os.File, error) {
+	if data, err := os.ReadFile(path); err == nil && len(data) > 0 {
+		_ = os.WriteFile(path+".autobak", data, 0644)
+	}
+	return os.Create(path)
 }
 
 // writeWorklogRecords writes CSV records to w, always quoting the comment
@@ -710,7 +723,53 @@ func UpdateCSVStatus(path string, results []Result) error {
 	}
 
 	// Write back
-	f, err = os.Create(path)
+	f, err = createForRewrite(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	return writeWorklogRecords(f, records)
+}
+
+// SetCSVStatusByRows overwrites the status column for the given 1-based CSV
+// row numbers (header = row 1, matching Entry.RowNumber). Unlike
+// UpdateCSVStatus it allows setting an empty status, which marks an entry
+// as pending.
+func SetCSVStatusByRows(path string, rowNumbers []int, newStatus string) error {
+	if len(rowNumbers) == 0 {
+		return nil
+	}
+	target := make(map[int]bool, len(rowNumbers))
+	for _, n := range rowNumbers {
+		target[n] = true
+	}
+
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+
+	reader := csv.NewReader(f)
+	reader.FieldsPerRecord = -1
+	records, err := reader.ReadAll()
+	f.Close()
+	if err != nil {
+		return err
+	}
+
+	for i, record := range records {
+		if !target[i+1] {
+			continue
+		}
+		for len(record) < 9 {
+			record = append(record, "")
+		}
+		record[ColStatus] = newStatus
+		records[i] = record
+	}
+
+	f, err = createForRewrite(path)
 	if err != nil {
 		return err
 	}
@@ -764,7 +823,7 @@ func UpdateCSVDescriptions(path string, descriptions map[string]string) (int, er
 	}
 
 	// Write back
-	f, err = os.Create(path)
+	f, err = createForRewrite(path)
 	if err != nil {
 		return 0, err
 	}
@@ -833,13 +892,18 @@ func PrependEntryWithStatus(path, issueKey, subtaskKey, issueType, description, 
 		return err
 	}
 
-	// Read existing file
+	// Read existing file. A read/parse failure must abort — rewriting the
+	// file based on a failed read silently destroys its current content.
 	var records [][]string
 	if f, err := os.Open(path); err == nil {
 		reader := csv.NewReader(f)
 		reader.FieldsPerRecord = -1
-		records, _ = reader.ReadAll()
+		var readErr error
+		records, readErr = reader.ReadAll()
 		f.Close()
+		if readErr != nil {
+			return fmt.Errorf("prepend entry: existing CSV is unreadable, refusing to rewrite it: %w", readErr)
+		}
 	}
 
 	// Default: log to parent. Callers opt into subtask logging via explicit "Y".
@@ -880,7 +944,7 @@ func PrependEntryWithStatus(path, issueKey, subtaskKey, issueType, description, 
 	}
 
 	// Write back
-	f, err := os.Create(path)
+	f, err := createForRewrite(path)
 	if err != nil {
 		return err
 	}
@@ -911,7 +975,7 @@ func RemoveEntryByRow(path string, rowNumber int) error {
 
 	records = append(records[:idx], records[idx+1:]...)
 
-	f, err = os.Create(path)
+	f, err = createForRewrite(path)
 	if err != nil {
 		return fmt.Errorf("remove entry: write CSV: %w", err)
 	}
@@ -945,7 +1009,7 @@ func UpdateEntryDescription(path string, rowNumber int, newDescription string) e
 	}
 
 	// Write back
-	f, err = os.Create(path)
+	f, err = createForRewrite(path)
 	if err != nil {
 		return err
 	}
@@ -1044,7 +1108,7 @@ func SortCSVByDate(path string) error {
 	sortRecordsByDate(records)
 
 	// Write back to file
-	f, err = os.Create(path)
+	f, err = createForRewrite(path)
 	if err != nil {
 		return err
 	}
@@ -1250,7 +1314,7 @@ func updateCSVWithRestructure(path string, details map[string]jira.IssueDetails,
 	}
 
 	// Write back
-	f, err = os.Create(path)
+	f, err = createForRewrite(path)
 	if err != nil {
 		return 0, 0, err
 	}

@@ -183,6 +183,63 @@ func (c *Client) GetTicket(key string) (*Ticket, error) {
 	return ticket, nil
 }
 
+// GetTicketDescription fetches an issue's description as plain text.
+// API v2 returns wiki-markup strings; ADF objects (v3-style) are flattened
+// to their text nodes, mirroring the worklog comment handling.
+func (c *Client) GetTicketDescription(key string) (string, error) {
+	var result struct {
+		Fields struct {
+			Description json.RawMessage `json:"description"`
+		} `json:"fields"`
+	}
+
+	resp, err := c.httpClient.R().
+		SetQueryParam("fields", "description").
+		SetResult(&result).
+		Get("/rest/api/2/issue/" + key)
+
+	if err != nil {
+		return "", fmt.Errorf("failed to fetch description: %w", err)
+	}
+	if resp.StatusCode() != http.StatusOK {
+		return "", fmt.Errorf("failed to fetch description: %s", resp.Status())
+	}
+
+	raw := result.Fields.Description
+	if len(raw) == 0 || string(raw) == "null" {
+		return "", nil
+	}
+
+	var text string
+	if err := json.Unmarshal(raw, &text); err == nil {
+		return text, nil
+	}
+
+	// ADF fallback: collect text nodes from paragraphs
+	var adf struct {
+		Content []struct {
+			Content []struct {
+				Text string `json:"text"`
+			} `json:"content"`
+		} `json:"content"`
+	}
+	if err := json.Unmarshal(raw, &adf); err == nil {
+		var parts []string
+		for _, p := range adf.Content {
+			var line strings.Builder
+			for _, t := range p.Content {
+				line.WriteString(t.Text)
+			}
+			if line.Len() > 0 {
+				parts = append(parts, line.String())
+			}
+		}
+		return strings.Join(parts, "\n"), nil
+	}
+
+	return "", nil
+}
+
 // LogWork logs work to a ticket
 func (c *Client) LogWork(key string, entry WorklogEntry) error {
 	body := map[string]interface{}{

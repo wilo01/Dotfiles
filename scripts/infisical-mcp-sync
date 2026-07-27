@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DOMAIN="http://localhost"
+PROJECT_ID="fe560626-91f2-427b-a402-8473e61943ad"
+MCP_ENV_DIR="$HOME/.claude/mcp-servers"
+ORACLE_ENVS=(trunk docker 121av 130av 131av 132av 81a chubbuat dss sap)
+QUIET="${1:-}"
+
+log() { [[ "$QUIET" != "--quiet" ]] && echo "$@" || true; }
+
+if ! curl -sf "$DOMAIN/api/status" >/dev/null 2>&1; then
+    log "[mcp-sync] Starting Infisical..."
+    (cd ~/.infisical && docker compose up -d 2>/dev/null)
+    for i in $(seq 1 30); do
+        curl -sf "$DOMAIN/api/status" >/dev/null 2>&1 && break
+        sleep 1
+    done
+    if ! curl -sf "$DOMAIN/api/status" >/dev/null 2>&1; then
+        echo "[mcp-sync] ERROR: Infisical failed to start" >&2
+        exit 1
+    fi
+fi
+
+mkdir -p "$MCP_ENV_DIR"
+
+FAILED=0
+
+for env_name in "${ORACLE_ENVS[@]}"; do
+    OUTPUT="$MCP_ENV_DIR/oracle-${env_name}.env"
+    if infisical export \
+        --domain="$DOMAIN" \
+        --projectId="$PROJECT_ID" \
+        --env=dev \
+        --path="/oracle/$env_name" \
+        --format=dotenv \
+        --silent 2>/dev/null > "$OUTPUT.tmp"; then
+        sed -i "s/^\([^=]*\)='\(.*\)'$/\1=\2/" "$OUTPUT.tmp"
+        mv "$OUTPUT.tmp" "$OUTPUT"
+        chmod 600 "$OUTPUT"
+    else
+        rm -f "$OUTPUT.tmp"
+        log "[mcp-sync] WARN: Failed to export oracle-$env_name"
+        FAILED=$((FAILED + 1))
+    fi
+done
+
+JIRA_OUTPUT="$MCP_ENV_DIR/jira-active.env"
+if infisical export \
+    --domain="$DOMAIN" \
+    --projectId="$PROJECT_ID" \
+    --env=dev \
+    --path="/jira" \
+    --format=dotenv \
+    --silent 2>/dev/null > "$JIRA_OUTPUT.tmp"; then
+    sed -i "s/^\([^=]*\)='\(.*\)'$/\1=\2/" "$JIRA_OUTPUT.tmp"
+    mv "$JIRA_OUTPUT.tmp" "$JIRA_OUTPUT"
+    chmod 600 "$JIRA_OUTPUT"
+else
+    rm -f "$JIRA_OUTPUT.tmp"
+    log "[mcp-sync] WARN: Failed to export jira"
+    FAILED=$((FAILED + 1))
+fi
+
+TOTAL=$((${#ORACLE_ENVS[@]} + 1))
+log "[mcp-sync] $(date +%H:%M:%S) — Synced $((TOTAL - FAILED))/$TOTAL env files"
+
+[ "$FAILED" -gt 0 ] && exit 1
+exit 0

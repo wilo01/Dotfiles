@@ -124,6 +124,46 @@ func filterStandupEntries(entries []batch.Entry, ignored map[string]bool) []batc
 	return out
 }
 
+// filterTicketsWithComments drops all rows of any IssueKey that has no
+// entry with a non-empty Comment in the given slice. Keyed on IssueKey only
+// (SubtaskKey ignored) to match mergeEntriesByIssueKey's grouping, so a
+// comment on a subtask row keeps the whole merged parent group visible.
+// Must run AFTER applyDayWindow so "has a comment" means "has a comment
+// inside the window".
+func filterTicketsWithComments(entries []batch.Entry) []batch.Entry {
+	commented := make(map[string]bool, len(entries))
+	for _, e := range entries {
+		if strings.TrimSpace(e.Comment) != "" {
+			commented[e.IssueKey] = true
+		}
+	}
+	out := make([]batch.Entry, 0, len(entries))
+	for _, e := range entries {
+		if commented[e.IssueKey] {
+			out = append(out, e)
+		}
+	}
+	return out
+}
+
+// prepareStandupEntries runs the shared standup pipeline: sort newest-first,
+// apply the day window, drop ignored tickets (unless promoted by note), and —
+// unless includeAll — drop tickets with no comment inside the window.
+// Shared by show, publish (blob + dry-run), and notify so their counts and
+// previews always agree. Copies before sorting so the caller's slice is
+// never mutated.
+func prepareStandupEntries(entries []batch.Entry, limitDays int, includeAll bool) []batch.Entry {
+	sorted := make([]batch.Entry, len(entries))
+	copy(sorted, entries)
+	sortEntriesNewestFirst(sorted)
+	out := applyDayWindow(sorted, limitDays)
+	out = filterStandupEntries(out, getIgnoredTickets())
+	if !includeAll {
+		out = filterTicketsWithComments(out)
+	}
+	return out
+}
+
 // applyDayWindow returns entries whose date is within the last `limitDays` days.
 // limitDays <= 0 disables the window (returns input unchanged).
 func applyDayWindow(entries []batch.Entry, limitDays int) []batch.Entry {
@@ -159,10 +199,8 @@ func sortEntriesNewestFirst(entries []batch.Entry) {
 	})
 }
 
-func renderPlainEntries(entries []batch.Entry, limitDays int, baseURL string, merge bool) error {
-	sortEntriesNewestFirst(entries)
-	entries = applyDayWindow(entries, limitDays)
-	entries = filterStandupEntries(entries, getIgnoredTickets())
+func renderPlainEntries(entries []batch.Entry, limitDays int, baseURL string, merge bool, includeAll bool) error {
+	entries = prepareStandupEntries(entries, limitDays, includeAll)
 
 	if len(entries) == 0 {
 		fmt.Println(ui.Warning("No entries found"))

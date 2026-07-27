@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DOMAIN="http://localhost"
+PROJECT_ID="fe560626-91f2-427b-a402-8473e61943ad"
+OPENCODE_DATA="$HOME/.local/share/opencode"
+OPENCODE_CONFIG="$HOME/.config/opencode/config.json"
+QUIET="${1:-}"
+
+log() { [[ "$QUIET" != "--quiet" ]] && echo "$@" || true; }
+
+if ! curl -sf "$DOMAIN/api/status" >/dev/null 2>&1; then
+    log "[opencode-sync] Starting Infisical..."
+    (cd ~/.infisical && docker compose up -d 2>/dev/null)
+    for i in $(seq 1 30); do
+        curl -sf "$DOMAIN/api/status" >/dev/null 2>&1 && break
+        sleep 1
+    done
+    if ! curl -sf "$DOMAIN/api/status" >/dev/null 2>&1; then
+        echo "[opencode-sync] ERROR: Infisical failed to start" >&2
+        exit 1
+    fi
+fi
+
+INFISICAL_ARGS=(--domain="$DOMAIN" --projectId="$PROJECT_ID" --env=dev --silent)
+FAILED=0
+
+get_secret() {
+    local path="$1" name="$2"
+    infisical secrets get "$name" --path="$path" "${INFISICAL_ARGS[@]}" --plain 2>/dev/null
+}
+
+# --- auth.json (OpenRouter API key) ---
+OPENROUTER_KEY=$(get_secret "/opencode" "OPENROUTER_API_KEY") || true
+if [[ -n "$OPENROUTER_KEY" ]]; then
+    jq -n --arg key "$OPENROUTER_KEY" \
+        '{"openrouter":{"type":"api","key":$key}}' \
+        > "$OPENCODE_DATA/auth.json.tmp"
+    mv "$OPENCODE_DATA/auth.json.tmp" "$OPENCODE_DATA/auth.json"
+    chmod 600 "$OPENCODE_DATA/auth.json"
+    log "[opencode-sync] ✓ auth.json"
+else
+    log "[opencode-sync] WARN: Failed to export auth.json"
+    FAILED=$((FAILED + 1))
+fi
+
+# --- mcp-auth.json (Figma OAuth tokens) ---
+FIGMA_SERVER_URL=$(get_secret "/opencode/figma" "FIGMA_SERVER_URL") || true
+FIGMA_CLIENT_ID=$(get_secret "/opencode/figma" "FIGMA_CLIENT_ID") || true
+FIGMA_CLIENT_SECRET=$(get_secret "/opencode/figma" "FIGMA_CLIENT_SECRET") || true
+FIGMA_CLIENT_ID_ISSUED_AT=$(get_secret "/opencode/figma" "FIGMA_CLIENT_ID_ISSUED_AT") || true
+FIGMA_CLIENT_SECRET_EXPIRES_AT=$(get_secret "/opencode/figma" "FIGMA_CLIENT_SECRET_EXPIRES_AT") || true
+FIGMA_ACCESS_TOKEN=$(get_secret "/opencode/figma" "FIGMA_ACCESS_TOKEN") || true
+FIGMA_REFRESH_TOKEN=$(get_secret "/opencode/figma" "FIGMA_REFRESH_TOKEN") || true
+FIGMA_EXPIRES_AT=$(get_secret "/opencode/figma" "FIGMA_EXPIRES_AT") || true
+FIGMA_CODE_VERIFIER=$(get_secret "/opencode/figma" "FIGMA_CODE_VERIFIER") || true
+
+if [[ -n "$FIGMA_ACCESS_TOKEN" ]]; then
+    jq -n \
+        --arg serverUrl "$FIGMA_SERVER_URL" \
+        --arg clientId "$FIGMA_CLIENT_ID" \
+        --arg clientSecret "$FIGMA_CLIENT_SECRET" \
+        --argjson clientIdIssuedAt "${FIGMA_CLIENT_ID_ISSUED_AT:-0}" \
+        --argjson clientSecretExpiresAt "${FIGMA_CLIENT_SECRET_EXPIRES_AT:-0}" \
+        --arg accessToken "$FIGMA_ACCESS_TOKEN" \
+        --arg refreshToken "$FIGMA_REFRESH_TOKEN" \
+        --argjson expiresAt "${FIGMA_EXPIRES_AT:-0}" \
+        --arg codeVerifier "$FIGMA_CODE_VERIFIER" \
+        '{
+            "figma": {
+                "serverUrl": $serverUrl,
+                "clientInfo": {
+                    "clientId": $clientId,
+                    "clientSecret": $clientSecret,
+                    "clientIdIssuedAt": $clientIdIssuedAt,
+                    "clientSecretExpiresAt": $clientSecretExpiresAt
+                },
+                "tokens": {
+                    "accessToken": $accessToken,
+                    "refreshToken": $refreshToken,
+                    "expiresAt": $expiresAt
+                }
+            },
+            "Figma": {
+                "codeVerifier": $codeVerifier
+            }
+        }' > "$OPENCODE_DATA/mcp-auth.json.tmp"
+    mv "$OPENCODE_DATA/mcp-auth.json.tmp" "$OPENCODE_DATA/mcp-auth.json"
+    chmod 600 "$OPENCODE_DATA/mcp-auth.json"
+    log "[opencode-sync] ✓ mcp-auth.json"
+else
+    log "[opencode-sync] WARN: Failed to export mcp-auth.json"
+    FAILED=$((FAILED + 1))
+fi
+
+# --- config.json (inject MCP environment secrets) ---
+if [[ -f "$OPENCODE_CONFIG" ]]; then
+    HA_URL=$(get_secret "/opencode/mcp" "HOMEASSISTANT_URL") || true
+    HA_TOKEN=$(get_secret "/opencode/mcp" "HOMEASSISTANT_TOKEN") || true
+    JIRA_URL=$(get_secret "/opencode/mcp" "JIRA_URL") || true
+    JIRA_USER=$(get_secret "/opencode/mcp" "JIRA_USERNAME") || true
+    JIRA_TOKEN=$(get_secret "/opencode/mcp" "JIRA_API_TOKEN") || true
+
+    if [[ -n "$HA_TOKEN" && -n "$JIRA_TOKEN" ]]; then
+        jq \
+            --arg ha_url "$HA_URL" \
+            --arg ha_token "$HA_TOKEN" \
+            --arg jira_url "$JIRA_URL" \
+            --arg jira_user "$JIRA_USER" \
+            --arg jira_token "$JIRA_TOKEN" \
+            '.mcp.homeassistant.environment.HOMEASSISTANT_URL = $ha_url
+            | .mcp.homeassistant.environment.HOMEASSISTANT_TOKEN = $ha_token
+            | .mcp.jira.environment.JIRA_URL = $jira_url
+            | .mcp.jira.environment.JIRA_USERNAME = $jira_user
+            | .mcp.jira.environment.JIRA_API_TOKEN = $jira_token' \
+            "$OPENCODE_CONFIG" > "$OPENCODE_CONFIG.tmp"
+        mv "$OPENCODE_CONFIG.tmp" "$OPENCODE_CONFIG"
+        log "[opencode-sync] ✓ config.json"
+    else
+        log "[opencode-sync] WARN: Failed to export config.json secrets"
+        FAILED=$((FAILED + 1))
+    fi
+else
+    log "[opencode-sync] SKIP: config.json not found"
+fi
+
+log "[opencode-sync] $(date +%H:%M:%S) — Synced $((3 - FAILED))/3 files"
+
+[ "$FAILED" -gt 0 ] && exit 1
+exit 0

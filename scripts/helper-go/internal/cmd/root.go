@@ -4,15 +4,19 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/dariuszw/hlp/internal/cmd/agent"
 	"github.com/dariuszw/hlp/internal/cmd/badge"
 	"github.com/dariuszw/hlp/internal/cmd/dev"
 	"github.com/dariuszw/hlp/internal/cmd/git"
 	"github.com/dariuszw/hlp/internal/cmd/jira"
 	"github.com/dariuszw/hlp/internal/cmd/namefinder"
+	"github.com/dariuszw/hlp/internal/cmd/pdf"
 	"github.com/dariuszw/hlp/internal/cmd/qr"
 	"github.com/dariuszw/hlp/internal/cmd/standup"
 	"github.com/dariuszw/hlp/internal/cmd/timesheet"
+	"github.com/dariuszw/hlp/internal/cmd/token"
 	"github.com/dariuszw/hlp/internal/config"
+	"github.com/dariuszw/hlp/internal/gitsync"
 	"github.com/dariuszw/hlp/internal/ui"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -34,7 +38,9 @@ var rootCmd = &cobra.Command{
 
 // Execute runs the root command
 func Execute() error {
-	return rootCmd.Execute()
+	err := rootCmd.Execute()
+	gitsync.SyncWorklogs(config.GetConfigDir())
+	return err
 }
 
 func init() {
@@ -49,12 +55,15 @@ func init() {
 	// Register commands at top level
 	dev.RegisterTopLevel(rootCmd)
 	badge.RegisterTopLevel(rootCmd)
+	rootCmd.AddCommand(agent.AgentCmd)
 	rootCmd.AddCommand(git.GitCmd)
 	rootCmd.AddCommand(jira.JiraCmd)
 	rootCmd.AddCommand(standup.StandupCmd)
 	rootCmd.AddCommand(timesheet.TimesheetCmd)
 	rootCmd.AddCommand(namefinder.NameFinderCmd)
 	rootCmd.AddCommand(qr.QrCmd)
+	rootCmd.AddCommand(pdf.PdfCmd)
+	rootCmd.AddCommand(token.TokenCmd)
 }
 
 func initConfig() {
