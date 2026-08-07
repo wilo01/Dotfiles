@@ -17,11 +17,15 @@ tmux session (named after the ticket key).
 
   start  opens a plain interactive claude in the ticket's worktree
   spin   spawns an autonomous agent (/agent-run + skip-permissions)
-  fanout spawns autonomous agents for all assigned tickets
+  fanout opens a session per assigned ticket (--spin for autonomous agents)
+
+Pass --context to start/fanout to have claude open already briefed on the
+ticket's current state, pulled live from the Jira MCP.
 
 The target repo is resolved by analyzing the ticket: --repo flag, then a scan
 for an existing branch containing the key, then a headless AI triage call,
-then an interactive picker as fallback.`,
+then an interactive picker as fallback. fanout stops at the branch scan unless
+--triage is passed, and only ever triages tickets in agent.triage_statuses.`,
 }
 
 func init() {

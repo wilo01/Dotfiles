@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/dariuszw/hlp/internal/config"
@@ -39,16 +40,45 @@ func newLaunchCmd(use, short string, manual bool) *cobra.Command {
 			if err != nil {
 				return err
 			}
+			if err := validateLaunchFlags(&opts); err != nil {
+				return err
+			}
+			opts.ContextPrompt = resolveContextPrompt(cfg, opts.ContextPrompt)
 			return startAgent(cfg, client, ticket, opts)
 		},
 	}
+	registerLaunchFlags(cmd, &opts)
+	return cmd
+}
+
+// registerLaunchFlags declares every flag that feeds startOptions. Both the
+// single-ticket commands and fanout use it so the two surfaces cannot drift.
+func registerLaunchFlags(cmd *cobra.Command, opts *startOptions) {
 	cmd.Flags().StringVar(&opts.Repo, "repo", "", "target repo name (skips AI triage)")
+	cmd.Flags().StringVar(&opts.ContextPrompt, "context", "", contextFlagUsage)
+	cmd.Flags().Lookup("context").NoOptDefVal = contextPromptFromConfig
+	cmd.Flags().StringVar(&opts.PermissionMode, "permission-mode", "", permissionModeFlagUsage)
 	cmd.Flags().StringVar(&opts.Base, "base", "", "base branch for new work (default: origin/HEAD)")
 	cmd.Flags().BoolVar(&opts.DryRun, "dry-run", false, "resolve repo/branch/worktree and print the plan without doing anything")
 	cmd.Flags().BoolVar(&opts.Force, "force", false, "skip the assignee check")
 	cmd.Flags().BoolVar(&opts.Relaunch, "relaunch", false, "send the claude launch even if one already ran in the session")
 	cmd.Flags().BoolVar(&opts.Interactive, "interactive", false, "always pick the repo interactively")
-	return cmd
+}
+
+// validateLaunchFlags rejects combinations that would otherwise be accepted and
+// silently do nothing. Both --context and --permission-mode only shape an
+// interactive claude, so passing them to an autonomous run is a mistake worth
+// surfacing rather than ignoring.
+func validateLaunchFlags(opts *startOptions) error {
+	if !opts.Manual {
+		if opts.ContextPrompt != "" {
+			return fmt.Errorf("--context only applies to interactive sessions: an autonomous agent reads the ticket itself")
+		}
+		if opts.PermissionMode != "" {
+			return fmt.Errorf("--permission-mode only applies to interactive sessions: autonomous agents run with agent.claude_cmd as configured")
+		}
+	}
+	return validatePermissionMode(opts.PermissionMode)
 }
 
 type startOptions struct {
@@ -61,6 +91,34 @@ type startOptions struct {
 	// Manual opens a plain interactive claude (no agent prompt, no
 	// --dangerously-skip-permissions, no CLAUDE_AGENT_MODE).
 	Manual bool
+	// ContextPrompt is passed to an interactive claude as its opening prompt
+	// ({{KEY}} substituted). Ignored when Manual is false.
+	ContextPrompt string
+	// RepoHow describes where Repo came from, for callers that resolved it
+	// ahead of resolveRepo. Empty means "specified on the command line".
+	RepoHow string
+	// PermissionMode overrides agent.permission_mode for this launch. Ignored
+	// when Manual is false.
+	PermissionMode string
+}
+
+// contextPromptFromConfig is the value --context takes when passed bare, later
+// swapped for agent.context_prompt.
+const contextPromptFromConfig = "@config"
+
+// Setting NoOptDefVal makes --context valid on its own, which is also what stops
+// pflag accepting the space-separated form, hence the =TMPL in the usage text.
+const contextFlagUsage = "open claude with a briefing prompt; bare uses agent.context_prompt, " +
+	"or --context=TMPL for your own ({{KEY}} is substituted). Requires the = form."
+
+const permissionModeFlagUsage = "claude permission mode for interactive sessions " +
+	"(default: agent.permission_mode; use 'manual' for normal prompts)"
+
+func resolveContextPrompt(cfg *config.Config, flagValue string) string {
+	if flagValue == contextPromptFromConfig {
+		return cfg.Agent.ContextPrompt
+	}
+	return flagValue
 }
 
 // startAgent runs the idempotent start sequence for one ticket:
@@ -121,13 +179,7 @@ func startAgent(cfg *config.Config, client *internalJira.Client, ticket *interna
 		worktreePath = filepath.Join(expandPath(cfg.Agent.WorktreeRoot), repo, key)
 	}
 
-	var launch string
-	if opts.Manual {
-		launch = fmt.Sprintf("JIRA_KEY=%s %s", key, stripSkipPermissions(cfg.Agent.ClaudeCmd))
-	} else {
-		prompt := strings.ReplaceAll(cfg.Agent.Prompt, "{{KEY}}", key)
-		launch = fmt.Sprintf("CLAUDE_AGENT_MODE=1 JIRA_KEY=%s %s %q", key, cfg.Agent.ClaudeCmd, prompt)
-	}
+	launch := buildLaunchCommand(cfg, key, opts)
 
 	fmt.Println(ui.Header(key + " — " + ticket.Summary))
 	fmt.Println(ui.KeyValue("Repo", fmt.Sprintf("%s (%s)", repo, how)))
@@ -183,6 +235,44 @@ func startAgent(cfg *config.Config, client *internalJira.Client, ticket *interna
 	return nil
 }
 
+// buildLaunchCommand assembles the shell line sent to the ticket's tmux session.
+// Manual sessions get a plain claude the user drives, optionally opened on a
+// briefing prompt; otherwise claude starts autonomously on the agent prompt.
+func buildLaunchCommand(cfg *config.Config, key string, opts startOptions) string {
+	if !opts.Manual {
+		prompt := strings.ReplaceAll(cfg.Agent.Prompt, "{{KEY}}", key)
+		return fmt.Sprintf("CLAUDE_AGENT_MODE=1 JIRA_KEY=%s %s %q", key, cfg.Agent.ClaudeCmd, prompt)
+	}
+
+	launch := fmt.Sprintf("JIRA_KEY=%s %s", key, stripSkipPermissions(cfg.Agent.ClaudeCmd))
+	if mode := permissionMode(cfg, opts); mode != "" {
+		launch += " --permission-mode " + mode
+	}
+	if opts.ContextPrompt != "" {
+		launch += fmt.Sprintf(" %q", strings.ReplaceAll(opts.ContextPrompt, "{{KEY}}", key))
+	}
+	return launch
+}
+
+// permissionModes mirrors claude's --permission-mode choices. The launch line is
+// delivered by tmux send-keys into a detached session, so an invalid mode would
+// fail inside a pane nobody is watching; hlp rejects it up front instead.
+var permissionModes = []string{"acceptEdits", "auto", "bypassPermissions", "manual", "dontAsk", "plan"}
+
+func permissionMode(cfg *config.Config, opts startOptions) string {
+	if opts.PermissionMode != "" {
+		return opts.PermissionMode
+	}
+	return cfg.Agent.PermissionMode
+}
+
+func validatePermissionMode(mode string) error {
+	if mode == "" || slices.Contains(permissionModes, mode) {
+		return nil
+	}
+	return fmt.Errorf("unknown permission mode %q (valid: %s)", mode, strings.Join(permissionModes, ", "))
+}
+
 // stripSkipPermissions removes --dangerously-skip-permissions from the
 // configured claude command so manual sessions get normal permission prompts.
 func stripSkipPermissions(claudeCmd string) string {
@@ -207,9 +297,13 @@ func existingMarker(exists bool) string {
 // --repo flag -> resume-scan -> AI triage -> interactive picker.
 func resolveRepo(cfg *config.Config, client *internalJira.Client, ticket *internalJira.Ticket, repos []string, opts startOptions) (string, string, error) {
 	if opts.Repo != "" {
+		how := opts.RepoHow
+		if how == "" {
+			how = "specified"
+		}
 		for _, r := range repos {
 			if r == opts.Repo {
-				return r, "specified", nil
+				return r, how, nil
 			}
 		}
 		return "", "", fmt.Errorf("repo %s not found under %s (known: %s)", opts.Repo, cfg.Agent.WorktreeRoot, strings.Join(repos, ", "))
@@ -228,14 +322,17 @@ func resolveRepo(cfg *config.Config, client *internalJira.Client, ticket *intern
 		return repo, "picked", err
 	}
 
-	description, err := client.GetTicketDescription(ticket.Key)
-	if err != nil {
-		fmt.Println(ui.Warning("could not fetch description for triage: " + err.Error()))
-	}
-
+	// Warnings are buffered rather than printed inline: the spinner owns the
+	// current line until it stops.
+	var warnings []string
 	stop := ui.Spinner("AI triage: resolving target repo...")
-	verdict, err := runTriage(cfg, ticket, description, repos)
+	verdict, err := triageRepo(cfg, client, ticket, repos, func(msg string) {
+		warnings = append(warnings, msg)
+	})
 	stop()
+	for _, w := range warnings {
+		fmt.Println(ui.Warning(w))
+	}
 	if err != nil {
 		fmt.Println(ui.Warning("triage failed: " + err.Error()))
 		repo, pickErr := pickRepo(repos)

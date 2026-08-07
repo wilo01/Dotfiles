@@ -40,13 +40,16 @@ type AgentRepoOverride struct {
 
 // AgentConfig holds settings for the parallel ticket-agent workflow (hlp agent)
 type AgentConfig struct {
-	JQL          string                       `mapstructure:"jql" yaml:"jql"`
-	MaxParallel  int                          `mapstructure:"max_parallel" yaml:"max_parallel"`
-	ClaudeCmd    string                       `mapstructure:"claude_cmd" yaml:"claude_cmd"`
-	Prompt       string                       `mapstructure:"prompt" yaml:"prompt"`
-	TriageCmd    string                       `mapstructure:"triage_cmd" yaml:"triage_cmd"`
-	WorktreeRoot string                       `mapstructure:"worktree_root" yaml:"worktree_root"`
-	Repos        map[string]AgentRepoOverride `mapstructure:"repos" yaml:"repos"`
+	JQL            string                       `mapstructure:"jql" yaml:"jql"`
+	MaxParallel    int                          `mapstructure:"max_parallel" yaml:"max_parallel"`
+	ClaudeCmd      string                       `mapstructure:"claude_cmd" yaml:"claude_cmd"`
+	Prompt         string                       `mapstructure:"prompt" yaml:"prompt"`
+	ContextPrompt  string                       `mapstructure:"context_prompt" yaml:"context_prompt"`
+	PermissionMode string                       `mapstructure:"permission_mode" yaml:"permission_mode"`
+	TriageCmd      string                       `mapstructure:"triage_cmd" yaml:"triage_cmd"`
+	TriageStatuses []string                     `mapstructure:"triage_statuses" yaml:"triage_statuses"`
+	WorktreeRoot   string                       `mapstructure:"worktree_root" yaml:"worktree_root"`
+	Repos          map[string]AgentRepoOverride `mapstructure:"repos" yaml:"repos"`
 }
 
 // DevConfig holds developer workflow settings
@@ -144,13 +147,16 @@ func Default() *Config {
 			CommitsFile: "~/Dev/Private/Commits.md",
 		},
 		Agent: AgentConfig{
-			JQL:          "assignee = currentUser() AND statusCategory != Done",
-			MaxParallel:  5,
-			ClaudeCmd:    "claude --dangerously-skip-permissions",
-			Prompt:       "/agent-run {{KEY}}",
-			TriageCmd:    "claude -p --model haiku",
-			WorktreeRoot: "~/tds-branch-opener/worktrees",
-			Repos:        map[string]AgentRepoOverride{},
+			JQL:            "assignee = currentUser() AND statusCategory != Done",
+			MaxParallel:    5,
+			ClaudeCmd:      "claude --dangerously-skip-permissions",
+			Prompt:         "/agent-run {{KEY}}",
+			ContextPrompt:  "Read the current state of {{KEY}} from Jira via the Jira MCP - status, description, and the latest comments - then give me a short brief on where it stands. Don't change anything yet.",
+			PermissionMode: "auto",
+			TriageCmd:      "claude -p --model haiku",
+			TriageStatuses: []string{"Backlog", "To Do"},
+			WorktreeRoot:   "~/tds-branch-opener/worktrees",
+			Repos:          map[string]AgentRepoOverride{},
 		},
 		Token: TokenConfig{
 			OAuthURL: "https://oauth.tdscloud.io/oauth/v1/authenticate",
