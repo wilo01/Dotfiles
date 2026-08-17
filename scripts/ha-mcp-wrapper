@@ -4,12 +4,28 @@ set -euo pipefail
 DOMAIN="http://localhost"
 PROJECT_ID="fe560626-91f2-427b-a402-8473e61943ad"
 
-export HOMEASSISTANT_URL=$(infisical secrets get HOMEASSISTANT_URL \
-    --path=/homeassistant --env=dev --plain \
-    --domain="$DOMAIN" --projectId="$PROJECT_ID" --silent 2>/dev/null)
+strip_terminal_control_codes() {
+    sed -e 's/\x1b\[[0-9;?]*[a-zA-Z]//g' -e 's/\r//g' \
+        | grep -v '^[[:space:]]*$' \
+        | tail -1
+}
 
-export HOMEASSISTANT_TOKEN=$(infisical secrets get HOMEASSISTANT_TOKEN \
-    --path=/homeassistant --env=dev --plain \
-    --domain="$DOMAIN" --projectId="$PROJECT_ID" --silent 2>/dev/null)
+fetch_secret() {
+    local key="$1" value
+    value=$(infisical secrets get "$key" \
+        --path=/homeassistant --env=dev --plain \
+        --domain="$DOMAIN" --projectId="$PROJECT_ID" --silent 2>/dev/null \
+        | strip_terminal_control_codes)
+
+    if [[ -z "$value" ]]; then
+        echo "ha-mcp-wrapper: could not read $key from infisical" >&2
+        exit 1
+    fi
+
+    printf '%s' "$value"
+}
+
+export HOMEASSISTANT_URL=$(fetch_secret HOMEASSISTANT_URL)
+export HOMEASSISTANT_TOKEN=$(fetch_secret HOMEASSISTANT_TOKEN)
 
 exec uvx ha-mcp@7.7.0 "$@"

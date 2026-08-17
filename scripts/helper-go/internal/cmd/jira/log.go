@@ -463,10 +463,32 @@ func runBatchLogCore(cfg batchRunConfig) {
 		batch.SortEntries(entries, batch.EntryOrder(cfg.order))
 	}
 
-	// Show preview before confirmation
+	// Scan for stale drafts now rather than after posting: the scan reads only
+	// TimeSpent and draft status, neither of which posting changes, so the answer
+	// is the same either way — and asking here means every question is answered
+	// before the run goes unattended. Skipped under -y, which has no one to ask.
+	var stale []batch.StaleDraft
+	previewList := entries
+	if !cfg.skipConfirmation {
+		allEntries, found, err := findStaleDraftsForCSV(csvPath)
+		if err != nil {
+			fmt.Println(ui.Warning("Stale draft scan failed: " + err.Error()))
+		} else {
+			stale = found
+			previewList = previewEntriesWithStale(entries, allEntries, stale)
+		}
+	}
+
+	// Show preview before confirmation. previewList is display-only — the posted
+	// set stays `entries`, since the merged list also carries DONE day-context
+	// rows and the drafts being swept.
 	fmt.Println()
 	fmt.Println("Processing worklogs " + ui.Muted.Render("(preview)") + ":")
-	showWorklogPreview(entries, getExpectedHoursPerDay())
+	showWorklogPreview(previewList, getExpectedHoursPerDay(), staleRowSet(stale))
+	if len(stale) > 0 {
+		fmt.Println()
+		fmt.Println(ui.Muted.Render("Reason for DELETE: " + pruneReasonSummary(stale)))
+	}
 
 	// Safety guard for protected profiles (unless confirmation is skipped)
 	if !cfg.skipConfirmation {
@@ -475,6 +497,18 @@ func runBatchLogCore(cfg batchRunConfig) {
 				fmt.Println(ui.Info("Operation cancelled"))
 				return
 			}
+		}
+	}
+
+	// Answered here, applied after the status write-back — see below.
+	var doomedRows []int
+	if len(stale) > 0 {
+		doomedRows = promptStaleDraftDeletion(stale,
+			fmt.Sprintf("Delete %d stale draft(s)?", len(stale)))
+		// Answered here but acted on much later, so acknowledge a "no" now
+		// rather than leaving the question apparently unanswered.
+		if len(doomedRows) == 0 {
+			fmt.Println(ui.Muted.Render("Drafts left unchanged"))
 		}
 	}
 
@@ -557,13 +591,13 @@ func runBatchLogCore(cfg batchRunConfig) {
 		}
 	}
 
-	// Sweep placeholders last, once the run's entries are marked DONE, so a day
-	// this batch just completed is cleaned up in the same pass and the prompt
-	// doesn't interrupt the result summary. Skipped when confirmation is
-	// suppressed, since scheduled runs have no one to answer it.
-	if !cfg.skipConfirmation {
+	// Delete only now, though the user answered before the run started:
+	// UpdateCSVStatus above addresses rows by absolute line number, and removing
+	// a row shifts every line below it. Sweeping first would write each status
+	// onto the wrong entry.
+	if len(doomedRows) > 0 {
 		fmt.Println()
-		if _, err := pruneStaleDrafts(csvPath, false); err != nil {
+		if err := applyStaleDraftDeletion(csvPath, doomedRows, len(stale)); err != nil {
 			fmt.Println(ui.Warning("Stale draft prune failed: " + err.Error()))
 		}
 	}
@@ -1318,6 +1352,28 @@ func entriesOnDaysOf(entries []batch.Entry, stale []batch.StaleDraft) []batch.En
 	return onDays
 }
 
+// previewEntriesWithStale merges the rows about to be posted with the rows about
+// to be deleted, so one table shows every entry's fate. The doomed drafts are
+// brought in with their whole day (entriesOnDaysOf) rather than alone: without
+// the day's existing DONE rows the group would total 0m and render a false
+// deficit, hiding the very reason the day counts as full.
+func previewEntriesWithStale(pending, all []batch.Entry, stale []batch.StaleDraft) []batch.Entry {
+	if len(stale) == 0 {
+		return pending
+	}
+
+	merged := make([]batch.Entry, 0, len(pending)+len(stale))
+	seen := make(map[int]bool, len(pending)+len(stale))
+	for _, e := range append(append([]batch.Entry{}, pending...), entriesOnDaysOf(all, stale)...) {
+		if seen[e.RowNumber] {
+			continue
+		}
+		seen[e.RowNumber] = true
+		merged = append(merged, e)
+	}
+	return merged
+}
+
 // pruneReasonSummary collapses the per-row reasons into one line, since within a
 // single run they are nearly always the same handful of values.
 func pruneReasonSummary(stale []batch.StaleDraft) string {
@@ -1575,12 +1631,10 @@ func getDraftRetentionDays() int {
 // Returns how many stale drafts were found, so callers can distinguish "nothing
 // to do" from "found some" without re-parsing the CSV.
 func pruneStaleDrafts(csvPath string, reportOnly bool) (int, error) {
-	entries, err := batch.ParseCSV(csvPath)
+	entries, stale, err := findStaleDraftsForCSV(csvPath)
 	if err != nil {
 		return 0, err
 	}
-
-	stale := batch.FindStaleDrafts(entries, getExpectedHoursPerDay(), getDraftRetentionDays(), time.Now())
 	if len(stale) == 0 {
 		return 0, nil
 	}
@@ -1609,8 +1663,32 @@ func pruneStaleDrafts(csvPath string, reportOnly bool) (int, error) {
 		return len(stale), nil
 	}
 
+	rows := promptStaleDraftDeletion(stale, "Delete?")
+	if err := applyStaleDraftDeletion(csvPath, rows, len(stale)); err != nil {
+		return len(stale), err
+	}
+	return len(stale), nil
+}
+
+// findStaleDraftsForCSV reads the CSV and scans it for prunable DRAFT rows,
+// returning the parsed entries alongside so callers can render the affected days
+// in context without a second parse.
+func findStaleDraftsForCSV(csvPath string) ([]batch.Entry, []batch.StaleDraft, error) {
+	entries, err := batch.ParseCSV(csvPath)
+	if err != nil {
+		return nil, nil, err
+	}
+	stale := batch.FindStaleDrafts(entries, getExpectedHoursPerDay(), getDraftRetentionDays(), time.Now())
+	return entries, stale, nil
+}
+
+// promptStaleDraftDeletion asks which stale drafts to delete and returns their
+// CSV row numbers. Split from the deletion itself so the batch flow can ask the
+// question up front but write the file later — see applyStaleDraftDeletion.
+func promptStaleDraftDeletion(stale []batch.StaleDraft, question string) []int {
 	choice, err := ui.PromptChoice(fmt.Sprintf(
-		"Delete? [%s]: ",
+		"%s [%s]: ",
+		question,
 		ui.Muted.Render("y=all / i=individually / N=none")))
 	if err != nil {
 		choice = ""
@@ -1620,28 +1698,38 @@ func pruneStaleDrafts(csvPath string, reportOnly bool) (int, error) {
 	for i, s := range stale {
 		candidates[i] = s.Entry
 	}
-	rows := selectRows(choice, candidates, func(e batch.Entry) bool {
+	return selectRows(choice, candidates, func(e batch.Entry) bool {
 		return ui.ConfirmAction(fmt.Sprintf("  Delete %s (%s)?", e.DisplayKey(), strings.Split(e.Date, " ")[0]))
 	})
+}
+
+// applyStaleDraftDeletion removes the chosen rows and reports the result. The
+// row numbers must have been read from the CSV in its current shape: any earlier
+// write that adds or removes lines invalidates them.
+func applyStaleDraftDeletion(csvPath string, rows []int, found int) error {
 	if len(rows) == 0 {
-		fmt.Println(ui.Muted.Render("Drafts left unchanged"))
-		return len(stale), nil
+		if found > 0 {
+			fmt.Println(ui.Muted.Render("Drafts left unchanged"))
+		}
+		return nil
 	}
 
 	if err := batch.RemoveEntriesByRows(csvPath, rows); err != nil {
-		return len(stale), err
+		return err
 	}
 	fmt.Printf("Removed %s of %d stale draft(s) %s\n\n",
 		ui.Success.Render(fmt.Sprintf("%d", len(rows))),
-		len(stale),
+		found,
 		ui.Muted.Render("(a backup was written to worklogs.csv.autobak)"))
-	return len(stale), nil
+	return nil
 }
 
 // showWorklogPreview displays pending entries before the confirmation prompt.
-func showWorklogPreview(entries []batch.Entry, expectedHours time.Duration) {
+// Rows in markedForDeletion render as DELETE, so the one table covers both what
+// will be posted and what will be swept.
+func showWorklogPreview(entries []batch.Entry, expectedHours time.Duration, markedForDeletion map[int]bool) {
 	if len(entries) == 0 {
 		return
 	}
-	showWorklogTable(entries, expectedHours, nil)
+	showWorklogTable(entries, expectedHours, markedForDeletion)
 }

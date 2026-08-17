@@ -185,3 +185,82 @@ func TestPruneReasonSummary_Deduplicates(t *testing.T) {
 		t.Errorf("pruneReasonSummary() = %q, want %q", got, want)
 	}
 }
+
+// The merged preview must show every row's fate without ever widening the set
+// that actually gets posted.
+func TestPreviewEntriesWithStale(t *testing.T) {
+	pending := []batch.Entry{
+		{IssueKey: "P1", Date: "10.08.2026 09:00", RowNumber: 10, TimeSpent: "2h"},
+		{IssueKey: "P2", Date: "10.08.2026 09:00", RowNumber: 11, TimeSpent: "1h"},
+	}
+	all := []batch.Entry{
+		{IssueKey: "OLD", Date: "07.08.2026 09:00", RowNumber: 4, Status: batch.StatusDone, TimeSpent: "7h30m"},
+		{IssueKey: "DEAD", Date: "07.08.2026 09:00", RowNumber: 5, Status: batch.StatusDraft},
+		{IssueKey: "OTHER", Date: "01.08.2026 09:00", RowNumber: 6, Status: batch.StatusDone, TimeSpent: "8h"},
+		pending[0], pending[1],
+	}
+	stale := []batch.StaleDraft{{Entry: all[1], Reason: "day full (7h30m)"}}
+
+	got := previewEntriesWithStale(pending, all, stale)
+
+	rows := make(map[int]int)
+	for _, e := range got {
+		rows[e.RowNumber]++
+	}
+	for _, want := range []int{10, 11, 4, 5} {
+		if rows[want] != 1 {
+			t.Errorf("row %d appears %d times, want exactly 1", want, rows[want])
+		}
+	}
+	if rows[6] != 0 {
+		t.Errorf("01.08 has no stale draft and must not be pulled into the preview")
+	}
+	if len(got) != 4 {
+		t.Errorf("expected 4 preview rows, got %d: %+v", len(got), got)
+	}
+}
+
+func TestPreviewEntriesWithStale_NoStaleReturnsPendingUnchanged(t *testing.T) {
+	pending := []batch.Entry{{IssueKey: "P1", RowNumber: 10}}
+
+	got := previewEntriesWithStale(pending, []batch.Entry{{RowNumber: 99}}, nil)
+
+	if len(got) != 1 || got[0].RowNumber != 10 {
+		t.Errorf("expected the pending set untouched, got %+v", got)
+	}
+}
+
+// The whole point of asking the delete question before posting is that posting
+// cannot change the answer. LoggedTimeByDate counts every non-DRAFT row's time
+// regardless of status, so flipping PENDING to DONE must select the same rows.
+// If this fails, the prompt has to move back after the submit loop.
+func TestFindStaleDraftsUnaffectedByStatusFlip(t *testing.T) {
+	now := time.Date(2026, 8, 10, 15, 0, 0, 0, time.UTC)
+	build := func(postedStatus string) []batch.Entry {
+		return []batch.Entry{
+			{IssueKey: "A", Date: "07.08.2026 09:00", RowNumber: 2, Status: postedStatus, TimeSpent: "7h30m"},
+			{IssueKey: "B", Date: "07.08.2026 09:00", RowNumber: 3, Status: batch.StatusDraft},
+			{IssueKey: "C", Date: "10.08.2026 09:00", RowNumber: 4, Status: postedStatus, TimeSpent: "1h"},
+		}
+	}
+	expected := 7*time.Hour + 30*time.Minute
+
+	before := batch.FindStaleDrafts(build(batch.StatusPending), expected, 30, now)
+	after := batch.FindStaleDrafts(build(batch.StatusDone), expected, 30, now)
+
+	if len(before) != 1 {
+		t.Fatalf("expected the 07.08 draft to be stale before posting, got %+v", before)
+	}
+	if len(before) != len(after) {
+		t.Fatalf("stale count changed across posting: %d before, %d after", len(before), len(after))
+	}
+	for i := range before {
+		if before[i].Entry.RowNumber != after[i].Entry.RowNumber {
+			t.Errorf("stale row %d changed across posting: %d -> %d",
+				i, before[i].Entry.RowNumber, after[i].Entry.RowNumber)
+		}
+		if before[i].Reason != after[i].Reason {
+			t.Errorf("reason changed across posting: %q -> %q", before[i].Reason, after[i].Reason)
+		}
+	}
+}

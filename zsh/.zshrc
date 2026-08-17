@@ -344,8 +344,8 @@ function hx() {
     fi
     xdg-open https://trunk.acrid.dev:3443/safe
 }
-alias ksw='echo kiosk start at: ; echo ~/tds-branch-opener/branches/tds-suite/source/ui-kiosk/ ; cd ~/tds-branch-opener/branches/tds-suite/source/ui-kiosk/ ; sencha app watch ; xdg-open http://localhost:3005/kiosk/'
-alias vsw='echo visitor-web-app start at: ; echo ~/tds-branch-opener/branches/tds-visitor-web-app/ui ; cd ~/tds-branch-opener/branches/tds-visitor-web-app/ui ; sencha app watch ; xdg-open http://localhost:3005/kiosk/'
+alias ksw='echo kiosk start at: ; echo ~/tds-branch-opener/branches/tds-suite/source/ui-kiosk/ ; cd ~/tds-branch-opener/branches/tds-suite/source/ui-kiosk/ ; sencha app watch'
+alias vsw='echo visitor-web-app start at: ; echo ~/tds-branch-opener/branches/tds-visitor-web-app/ui ; cd ~/tds-branch-opener/branches/tds-visitor-web-app/ui ; sencha app watch'
 alias cy="echo Cypress open at: ; cdy ; sleep 1 ; echo ./node_modules/cypress/bin/cypress open ; ./node_modules/cypress/bin/cypress open"
 alias cy_all="echo Cypress run all tests at: ; cdy ; sleep 1 ; echo npx cypress run --headless --spec cypress/integration/tdsvisitor/rt/*.js ; npx cypress run --headless --spec cypress/integration/tdsvisitor/rt/*.js"
 alias docker_start_trunk="echo cd ~/Dev/branch-opener/branches/safe ; echo sudo docker start -ai trunk ; cd ~/Dev/branch-opener/branches/safe && sudo docker start -ai trunk"
@@ -433,6 +433,8 @@ alias claude-fast='claude-haiku'
 alias claude-haiku='claude --model claude-3-5-haiku-20241022'
 # Personal Claude Code account (isolated config dir; first run will prompt /login)
 alias claude-daro='CLAUDE_CONFIG_DIR="$HOME/.claude-personal" claude'
+# Minimal Claude Code profile: no skills/rules/commands
+alias claude-mini='CLAUDE_CONFIG_DIR="$HOME/.claude-mini" claude'
 # alias fcc-claude='fcc-claude'
 
 # Auto-start fcc-server if not already running

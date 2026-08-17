@@ -70,11 +70,11 @@ id_ed25519.pub
 # AI
 AGENT.md
 AGENTS.md
-CLAUDE.md
+# CLAUDE.md
 GEMINI.md
 agents.json
 opencode.json
-.claude/
+# .claude/
 .taskmaster
 jira-cache.skill
 # CLAUDE.md
@@ -93,3 +93,5 @@ source/server/database/sql/safe/after-install/custom_default_data.sql
 .fix-codex/
 
 .playwright-mcp/
+
+**/.claude/settings.local.json
