@@ -19,7 +19,7 @@ func TestGetSmartDefaultRange(t *testing.T) {
 			today:          time.Date(2025, 12, 29, 0, 0, 0, 0, time.Local), // Monday
 			wantStartDay:   26,                                              // Friday
 			wantStartMonth: time.December,
-			wantEndDay:     28,  // Sunday (yesterday)
+			wantEndDay:     28, // Sunday (yesterday)
 			wantEndMonth:   time.December,
 		},
 		{

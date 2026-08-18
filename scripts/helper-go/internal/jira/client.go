@@ -53,8 +53,8 @@ type WorklogEntry struct {
 
 // CurrentUser represents the authenticated JIRA user
 type CurrentUser struct {
-	AccountID    string `json:"accountId"`    // Cloud
-	Name         string `json:"name"`         // Server/DC username
+	AccountID    string `json:"accountId"` // Cloud
+	Name         string `json:"name"`      // Server/DC username
 	DisplayName  string `json:"displayName"`
 	EmailAddress string `json:"emailAddress"`
 }
@@ -122,8 +122,8 @@ func (c *Client) GetTicket(key string) (*Ticket, error) {
 	var result struct {
 		Key    string `json:"key"`
 		Fields struct {
-			Summary   string `json:"summary"`
-			Status    struct {
+			Summary string `json:"summary"`
+			Status  struct {
 				Name string `json:"name"`
 			} `json:"status"`
 			Assignee *struct {
@@ -294,7 +294,7 @@ func (c *Client) GetWorklogs(key string) ([]Worklog, error) {
 			Started   string          `json:"started"`
 			TimeSpent string          `json:"timeSpent"`
 			Comment   json.RawMessage `json:"comment"`
-			Author struct {
+			Author    struct {
 				DisplayName string `json:"displayName"`
 				AccountId   string `json:"accountId"`
 			} `json:"author"`
@@ -437,8 +437,8 @@ func (c *Client) Search(jql string, maxResults int) ([]Ticket, error) {
 		Issues []struct {
 			Key    string `json:"key"`
 			Fields struct {
-				Summary   string `json:"summary"`
-				Status    struct {
+				Summary string `json:"summary"`
+				Status  struct {
 					Name string `json:"name"`
 				} `json:"status"`
 				Assignee *struct {

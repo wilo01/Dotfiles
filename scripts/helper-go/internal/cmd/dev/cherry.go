@@ -74,14 +74,14 @@ func expandPath(path string) string {
 
 // cherryContext groups the resolved state needed for cherry-pick processing.
 type cherryContext struct {
-	PRNumber         int
-	PRInfo           *gitops.PRInfo
-	MergeCommit      string
-	OriginalBranch   string
-	JiraTicket       string
-	CommitEntry      *commits.CommitEntry
-	Cfg              *config.Config
-	Interactive      bool
+	PRNumber          int
+	PRInfo            *gitops.PRInfo
+	MergeCommit       string
+	OriginalBranch    string
+	JiraTicket        string
+	CommitEntry       *commits.CommitEntry
+	Cfg               *config.Config
+	Interactive       bool
 	OverwriteBranches *bool // nil = not yet asked, set on first "already exists" prompt
 }
 

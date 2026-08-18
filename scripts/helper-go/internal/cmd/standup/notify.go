@@ -98,4 +98,3 @@ func uniqueIssueKeys(entries []batch.Entry, max int) []string {
 	}
 	return out
 }
-

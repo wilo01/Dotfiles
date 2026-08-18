@@ -3,6 +3,7 @@ package ui
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -177,6 +178,14 @@ func ProgressBar(current, total int, width int) string {
 // own bufio.Reader would let the first one buffer ahead and swallow input
 // meant for later prompts (breaks piped/redirected stdin).
 var stdinReader = bufio.NewReader(os.Stdin)
+
+// SetInput redirects the prompt functions at another reader, so tests can drive
+// a confirmation without a terminal. Returns a function restoring stdin.
+func SetInput(r io.Reader) func() {
+	previous := stdinReader
+	stdinReader = bufio.NewReader(r)
+	return func() { stdinReader = previous }
+}
 
 // ConfirmAction prompts user for Y/N confirmation
 // Returns true if user confirms, false otherwise.

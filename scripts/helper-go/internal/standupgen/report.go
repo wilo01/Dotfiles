@@ -13,12 +13,12 @@ import (
 
 // Report represents a standup report
 type Report struct {
-	StartDate  time.Time
-	EndDate    time.Time
-	Entries    []ReportEntry
-	TotalTime  time.Duration
-	TaskCount  int
-	DayCount   int
+	StartDate time.Time
+	EndDate   time.Time
+	Entries   []ReportEntry
+	TotalTime time.Duration
+	TaskCount int
+	DayCount  int
 }
 
 // ReportEntry represents a single ticket in the report

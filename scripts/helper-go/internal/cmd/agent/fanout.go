@@ -21,7 +21,6 @@ var (
 	fanoutMax             int
 	fanoutIncludeSubtasks bool
 	fanoutYes             bool
-	fanoutTriage          bool
 	fanoutSpin            bool
 )
 
@@ -32,9 +31,9 @@ var fanoutCmd = &cobra.Command{
 and opens one worktree + tmux session per ticket with an interactive claude,
 staggered a few seconds apart.
 
-Only tickets that already have a branch are opened by default; the rest are
-listed, since guessing a repo for work that hasn't started is what --triage is
-for. --spin restores the old behaviour of spawning autonomous /agent-run agents.`,
+Only tickets whose repo can be resolved from an existing branch are opened;
+the rest are listed for "hlp agent start <KEY>", which lets you pick repos
+yourself. --spin spawns autonomous /agent-run agents instead.`,
 	// Without this, `--context "my prompt"` parses as a bare --context plus a
 	// stray positional, silently using the configured prompt instead of yours.
 	Args: cobra.NoArgs,
@@ -49,7 +48,6 @@ func init() {
 	fanoutCmd.Flags().IntVar(&fanoutMax, "max", 0, "spawn at most N agents (default: agent.max_parallel)")
 	fanoutCmd.Flags().BoolVar(&fanoutIncludeSubtasks, "include-subtasks", false, "also spawn agents for subtasks")
 	fanoutCmd.Flags().BoolVar(&fanoutYes, "yes", false, "skip the confirmation prompt")
-	fanoutCmd.Flags().BoolVar(&fanoutTriage, "triage", false, "AI-triage the target repo for unstarted tickets (agent.triage_statuses)")
 	fanoutCmd.Flags().BoolVar(&fanoutSpin, "spin", false, "spawn autonomous /agent-run agents instead of interactive sessions")
 }
 
@@ -121,20 +119,24 @@ func runFanout() error {
 
 	candidates := buildCandidates(tickets)
 
-	repos, err := discoverRepos(cfg.Agent.WorktreeRoot)
+	sources, err := discoverSourceRepos(cfg.Agent.ReposRoot)
 	if err != nil {
 		return err
 	}
-	if len(repos) == 0 {
-		return fmt.Errorf("no repos found under %s", cfg.Agent.WorktreeRoot)
+	if len(sources) == 0 {
+		return fmt.Errorf("no repos found under %s", expandPath(cfg.Agent.ReposRoot))
+	}
+	repos := make([]string, 0, len(sources))
+	for _, s := range sources {
+		repos = append(repos, s.Name)
 	}
 
 	if fanoutOpts.Repo != "" && !slices.Contains(repos, fanoutOpts.Repo) {
-		return fmt.Errorf("repo %s not found under %s (known: %s)", fanoutOpts.Repo, cfg.Agent.WorktreeRoot, strings.Join(repos, ", "))
+		return fmt.Errorf("repo %s not found under %s (known: %s)", fanoutOpts.Repo, expandPath(cfg.Agent.ReposRoot), strings.Join(repos, ", "))
 	}
 
 	stop := ui.Spinner("Resolving target repos...")
-	preResolve(cfg, client, candidates, repos, fanoutOpts, fanoutTriage, fanoutMax, triageRepo)
+	preResolve(cfg, candidates, repos, fanoutOpts, fanoutMax)
 	stop()
 
 	printPlan(candidates, jql)
@@ -155,7 +157,7 @@ func runFanout() error {
 		}
 	}
 
-	return spawnAll(cfg, client, candidates, repos)
+	return spawnAll(cfg, candidates)
 }
 
 // buildCandidates turns search results into candidates, marking the ones that
@@ -176,16 +178,13 @@ func buildCandidates(tickets []internalJira.Ticket) []candidate {
 }
 
 // preResolve fills in each candidate's repo ahead of the spawn loop, so the plan
-// table can show it and so triage never runs unattended by default.
+// table can show it.
 //
-// It runs in three phases because the --max cut has to sit between the free and
-// the paid one: scanning for an existing branch costs nothing, so it happens for
-// every ticket, and only what survives that (and the limit) is worth a model
-// call. Cutting earlier would let tickets that turn out to be unspawnable eat
-// slots that a resumable ticket further down the list could have used.
-func preResolve(cfg *config.Config, client *internalJira.Client, candidates []candidate, repos []string, opts startOptions, triage bool, max int, fn triageFunc) {
-	// --repo and --interactive settle every ticket the same way, so neither the
-	// branch scan nor triage has anything left to decide.
+// Resolution is the branch scan only: a ticket with no branch anywhere has no
+// unattended answer, and picking repos for it is what `hlp agent start` is for.
+func preResolve(cfg *config.Config, candidates []candidate, repos []string, opts startOptions, max int) {
+	// --repo and --interactive settle every ticket the same way, so the branch
+	// scan has nothing left to decide.
 	switch {
 	case opts.Repo != "":
 		for i := range candidates {
@@ -209,26 +208,12 @@ func preResolve(cfg *config.Config, client *internalJira.Client, candidates []ca
 
 	for i := range candidates {
 		c := &candidates[i]
-		if c.Skip != "" || c.Repo != "" || c.NeedsPicker {
-			continue
-		}
-		if !triage {
-			c.Skip = "needs triage"
-		} else if !statusAllowsTriage(cfg, c.Ticket.Status) {
-			c.Skip = "not " + strings.Join(cfg.Agent.TriageStatuses, "/")
+		if c.Skip == "" && c.Repo == "" && !c.NeedsPicker {
+			c.Skip = "no branch yet"
 		}
 	}
 
 	applyMaxLimit(cfg, candidates, max)
-
-	if !triage {
-		return
-	}
-	concurrently(cfg, candidates, func(c *candidate) {
-		if c.Repo == "" && !c.NeedsPicker {
-			triageCandidate(cfg, client, c, repos, fn)
-		}
-	})
 }
 
 // concurrently runs work over every candidate that is still in play, bounded by
@@ -282,35 +267,9 @@ func scanForBranch(cfg *config.Config, c *candidate, repos []string) {
 	}
 }
 
-func triageCandidate(cfg *config.Config, client *internalJira.Client, c *candidate, repos []string, fn triageFunc) {
-	verdict, err := fn(cfg, client, &c.Ticket, repos, func(msg string) {
-		c.Warnings = append(c.Warnings, c.Ticket.Key+": "+msg)
-	})
-	if err != nil {
-		c.Warnings = append(c.Warnings, c.Ticket.Key+": triage failed: "+err.Error())
-		c.NeedsPicker = true
-		return
-	}
-	if verdict.Confidence == "low" {
-		c.Warnings = append(c.Warnings, fmt.Sprintf("%s: low triage confidence (%s)", c.Ticket.Key, verdict.Reason))
-		c.NeedsPicker = true
-		return
-	}
-	c.Repo, c.How = verdict.Repo, "AI triage: "+verdict.Reason
-}
-
-// statusAllowsTriage reports whether a ticket is early enough in the workflow
-// that guessing its repo is meaningful. Anything past these columns either
-// already has a branch or is too far along to guess at.
-func statusAllowsTriage(cfg *config.Config, status string) bool {
-	return slices.ContainsFunc(cfg.Agent.TriageStatuses, func(s string) bool {
-		return strings.EqualFold(s, status)
-	})
-}
-
 func printPlan(candidates []candidate, jql string) {
 	var rows [][]string
-	needsTriage := false
+	needsPicking := false
 	for i := range candidates {
 		c := &candidates[i]
 		summary := c.Ticket.Summary
@@ -318,8 +277,8 @@ func printPlan(candidates []candidate, jql string) {
 			summary = summary[:47] + "..."
 		}
 		rows = append(rows, []string{c.Ticket.Key, c.Ticket.IssueType, c.Ticket.Status, summary, c.repoCell(), c.action()})
-		if c.Skip == "needs triage" {
-			needsTriage = true
+		if c.Skip == "no branch yet" {
+			needsPicking = true
 		}
 	}
 
@@ -331,12 +290,12 @@ func printPlan(candidates []candidate, jql string) {
 			fmt.Println(ui.Warning(w))
 		}
 	}
-	if needsTriage {
-		fmt.Println(ui.Info("no branch yet for some tickets: run `hlp agent start <KEY>` for those, or --triage to resolve them here"))
+	if needsPicking {
+		fmt.Println(ui.Info("no branch yet for some tickets: run `hlp agent start <KEY>` to pick their repos"))
 	}
 }
 
-func spawnAll(cfg *config.Config, client *internalJira.Client, candidates []candidate, repos []string) error {
+func spawnAll(cfg *config.Config, candidates []candidate) error {
 	var failures []string
 	launched := 0
 
@@ -348,36 +307,26 @@ func spawnAll(cfg *config.Config, client *internalJira.Client, candidates []cand
 
 		opts := fanoutOpts
 		opts.Manual = !fanoutSpin
+		// Attaching mid-loop would hand the terminal away and strand the rest.
+		opts.NoAttach = true
 		opts.ContextPrompt = resolveContextPrompt(cfg, fanoutOpts.ContextPrompt)
-		opts.Repo, opts.RepoHow = c.Repo, c.How
-		// The per-ticket picker below replaces the blanket one, and startAgent
-		// must not re-resolve a repo the pre-pass already settled.
-		opts.Interactive = false
-		// The picker is interactive, so it has to run here rather than in the
+		opts.Repo = c.Repo
+		// The picker is interactive, so it runs here rather than in the
 		// concurrent pre-resolve pass - and never under --dry-run, which must
 		// not prompt for anything.
-		if c.NeedsPicker {
-			if fanoutOpts.DryRun {
-				fmt.Println(ui.Header(c.Ticket.Key + " - " + c.Ticket.Summary))
-				fmt.Println(ui.Info("dry-run: repo would be chosen interactively"))
-				fmt.Println()
-				launched++
-				continue
-			}
+		opts.Interactive = c.NeedsPicker
+		if c.NeedsPicker && fanoutOpts.DryRun {
 			fmt.Println(ui.Header(c.Ticket.Key + " - " + c.Ticket.Summary))
-			repo, err := pickRepo(repos)
-			if err != nil {
-				failures = append(failures, c.Ticket.Key+": "+err.Error())
-				fmt.Println(ui.Error(c.Ticket.Key + ": " + err.Error()))
-				continue
-			}
-			opts.Repo, opts.RepoHow = repo, "picked"
+			fmt.Println(ui.Info("dry-run: repos would be chosen interactively"))
+			fmt.Println()
+			launched++
+			continue
 		}
 
 		if launched > 0 && !fanoutOpts.DryRun {
 			time.Sleep(4 * time.Second)
 		}
-		if err := startAgent(cfg, client, &c.Ticket, opts); err != nil {
+		if err := startAgent(cfg, &c.Ticket, opts); err != nil {
 			failures = append(failures, c.Ticket.Key+": "+err.Error())
 			fmt.Println(ui.Error(c.Ticket.Key + ": " + err.Error()))
 			continue

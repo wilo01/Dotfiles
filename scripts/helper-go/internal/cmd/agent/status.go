@@ -4,72 +4,92 @@ import (
 	"encoding/json"
 	"fmt"
 	"os/exec"
-	"path/filepath"
-	"regexp"
 	"strings"
 
-	"github.com/dariuszw/hlp/internal/config"
+	"github.com/dariuszw/hlp/internal/task"
 	"github.com/dariuszw/hlp/internal/ui"
 	"github.com/spf13/cobra"
 )
 
-var ticketKeyPattern = regexp.MustCompile(`^[A-Z][A-Z0-9]+-\d+$`)
+var statusDrift bool
 
 var statusCmd = &cobra.Command{
 	Use:   "status",
-	Short: "Show all ticket agents: session, worktree, branch, PR",
+	Short: "Show every ticket task: repos, worktree state, session, PR",
+	Long: `Lists the tasks in tasks.json, most recently opened first, with one row per
+repo. BRANCH shows "detached@<sha>" until Claude creates a branch.
+
+Pass --drift to also check each task against the filesystem.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runStatus()
 	},
 }
 
 func runStatus() error {
-	cfg, err := config.Load()
+	store, err := loadStore()
 	if err != nil {
 		return err
 	}
 
-	root := expandPath(cfg.Agent.WorktreeRoot)
-	repos, err := discoverRepos(cfg.Agent.WorktreeRoot)
-	if err != nil {
-		return err
-	}
-
-	var rows [][]string
-	for _, repo := range repos {
-		worktrees, err := filepath.Glob(filepath.Join(root, repo, "*"))
-		if err != nil {
-			continue
-		}
-		for _, wtPath := range worktrees {
-			key := filepath.Base(wtPath)
-			if !ticketKeyPattern.MatchString(key) || !isGitRepo(wtPath) {
-				continue
-			}
-
-			session := "-"
-			if sessionExists(key) {
-				session = "idle"
-				if agentRunning(key) {
-					session = "agent"
-				}
-			}
-
-			branch := gitOutput(wtPath, "rev-parse", "--abbrev-ref", "HEAD")
-			ahead := branchAhead(wtPath, branch)
-			pr := prState(wtPath, branch)
-
-			rows = append(rows, []string{key, repo, session, branch, ahead, pr})
-		}
-	}
-
-	if len(rows) == 0 {
-		fmt.Println(ui.Info("no ticket worktrees found under " + root))
+	tasks := store.All()
+	if len(tasks) == 0 {
+		fmt.Println(ui.Info("no tasks yet — run: hlp agent start <TICKET-KEY>"))
 		return nil
 	}
 
-	fmt.Println(ui.Table([]string{"KEY", "REPO", "SESSION", "BRANCH", "AHEAD", "PR"}, rows))
+	var rows [][]string
+	for _, t := range tasks {
+		session := sessionState(t)
+		env := hexerCell(t)
+
+		if len(t.Repos) == 0 {
+			rows = append(rows, []string{t.JiraKey, "-", "-", "-", session, env, "-"})
+			continue
+		}
+		for i, r := range t.Repos {
+			key := t.JiraKey
+			if i > 0 {
+				key = "" // one key per task, repos listed beneath it
+			}
+			branch := worktreeHead(r.Worktree)
+			rows = append(rows, []string{
+				key, r.Name, branch, branchAhead(r.Worktree, branch), session, env, prState(r.Worktree, branch),
+			})
+		}
+	}
+
+	fmt.Println(ui.Table([]string{"KEY", "REPO", "BRANCH", "AHEAD", "SESSION", "HEXER", "PR"}, rows))
+
+	if statusDrift {
+		for _, t := range tasks {
+			if drift := task.Reconcile(t); len(drift) > 0 {
+				fmt.Println()
+				fmt.Println(ui.Header(t.JiraKey + " drift"))
+				reportDrift(t)
+			}
+		}
+	}
 	return nil
+}
+
+// sessionState describes the tmux session: absent, idle, or running claude.
+func sessionState(t task.Task) string {
+	name := t.SessionName()
+	if !sessionExists(name) {
+		return "-"
+	}
+	primary, ok := t.PrimaryRepo()
+	if ok && claudeRunningInWindow(name, primary.Name) {
+		return "claude"
+	}
+	return "idle"
+}
+
+func hexerCell(t task.Task) string {
+	if !t.Hexer.Enabled {
+		return "-"
+	}
+	return fmt.Sprintf(":%d", t.Hexer.Port)
 }
 
 func gitOutput(dir string, args ...string) string {
@@ -80,9 +100,11 @@ func gitOutput(dir string, args ...string) string {
 	return strings.TrimSpace(string(out))
 }
 
-// branchAhead reports "N ahead" vs upstream, "unpushed" when no upstream exists
+// branchAhead reports "+ahead/-behind" vs upstream. A detached worktree has no
+// upstream and nothing to compare, which is the normal state until Claude
+// creates a branch.
 func branchAhead(dir, branch string) string {
-	if branch == "-" || branch == "HEAD" {
+	if branch == "-" || branch == "?" || strings.HasPrefix(branch, "detached") {
 		return "-"
 	}
 	upstream := gitOutput(dir, "rev-parse", "--abbrev-ref", branch+"@{upstream}")
@@ -90,19 +112,16 @@ func branchAhead(dir, branch string) string {
 		return "unpushed"
 	}
 	counts := gitOutput(dir, "rev-list", "--count", "--left-right", branch+"..."+upstream)
-	if counts == "-" {
+	parts := strings.Fields(counts)
+	if len(parts) != 2 {
 		return "-"
 	}
-	parts := strings.Fields(counts)
-	if len(parts) == 2 {
-		return fmt.Sprintf("+%s/-%s", parts[0], parts[1])
-	}
-	return "-"
+	return fmt.Sprintf("+%s/-%s", parts[0], parts[1])
 }
 
 // prState queries gh for a PR on the branch; degrades to "-" without gh/auth
 func prState(dir, branch string) string {
-	if branch == "-" || branch == "HEAD" {
+	if branch == "-" || branch == "?" || strings.HasPrefix(branch, "detached") {
 		return "-"
 	}
 	gh, err := exec.LookPath("gh")
@@ -129,4 +148,8 @@ func prState(dir, branch string) string {
 		state = "draft"
 	}
 	return fmt.Sprintf("#%d %s", prs[0].Number, state)
+}
+
+func init() {
+	statusCmd.Flags().BoolVar(&statusDrift, "drift", false, "also check each task against the filesystem")
 }

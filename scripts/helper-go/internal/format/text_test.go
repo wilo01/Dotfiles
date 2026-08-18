@@ -105,9 +105,9 @@ func TestFilename(t *testing.T) {
 
 func TestExtractTicket(t *testing.T) {
 	tests := []struct {
-		input           string
-		expectedTicket  string
-		expectedDesc    string
+		input          string
+		expectedTicket string
+		expectedDesc   string
 	}{
 		{"VIS-1234 add feature", "VIS-1234", "add feature"},
 		{"vis-99-fix-bug", "VIS-99", "fix-bug"},

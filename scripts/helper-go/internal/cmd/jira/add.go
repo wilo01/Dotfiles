@@ -314,9 +314,9 @@ func runAdd(cmd *cobra.Command, args []string) {
 				subtaskKey,
 				issueType,
 				description,
-				"",              // timeSpent - empty for draft
+				"", // timeSpent - empty for draft
 				currentDateTime,
-				"",              // comment
+				"", // comment
 				subtaskLogInd,
 				batch.StatusDraft,
 			)
@@ -579,9 +579,9 @@ func RunAutoSync(quiet bool) error {
 			subtaskKey,
 			issueType,
 			description,
-			"",              // timeSpent - empty for draft
+			"", // timeSpent - empty for draft
 			currentDateTime,
-			"",              // comment
+			"", // comment
 			subtaskLogInd,
 			batch.StatusDraft,
 		)

@@ -135,3 +135,9 @@ nvim/.config/nvim-lazy
 nvim/.config/nvim-tj
 zsh/.oh-my-zsh/
 OpenJDK17U-jdk_x64_linux_hotspot_17.0.13_11.tar.gz
+
+# Third-party tmux plugins are cloned in place (~/.tmux symlinks here), so they
+# carry their own .git and stay updatable with git pull. tmux-harpoon is ours
+# and stays tracked.
+tmux/.tmux/plugins/tmux-resurrect/
+tmux/.tmux/plugins/tmux-continuum/

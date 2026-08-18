@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/dariuszw/hlp/internal/hexer"
 	"github.com/spf13/viper"
 )
 
@@ -40,16 +41,29 @@ type AgentRepoOverride struct {
 
 // AgentConfig holds settings for the parallel ticket-agent workflow (hlp agent)
 type AgentConfig struct {
-	JQL            string                       `mapstructure:"jql" yaml:"jql"`
-	MaxParallel    int                          `mapstructure:"max_parallel" yaml:"max_parallel"`
-	ClaudeCmd      string                       `mapstructure:"claude_cmd" yaml:"claude_cmd"`
-	Prompt         string                       `mapstructure:"prompt" yaml:"prompt"`
-	ContextPrompt  string                       `mapstructure:"context_prompt" yaml:"context_prompt"`
-	PermissionMode string                       `mapstructure:"permission_mode" yaml:"permission_mode"`
-	TriageCmd      string                       `mapstructure:"triage_cmd" yaml:"triage_cmd"`
-	TriageStatuses []string                     `mapstructure:"triage_statuses" yaml:"triage_statuses"`
-	WorktreeRoot   string                       `mapstructure:"worktree_root" yaml:"worktree_root"`
-	Repos          map[string]AgentRepoOverride `mapstructure:"repos" yaml:"repos"`
+	JQL            string `mapstructure:"jql" yaml:"jql"`
+	MaxParallel    int    `mapstructure:"max_parallel" yaml:"max_parallel"`
+	ClaudeCmd      string `mapstructure:"claude_cmd" yaml:"claude_cmd"`
+	Prompt         string `mapstructure:"prompt" yaml:"prompt"`
+	ContextPrompt  string `mapstructure:"context_prompt" yaml:"context_prompt"`
+	PermissionMode string `mapstructure:"permission_mode" yaml:"permission_mode"`
+	// ReposRoot holds the main checkouts task worktrees are cut from.
+	ReposRoot string `mapstructure:"repos_root" yaml:"repos_root"`
+	// TasksRoot holds one directory per ticket, each containing one worktree
+	// per enlisted repo.
+	TasksRoot string `mapstructure:"tasks_root" yaml:"tasks_root"`
+	// RepoURLTemplate turns a bare repo name into a clone URL; {{REPO}} is
+	// substituted.
+	RepoURLTemplate string `mapstructure:"repo_url_template" yaml:"repo_url_template"`
+	// BaseBranchPatterns are the remote branch globs offered as bases in the
+	// picker, alongside each repo's default. Listing every branch is not an
+	// option: tds-suite alone has thousands.
+	BaseBranchPatterns []string `mapstructure:"base_branch_patterns" yaml:"base_branch_patterns"`
+	// WorktreeRoot is the pre-multi-repo layout, kept readable so status can
+	// still see worktrees created before the task model landed.
+	WorktreeRoot string                       `mapstructure:"worktree_root" yaml:"worktree_root"`
+	Repos        map[string]AgentRepoOverride `mapstructure:"repos" yaml:"repos"`
+	Hexer        hexer.Config                 `mapstructure:"hexer" yaml:"hexer"`
 }
 
 // DevConfig holds developer workflow settings
@@ -147,16 +161,29 @@ func Default() *Config {
 			CommitsFile: "~/Dev/Private/Commits.md",
 		},
 		Agent: AgentConfig{
-			JQL:            "assignee = currentUser() AND statusCategory != Done",
-			MaxParallel:    5,
-			ClaudeCmd:      "claude --dangerously-skip-permissions",
-			Prompt:         "/agent-run {{KEY}}",
-			ContextPrompt:  "Read the current state of {{KEY}} from Jira via the Jira MCP - status, description, and the latest comments - then give me a short brief on where it stands. Don't change anything yet.",
-			PermissionMode: "auto",
-			TriageCmd:      "claude -p --model haiku",
-			TriageStatuses: []string{"Backlog", "To Do"},
-			WorktreeRoot:   "~/tds-branch-opener/worktrees",
-			Repos:          map[string]AgentRepoOverride{},
+			JQL:                "assignee = currentUser() AND statusCategory != Done",
+			MaxParallel:        5,
+			ClaudeCmd:          "claude --dangerously-skip-permissions",
+			Prompt:             "/agent-run {{KEY}}",
+			ContextPrompt:      "Read the current state of {{KEY}} from Jira via the Jira MCP - status, description, and the latest comments - then give me a short brief on where it stands. Don't change anything yet.",
+			PermissionMode:     "auto",
+			ReposRoot:          "~/tds-branch-opener/branches",
+			TasksRoot:          "~/tds-branch-opener/branches/tasks",
+			RepoURLTemplate:    "git@github.com:acreidentity/{{REPO}}.git",
+			BaseBranchPatterns: []string{"maintenance/*", "release/*"},
+			WorktreeRoot:       "~/tds-branch-opener/worktrees",
+			Repos:              map[string]AgentRepoOverride{},
+			Hexer: hexer.Config{
+				Enabled:        true,
+				HexerDir:       "~/tds-branch-opener/tds-hexer",
+				TDSDir:         "~/tds-branch-opener/branches/tds-suite",
+				TDSRepo:        "tds-suite",
+				HexerPortMin:   3100,
+				HexerPortMax:   3199,
+				DBPortMin:      1531,
+				DBPortMax:      1599,
+				HostnameSuffix: "acrid.dev",
+			},
 		},
 		Token: TokenConfig{
 			OAuthURL: "https://oauth.tdscloud.io/oauth/v1/authenticate",

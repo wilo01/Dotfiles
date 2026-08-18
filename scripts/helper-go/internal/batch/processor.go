@@ -33,16 +33,16 @@ const (
 
 // Entry represents a single worklog entry from CSV
 type Entry struct {
-	IssueKey    string // Parent/main issue key
-	SubtaskKey  string // Sub-task key if applicable (empty for non-subtasks)
-	IssueType   string // Story, Bug, Task, etc.
-	Description string // Ticket summary from JIRA (combined for subtasks)
-	Comment     string
-	Date        string // DD/MM/YYYY or DD.MM.YYYY
-	TimeSpent   string
+	IssueKey      string // Parent/main issue key
+	SubtaskKey    string // Sub-task key if applicable (empty for non-subtasks)
+	IssueType     string // Story, Bug, Task, etc.
+	Description   string // Ticket summary from JIRA (combined for subtasks)
+	Comment       string
+	Date          string // DD/MM/YYYY or DD.MM.YYYY
+	TimeSpent     string
 	SubtaskLogInd string // Y = log to subtask, N/empty = log to parent
-	Status      string // empty = pending, SYNC, UPDATED, DONE
-	RowNumber   int    // Internal - row number in CSV
+	Status        string // empty = pending, SYNC, UPDATED, DONE
+	RowNumber     int    // Internal - row number in CSV
 }
 
 // IsPending returns true if entry needs to be posted
@@ -187,15 +187,15 @@ func DefaultCSVPathForProfile(profile *config.JiraProfile) string {
 // CSV column indices (9-column format)
 // Format: issue_key, subtask_key, issue_type, description, comment, date, time_spent, log_to, status
 const (
-	ColIssueKey    = 0
-	ColSubtaskKey  = 1
-	ColIssueType   = 2
-	ColDescription = 3
-	ColComment     = 4
-	ColDate        = 5
-	ColTimeSpent   = 6
+	ColIssueKey      = 0
+	ColSubtaskKey    = 1
+	ColIssueType     = 2
+	ColDescription   = 3
+	ColComment       = 4
+	ColDate          = 5
+	ColTimeSpent     = 6
 	ColSubtaskLogInd = 7
-	ColStatus      = 8
+	ColStatus        = 8
 )
 
 // forceQuote CSV-encodes a field, always wrapping it in double quotes.
@@ -290,16 +290,16 @@ func ParseCSV(path string) ([]Entry, error) {
 		if len(record) >= 9 {
 			// New 9-column format: issue_key, subtask_key, issue_type, description, comment, date, time_spent, log_to, status
 			entry := Entry{
-				IssueKey:    strings.ToUpper(strings.TrimSpace(record[ColIssueKey])),
-				SubtaskKey:  strings.ToUpper(strings.TrimSpace(record[ColSubtaskKey])),
-				IssueType:   strings.TrimSpace(record[ColIssueType]),
-				Description: strings.TrimSpace(record[ColDescription]),
-				Comment:     strings.TrimSpace(record[ColComment]),
-				Date:        strings.TrimSpace(record[ColDate]),
-				TimeSpent:   strings.TrimSpace(record[ColTimeSpent]),
+				IssueKey:      strings.ToUpper(strings.TrimSpace(record[ColIssueKey])),
+				SubtaskKey:    strings.ToUpper(strings.TrimSpace(record[ColSubtaskKey])),
+				IssueType:     strings.TrimSpace(record[ColIssueType]),
+				Description:   strings.TrimSpace(record[ColDescription]),
+				Comment:       strings.TrimSpace(record[ColComment]),
+				Date:          strings.TrimSpace(record[ColDate]),
+				TimeSpent:     strings.TrimSpace(record[ColTimeSpent]),
 				SubtaskLogInd: strings.ToUpper(strings.TrimSpace(record[ColSubtaskLogInd])),
-				Status:      strings.TrimSpace(record[ColStatus]),
-				RowNumber:   rowNum,
+				Status:        strings.TrimSpace(record[ColStatus]),
+				RowNumber:     rowNum,
 			}
 			entries = append(entries, entry)
 		} else if len(record) >= 7 {
@@ -1282,11 +1282,11 @@ func updateCSVWithRestructure(path string, details map[string]jira.IssueDetails,
 			// Restructure: move issueKey to SubtaskKey, use parent as IssueKey
 			parentDetail, hasParent := parentDetails[detail.ParentKey]
 			if hasParent {
-				record[ColSubtaskKey] = issueKey                                                            // Original key becomes subtask
-				record[ColIssueKey] = detail.ParentKey                                                      // Parent becomes main key
-				record[ColIssueType] = parentDetail.IssueType                                               // Parent's type
+				record[ColSubtaskKey] = issueKey                                       // Original key becomes subtask
+				record[ColIssueKey] = detail.ParentKey                                 // Parent becomes main key
+				record[ColIssueType] = parentDetail.IssueType                          // Parent's type
 				record[ColDescription] = parentDetail.Summary + " > " + detail.Summary // Combined description
-				record[ColSubtaskLogInd] = "Y"                                                              // Worklog was logged to subtask
+				record[ColSubtaskLogInd] = "Y"                                         // Worklog was logged to subtask
 				records[i] = record
 				restructured++
 				continue // Skip normal enrichment since we just did full restructure

@@ -43,22 +43,22 @@ func TestBuildCommitMessage(t *testing.T) {
 	}
 
 	tests := []struct {
-		name        string
-		ticket      string
-		version     string
-		newBranch   string
-		entry       *commits.CommitEntry
-		prNumber    int
+		name         string
+		ticket       string
+		version      string
+		newBranch    string
+		entry        *commits.CommitEntry
+		prNumber     int
 		targetBranch string
 		wantContains []string
 	}{
 		{
-			name:        "with entry and version",
-			ticket:      "VIS-6457",
-			version:     "13.2AV",
-			newBranch:   "VIS-6457-some-fix-13.2av",
-			entry:       entry,
-			prNumber:    1063,
+			name:         "with entry and version",
+			ticket:       "VIS-6457",
+			version:      "13.2AV",
+			newBranch:    "VIS-6457-some-fix-13.2av",
+			entry:        entry,
+			prNumber:     1063,
 			targetBranch: "maintenance/13.2AV",
 			wantContains: []string{
 				"VIS-6457 [13.2AV]",
@@ -69,36 +69,36 @@ func TestBuildCommitMessage(t *testing.T) {
 			},
 		},
 		{
-			name:        "nil entry falls back",
-			ticket:      "VIS-1234",
-			version:     "13.1AV",
-			newBranch:   "VIS-1234-fix-13.1av",
-			entry:       nil,
-			prNumber:    999,
+			name:         "nil entry falls back",
+			ticket:       "VIS-1234",
+			version:      "13.1AV",
+			newBranch:    "VIS-1234-fix-13.1av",
+			entry:        nil,
+			prNumber:     999,
 			targetBranch: "maintenance/13.1AV",
 			wantContains: []string{
 				"Cherry-pick PR #999 onto maintenance/13.1AV",
 			},
 		},
 		{
-			name:        "empty version falls back",
-			ticket:      "VIS-1234",
-			version:     "",
-			newBranch:   "VIS-1234-fix",
-			entry:       entry,
-			prNumber:    500,
+			name:         "empty version falls back",
+			ticket:       "VIS-1234",
+			version:      "",
+			newBranch:    "VIS-1234-fix",
+			entry:        entry,
+			prNumber:     500,
 			targetBranch: "some-branch",
 			wantContains: []string{
 				"Cherry-pick PR #500 onto some-branch",
 			},
 		},
 		{
-			name:        "entry with no logs",
-			ticket:      "VIS-6457",
-			version:     "13.2AV",
-			newBranch:   "VIS-6457-fix-13.2av",
-			entry:       &commits.CommitEntry{Ticket: "VIS-6457"},
-			prNumber:    1063,
+			name:         "entry with no logs",
+			ticket:       "VIS-6457",
+			version:      "13.2AV",
+			newBranch:    "VIS-6457-fix-13.2av",
+			entry:        &commits.CommitEntry{Ticket: "VIS-6457"},
+			prNumber:     1063,
 			targetBranch: "maintenance/13.2AV",
 			wantContains: []string{
 				"VIS-6457 [13.2AV]",
@@ -255,4 +255,3 @@ func TestExpandPath(t *testing.T) {
 		})
 	}
 }
-

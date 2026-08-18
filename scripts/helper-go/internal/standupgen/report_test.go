@@ -10,13 +10,13 @@ import (
 
 func TestBuildReport(t *testing.T) {
 	tests := []struct {
-		name       string
-		entries    []batch.Entry
-		startDate  time.Time
-		endDate    time.Time
-		wantTasks  int
-		wantDays   int
-		wantTime   time.Duration
+		name      string
+		entries   []batch.Entry
+		startDate time.Time
+		endDate   time.Time
+		wantTasks int
+		wantDays  int
+		wantTime  time.Duration
 	}{
 		{
 			name: "single entry",

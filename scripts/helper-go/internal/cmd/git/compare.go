@@ -20,15 +20,15 @@ var (
 
 // CompareResult holds the comparison data between commit and branch
 type CompareResult struct {
-	Commit        string
-	Branch        string
-	CommitShort   string
-	BranchHead    string
-	Ahead         int
-	Behind        int
-	MergeBase     string
-	CommitsAhead  []CommitInfo
-	BehindList    []CommitInfo
+	Commit       string
+	Branch       string
+	CommitShort  string
+	BranchHead   string
+	Ahead        int
+	Behind       int
+	MergeBase    string
+	CommitsAhead []CommitInfo
+	BehindList   []CommitInfo
 	// Enhanced versions with metadata
 	AheadEnhanced  []EnhancedCommitInfo
 	BehindEnhanced []EnhancedCommitInfo
@@ -249,7 +249,6 @@ func parseEnhancedCommitLog(output string) []EnhancedCommitInfo {
 	}
 	return commits
 }
-
 
 func printCompareResult(r *CompareResult) {
 	fmt.Println()
