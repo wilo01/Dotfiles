@@ -15,8 +15,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
-		if m.cloning {
+		switch {
+		case m.cloning:
 			return m.updateCloning(msg)
+		case m.showDescription:
+			return m.updateDescription(msg)
 		}
 		return m.updateForm(msg)
 	}
@@ -53,6 +56,31 @@ func (m Model) updateCloning(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	m.cloneInput, cmd = m.cloneInput.Update(msg)
 	return m, cmd
+}
+
+// updateDescription drives the full-text overlay: it only scrolls and closes,
+// so the repo list underneath cannot be changed by accident.
+func (m Model) updateDescription(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "esc", "d", "q", "enter":
+		m.showDescription = false
+		m.descriptionTop = 0
+	case "up", "k":
+		m.descriptionTop = max(m.descriptionTop-1, 0)
+	case "down", "j":
+		m.descriptionTop++
+	case "pgup":
+		m.descriptionTop = max(m.descriptionTop-descriptionOverlayRows, 0)
+	case "pgdown", " ":
+		m.descriptionTop += descriptionOverlayRows
+	case "home":
+		m.descriptionTop = 0
+	case "ctrl+c":
+		m.cancelled = true
+		m.result = Result{}
+		return m, tea.Quit
+	}
+	return m, nil
 }
 
 func (m Model) updateForm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
@@ -108,6 +136,16 @@ func (m Model) updateForm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			break
 		}
 		return m.expand(false), nil
+
+	case "d":
+		if onText {
+			break // a literal d in the branch name
+		}
+		if m.description != "" {
+			m.showDescription = true
+			m.descriptionTop = 0
+		}
+		return m, nil
 
 	case " ":
 		if onText {

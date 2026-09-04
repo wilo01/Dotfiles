@@ -1,0 +1,382 @@
+{
+  "claude": {
+    "total_calls": 256,
+    "successful_calls": 96,
+    "failed_calls": 160,
+    "total_time": 2553,
+    "wins": 96,
+    "recent_failures": [
+      "2026-05-26T09:22:18Z",
+      "2026-05-26T11:06:40Z",
+      "2026-05-26T11:11:02Z"
+    ],
+    "last_success": "2026-05-08T14:55:37Z",
+    "disabled_until": "2026-05-26T12:11:02Z"
+  },
+  "gemini": {
+    "total_calls": 257,
+    "successful_calls": 110,
+    "failed_calls": 147,
+    "total_time": 4017,
+    "wins": 110,
+    "recent_failures": [
+      "2026-05-26T09:22:18Z",
+      "2026-05-26T11:06:40Z",
+      "2026-05-26T11:11:02Z"
+    ],
+    "last_success": "2026-03-12T09:58:33Z",
+    "disabled_until": "2026-05-26T12:11:02Z"
+  },
+  "history": [
+    {
+      "ai": "claude",
+      "success": false,
+      "time": 16,
+      "winner": false,
+      "timestamp": "2026-05-07T13:31:29Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 20,
+      "winner": false,
+      "timestamp": "2026-05-07T13:31:29Z"
+    },
+    {
+      "ai": "claude",
+      "success": true,
+      "time": 16,
+      "winner": true,
+      "timestamp": "2026-05-08T08:01:54Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 60,
+      "winner": false,
+      "timestamp": "2026-05-08T08:01:55Z"
+    },
+    {
+      "ai": "claude",
+      "success": true,
+      "time": 51,
+      "winner": true,
+      "timestamp": "2026-05-08T12:38:57Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 60,
+      "winner": false,
+      "timestamp": "2026-05-08T12:38:57Z"
+    },
+    {
+      "ai": "claude",
+      "success": true,
+      "time": 20,
+      "winner": true,
+      "timestamp": "2026-05-08T14:55:37Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 60,
+      "winner": false,
+      "timestamp": "2026-05-08T14:55:37Z"
+    },
+    {
+      "ai": "claude",
+      "success": false,
+      "time": 13,
+      "winner": false,
+      "timestamp": "2026-05-11T07:55:49Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 18,
+      "winner": false,
+      "timestamp": "2026-05-11T07:55:49Z"
+    },
+    {
+      "ai": "claude",
+      "success": false,
+      "time": 13,
+      "winner": false,
+      "timestamp": "2026-05-12T09:01:22Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 12,
+      "winner": false,
+      "timestamp": "2026-05-12T09:01:22Z"
+    },
+    {
+      "ai": "claude",
+      "success": false,
+      "time": 20,
+      "winner": false,
+      "timestamp": "2026-05-12T09:12:11Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 11,
+      "winner": false,
+      "timestamp": "2026-05-12T09:12:11Z"
+    },
+    {
+      "ai": "claude",
+      "success": false,
+      "time": 12,
+      "winner": false,
+      "timestamp": "2026-05-12T14:40:56Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 13,
+      "winner": false,
+      "timestamp": "2026-05-12T14:40:56Z"
+    },
+    {
+      "ai": "claude",
+      "success": false,
+      "time": 15,
+      "winner": false,
+      "timestamp": "2026-05-14T14:33:48Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 17,
+      "winner": false,
+      "timestamp": "2026-05-14T14:33:48Z"
+    },
+    {
+      "ai": "claude",
+      "success": false,
+      "time": 15,
+      "winner": false,
+      "timestamp": "2026-05-14T14:40:35Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 21,
+      "winner": false,
+      "timestamp": "2026-05-14T14:40:35Z"
+    },
+    {
+      "ai": "claude",
+      "success": false,
+      "time": 13,
+      "winner": false,
+      "timestamp": "2026-05-14T14:44:19Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 18,
+      "winner": false,
+      "timestamp": "2026-05-14T14:44:19Z"
+    },
+    {
+      "ai": "claude",
+      "success": false,
+      "time": 13,
+      "winner": false,
+      "timestamp": "2026-05-14T14:46:34Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 15,
+      "winner": false,
+      "timestamp": "2026-05-14T14:46:34Z"
+    },
+    {
+      "ai": "claude",
+      "success": false,
+      "time": 12,
+      "winner": false,
+      "timestamp": "2026-05-14T14:49:31Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 7,
+      "winner": false,
+      "timestamp": "2026-05-14T14:49:31Z"
+    },
+    {
+      "ai": "claude",
+      "success": false,
+      "time": 13,
+      "winner": false,
+      "timestamp": "2026-05-14T14:52:36Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 82,
+      "winner": false,
+      "timestamp": "2026-05-14T14:52:36Z"
+    },
+    {
+      "ai": "claude",
+      "success": false,
+      "time": 15,
+      "winner": false,
+      "timestamp": "2026-05-15T07:01:27Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 16,
+      "winner": false,
+      "timestamp": "2026-05-15T07:01:27Z"
+    },
+    {
+      "ai": "claude",
+      "success": false,
+      "time": 7,
+      "winner": false,
+      "timestamp": "2026-05-17T15:15:41Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 65,
+      "winner": false,
+      "timestamp": "2026-05-17T15:15:41Z"
+    },
+    {
+      "ai": "claude",
+      "success": false,
+      "time": 9,
+      "winner": false,
+      "timestamp": "2026-05-20T13:05:06Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 14,
+      "winner": false,
+      "timestamp": "2026-05-20T13:05:06Z"
+    },
+    {
+      "ai": "claude",
+      "success": false,
+      "time": 8,
+      "winner": false,
+      "timestamp": "2026-05-21T20:50:13Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 11,
+      "winner": false,
+      "timestamp": "2026-05-21T20:50:13Z"
+    },
+    {
+      "ai": "claude",
+      "success": false,
+      "time": 7,
+      "winner": false,
+      "timestamp": "2026-05-21T20:52:29Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 23,
+      "winner": false,
+      "timestamp": "2026-05-21T20:52:29Z"
+    },
+    {
+      "ai": "claude",
+      "success": false,
+      "time": 8,
+      "winner": false,
+      "timestamp": "2026-05-25T08:31:01Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 18,
+      "winner": false,
+      "timestamp": "2026-05-25T08:31:01Z"
+    },
+    {
+      "ai": "claude",
+      "success": false,
+      "time": 7,
+      "winner": false,
+      "timestamp": "2026-05-26T08:08:10Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 17,
+      "winner": false,
+      "timestamp": "2026-05-26T08:08:10Z"
+    },
+    {
+      "ai": "claude",
+      "success": false,
+      "time": 8,
+      "winner": false,
+      "timestamp": "2026-05-26T09:00:30Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 17,
+      "winner": false,
+      "timestamp": "2026-05-26T09:00:30Z"
+    },
+    {
+      "ai": "claude",
+      "success": false,
+      "time": 7,
+      "winner": false,
+      "timestamp": "2026-05-26T09:22:18Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 18,
+      "winner": false,
+      "timestamp": "2026-05-26T09:22:18Z"
+    },
+    {
+      "ai": "claude",
+      "success": false,
+      "time": 8,
+      "winner": false,
+      "timestamp": "2026-05-26T11:06:40Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 23,
+      "winner": false,
+      "timestamp": "2026-05-26T11:06:40Z"
+    },
+    {
+      "ai": "claude",
+      "success": false,
+      "time": 7,
+      "winner": false,
+      "timestamp": "2026-05-26T11:11:02Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 18,
+      "winner": false,
+      "timestamp": "2026-05-26T11:11:02Z"
+    }
+  ]
+}

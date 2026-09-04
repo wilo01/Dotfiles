@@ -92,6 +92,7 @@ Without a key it lists your tasks to pick from.`,
 		apply, err := runPicker(cfg, store, ticket, existing, applyOptions{
 			Key:          key,
 			Summary:      existing.Summary,
+			Description:  existing.Description,
 			Base:         editOpts.Base,
 			DryRun:       editOpts.DryRun,
 			Force:        editOpts.Force,
@@ -187,7 +188,13 @@ func removeTask(cfg *config.Config, key string) error {
 			return err
 		}
 		// The container is bound to the worktree path, so it has to go first.
-		if err := runner.Down(hexerSlug(key), t.TaskRoot, t.Hexer.Port, rmKeepDB); err != nil {
+		if err := runner.Down(hexer.DownOptions{
+			Slug:      hexerSlug(key),
+			TaskRoot:  t.TaskRoot,
+			HexerPort: t.Hexer.Port,
+			DBPort:    t.Hexer.DBPort,
+			KeepDB:    rmKeepDB,
+		}); err != nil {
 			return fmt.Errorf("hexer teardown failed (nothing was removed): %w", err)
 		}
 		fmt.Println(ui.SuccessMsg("hexer environment torn down"))
@@ -240,7 +247,7 @@ func selectTask(store *task.Store, args []string, title string) (task.Task, erro
 		return task.Task{}, err
 	}
 	if key == "" {
-		return task.Task{}, fmt.Errorf("cancelled")
+		return task.Task{}, errCancelled
 	}
 	t, ok := store.Get(key)
 	if !ok {

@@ -10,7 +10,6 @@
    autoSetupRemote = true
 [core]
 	editor = nvim
-	hooksPath = /home/dariuszw/.git-template/hooks
 	pager = delta
 	excludesfile = /home/dariuszw/gitconfig/gitignore/.gitignore
 [safe]
@@ -47,3 +46,9 @@
     commit = "rgb:ffb86c"
     file-meta = "rgb:565f89"
     hunk-header = "rgb:bb9af7"
+[credential "https://github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential

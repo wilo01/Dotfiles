@@ -1,0 +1,12 @@
+#!/bin/bash
+source "$(dirname "$(readlink -f "$0")")/branch-guard.sh" || exit 0
+
+if guard_enabled Commit; then
+   branch=$(current_branch)
+   if is_protected_branch "$branch"; then
+      refuse_commit "$branch"
+      exit 1
+   fi
+fi
+
+delegate_to_local_hook pre-commit "$@"

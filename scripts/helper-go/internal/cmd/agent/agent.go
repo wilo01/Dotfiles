@@ -18,13 +18,14 @@ with one window per repo, one resumable Claude session, and optionally a
 dedicated hexer environment.
 
   start  pick repos, create worktrees, open the session
+         with no key: bring up every ticket agent.jql returns
   open   rebuild the session from tasks.json (no Jira call, no picker)
   edit   add or remove repos on an existing ticket
   status list every task with its worktree and session state
   stop   interrupt a running agent (--kill ends the session)
+  cert   trust the tds-hexer dev certificate (one import covers every env)
   rm     delete a ticket's worktrees, hexer env and session
   spin   spawn an autonomous agent
-  fanout open a session per assigned ticket
 
 Worktrees are created detached at origin/<default branch>, freshly fetched. No
 branch is created: Claude branches when it starts work.
@@ -37,10 +38,10 @@ func init() {
 	AgentCmd.AddCommand(newLaunchCmd("spin", "Spawn an autonomous agent for one ticket (worktrees + tmux + /agent-run)", false))
 	AgentCmd.AddCommand(openCmd)
 	AgentCmd.AddCommand(editCmd)
-	AgentCmd.AddCommand(fanoutCmd)
 	AgentCmd.AddCommand(statusCmd)
 	AgentCmd.AddCommand(stopCmd)
 	AgentCmd.AddCommand(rmCmd)
+	AgentCmd.AddCommand(certCmd)
 }
 
 func getJiraClient() (*internalJira.Client, error) {

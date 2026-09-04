@@ -10,6 +10,7 @@ Commit_notes.md
 # TMP
 # Directories
 .tmux-orchestrator/
+specs/
 source/ui/app/view/
 test/Cypress/cypress/e2e/demo/
 

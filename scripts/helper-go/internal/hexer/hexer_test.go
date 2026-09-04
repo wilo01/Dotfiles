@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"testing"
 )
 
@@ -144,5 +145,23 @@ func TestModulesByName(t *testing.T) {
 
 	if _, err := cfg.ModulesByName([]string{"nope"}); err == nil {
 		t.Error("expected an error for an unknown app name")
+	}
+}
+
+func TestDownFlagsCarryDBPortForConnectionCleanup(t *testing.T) {
+	got := downFlags(DownOptions{Slug: "suite-9345", TaskRoot: "/tasks/SUITE-9345", HexerPort: 3102, DBPort: 1533})
+
+	want := []string{"down", "suite-9345", "--task-root", "/tasks/SUITE-9345", "--hexer-port", "3102", "--db-port", "1533"}
+	if !slices.Equal(got, want) {
+		t.Errorf("downFlags = %v, want %v", got, want)
+	}
+}
+
+func TestDownFlagsOmitUnsetPorts(t *testing.T) {
+	got := downFlags(DownOptions{Slug: "suite-9345", TaskRoot: "/tasks/SUITE-9345", KeepDB: true})
+
+	want := []string{"down", "suite-9345", "--task-root", "/tasks/SUITE-9345", "--keep-db"}
+	if !slices.Equal(got, want) {
+		t.Errorf("downFlags = %v, want %v", got, want)
 	}
 }

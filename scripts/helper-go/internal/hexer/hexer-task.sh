@@ -19,7 +19,7 @@
 #   up <slug> --branch <b> --worktree <tds-suite-worktree> --task-root <dir>
 #      --db-port <n> --hexer-port <n> [--hexer-dir <dir>] [--host <hostname>]
 #      --module <name:route:static:rt> [--module ...]
-#   down <slug> --task-root <dir> [--keep-db]
+#   down <slug> --task-root <dir> [--db-port <n>] [--keep-db]
 #   status <slug> --task-root <dir>
 #
 set -euo pipefail
@@ -36,6 +36,10 @@ GOLDEN_BUILD_CONTAINER="tds-golden-build"
 GOLDEN_BUILD_PORT="1530"
 DB_SERVICE="xepdb1"
 DB_USER="coreaccess"
+# Basic-auth credentials for hexer's /health dashboard. /health-check itself is
+# unauthenticated, so provisioning never needs these.
+HEALTH_USER="${HEXER_TASK_HEALTH_USER:-admin}"
+HEALTH_PASS="${HEXER_TASK_HEALTH_PASS:-admin123}"
 DB_PASS='xy*0m9'
 ORACLE_PWD='TdsSuite1'
 
@@ -85,15 +89,27 @@ container_name() { echo "tds-task-$1"; }
 container_exists()  { docker ps -a --format '{{.Names}}' | grep -qx "$1"; }
 container_running() { docker ps --format '{{.Names}}' | grep -qx "$1"; }
 
+# A task container is cloned from an image that was committed while its database
+# was already up, so its log carries that build's "DATABASE IS READY TO USE"
+# line from the very first poll. Matching it is what let liquibase start against
+# a PDB that had not reopened yet (ORA-12514). The healthcheck is authoritative
+# where there is one; the log is consulted only when there is not, and then only
+# for output this container produced since it started.
 wait_db_ready() {
    local name="$1" tries="${2:-240}"
-   local i health
+   local i health started
+   local -a since=()
+   started="$(docker inspect -f '{{.State.StartedAt}}' "$name" 2>/dev/null || true)"
+   if [ -n "$started" ]; then
+      since=(--since "$started")
+   fi
    for i in $(seq 1 "$tries"); do
       health="$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{end}}' "$name" 2>/dev/null || true)"
-      [ "$health" = "healthy" ] && return 0
+      if [ -n "$health" ]; then
+         [ "$health" = "healthy" ] && return 0
       # grep without -q: it must consume the whole stream — early exit sends
       # docker logs a SIGPIPE, which pipefail turns into a false negative.
-      if docker logs "$name" 2>&1 | grep "DATABASE IS READY TO USE" >/dev/null; then
+      elif docker logs "${since[@]}" "$name" 2>&1 | grep "DATABASE IS READY TO USE" >/dev/null; then
          return 0
       fi
       container_running "$name" || die "container $name stopped — check 'docker logs $name'"
@@ -102,12 +118,45 @@ wait_db_ready() {
    die "$name did not become ready — check 'docker logs $name' (Rosetta enabled?)"
 }
 
-CERT_DIR="$HOME/.config/acorn/certs"
+CERT_DIR="${HEXER_TASK_CERT_DIR:-$HOME/.config/hlp/certs}"
 
-# Self-signed wildcard cert per hostname suffix (*.acrid.dev). The .dev TLD
-# is HSTS-preloaded — browsers force HTTPS, plain HTTP can never work.
+# The .dev TLD is HSTS-preloaded — browsers force HTTPS, so plain HTTP can
+# never work and the certificate has to be one the browser accepts.
+#
+# tds-hexer ships its own dev CA (scripts/dev/generate-dev-certs.sh, exposed as
+# `pnpm dev:certs`) covering *.acrid.dev. Reusing it means one import into the
+# browser covers every task environment; generating a cert per suffix here would
+# mean a new untrusted authority each time.
+hexer_repo_cert() {
+   local dir="${HEXER_DEFAULT:-}"
+   [ -n "$dir" ] || return 1
+   HEXER_CERT_DIR="$dir/src/assets/certs/dev"
+   [ -f "$HEXER_CERT_DIR/acreidentity-dev.crt" ] && [ -f "$HEXER_CERT_DIR/acreidentity-dev.key" ]
+}
+
 ensure_dev_cert() {
    local suffix="$1"
+
+   if hexer_repo_cert; then
+      CERT_FILE="$HEXER_CERT_DIR/acreidentity-dev.crt"
+      KEY_FILE="$HEXER_CERT_DIR/acreidentity-dev.key"
+      ok "using the tds-hexer dev certificate ($CERT_FILE)"
+      return 0
+   fi
+
+   # Not generated yet: let the repo's own tooling make it, so the cert the
+   # browser trusts and the cert we serve stay the same artifact.
+   if [ -n "${HEXER_DEFAULT:-}" ] && [ -f "$HEXER_DEFAULT/scripts/dev/generate-dev-certs.sh" ]; then
+      warn "tds-hexer dev certificate missing — generating it with pnpm dev:certs"
+      ( cd "$HEXER_DEFAULT" && pnpm dev:certs ) >&2 2>&1 || true
+      if hexer_repo_cert; then
+         CERT_FILE="$HEXER_CERT_DIR/acreidentity-dev.crt"
+         KEY_FILE="$HEXER_CERT_DIR/acreidentity-dev.key"
+         ok "generated the tds-hexer dev certificate ($CERT_FILE)"
+         return 0
+      fi
+   fi
+
    CERT_FILE="$CERT_DIR/$suffix.crt"
    KEY_FILE="$CERT_DIR/$suffix.key"
    [ -f "$CERT_FILE" ] && [ -f "$KEY_FILE" ] && return 0
@@ -118,7 +167,8 @@ ensure_dev_cert() {
       -addext "subjectAltName=DNS:*.$suffix,DNS:$suffix,DNS:localhost,IP:127.0.0.1" \
       >/dev/null 2>&1 || die "openssl cert generation failed for *.$suffix"
    chmod 600 "$KEY_FILE"
-   ok "self-signed wildcard cert created for *.$suffix ($CERT_DIR)"
+   warn "no tds-hexer dev certificate found; fell back to a self-signed cert for *.$suffix"
+   ok "self-signed wildcard cert created ($CERT_DIR)"
 }
 
 # HSTS-preloaded TLDs (.dev) hard-block untrusted certs — no "Proceed
@@ -126,17 +176,41 @@ ensure_dev_cert() {
 # keychain. Deliberately NOT automated: changing the system trust store is
 # the developer's own call, so we detect and hand them the exact command.
 cert_trust_command() {
-   echo "sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain '$CERT_FILE'"
+   if [ "$(uname)" = "Darwin" ]; then
+      echo "sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain '$CERT_FILE'"
+   else
+      echo "certutil -d sql:\$HOME/.pki/nssdb -A -t 'C,,' -n 'Acre Identity Dev' -i '$CERT_FILE'"
+   fi
 }
 
+# Chrome and Firefox read the NSS database rather than the system store, so on
+# Linux that is where the answer is. An unknown answer counts as trusted: this
+# only drives a hint, and a false alarm on every run would be worse than silence.
 cert_is_trusted() {
-   [ "$(uname)" = "Darwin" ] || return 0
-   security verify-cert -c "$CERT_FILE" -p ssl >/dev/null 2>&1
+   if [ "$(uname)" = "Darwin" ]; then
+      security verify-cert -c "$CERT_FILE" -p ssl >/dev/null 2>&1
+      return
+   fi
+   command -v certutil >/dev/null 2>&1 || return 0
+   [ -d "$HOME/.pki/nssdb" ] || return 0
+   certutil -d "sql:$HOME/.pki/nssdb" -L 2>/dev/null | grep -q "Acre Identity Dev"
 }
+
+CERT_TRUST_MISSING=""
 
 ensure_cert_trusted() {
    cert_is_trusted && return 0
-   die "dev certificate is not trusted — browsers hard-block .dev domains. Run once: $(cert_trust_command)"
+   CERT_TRUST_MISSING="1"
+   warn "dev certificate is not trusted yet — the environment will still start, but the browser will refuse it"
+   return 0
+}
+
+# cert_trust_reminder repeats the one-time import next to the URL it unblocks.
+cert_trust_reminder() {
+   [ -n "$CERT_TRUST_MISSING" ] || return 0
+   warn "trust the dev certificate once, then reopen the URL above:"
+   warn "  $(cert_trust_command)"
+   warn "  Chrome: chrome://certificate-manager/localcerts/usercerts → Import → $CERT_FILE"
 }
 
 # Protocol-agnostic TLS terminator: decrypts on the public task port and
@@ -158,19 +232,64 @@ srv.listen(Number(httpsPort),"0.0.0.0",()=>console.log(`tls ${httpsPort} -> http
    echo $! > "$state/tls.pid"
 }
 
-# Task hostnames (<slug>.acrid.dev) must resolve to loopback. On macOS a
-# native admin-password dialog adds the entry; elsewhere we print the line.
+# True when every address the resolver returns for $host is loopback. Checking
+# resolution rather than /etc/hosts is what lets a wildcard DNS entry, or
+# systemd-resolved synthesising *.localhost, satisfy this without root.
+resolves_to_loopback() {
+   local host="$1" addrs=""
+   if command -v getent >/dev/null 2>&1; then
+      addrs="$(getent ahosts "$host" 2>/dev/null | awk '{print $1}' | sort -u)"
+   elif command -v dscacheutil >/dev/null 2>&1; then
+      addrs="$(dscacheutil -q host -a name "$host" 2>/dev/null | awk '/^ipv?6?_address:/ {print $2}' | sort -u)"
+   fi
+   [ -n "$addrs" ] || return 1
+
+   local addr
+   while IFS= read -r addr; do
+      [ -n "$addr" ] || continue
+      case "$addr" in
+         127.*|::1) ;;
+         # A public record pointing somewhere real must not be mistaken for a
+         # local mapping.
+         *) return 1 ;;
+      esac
+   done <<RESOLVED
+$addrs
+RESOLVED
+   return 0
+}
+
+# Set when the task hostname does not resolve, so cmd_up can repeat the fix at
+# the end rather than burying it behind the provisioning log.
+HOST_MAPPING_MISSING=""
+
+# Task hostnames (<slug>.<suffix>) must resolve to loopback for a browser to
+# reach the environment. Nothing in provisioning needs it — the DB and hexer
+# bind to ports, not names — so a missing mapping is reported, never fatal.
 ensure_host_mapping() {
    local host="$1"
-   grep -qE "^[^#]*[[:space:]]$host([[:space:]]|\$)" /etc/hosts 2>/dev/null && return 0
-   warn "$host missing from /etc/hosts — requesting admin approval to add it"
+   resolves_to_loopback "$host" && return 0
+
    if [ "$(uname)" = "Darwin" ]; then
-      osascript -e "do shell script \"printf '127.0.0.1 $host\\n' >> /etc/hosts\" with administrator privileges" >/dev/null 2>&1 \
-         || die "cannot add $host to /etc/hosts — run: sudo sh -c 'echo 127.0.0.1 $host >> /etc/hosts'"
-      ok "$host → 127.0.0.1 added to /etc/hosts"
-   else
-      die "add to /etc/hosts first: sudo sh -c 'echo 127.0.0.1 $host >> /etc/hosts'"
+      warn "$host does not resolve — requesting admin approval to add it to /etc/hosts"
+      if osascript -e "do shell script \"printf '127.0.0.1 $host\\n' >> /etc/hosts\" with administrator privileges" >/dev/null 2>&1; then
+         ok "$host → 127.0.0.1 added to /etc/hosts"
+         return 0
+      fi
    fi
+
+   HOST_MAPPING_MISSING="$host"
+   warn "$host does not resolve yet — continuing; the environment will still come up"
+   warn "run this when convenient:  sudo sh -c 'echo 127.0.0.1 $host >> /etc/hosts'"
+   return 0
+}
+
+# host_mapping_reminder repeats the pending /etc/hosts line next to the URL it
+# unblocks, so it is the last thing on screen instead of the first.
+host_mapping_reminder() {
+   [ -n "$HOST_MAPPING_MISSING" ] || return 0
+   warn "$HOST_MAPPING_MISSING is not in /etc/hosts yet — the URL above will not resolve until it is:"
+   warn "  sudo sh -c 'echo 127.0.0.1 $HOST_MAPPING_MISSING >> /etc/hosts'"
 }
 
 kill_port_listeners() {
@@ -220,6 +339,26 @@ patch_known_source_bug() {
 
 # Substitute {{ssm-*}} placeholders portably (node, not GNU sed), run
 # Liquibase against localhost:<port>, restore the tracked files.
+# Personal seed data (custom_default_data.sql and friends) is deliberately
+# gitignored, so it lives only in the shared checkout and never reaches a task
+# worktree -- where safe.changelog.xml's `includeAll after-install/` would
+# otherwise pick it up. Linking rather than copying keeps the shared checkout
+# the single place to edit it. Only ignored files are linked: a tracked
+# after-install file already exists in the worktree at that branch's version.
+link_personal_after_install() {
+   local worktree="$1"
+   local rel="source/server/database/sql/safe/after-install"
+   local src="$TDS/$rel" dst="$worktree/$rel"
+   [ -d "$src" ] && [ -d "$dst" ] || return 0
+   local f base
+   while IFS= read -r f; do
+      [ -n "$f" ] || continue
+      base="$(basename "$f")"
+      ln -sfn "$src/$base" "$dst/$base"
+      ok "seeding $base from the shared checkout"
+   done < <( cd "$TDS" && git ls-files --others --ignored --exclude-standard -- "$rel" 2>/dev/null )
+}
+
 run_liquibase() {
    local worktree="$1" port="$2"
    ensure_jdk
@@ -250,8 +389,10 @@ const map = {
 for (const [k, v] of Object.entries(map)) c = c.split(k).join(v);
 fs.writeFileSync(cl, c);
 NODE
-     ( cd source/server/database && rm -f install-update.log && JAVA_HOME="$LB_JAVA_HOME" ./liquibase update ) || true
+     local rc=0
+     ( cd source/server/database && rm -f install-update.log && JAVA_HOME="$LB_JAVA_HOME" ./liquibase update ) || rc=$?
      git restore source/server/database/liquibase.properties source/server/database/sql/safe/safe.changelog.xml 2>/dev/null || true
+     [ "$rc" -eq 0 ] || die "liquibase update failed (exit $rc) — see $worktree/source/server/database/install-update.log"
    )
 }
 
@@ -271,6 +412,176 @@ SQL
 
 recompile_schema() {
    docker exec "$1" bash -lc "echo \"begin sys.dbms_utility.compile_schema('$DB_USER',false); end;\" | sqlplus -s '/ as sysdba'" >/dev/null 2>&1 || true
+}
+
+# ── saved database connections ────────────────────────────────────────────────
+# A task's DB is only reachable at localhost:<db-port>, so every task needs its
+# own entry in the tools that talk to it: SQLcl's common connection store
+# (~/.dbtools, also read by the oracle-sqlcl MCP and SQL Developer for VS Code)
+# and SQL Developer desktop's own store.
+
+connection_name() { echo "oracle-docker-$1"; }
+
+sqlcl_bin() {
+   local candidate
+   for candidate in "${HEXER_TASK_SQLCL:-}" "${SQLCL_PATH:-}" \
+                    "$(command -v sql 2>/dev/null || true)" \
+                    "$HOME/.local/sqlcl/bin/sql" /opt/sqlcl/bin/sql; do
+      [ -n "$candidate" ] && [ -x "$candidate" ] && { echo "$candidate"; return 0; }
+   done
+   return 1
+}
+
+# `connect -save` only persists on a successful connect, so this doubles as a
+# check that the schema is actually reachable with the credentials hexer uses.
+save_sqlcl_connection() {
+   local db_port="$1" name bin
+   name="$(connection_name "$db_port")"
+   bin="$(sqlcl_bin)" || { warn "sqlcl not found — skipping the $name connection (set HEXER_TASK_SQLCL)"; return 1; }
+   printf 'set feedback off\nconnect -save %s -savepwd -replace %s/%s@localhost:%s/%s\nexit\n' \
+      "$name" "$DB_USER" "$DB_PASS" "$db_port" "$DB_SERVICE" \
+      | "$bin" -nohistory /nolog >/dev/null 2>&1
+}
+
+remove_sqlcl_connection() {
+   local name bin
+   name="$(connection_name "$1")"
+   bin="$(sqlcl_bin)" || return 0
+   printf 'set feedback off\nconnmgr delete -conn %s\nexit\n' "$name" \
+      | "$bin" -nohistory /nolog >/dev/null 2>&1 || true
+}
+
+sqldev_stores() {
+   ls -d "$HOME"/.sqldeveloper/system*/o.jdeveloper.db.connection/connections.json 2>/dev/null || true
+}
+
+sqldev_running() {
+   pgrep -f 'sqldeveloper.*ide-launcher|oracle.ide.boot.Launcher' >/dev/null 2>&1
+}
+
+# SQL Developer desktop encrypts passwords with a per-connection key derived
+# from its own install, which cannot be reproduced here — the entry is written
+# without one, so the IDE prompts on first connect. It also rewrites this file
+# wholesale on exit, so a running instance would silently discard the edit.
+sqldev_write_connection() {
+   local db_port="$1" action="$2" name store rc=0
+   name="$(connection_name "$db_port")"
+   [ -n "$(sqldev_stores)" ] || return 0
+   if sqldev_running; then
+      warn "SQL Developer is running — close it and re-run to get the $name connection there"
+      return 0
+   fi
+   for store in $(sqldev_stores); do
+      run_node_script "$store" "$name" "$db_port" "$DB_USER" "$DB_SERVICE" "$action" <<'NODE' || rc=$?
+const fs = require("fs");
+const [store, name, port, user, service, action] = process.argv.slice(2);
+const doc = JSON.parse(fs.readFileSync(store, "utf8"));
+const kept = (doc.connections || []).filter((c) => c.name !== name);
+if (action === "add") {
+  kept.push({
+    name,
+    type: "jdbc",
+    info: {
+      role: "", SavePassword: "false", NoPasswordConnection: "TRUE",
+      OracleConnectionType: "BASIC", RaptorConnectionType: "Oracle",
+      subtype: "oraJDBC", driver: "oracle.jdbc.OracleDriver", oraDriverType: "thin",
+      hostname: "localhost", port, serviceName: service, user,
+      customUrl: `jdbc:oracle:thin:@//localhost:${port}/${service}`,
+      OS_AUTHENTICATION: "false", KERBEROS_AUTHENTICATION: "false",
+      IS_PROXY: "false", PROXY_TYPE: "USER NAME", PROXY_USER_NAME: "",
+      ConnName: name,
+    },
+  });
+}
+doc.connections = kept;
+fs.copyFileSync(store, `${store}.hexer-task.bak`);
+fs.writeFileSync(store, JSON.stringify(doc, null, 2));
+NODE
+   done
+   sqldev_write_folder "$db_port" "$action" || warn "could not file $name under $SQLDEV_FOLDER in SQL Developer"
+   return $rc
+}
+
+# Folder membership lives outside connections.json, in a flat name→folder map
+# in product-preferences.xml. Without an entry there the connection still works
+# but lands at the root of the navigator instead of alongside its siblings.
+SQLDEV_FOLDER="${HEXER_TASK_SQLDEV_FOLDER:-Dockers}"
+
+sqldev_prefs() {
+   ls -d "$HOME"/.sqldeveloper/system*/o.sqldeveloper/product-preferences.xml 2>/dev/null || true
+}
+
+sqldev_write_folder() {
+   local db_port="$1" action="$2" name prefs rc=0
+   name="$(connection_name "$db_port")"
+   for prefs in $(sqldev_prefs); do
+      run_node_script "$prefs" "$name" "$SQLDEV_FOLDER" "$action" <<'NODE' || rc=$?
+const fs = require("fs");
+const [prefs, name, folder, action] = process.argv.slice(2);
+
+const formEncode = (s) =>
+  encodeURIComponent(s).replace(/%20/g, "+").replace(/[!'()*]/g, (c) =>
+    "%" + c.charCodeAt(0).toString(16).toUpperCase());
+
+const lines = fs.readFileSync(prefs, "utf8").split("\n");
+const openTag = (i, n) => lines[i].trim().startsWith(`<hash n="${n}">`);
+
+const descend = (from, to, names) => {
+  let start = from;
+  for (const n of names) {
+    let found = -1;
+    for (let i = start; i < to; i++) if (openTag(i, n)) { found = i; break; }
+    if (found === -1) return null;
+    start = found + 1;
+  }
+  let depth = 0;
+  for (let i = start; i < to; i++) {
+    const t = lines[i].trim();
+    if (t.startsWith("<hash")) depth++;
+    else if (t.startsWith("</hash>")) { if (depth === 0) return [start, i]; depth--; }
+  }
+  return null;
+};
+
+const span = descend(0, lines.length, ["DatabaseFoldersCache", "Connections", "sqldev.nav"]);
+if (!span) process.exit(3);
+const [first, end] = span;
+
+const key = `IdeConnections%23${formEncode(name)}`;
+const body = lines.slice(first, end).filter((l) => !l.includes(`n="${key}"`));
+
+if (action === "add") {
+  const indent = (lines[first] || "").match(/^\s*/)[0] || "            ";
+  const entry = `${indent}<value n="${key}" v="${formEncode(folder)}"/>`;
+  const at = body.findIndex((l) => {
+    const m = l.match(/n="([^"]+)"/);
+    return m && m[1].localeCompare(key) > 0;
+  });
+  body.splice(at === -1 ? body.length : at, 0, entry);
+}
+
+fs.copyFileSync(prefs, `${prefs}.hexer-task.bak`);
+fs.writeFileSync(prefs, [...lines.slice(0, first), ...body, ...lines.slice(end)].join("\n"));
+NODE
+   done
+   return $rc
+}
+
+register_db_connections() {
+   local db_port="$1" name
+   name="$(connection_name "$db_port")"
+   if save_sqlcl_connection "$db_port"; then
+      ok "saved connection $name (localhost:$db_port/$DB_SERVICE as $DB_USER)"
+   else
+      warn "could not save the $name connection to the SQLcl store"
+   fi
+   sqldev_write_connection "$db_port" add || warn "could not add $name to SQL Developer desktop"
+}
+
+unregister_db_connections() {
+   remove_sqlcl_connection "$1"
+   sqldev_write_connection "$1" remove || true
+   ok "removed connection $(connection_name "$1")"
 }
 
 # ── doctor ────────────────────────────────────────────────────────────────────
@@ -484,8 +795,11 @@ cmd_up() {
    step wait-db 20 "waiting for oracle to accept connections"
    wait_db_ready "$name" 180
    step liquibase 55 "applying changeset delta from the task worktree"
+   link_personal_after_install "$worktree"
    run_liquibase "$worktree" "$db_port"
    recompile_schema "$name"
+   step db-connection 70 "saving the $(connection_name "$db_port") database connection"
+   register_db_connections "$db_port"
 
    # Public task port serves HTTPS (mandatory on the HSTS-preloaded .dev
    # TLD); hexer itself listens on HTTP one thousand ports up.
@@ -498,15 +812,26 @@ cmd_up() {
    jwt_secret="$(node -e 'console.log(require("crypto").randomBytes(48).toString("hex"))')"
    local instances
    instances="$(run_node_script "$slug" "$host" "$worktree" "$DB_USER" "$DB_PASS" "$db_port" "$DB_SERVICE" "${modules[@]}" <<'NODE'
+const { existsSync } = require("fs");
 const [slug, host, worktree, user, pass, port, service, ...moduleSpecs] = process.argv.slice(2);
+
+// A Sencha Cmd app serves a microloader that needs bootstrap.js/bootstrap.json,
+// which are build output and gitignored -- so a fresh worktree 404s them and the
+// page dies on "Ext is not defined". app.json is what marks such an app; hexer's
+// startup-command-service runs this in the module's static dir and keeps it there.
+const startupCommandFor = (staticDir) =>
+  existsSync(`${staticDir}/app.json`) ? "sencha app watch" : undefined;
+
 const modules = moduleSpecs.map((spec) => {
   const [name, route, staticRel, rtRel] = spec.split(":");
+  const staticDir = `${worktree}/${staticRel}`;
   return {
     appName: name,
     type: "web",
     version: "local",
     route: `/${route.replace(/^\//, "")}`,
-    static: `${worktree}/${staticRel}`,
+    static: staticDir,
+    startupCommand: startupCommandFor(staticDir),
     resourceTemplates: `${worktree}/${rtRel}`,
     authConfig: name === "kiosk"
       ? { type: "none" }
@@ -547,6 +872,7 @@ NODE
    fi
    kill_port_listeners "$hexer_port"
    kill_port_listeners "$internal_port"
+   write_health_env "$hexer_state"
    # cwd = the task's state dir, NOT the hexer checkout: hexer re-reads
    # ${cwd}/.env on its periodic config reload, which would overwrite our
    # INSTANCES with the shared checkout's runtds.sh config after ~2 min.
@@ -559,6 +885,7 @@ NODE
      CORS_ORIGIN="$host" CORS_CREDENTIALS=true \
      CACHE_ENABLED=false CACHE_ENCRYPTION_ENABLED=false \
      LINX_USE_MOCK=false \
+     HEALTH_AUTH_USERNAME="$HEALTH_USER" HEALTH_AUTH_PASSWORD="$HEALTH_PASS" \
      INSTANCES="$instances" \
      nohup node "$hexer_dir/src/server.js" >"$hexer_state/logs/stdout.log" 2>&1 &
      echo $! > "$hexer_state/hexer.pid" )
@@ -579,19 +906,60 @@ NODE
    curl -fsSk --max-time 3 "https://localhost:$hexer_port/health-check" >/dev/null 2>&1 \
       || die "TLS proxy on :$hexer_port not answering — see $hexer_state/logs/tls.log"
 
+   warm_build_watchers "$worktree" "$host" "$internal_port" "${modules[@]}"
+
    step done 100 "https://$host:$hexer_port"
    ok "task environment up: https://$host:$hexer_port (db localhost:$db_port)"
+   host_mapping_reminder
+   cert_trust_reminder
+}
+
+# Hexer starts a module's build watcher lazily, on the first static request to it
+# (startup-command-service's ensureStartupCommand), and Sencha's first build takes
+# about a minute. Touching the route here means that build is already under way --
+# usually finished -- by the time the page is opened, rather than the first visit
+# 404ing bootstrap.js and dying on "Ext is not defined".
+# Hexer runs with the task state dir as its cwd, so dotenv reads a file placed
+# there. The launch below already exports these, which covers every hexer this
+# script starts; the file additionally covers one restarted by hand from that
+# directory. Only the two keys are rewritten, so anything else in the file (and
+# INSTANCES, which is never written here) survives.
+write_health_env() {
+   local hexer_state="$1"
+   local envfile="$hexer_state/.env"
+   local tmp
+   tmp="$(mktemp)"
+   if [ -f "$envfile" ]; then
+      grep -vE '^(HEALTH_AUTH_USERNAME|HEALTH_AUTH_PASSWORD)=' "$envfile" > "$tmp" || true
+   fi
+   printf 'HEALTH_AUTH_USERNAME=%s\nHEALTH_AUTH_PASSWORD=%s\n' "$HEALTH_USER" "$HEALTH_PASS" >> "$tmp"
+   install -m 600 "$tmp" "$envfile"
+   rm -f "$tmp"
+}
+
+warm_build_watchers() {
+   local worktree="$1" host="$2" internal_port="$3"
+   shift 3
+   local spec name route static_rel
+   for spec in "$@"; do
+      IFS=: read -r name route static_rel _ <<< "$spec"
+      [ -f "$worktree/$static_rel/app.json" ] || continue
+      curl -fsS --max-time 10 -H "Host: $host" \
+         "http://localhost:$internal_port/$route/static/" >/dev/null 2>&1 || true
+      ok "$name build watcher started (first build takes ~1 min)"
+   done
 }
 
 # ── down / status ─────────────────────────────────────────────────────────────
 cmd_down() {
    local slug="${1:?usage: down <slug> --task-root <dir>}"; shift
-   local task_root="" keep_db=0 hexer_port=""
+   local task_root="" keep_db=0 hexer_port="" db_port=""
    while [ $# -gt 0 ]; do
       case "$1" in
          --task-root)  task_root="$2"; shift 2 ;;
          --keep-db)    keep_db=1; shift ;;
          --hexer-port) hexer_port="$2"; shift 2 ;;
+         --db-port)    db_port="$2"; shift 2 ;;
          *) die "unknown down option: $1" ;;
       esac
    done
@@ -621,6 +989,7 @@ cmd_down() {
       else
          docker rm -f "$name" >/dev/null
          ok "db container $name removed"
+         if [ -n "$db_port" ]; then unregister_db_connections "$db_port"; fi
       fi
    fi
 }

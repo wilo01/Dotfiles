@@ -5,6 +5,7 @@ import (
 	"slices"
 	"strings"
 
+	jiracmd "github.com/dariuszw/hlp/internal/cmd/jira"
 	"github.com/dariuszw/hlp/internal/config"
 	internalJira "github.com/dariuszw/hlp/internal/jira"
 	"github.com/dariuszw/hlp/internal/task"
@@ -19,9 +20,9 @@ import (
 func newLaunchCmd(use, short string, manual bool) *cobra.Command {
 	opts := startOptions{Manual: manual}
 	cmd := &cobra.Command{
-		Use:   use + " <TICKET-KEY> [REPO...]",
+		Use:   use + " [TICKET-KEY] [REPO...]",
 		Short: short,
-		Args:  cobra.MinimumNArgs(1),
+		Args:  cobra.ArbitraryArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg, err := config.Load()
 			if err != nil {
@@ -31,17 +32,27 @@ func newLaunchCmd(use, short string, manual bool) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			key := strings.ToUpper(args[0])
-			opts.Repos = args[1:]
-
-			ticket, err := client.GetTicket(key)
-			if err != nil {
-				return err
-			}
 			if err := validateLaunchFlags(&opts); err != nil {
 				return err
 			}
 			opts.ContextPrompt = resolveContextPrompt(cfg, opts.ContextPrompt)
+
+			if len(args) == 0 {
+				// Bulk autonomous agents across every assigned ticket is not
+				// something to trigger by omitting an argument.
+				if !manual {
+					return fmt.Errorf("spin needs a ticket key: %s spin <TICKET-KEY>", cmd.Root().Name())
+				}
+				return startAll(cfg, client, opts)
+			}
+
+			key := strings.ToUpper(args[0])
+			opts.Repos = args[1:]
+			ticket, err := client.GetTicket(key)
+			if err != nil {
+				return err
+			}
+			opts.Description = fetchDescription(client, key)
 			return startAgent(cfg, ticket, opts)
 		},
 	}
@@ -49,8 +60,8 @@ func newLaunchCmd(use, short string, manual bool) *cobra.Command {
 	return cmd
 }
 
-// registerLaunchFlags declares every flag that feeds startOptions. Both the
-// single-ticket commands and fanout use it so the two surfaces cannot drift.
+// registerLaunchFlags declares every flag that feeds startOptions, shared by
+// start and spin so the two surfaces cannot drift.
 func registerLaunchFlags(cmd *cobra.Command, opts *startOptions) {
 	cmd.Flags().StringVar(&opts.Repo, "repo", "", "target repo name (skips the picker)")
 	cmd.Flags().StringVar(&opts.ContextPrompt, "context", "", contextFlagUsage)
@@ -62,6 +73,11 @@ func registerLaunchFlags(cmd *cobra.Command, opts *startOptions) {
 	cmd.Flags().BoolVar(&opts.Relaunch, "relaunch", false, "send the claude launch even if one already runs in the session")
 	cmd.Flags().BoolVar(&opts.Interactive, "interactive", false, "always open the repo picker")
 	cmd.Flags().BoolVar(&opts.NoAttach, "no-attach", false, "create the session but stay where you are")
+	cmd.Flags().StringVar(&opts.JQL, "jql", "", "with no ticket key: override agent.jql")
+	cmd.Flags().IntVar(&opts.Max, "max", 0, "with no ticket key: create at most N new sessions (restores are unlimited)")
+	cmd.Flags().BoolVar(&opts.Yes, "yes", false, "with no ticket key: skip the confirmation prompt")
+	cmd.Flags().BoolVar(&opts.IncludeSubtasks, "include-subtasks", false, "with no ticket key: also open subtasks")
+	cmd.Flags().BoolVar(&opts.NoWorklog, "no-worklog", false, "skip adding the ticket to worklogs.csv as a DRAFT")
 }
 
 // validateLaunchFlags rejects combinations that would otherwise be accepted and
@@ -81,8 +97,8 @@ func validateLaunchFlags(opts *startOptions) error {
 }
 
 type startOptions struct {
-	// Repo is the single-repo form used by fanout and --repo; Repos is the
-	// multi-repo positional form.
+	// Repo is the single-repo form set by --repo; Repos is the multi-repo
+	// positional form.
 	Repo        string
 	Repos       []string
 	Base        string
@@ -91,6 +107,14 @@ type startOptions struct {
 	Relaunch    bool
 	Interactive bool
 	NoAttach    bool
+	// The fields below only apply to a run with no ticket key, which brings up
+	// every ticket the JQL returns.
+	JQL             string
+	Max             int
+	Yes             bool
+	IncludeSubtasks bool
+	// NoWorklog skips adding the ticket to worklogs.csv as a DRAFT.
+	NoWorklog bool
 	// Manual opens a plain interactive claude (no agent prompt, no
 	// --dangerously-skip-permissions, no CLAUDE_AGENT_MODE).
 	Manual bool
@@ -100,6 +124,9 @@ type startOptions struct {
 	// PermissionMode overrides agent.permission_mode for this launch. Ignored
 	// when Manual is false.
 	PermissionMode string
+	// Description is the ticket body, fetched by the caller and shown in the
+	// picker. Empty falls back to whatever the task already cached.
+	Description string
 }
 
 // contextPromptFromConfig is the value --context takes when passed bare, later
@@ -149,6 +176,11 @@ func startAgent(cfg *config.Config, ticket *internalJira.Ticket, opts startOptio
 		return nil
 	}
 
+	if !opts.NoWorklog {
+		// Idempotent: jira add skips a ticket that already has an entry today.
+		jiracmd.AddDrafts([]string{t.JiraKey}, true)
+	}
+
 	return ensureSession(cfg, store, t, launchOptions{
 		Manual:         opts.Manual,
 		ContextPrompt:  opts.ContextPrompt,
@@ -163,9 +195,15 @@ func startAgent(cfg *config.Config, ticket *internalJira.Ticket, opts startOptio
 func resolveSelection(cfg *config.Config, store *task.Store, ticket *internalJira.Ticket, opts startOptions) (applyOptions, error) {
 	existing, _ := store.Get(ticket.Key)
 
+	description := opts.Description
+	if description == "" {
+		description = existing.Description
+	}
+
 	apply := applyOptions{
 		Key:          ticket.Key,
 		Summary:      ticket.Summary,
+		Description:  description,
 		Base:         opts.Base,
 		DryRun:       opts.DryRun,
 		Force:        opts.Force,
@@ -210,9 +248,11 @@ func runPicker(cfg *config.Config, store *task.Store, ticket *internalJira.Ticke
 			return applyOptions{}, fmt.Errorf("no repos found under %s", expandPath(cfg.Agent.ReposRoot))
 		}
 
+		mentioned := mentionedRepos(ticket, apply.Description, sources)
+
 		repos := make([]repopicker.Repo, 0, len(sources))
 		for _, s := range sources {
-			entry := repopicker.Repo{Name: s.Name, InTask: existing.HasRepo(s.Name)}
+			entry := repopicker.Repo{Name: s.Name, InTask: existing.HasRepo(s.Name), Mentioned: mentioned[s.Name]}
 			if r, ok := existing.Repo(s.Name); ok {
 				entry.Base = r.Base
 			}
@@ -229,6 +269,7 @@ func runPicker(cfg *config.Config, store *task.Store, ticket *internalJira.Ticke
 
 		result, err := repopicker.Run(repopicker.Options{
 			Title:          title,
+			Description:    apply.Description,
 			Repos:          orderByTask(repos, existing),
 			Base:           apply.Base,
 			HexerAvailable: cfg.Agent.Hexer.Enabled,
@@ -255,7 +296,7 @@ func runPicker(cfg *config.Config, store *task.Store, ticket *internalJira.Ticke
 		}
 
 		if !result.Confirmed {
-			return applyOptions{}, fmt.Errorf("cancelled")
+			return applyOptions{}, errCancelled
 		}
 
 		apply.Selected = result.Selected

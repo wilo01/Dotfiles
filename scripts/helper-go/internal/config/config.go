@@ -58,12 +58,9 @@ type AgentConfig struct {
 	// BaseBranchPatterns are the remote branch globs offered as bases in the
 	// picker, alongside each repo's default. Listing every branch is not an
 	// option: tds-suite alone has thousands.
-	BaseBranchPatterns []string `mapstructure:"base_branch_patterns" yaml:"base_branch_patterns"`
-	// WorktreeRoot is the pre-multi-repo layout, kept readable so status can
-	// still see worktrees created before the task model landed.
-	WorktreeRoot string                       `mapstructure:"worktree_root" yaml:"worktree_root"`
-	Repos        map[string]AgentRepoOverride `mapstructure:"repos" yaml:"repos"`
-	Hexer        hexer.Config                 `mapstructure:"hexer" yaml:"hexer"`
+	BaseBranchPatterns []string                     `mapstructure:"base_branch_patterns" yaml:"base_branch_patterns"`
+	Repos              map[string]AgentRepoOverride `mapstructure:"repos" yaml:"repos"`
+	Hexer              hexer.Config                 `mapstructure:"hexer" yaml:"hexer"`
 }
 
 // DevConfig holds developer workflow settings
@@ -171,7 +168,6 @@ func Default() *Config {
 			TasksRoot:          "~/tds-branch-opener/branches/tasks",
 			RepoURLTemplate:    "git@github.com:acreidentity/{{REPO}}.git",
 			BaseBranchPatterns: []string{"maintenance/*", "release/*"},
-			WorktreeRoot:       "~/tds-branch-opener/worktrees",
 			Repos:              map[string]AgentRepoOverride{},
 			Hexer: hexer.Config{
 				Enabled:        true,
@@ -183,6 +179,7 @@ func Default() *Config {
 				DBPortMin:      1531,
 				DBPortMax:      1599,
 				HostnameSuffix: "acrid.dev",
+				CertDir:        "~/.config/hlp/certs",
 			},
 		},
 		Token: TokenConfig{

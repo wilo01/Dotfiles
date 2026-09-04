@@ -35,8 +35,11 @@ type Hexer struct {
 // Task is keyed by JiraKey: the key is the identity, which is what makes the
 // tmux session name and the task directory derivable rather than stored.
 type Task struct {
-	JiraKey         string `json:"jira_key"`
-	Summary         string `json:"summary"`
+	JiraKey string `json:"jira_key"`
+	Summary string `json:"summary"`
+	// Description is the ticket body as plain text, cached when the task is
+	// created so the repo picker can show it without a network call.
+	Description     string `json:"description,omitempty"`
 	TaskRoot        string `json:"task_root"`
 	ClaudeSessionID string `json:"claude_session_id"`
 	SessionStarted  bool   `json:"session_started"`

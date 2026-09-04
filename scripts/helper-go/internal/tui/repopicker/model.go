@@ -25,11 +25,15 @@ type Repo struct {
 	// Base is the currently chosen base. Empty means the repo default, which is
 	// Branches[0].
 	Base string
+	// Mentioned marks a repo the ticket text names, shown as a hint.
+	Mentioned bool
 }
 
 // Options configures one run of the picker.
 type Options struct {
-	Title          string
+	Title string
+	// Description is the ticket body, shown collapsed above the repo list.
+	Description    string
 	Repos          []Repo
 	Base           string
 	HexerAvailable bool
@@ -80,8 +84,9 @@ type row struct {
 	// expanded tracks whether a rowRepo is showing its branch list.
 	expanded bool
 	// branches and base carry a rowRepo's choices; base is the selected one.
-	branches []string
-	base     string
+	branches  []string
+	base      string
+	mentioned bool
 	// seq records when a repo was checked, so the first-selected repo stays
 	// first and becomes the task's primary.
 	seq int
@@ -96,6 +101,12 @@ type Model struct {
 	baseInput  textinput.Model
 	cloneInput textinput.Model
 	cloning    bool
+
+	// description is the ticket body, wrapped lazily to the terminal width.
+	description string
+	// showDescription switches to the full-text overlay.
+	showDescription bool
+	descriptionTop  int
 
 	seqCounter int
 	width      int
@@ -125,9 +136,10 @@ func New(opts Options) Model {
 	clone.CharLimit = 200
 
 	m := Model{
-		title:      opts.Title,
-		baseInput:  base,
-		cloneInput: clone,
+		title:       opts.Title,
+		description: strings.TrimSpace(opts.Description),
+		baseInput:   base,
+		cloneInput:  clone,
 	}
 
 	// In-task repos first, in their existing order, so the primary repo is
@@ -158,14 +170,15 @@ func New(opts Options) Model {
 			base = r.Branches[0]
 		}
 		m.rows = append(m.rows, row{
-			kind:     rowRepo,
-			name:     r.Name,
-			label:    r.Name,
-			checked:  r.InTask,
-			inTask:   r.InTask,
-			seq:      seq,
-			branches: r.Branches,
-			base:     base,
+			kind:      rowRepo,
+			name:      r.Name,
+			label:     r.Name,
+			checked:   r.InTask,
+			inTask:    r.InTask,
+			seq:       seq,
+			branches:  r.Branches,
+			base:      base,
+			mentioned: r.Mentioned,
 		})
 	}
 

@@ -40,6 +40,12 @@ var (
 	warnStyle = lipgloss.NewStyle().Foreground(warnColor)
 
 	footerStyle = lipgloss.NewStyle().Foreground(mutedColor)
+
+	descriptionStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("245"))
+
+	hintStyle = lipgloss.NewStyle().Foreground(mutedColor).Italic(true)
+
+	mentionedStyle = lipgloss.NewStyle().Foreground(warnColor)
 )
 
 func sectionRule(label string, width int) string {

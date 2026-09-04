@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/dariuszw/hlp/internal/config"
 	"github.com/dariuszw/hlp/internal/task"
@@ -441,5 +442,131 @@ func TestApplyTaskRefusesToSilentlyChangeBase(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "already checked out") {
 		t.Errorf("unhelpful error: %v", err)
+	}
+}
+
+// A failing environment must not strand the worktrees: they exist on disk, so
+// the task has to be recorded or status cannot see them and rm cannot clean up.
+func TestApplyTaskPersistsWhenHexerConfigFails(t *testing.T) {
+	cfg := workspace(t, "tds-hexer")
+	cfg.Agent.Hexer.Enabled = true
+	// The env serves the tds-suite worktree, which this task does not enlist.
+	cfg.Agent.Hexer.TDSRepo = "tds-suite"
+	store := newStore(t)
+
+	got, err := applyTask(cfg, store, applyOptions{
+		Key:          "SUITE-1",
+		Selected:     []string{"tds-hexer"},
+		Hexer:        true,
+		HexerModules: []string{"safe"},
+	})
+	if err == nil {
+		t.Fatal("expected the misconfigured environment to surface")
+	}
+	if !strings.Contains(err.Error(), "worktrees are ready") {
+		t.Errorf("error should say the worktrees survived: %v", err)
+	}
+
+	saved, ok := store.Get("SUITE-1")
+	if !ok {
+		t.Fatal("task was not recorded, its worktrees are now orphaned")
+	}
+	if !saved.HasRepo("tds-hexer") {
+		t.Error("the created worktree is not recorded on the task")
+	}
+	if saved.Hexer.Enabled {
+		t.Error("a rejected environment must not be recorded as enabled")
+	}
+	if _, statErr := os.Stat(got.TaskRoot); statErr != nil {
+		t.Errorf("task root missing: %v", statErr)
+	}
+}
+
+// Configuring an environment allocates its ports and host but must not spend
+// minutes provisioning: that happens in the session's own window.
+func TestApplyTaskConfiguresHexerWithoutProvisioning(t *testing.T) {
+	cfg := workspace(t, "tds-suite")
+	cfg.Agent.Hexer.Enabled = true
+	cfg.Agent.Hexer.TDSRepo = "tds-suite"
+	cfg.Agent.Hexer.HexerDir = filepath.Join(t.TempDir(), "absent")
+	cfg.Agent.Hexer.TDSDir = filepath.Join(t.TempDir(), "absent")
+	store := newStore(t)
+
+	started := time.Now()
+	got, err := applyTask(cfg, store, applyOptions{
+		Key:          "SUITE-1",
+		Selected:     []string{"tds-suite"},
+		Hexer:        true,
+		HexerModules: []string{"safe"},
+	})
+	if err != nil {
+		t.Fatalf("applyTask: %v", err)
+	}
+	// A real provision starts an Oracle container; anything near that would mean
+	// the work did not move to the background.
+	if elapsed := time.Since(started); elapsed > 20*time.Second {
+		t.Errorf("applyTask took %s — provisioning is still inline", elapsed)
+	}
+
+	if !got.Hexer.Enabled {
+		t.Error("hexer not marked enabled")
+	}
+	if got.Hexer.Port < cfg.Agent.Hexer.HexerPortMin || got.Hexer.Port > cfg.Agent.Hexer.HexerPortMax {
+		t.Errorf("hexer port %d outside the configured range", got.Hexer.Port)
+	}
+	if got.Hexer.DBPort == 0 {
+		t.Error("no db port allocated")
+	}
+	if got.Hexer.Host != "suite-1."+cfg.Agent.Hexer.HostnameSuffix {
+		t.Errorf("host = %q", got.Hexer.Host)
+	}
+	if got.Hexer.Base != "master" {
+		t.Errorf("base = %q, want the tds-suite base", got.Hexer.Base)
+	}
+}
+
+func TestHexerUpCommandIsRunnableAndQuoted(t *testing.T) {
+	cfg := workspace(t, "tds-suite")
+	cfg.Agent.Hexer.Enabled = true
+	cfg.Agent.Hexer.TDSRepo = "tds-suite"
+	store := newStore(t)
+
+	got, err := applyTask(cfg, store, applyOptions{
+		Key: "SUITE-1", Selected: []string{"tds-suite"},
+		Hexer: true, HexerModules: []string{"safe"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	command, err := hexerUpCommand(cfg, got)
+	if err != nil {
+		t.Fatalf("hexerUpCommand: %v", err)
+	}
+	for _, want := range []string{"hexer-task.sh", "up suite-1", "--hexer-port", "--module safe:safe:"} {
+		if !strings.Contains(command, want) {
+			t.Errorf("command missing %q:\n%s", want, command)
+		}
+	}
+	if !strings.Contains(command, "HEXER_TASK_HEXER_DIR") {
+		t.Error("machine paths are not passed through the environment")
+	}
+}
+
+func TestShellQuote(t *testing.T) {
+	cases := map[string]string{
+		"plain":           "plain",
+		"/no/spaces/here": "/no/spaces/here",
+		"":                "''",
+		"has space":       "'has space'",
+		"semi;colon":      "'semi;colon'",
+	}
+	for in, want := range cases {
+		if got := shellQuote(in); got != want {
+			t.Errorf("shellQuote(%q) = %s, want %s", in, got, want)
+		}
+	}
+	if got := shellQuote("it's"); got != `'it'\''s'` {
+		t.Errorf("shellQuote(\"it's\") = %s", got)
 	}
 }

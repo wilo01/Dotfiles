@@ -1,11 +1,21 @@
 package repopicker
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 // visibleRows is how many form rows are shown before the list scrolls. The repo
 // list is long enough (22 repos here) that it must not push the footer off a
 // standard terminal.
 const visibleRows = 22
+
+// descriptionPreviewRows is how much of the ticket body shows inline; the rest
+// is one keypress away rather than crowding out the repo list.
+const descriptionPreviewRows = 6
+
+// descriptionOverlayRows is a page in the full-text view.
+const descriptionOverlayRows = 20
 
 // View renders the form.
 func (m Model) View() string {
@@ -21,6 +31,15 @@ func (m Model) View() string {
 	var b strings.Builder
 	b.WriteString(titleStyle.Render(m.title))
 	b.WriteString("\n\n")
+
+	if m.showDescription {
+		return m.descriptionView(width)
+	}
+
+	if preview := m.descriptionPreview(width); preview != "" {
+		b.WriteString(preview)
+		b.WriteString("\n")
+	}
 
 	if m.cloning {
 		b.WriteString(labelStyle.Render("  clone a new repo"))
@@ -54,8 +73,87 @@ func (m Model) View() string {
 		b.WriteString(footerStyle.Render("  " + hint))
 		b.WriteString("\n")
 	}
-	b.WriteString(footerStyle.Render("  ↑↓ move · ←→ expand · space toggle · ctrl+c clear · ⏎ ok · esc cancel"))
+	footer := "  ↑↓ move · ←→ expand · space toggle · ⏎ ok · esc cancel"
+	if m.description != "" {
+		footer = "  ↑↓ move · ←→ expand · space toggle · d description · ⏎ ok · esc cancel"
+	}
+	b.WriteString(footerStyle.Render(footer))
 	return b.String()
+}
+
+// descriptionPreview renders the first few wrapped lines of the ticket body,
+// with a pointer to the full text when there is more.
+func (m Model) descriptionPreview(width int) string {
+	if m.description == "" {
+		return ""
+	}
+	lines := wrap(m.description, width-4)
+
+	var b strings.Builder
+	shown := min(len(lines), descriptionPreviewRows)
+	for _, line := range lines[:shown] {
+		b.WriteString("  " + descriptionStyle.Render(line) + "\n")
+	}
+	if len(lines) > shown {
+		b.WriteString("  " + hintStyle.Render(fmt.Sprintf("… d for the full description (%d more lines)", len(lines)-shown)) + "\n")
+	} else {
+		b.WriteString("  " + hintStyle.Render("d to read it full-screen") + "\n")
+	}
+	return b.String()
+}
+
+// descriptionView is the full-text overlay, which scrolls and nothing else.
+func (m Model) descriptionView(width int) string {
+	lines := wrap(m.description, width-4)
+
+	top := m.descriptionTop
+	if top > max(len(lines)-descriptionOverlayRows, 0) {
+		top = max(len(lines)-descriptionOverlayRows, 0)
+	}
+	end := min(top+descriptionOverlayRows, len(lines))
+
+	var b strings.Builder
+	b.WriteString(titleStyle.Render(m.title))
+	b.WriteString("\n\n")
+	for _, line := range lines[top:end] {
+		b.WriteString("  " + descriptionStyle.Render(line) + "\n")
+	}
+	b.WriteString("\n")
+	b.WriteString(footerStyle.Render(fmt.Sprintf("  lines %d-%d of %d · ↑↓ scroll · space/pgdn page · d or esc back",
+		top+1, end, len(lines))))
+	return b.String()
+}
+
+// wrap breaks text to the given width on word boundaries, preserving the blank
+// lines that separate a Jira description's paragraphs.
+func wrap(text string, width int) []string {
+	if width < 20 {
+		width = 20
+	}
+	var out []string
+	for _, paragraph := range strings.Split(strings.ReplaceAll(text, "\r\n", "\n"), "\n") {
+		paragraph = strings.TrimRight(paragraph, " \t")
+		if paragraph == "" {
+			out = append(out, "")
+			continue
+		}
+		line := ""
+		for _, word := range strings.Fields(paragraph) {
+			switch {
+			case line == "":
+				line = word
+			case len(line)+1+len(word) <= width:
+				line += " " + word
+			default:
+				out = append(out, line)
+				line = word
+			}
+		}
+		if line != "" {
+			out = append(out, line)
+		}
+	}
+	return out
 }
 
 // window returns the slice of rows to draw, keeping the cursor in view.
@@ -132,8 +230,11 @@ func (m Model) renderRow(i, width int) string {
 			label += "  " + disabledStyle.Render("→")
 		}
 	}
-	if r.inTask {
+	switch {
+	case r.inTask:
 		label += " · in the task (uncheck to remove)"
+	case r.mentioned:
+		label += " · mentioned"
 	}
 
 	style := itemStyle
@@ -144,6 +245,8 @@ func (m Model) renderRow(i, width int) string {
 		style = selectedItemStyle
 	case r.inTask:
 		style = inTaskStyle
+	case r.mentioned:
+		style = mentionedStyle
 	}
 	return pointer + style.Render(mark+label)
 }

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/dariuszw/hlp/internal/config"
+	"github.com/dariuszw/hlp/internal/hexer"
 	"github.com/dariuszw/hlp/internal/task"
 	"github.com/dariuszw/hlp/internal/ui"
 )
@@ -48,6 +49,10 @@ func ensureSession(cfg *config.Config, store *task.Store, t task.Task, opts laun
 
 	if err := syncWindows(session, windowSpecs(t), knownRepoWindows(cfg, store)); err != nil {
 		return err
+	}
+
+	if err := ensureHexerWindow(cfg, t); err != nil {
+		fmt.Println(ui.Warning(err.Error()))
 	}
 
 	if claudeRunningInWindow(session, primary.Name) && !opts.Relaunch {
@@ -107,6 +112,98 @@ func attach(session, window string, opts launchOptions) error {
 	return nil
 }
 
+// hexerWindow is the window name provisioning runs in.
+const hexerWindow = "hexer"
+
+// ensureHexerWindow starts the environment in its own tmux window.
+//
+// Provisioning takes minutes and outlives the command that asked for it, so it
+// belongs in the session rather than in hlp: the window shows live progress, the
+// scrollback keeps the log, and closing the session is what stops it. Running it
+// inline made `hlp agent start` block until the whole environment was up, and a
+// Ctrl-C then took the hexer process down with it.
+//
+// Liveness is read from the pid file, never from the window: `up` backgrounds
+// hexer and exits, so the pane is an idle shell both after a successful run and
+// after the process died with the laptop. Gating on the window alone left a
+// restored session permanently unable to bring its environment back.
+func ensureHexerWindow(cfg *config.Config, t task.Task) error {
+	if !t.Hexer.Enabled {
+		return nil
+	}
+	session := t.SessionName()
+	if hexerRunning(cfg, t) || hexerProvisioning(session) {
+		return nil
+	}
+
+	command, err := hexerUpCommand(cfg, t)
+	if err != nil {
+		return fmt.Errorf("hexer environment not started: %w", err)
+	}
+	if !windowExists(session, hexerWindow) {
+		if err := newWindow(session, hexerWindow, t.TaskRoot); err != nil {
+			return err
+		}
+	}
+	if err := sendKeysToWindow(session, hexerWindow, command); err != nil {
+		return err
+	}
+
+	fmt.Println(ui.Info(fmt.Sprintf("hexer environment provisioning in %s:%s — it will be at https://%s:%d when ready",
+		session, hexerWindow, t.Hexer.Host, t.Hexer.Port)))
+	return nil
+}
+
+// hexerRunning reports whether the task's environment is actually serving.
+// The script's status command owns the definition, reading the pid file it
+// wrote, so hlp and the script can never disagree about what "up" means.
+//
+// Both halves must be up. The hexer process outlives its database whenever the
+// container is stopped underneath it -- a docker restart, a machine reboot --
+// leaving a listener that answers every request with a connection error. Taking
+// hexer=running alone as healthy made `start` skip provisioning for exactly the
+// environments that most needed it.
+func hexerRunning(cfg *config.Config, t task.Task) bool {
+	runner, err := hexer.New(config.GetConfigDir(), cfg.Agent.Hexer, nil)
+	if err != nil {
+		return false
+	}
+	status, err := runner.Status(hexerSlug(t.JiraKey), t.TaskRoot)
+	if err != nil {
+		return false
+	}
+	return environmentUp(status)
+}
+
+// environmentUp parses the script's "hexer=<state> db=<state>" status line.
+func environmentUp(status string) bool {
+	return strings.Contains(status, "hexer=running") && strings.Contains(status, "db=running")
+}
+
+// hexerProvisioning reports whether an `up` is already in flight in the window.
+//
+// A provisioning run has not written its pid file yet, so hexerRunning is false
+// for the several minutes it takes; re-sending the command would stack a second
+// run on top of the first. The script runs under bash while the window's idle
+// state is the login shell, so a foreground command that is neither identifies
+// the run in progress -- as does bash itself.
+func hexerProvisioning(session string) bool {
+	return paneCommandsIndicateWork(windowCommands(session, hexerWindow))
+}
+
+// paneCommandsIndicateWork treats every foreground command that is not an idle
+// login shell as work in progress.
+func paneCommandsIndicateWork(cmds []string) bool {
+	for _, cmd := range cmds {
+		if !slices.Contains(idleShells, cmd) {
+			return true
+		}
+	}
+	return false
+}
+
+var idleShells = []string{"zsh", "sh", "fish"}
+
 func touch(store *task.Store, key string) error {
 	store.Touch(key)
 	return store.Save()
@@ -143,23 +240,31 @@ func knownRepoWindows(cfg *config.Config, store *task.Store) map[string]bool {
 }
 
 // buildLaunchCommand assembles the shell line sent to the primary window.
-//
-// The session UUID is minted with the task, so the first launch opens it with
-// --session-id and every later one resumes it. That is what makes reopening a
-// ticket continue the same conversation instead of starting a fresh one.
-func buildLaunchCommand(cfg *config.Config, t task.Task, opts launchOptions) string {
-	sessionFlag := "--session-id " + t.ClaudeSessionID
+// newSessionFlag pins the task's minted UUID on its first launch, so that
+// conversation can still be found by hand later. Reopening a ticket starts a
+// fresh conversation instead of resuming that UUID: claude aborts the whole
+// launch with "No conversation found with session ID" once the conversation is
+// gone -- which it routinely is, since sessions are cleaned up over time and are
+// stored per CLAUDE_CONFIG_DIR, so one written under a different profile is
+// invisible here. A failed resume left the window at a bare shell with no agent
+// running at all, which is strictly worse than a new conversation.
+func newSessionFlag(t task.Task) string {
 	if t.SessionStarted {
-		sessionFlag = "--resume " + t.ClaudeSessionID
+		return ""
 	}
+	return " --session-id " + t.ClaudeSessionID
+}
+
+func buildLaunchCommand(cfg *config.Config, t task.Task, opts launchOptions) string {
+	sessionFlag := newSessionFlag(t)
 
 	if !opts.Manual {
 		prompt := strings.ReplaceAll(cfg.Agent.Prompt, "{{KEY}}", t.JiraKey)
-		return fmt.Sprintf("CLAUDE_AGENT_MODE=1 JIRA_KEY=%s %s %s %q",
+		return fmt.Sprintf("CLAUDE_AGENT_MODE=1 JIRA_KEY=%s %s%s %q",
 			t.JiraKey, cfg.Agent.ClaudeCmd, sessionFlag, prompt)
 	}
 
-	launch := fmt.Sprintf("JIRA_KEY=%s %s %s", t.JiraKey, stripSkipPermissions(cfg.Agent.ClaudeCmd), sessionFlag)
+	launch := fmt.Sprintf("JIRA_KEY=%s %s%s", t.JiraKey, stripSkipPermissions(cfg.Agent.ClaudeCmd), sessionFlag)
 	if mode := permissionModeFor(cfg, opts); mode != "" {
 		launch += " --permission-mode " + mode
 	}

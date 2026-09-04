@@ -217,6 +217,12 @@
             <value n="IdeConnections%23Google" v="Enviroments"/>
             <value n="IdeConnections%23northumbrialive.caclckwdtsex.eu-west-2.rds.amazonaws.com" v="STUDENT"/>
             <value n="IdeConnections%23northumbriauat.caclckwdtsex.eu-west-2.rds.amazonaws.com" v="STUDENT"/>
+            <value n="IdeConnections%23oracle-docker-1533" v="Dockers"/>
+            <value n="IdeConnections%23oracle-docker-1534" v="Dockers"/>
+            <value n="IdeConnections%23oracle-docker-1535" v="Dockers"/>
+            <value n="IdeConnections%23oracle-docker-1536" v="Dockers"/>
+            <value n="IdeConnections%23oracle-docker-1537" v="Dockers"/>
+            <value n="IdeConnections%23oracle-docker-1538" v="Dockers"/>
             <value n="IdeConnections%23rddemo" v="Enviroments"/>
             <value n="IdeConnections%23sunderlanduat.cbzwztcxfluc.eu-west-1.rds.amazonaws.com" v="STUDENT"/>
             <value n="IdeConnections%23Trunk" v="Enviroments"/>

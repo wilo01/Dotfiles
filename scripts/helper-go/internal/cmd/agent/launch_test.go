@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/dariuszw/hlp/internal/config"
-	internalJira "github.com/dariuszw/hlp/internal/jira"
 	"github.com/dariuszw/hlp/internal/task"
 )
 
@@ -27,85 +26,6 @@ func launchTask() task.Task {
 }
 
 const testSessionID = "11111111-2222-4333-8444-555555555555"
-
-func candidatesFor(tickets ...internalJira.Ticket) []candidate {
-	out := make([]candidate, 0, len(tickets))
-	for _, t := range tickets {
-		out = append(out, candidate{Ticket: t})
-	}
-	return out
-}
-
-func findCandidate(t *testing.T, candidates []candidate, key string) *candidate {
-	t.Helper()
-	for i := range candidates {
-		if candidates[i].Ticket.Key == key {
-			return &candidates[i]
-		}
-	}
-	t.Fatalf("candidate %s not found", key)
-	return nil
-}
-
-func TestPreResolveSkipsAlreadySkippedCandidates(t *testing.T) {
-	cfg := testConfig(t)
-	candidates := candidatesFor(internalJira.Ticket{Key: "VIS-1", Status: "To Do"})
-	candidates[0].Skip = "over --max limit"
-
-	preResolve(cfg, candidates, []string{"repo-a"}, startOptions{}, 0)
-
-	if candidates[0].Repo != "" {
-		t.Error("an over-limit ticket must not be resolved")
-	}
-	if candidates[0].Skip != "over --max limit" {
-		t.Errorf("skip reason overwritten: %q", candidates[0].Skip)
-	}
-}
-
-func TestApplyMaxLimit(t *testing.T) {
-	cfg := testConfig(t)
-	candidates := candidatesFor(
-		internalJira.Ticket{Key: "VIS-1"},
-		internalJira.Ticket{Key: "VIS-2"},
-		internalJira.Ticket{Key: "VIS-3"},
-	)
-
-	applyMaxLimit(cfg, candidates, 2)
-
-	if candidates[0].Skip != "" || candidates[1].Skip != "" {
-		t.Errorf("first two should spawn, got %q and %q", candidates[0].Skip, candidates[1].Skip)
-	}
-	if candidates[2].Skip != "over --max limit" {
-		t.Errorf("third: skip = %q, want %q", candidates[2].Skip, "over --max limit")
-	}
-}
-
-// A ticket that can't be spawned must not consume a --max slot, otherwise a
-// resumable ticket further down the list is cut for no reason.
-func TestApplyMaxLimitIgnoresSkippedCandidates(t *testing.T) {
-	cfg := testConfig(t)
-	candidates := candidatesFor(
-		internalJira.Ticket{Key: "VIS-1"},
-		internalJira.Ticket{Key: "VIS-2"},
-		internalJira.Ticket{Key: "VIS-3"},
-	)
-	candidates[0].Skip = "needs triage"
-	candidates[1].Skip = "subtask"
-
-	applyMaxLimit(cfg, candidates, 1)
-
-	if candidates[2].Skip != "" {
-		t.Errorf("VIS-3 should have taken the free slot, got %q", candidates[2].Skip)
-	}
-}
-
-func TestBuildCandidatesSkipsSubtasks(t *testing.T) {
-	candidates := buildCandidates([]internalJira.Ticket{{Key: "VIS-1", IsSubtask: true}})
-
-	if candidates[0].Skip != "subtask" {
-		t.Errorf("skip = %q, want %q", candidates[0].Skip, "subtask")
-	}
-}
 
 func TestResolveContextPrompt(t *testing.T) {
 	cfg := config.Default()
@@ -132,21 +52,6 @@ func TestResolveContextPrompt(t *testing.T) {
 	}
 }
 
-func TestValidateFanoutFlags(t *testing.T) {
-	if err := validateFanoutFlags(startOptions{ContextPrompt: "/brief {{KEY}}"}, true); err == nil {
-		t.Error("--context with --spin should be rejected")
-	}
-	if err := validateFanoutFlags(startOptions{ContextPrompt: "/brief {{KEY}}"}, false); err != nil {
-		t.Errorf("--context alone should be valid, got %v", err)
-	}
-	if err := validateFanoutFlags(startOptions{}, true); err != nil {
-		t.Errorf("--spin alone should be valid, got %v", err)
-	}
-	if err := validateFanoutFlags(startOptions{PermissionMode: "autoo"}, false); err == nil {
-		t.Error("a typo'd permission mode should be rejected before launch")
-	}
-}
-
 func TestValidatePermissionMode(t *testing.T) {
 	for _, mode := range append([]string{""}, permissionModes...) {
 		if err := validatePermissionMode(mode); err != nil {
@@ -157,25 +62,6 @@ func TestValidatePermissionMode(t *testing.T) {
 		if err := validatePermissionMode(mode); err == nil {
 			t.Errorf("mode %q should be rejected", mode)
 		}
-	}
-}
-
-func TestCandidateRepoCell(t *testing.T) {
-	tests := []struct {
-		name string
-		c    candidate
-		want string
-	}{
-		{"resolved", candidate{Repo: "tds-suite"}, "tds-suite"},
-		{"picker", candidate{NeedsPicker: true}, "picker"},
-		{"unresolved", candidate{}, "-"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.c.repoCell(); got != tt.want {
-				t.Errorf("repoCell() = %q, want %q", got, tt.want)
-			}
-		})
 	}
 }
 
@@ -266,53 +152,27 @@ func TestBuildLaunchCommandPermissionMode(t *testing.T) {
 	})
 }
 
-// A task whose session has already been opened resumes it, so reopening a
-// ticket continues the same conversation rather than starting a new one.
-func TestBuildLaunchCommandResumesAStartedSession(t *testing.T) {
+// Reopening a ticket starts a fresh conversation. Resuming by UUID aborts the
+// launch outright once that conversation is gone, leaving the window at a bare
+// shell, so no session flag is passed after the first launch.
+func TestBuildLaunchCommandStartsFreshOnAStartedSession(t *testing.T) {
 	cfg := config.Default()
 	started := launchTask()
 	started.SessionStarted = true
 
 	got := buildLaunchCommand(cfg, started, launchOptions{Manual: true})
 
-	if !strings.Contains(got, "--resume "+testSessionID) {
-		t.Errorf("expected --resume, got %q", got)
+	if strings.Contains(got, "--resume") {
+		t.Errorf("a started session must not be resumed: %q", got)
 	}
 	if strings.Contains(got, "--session-id") {
 		t.Errorf("a started session must not be re-created: %q", got)
 	}
-}
-
-func TestPreResolveWithForcedRepo(t *testing.T) {
-	cfg := testConfig(t)
-	candidates := candidatesFor(
-		internalJira.Ticket{Key: "VIS-1", Status: "To Do"},
-		internalJira.Ticket{Key: "VIS-2", Status: "In Progress"},
-	)
-
-	preResolve(cfg, candidates, []string{"repo-a"}, startOptions{Repo: "repo-a"}, 0)
-
-	for i := range candidates {
-		if candidates[i].Repo != "repo-a" || candidates[i].Skip != "" {
-			t.Errorf("%s: repo=%q skip=%q, want repo-a and no skip",
-				candidates[i].Ticket.Key, candidates[i].Repo, candidates[i].Skip)
-		}
+	if strings.Contains(got, "  ") {
+		t.Errorf("dropping the session flag left a double space: %q", got)
 	}
-}
-
-func TestPreResolveInteractiveDefersEveryRepoToThePicker(t *testing.T) {
-	cfg := testConfig(t)
-	candidates := candidatesFor(
-		internalJira.Ticket{Key: "VIS-1", Status: "To Do"},
-		internalJira.Ticket{Key: "VIS-2", Status: "Backlog"},
-	)
-
-	preResolve(cfg, candidates, []string{"repo-a"}, startOptions{Interactive: true}, 0)
-
-	for i := range candidates {
-		if !candidates[i].NeedsPicker {
-			t.Errorf("%s: NeedsPicker = false, want true", candidates[i].Ticket.Key)
-		}
+	if want := "JIRA_KEY=VIS-1 claude"; !strings.HasPrefix(got, want) {
+		t.Errorf("got %q, want prefix %q", got, want)
 	}
 }
 
@@ -342,20 +202,26 @@ func TestValidateLaunchFlagsRejectsInteractiveOnlyFlagsOnSpin(t *testing.T) {
 	}
 }
 
-// fanout --spin must reject the same combinations that spin itself does.
-func TestFanoutAndSpinAgreeOnFlagValidity(t *testing.T) {
-	for _, opts := range []startOptions{
-		{ContextPrompt: "brief {{KEY}}"},
-		{PermissionMode: "auto"},
-		{PermissionMode: "autoo"},
-		{},
-	} {
-		spinOpts := opts
-		spinOpts.Manual = false
-		wantErr := validateLaunchFlags(&spinOpts) != nil
-
-		if gotErr := validateFanoutFlags(opts, true) != nil; gotErr != wantErr {
-			t.Errorf("%+v: fanout --spin error = %v, spin error = %v", opts, gotErr, wantErr)
-		}
+// A restored tmux session brings the hexer window back as an idle shell, so
+// only the login shell must read as "nothing running" — anything else is a
+// provisioning run that a second `start` would stack on top of.
+func TestHexerProvisioningIgnoresIdleShells(t *testing.T) {
+	cases := []struct {
+		name string
+		cmds []string
+		want bool
+	}{
+		{"restored idle shell", []string{"zsh"}, false},
+		{"no window at all", nil, false},
+		{"provisioning under bash", []string{"bash"}, true},
+		{"waiting on docker", []string{"docker"}, true},
+		{"liquibase java step", []string{"java"}, true},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := paneCommandsIndicateWork(tc.cmds); got != tc.want {
+				t.Errorf("paneCommandsIndicateWork(%v) = %v, want %v", tc.cmds, got, tc.want)
+			}
+		})
 	}
 }

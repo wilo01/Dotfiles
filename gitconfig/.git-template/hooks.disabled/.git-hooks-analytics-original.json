@@ -1,0 +1,83 @@
+{
+  "claude": {
+    "total_calls": 4,
+    "successful_calls": 2,
+    "failed_calls": 2,
+    "total_time": 31,
+    "wins": 2,
+    "recent_failures": [],
+    "last_success": "2025-08-23T23:39:41Z",
+    "disabled_until": null
+  },
+  "gemini": {
+    "total_calls": 4,
+    "successful_calls": 2,
+    "failed_calls": 2,
+    "total_time": 40,
+    "wins": 2,
+    "recent_failures": [
+      "2025-08-23T23:17:40Z",
+      "2025-08-23T23:39:41Z"
+    ],
+    "last_success": "2025-08-23T23:13:10Z",
+    "disabled_until": null
+  },
+  "history": [
+    {
+      "ai": "gemini",
+      "success": true,
+      "time": 20,
+      "winner": true,
+      "timestamp": "2025-08-23T23:09:51Z"
+    },
+    {
+      "ai": "claude",
+      "success": false,
+      "time": 30,
+      "winner": false,
+      "timestamp": "2025-08-23T23:09:52Z"
+    },
+    {
+      "ai": "gemini",
+      "success": true,
+      "time": 20,
+      "winner": true,
+      "timestamp": "2025-08-23T23:13:10Z"
+    },
+    {
+      "ai": "claude",
+      "success": false,
+      "time": 30,
+      "winner": false,
+      "timestamp": "2025-08-23T23:13:11Z"
+    },
+    {
+      "ai": "claude",
+      "success": true,
+      "time": 16,
+      "winner": true,
+      "timestamp": "2025-08-23T23:17:40Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 30,
+      "winner": false,
+      "timestamp": "2025-08-23T23:17:40Z"
+    },
+    {
+      "ai": "claude",
+      "success": true,
+      "time": 15,
+      "winner": true,
+      "timestamp": "2025-08-23T23:39:41Z"
+    },
+    {
+      "ai": "gemini",
+      "success": false,
+      "time": 30,
+      "winner": false,
+      "timestamp": "2025-08-23T23:39:41Z"
+    }
+  ]
+}

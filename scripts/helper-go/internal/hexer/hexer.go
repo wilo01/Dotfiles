@@ -48,16 +48,19 @@ func DefaultModules() []Module {
 
 // Config is the machine-level hexer setup, from agent.hexer in config.yaml.
 type Config struct {
-	Enabled        bool     `mapstructure:"enabled" yaml:"enabled"`
-	HexerDir       string   `mapstructure:"hexer_dir" yaml:"hexer_dir"`
-	TDSDir         string   `mapstructure:"tds_dir" yaml:"tds_dir"`
-	TDSRepo        string   `mapstructure:"tds_repo" yaml:"tds_repo"`
-	HexerPortMin   int      `mapstructure:"hexer_port_min" yaml:"hexer_port_min"`
-	HexerPortMax   int      `mapstructure:"hexer_port_max" yaml:"hexer_port_max"`
-	DBPortMin      int      `mapstructure:"db_port_min" yaml:"db_port_min"`
-	DBPortMax      int      `mapstructure:"db_port_max" yaml:"db_port_max"`
-	HostnameSuffix string   `mapstructure:"hostname_suffix" yaml:"hostname_suffix"`
-	Modules        []Module `mapstructure:"modules" yaml:"modules"`
+	Enabled        bool   `mapstructure:"enabled" yaml:"enabled"`
+	HexerDir       string `mapstructure:"hexer_dir" yaml:"hexer_dir"`
+	TDSDir         string `mapstructure:"tds_dir" yaml:"tds_dir"`
+	TDSRepo        string `mapstructure:"tds_repo" yaml:"tds_repo"`
+	HexerPortMin   int    `mapstructure:"hexer_port_min" yaml:"hexer_port_min"`
+	HexerPortMax   int    `mapstructure:"hexer_port_max" yaml:"hexer_port_max"`
+	DBPortMin      int    `mapstructure:"db_port_min" yaml:"db_port_min"`
+	DBPortMax      int    `mapstructure:"db_port_max" yaml:"db_port_max"`
+	HostnameSuffix string `mapstructure:"hostname_suffix" yaml:"hostname_suffix"`
+	// CertDir is where a fallback self-signed cert is written when the
+	// tds-hexer repo has no dev certificate of its own.
+	CertDir string   `mapstructure:"cert_dir" yaml:"cert_dir"`
+	Modules []Module `mapstructure:"modules" yaml:"modules"`
 }
 
 // EffectiveModules falls back to the built-in app list when none is configured.
@@ -164,8 +167,26 @@ type UpOptions struct {
 	Modules   []Module
 }
 
-// Up provisions the DB container and hexer process for a task.
+// UpArgs is the full argv for provisioning, so a caller can run it somewhere
+// that outlives the current process instead of inline.
+func (r *Runner) UpArgs(opts UpOptions) []string {
+	return append([]string{r.ScriptPath}, r.upFlags(opts)...)
+}
+
+// Env is the environment the script needs, as KEY=VALUE pairs.
+func (r *Runner) Env() []string {
+	return []string{
+		"HEXER_TASK_HEXER_DIR=" + expand(r.Config.HexerDir),
+		"HEXER_TASK_TDS_DIR=" + expand(r.Config.TDSDir),
+	}
+}
+
+// Up provisions the DB container and hexer process for a task, inline.
 func (r *Runner) Up(opts UpOptions) error {
+	return r.run(r.upFlags(opts)...)
+}
+
+func (r *Runner) upFlags(opts UpOptions) []string {
 	args := []string{"up", opts.Slug,
 		"--branch", opts.Branch,
 		"--worktree", opts.Worktree,
@@ -180,20 +201,38 @@ func (r *Runner) Up(opts UpOptions) error {
 	for _, m := range opts.Modules {
 		args = append(args, "--module", m.arg())
 	}
-	return r.run(args...)
+	return args
+}
+
+// DownOptions describes the environment to tear down. DBPort is what the saved
+// SQLcl / SQL Developer connection is named after, so teardown needs it to
+// clean the connection up alongside the container.
+type DownOptions struct {
+	Slug      string
+	TaskRoot  string
+	HexerPort int
+	DBPort    int
+	KeepDB    bool
 }
 
 // Down tears the environment down. Called before worktrees are removed, because
 // the container is bound to the worktree path.
-func (r *Runner) Down(slug, taskRoot string, hexerPort int, keepDB bool) error {
-	args := []string{"down", slug, "--task-root", taskRoot}
-	if hexerPort != 0 {
-		args = append(args, "--hexer-port", strconv.Itoa(hexerPort))
+func (r *Runner) Down(opts DownOptions) error {
+	return r.run(downFlags(opts)...)
+}
+
+func downFlags(opts DownOptions) []string {
+	args := []string{"down", opts.Slug, "--task-root", opts.TaskRoot}
+	if opts.HexerPort != 0 {
+		args = append(args, "--hexer-port", strconv.Itoa(opts.HexerPort))
 	}
-	if keepDB {
+	if opts.DBPort != 0 {
+		args = append(args, "--db-port", strconv.Itoa(opts.DBPort))
+	}
+	if opts.KeepDB {
 		args = append(args, "--keep-db")
 	}
-	return r.run(args...)
+	return args
 }
 
 // Status reports the environment's state for one task.
@@ -220,10 +259,10 @@ func (r *Runner) Doctor(branch string) error {
 // from the repos it operates on.
 func (r *Runner) command(args ...string) *exec.Cmd {
 	cmd := exec.Command(r.ScriptPath, args...)
-	cmd.Env = append(os.Environ(),
-		"HEXER_TASK_HEXER_DIR="+expand(r.Config.HexerDir),
-		"HEXER_TASK_TDS_DIR="+expand(r.Config.TDSDir),
-	)
+	cmd.Env = append(os.Environ(), r.Env()...)
+	if dir := expand(r.Config.CertDir); dir != "" {
+		cmd.Env = append(cmd.Env, "HEXER_TASK_CERT_DIR="+dir)
+	}
 	return cmd
 }
 

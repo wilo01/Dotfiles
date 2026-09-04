@@ -32,8 +32,9 @@ func taskRootFor(cfg *config.Config, key string) string {
 
 // applyOptions describes the target state for a task.
 type applyOptions struct {
-	Key     string
-	Summary string
+	Key         string
+	Summary     string
+	Description string
 	// Selected is the full set of repos the task should end up with, in the
 	// order they were chosen; the first becomes the primary.
 	Selected []string
@@ -64,6 +65,9 @@ func applyTask(cfg *config.Config, store *task.Store, opts applyOptions) (task.T
 	if opts.Summary != "" {
 		current.Summary = opts.Summary
 	}
+	if opts.Description != "" {
+		current.Description = opts.Description
+	}
 
 	removed := slices.DeleteFunc(current.RepoNames(), func(name string) bool {
 		return slices.Contains(opts.Selected, name)
@@ -93,13 +97,21 @@ func applyTask(cfg *config.Config, store *task.Store, opts applyOptions) (task.T
 	// repos to match rather than leaving them in creation order.
 	current.Repos = reorderRepos(current, opts.Selected)
 
-	if err := applyHexer(cfg, store, &current, opts); err != nil {
-		return task.Task{}, err
+	// The worktrees exist on disk by now, so the task is recorded even when the
+	// environment fails: losing the registry entry would strand them, invisible
+	// to status and unremovable by rm.
+	hexerErr := configureHexer(cfg, store, &current, opts)
+	if hexerErr != nil {
+		current.Hexer = task.Hexer{}
 	}
 
 	store.Upsert(current)
 	if err := store.Save(); err != nil {
 		return task.Task{}, err
+	}
+	if hexerErr != nil {
+		return current, fmt.Errorf("worktrees are ready but the hexer environment could not be configured (retry with `hlp agent edit %s`): %w",
+			current.JiraKey, hexerErr)
 	}
 	return current, nil
 }
@@ -238,7 +250,7 @@ func removeRepos(t *task.Task, names []string, force bool) error {
 	}
 
 	if !ui.ConfirmAction(fmt.Sprintf("Remove %s from %s? Their worktrees will be deleted.", strings.Join(names, ", "), t.JiraKey)) {
-		return fmt.Errorf("cancelled")
+		return errCancelled
 	}
 
 	for _, name := range names {
@@ -272,22 +284,29 @@ func reorderRepos(t task.Task, order []string) []task.Repo {
 	return out
 }
 
-// applyHexer brings the task's environment up or down to match the request.
-// Tearing down happens before worktrees are touched elsewhere, because the
-// container is bound to the worktree path.
-func applyHexer(cfg *config.Config, store *task.Store, t *task.Task, opts applyOptions) error {
-	if !opts.Hexer && !t.Hexer.Enabled {
-		return nil
-	}
-
-	runner, err := hexer.New(config.GetConfigDir(), cfg.Agent.Hexer, hexerProgress)
-	if err != nil {
-		return err
-	}
-
+// configureHexer settles the environment's ports, host and apps on the task, or
+// tears an existing one down when it has been switched off.
+//
+// It never provisions: bringing an environment up takes minutes (an Oracle
+// container, a liquibase run, a hexer build), and blocking `start` on that
+// delays the tmux session the user is actually waiting for. ensureSession
+// launches it in its own window instead.
+func configureHexer(cfg *config.Config, store *task.Store, t *task.Task, opts applyOptions) error {
 	if !opts.Hexer {
+		if !t.Hexer.Enabled {
+			return nil
+		}
+		runner, err := hexer.New(config.GetConfigDir(), cfg.Agent.Hexer, hexerProgress)
+		if err != nil {
+			return err
+		}
 		fmt.Println(ui.Info("tearing down the hexer environment"))
-		if err := runner.Down(hexerSlug(t.JiraKey), t.TaskRoot, t.Hexer.Port, false); err != nil {
+		if err := runner.Down(hexer.DownOptions{
+			Slug:      hexerSlug(t.JiraKey),
+			TaskRoot:  t.TaskRoot,
+			HexerPort: t.Hexer.Port,
+			DBPort:    t.Hexer.DBPort,
+		}); err != nil {
 			return err
 		}
 		t.Hexer = task.Hexer{}
@@ -298,7 +317,6 @@ func applyHexer(cfg *config.Config, store *task.Store, t *task.Task, opts applyO
 	if !ok {
 		return fmt.Errorf("a hexer env needs %s in the task (it serves that worktree)", cfg.Agent.Hexer.TDSRepo)
 	}
-
 	modules, err := cfg.Agent.Hexer.ModulesByName(opts.HexerModules)
 	if err != nil {
 		return err
@@ -323,13 +341,28 @@ func applyHexer(cfg *config.Config, store *task.Store, t *task.Task, opts applyO
 	t.Hexer.Base = tds.Base
 	t.Hexer.Modules = opts.HexerModules
 	t.Hexer.Host = hexer.Hostname(t.JiraKey, cfg.Agent.Hexer.HostnameSuffix)
+	return nil
+}
 
-	if err := runner.Doctor(tds.Base); err != nil {
-		return err
+// hexerUpCommand is the shell line that provisions a task's environment, for
+// running inside its own tmux window.
+func hexerUpCommand(cfg *config.Config, t task.Task) (string, error) {
+	runner, err := hexer.New(config.GetConfigDir(), cfg.Agent.Hexer, nil)
+	if err != nil {
+		return "", err
 	}
-	return runner.Up(hexer.UpOptions{
+	tds, ok := t.Repo(cfg.Agent.Hexer.TDSRepo)
+	if !ok {
+		return "", fmt.Errorf("%s is not in the task", cfg.Agent.Hexer.TDSRepo)
+	}
+	modules, err := cfg.Agent.Hexer.ModulesByName(t.Hexer.Modules)
+	if err != nil {
+		return "", err
+	}
+
+	argv := runner.UpArgs(hexer.UpOptions{
 		Slug:      hexerSlug(t.JiraKey),
-		Branch:    tds.Base,
+		Branch:    t.Hexer.Base,
 		Worktree:  tds.Worktree,
 		TaskRoot:  t.TaskRoot,
 		DBPort:    t.Hexer.DBPort,
@@ -337,6 +370,27 @@ func applyHexer(cfg *config.Config, store *task.Store, t *task.Task, opts applyO
 		Host:      t.Hexer.Host,
 		Modules:   modules,
 	})
+
+	quoted := make([]string, 0, len(argv))
+	for _, env := range runner.Env() {
+		name, value, _ := strings.Cut(env, "=")
+		quoted = append(quoted, name+"="+shellQuote(value))
+	}
+	for _, arg := range argv {
+		quoted = append(quoted, shellQuote(arg))
+	}
+	return strings.Join(quoted, " "), nil
+}
+
+// shellQuote wraps a value for a shell that tmux send-keys will type verbatim.
+func shellQuote(value string) string {
+	if value == "" {
+		return "''"
+	}
+	if !strings.ContainsAny(value, " \t\n\"'$`\\*?[]{}();&|<>~#") {
+		return value
+	}
+	return "'" + strings.ReplaceAll(value, "'", `'\''`) + "'"
 }
 
 // hexerSlug is the container/host-safe name for a task's environment.

@@ -5,9 +5,24 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
+
+	internalJira "github.com/dariuszw/hlp/internal/jira"
 )
+
+// expandPath expands a leading ~ to the user's home directory
+func expandPath(path string) string {
+	if path == "~" || strings.HasPrefix(path, "~/") {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return path
+		}
+		return filepath.Join(home, strings.TrimPrefix(path, "~"))
+	}
+	return path
+}
 
 // SourceRepo is a main checkout that task worktrees are created from.
 type SourceRepo struct {
@@ -326,4 +341,95 @@ func listBaseBranches(source, defaultBranch string, patterns []string) []string 
 		branches = append(branches, name)
 	}
 	return branches
+}
+
+// fetchDescription pulls a ticket's body as plain text. It is advisory context
+// for the picker, so a failure degrades to no description rather than blocking
+// the run.
+func fetchDescription(client *internalJira.Client, key string) string {
+	description, err := client.GetTicketDescription(key)
+	if err != nil {
+		return ""
+	}
+	return description
+}
+
+// repoMentionStopWords are alias fragments too common in TDS ticket text to
+// carry any signal — "suite" appears in the product name on nearly every ticket.
+var repoMentionStopWords = map[string]bool{"suite": true, "internal": true, "cpp": true}
+
+// mentionedRepos flags the repos a ticket's text names, as a hint for which
+// worktrees the work needs. It matches the full repo name and, when distinctive
+// enough, the part after the "tds-" prefix.
+//
+// The ticket key is stripped first: without that, "SUITE-9250" would mark
+// tds-suite on every ticket in the project.
+func mentionedRepos(ticket *internalJira.Ticket, description string, sources []SourceRepo) map[string]bool {
+	haystack := strings.ToLower(ticket.Summary + "\n" + description)
+	haystack = strings.ReplaceAll(haystack, strings.ToLower(ticket.Key), " ")
+
+	mentioned := map[string]bool{}
+	for _, source := range sources {
+		for _, alias := range repoAliases(source.Name) {
+			if containsWord(haystack, alias) {
+				mentioned[source.Name] = true
+				break
+			}
+		}
+	}
+	return mentioned
+}
+
+// repoAliases are the names a ticket might call a repo by: the directory name
+// itself, the name without the "tds-" prefix, and the distinguishing first
+// segment of that — prose says "the kiosk app", never "tds-kiosk-chrome-app".
+//
+// Short or generic fragments are dropped, since a hint that fires on every
+// ticket is worse than no hint.
+func repoAliases(repoName string) []string {
+	name := strings.ToLower(repoName)
+	aliases := []string{name}
+
+	suffix := strings.TrimPrefix(name, "tds-")
+	for _, candidate := range []string{suffix, firstSegment(suffix)} {
+		if candidate == name || len(candidate) < 4 || repoMentionStopWords[candidate] {
+			continue
+		}
+		if !slices.Contains(aliases, candidate) {
+			aliases = append(aliases, candidate)
+		}
+	}
+	return aliases
+}
+
+func firstSegment(name string) string {
+	if idx := strings.IndexByte(name, '-'); idx > 0 {
+		return name[:idx]
+	}
+	return name
+}
+
+// containsWord reports whether needle appears in haystack bounded by something
+// other than a letter or digit, so "api" does not match "rapid".
+func containsWord(haystack, needle string) bool {
+	for offset := 0; ; {
+		idx := strings.Index(haystack[offset:], needle)
+		if idx < 0 {
+			return false
+		}
+		start := offset + idx
+		end := start + len(needle)
+		if !isWordByte(haystack, start-1) && !isWordByte(haystack, end) {
+			return true
+		}
+		offset = start + 1
+	}
+}
+
+func isWordByte(s string, i int) bool {
+	if i < 0 || i >= len(s) {
+		return false
+	}
+	c := s[i]
+	return c >= 'a' && c <= 'z' || c >= '0' && c <= '9'
 }

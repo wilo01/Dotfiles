@@ -685,3 +685,17 @@ func IsQuietMode(cmd *cobra.Command) bool {
 	}
 	return addQuiet
 }
+
+// AddDrafts adds tickets to worklogs.csv as DRAFT entries, skipping the sprint
+// sync — the library form of `hlp jira add --no-sync <keys...>`.
+//
+// It drives the same code path as the command rather than reimplementing it, so
+// subtask resolution and the log_to_subtask preference cannot drift between the
+// two entry points. Tickets already present for today are left alone.
+func AddDrafts(keys []string, quiet bool) {
+	previousNoSync, previousQuiet, previousDryRun := addNoSync, addQuiet, addDryRun
+	defer func() { addNoSync, addQuiet, addDryRun = previousNoSync, previousQuiet, previousDryRun }()
+
+	addNoSync, addQuiet, addDryRun = true, quiet, false
+	runAdd(addCmd, keys)
+}

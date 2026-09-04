@@ -360,6 +360,112 @@ alias zip_apex="echo zip -r rt.zip ~/tds-branch-opener/branches/tds-suite/source
 alias git_lens="git log --graph --oneline --decorate ; echo git log --graph --oneline --decorate"
 alias git_graph="git log --graph --oneline --decorate ; echo git log --graph --oneline --decorate"
 alias git_last="git log -1 --stat ; echo git log -1 --stat"
+GIT_DIFF_STATE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/git_diff"
+function git_default_remote_branch() {
+   local head candidate
+   head=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null) && { echo "$head"; return }
+   for candidate in origin/master origin/main; do
+      git rev-parse --verify --quiet "$candidate" >/dev/null && { echo "$candidate"; return }
+   done
+   echo origin/master
+}
+function git_diff_state_file() {
+   local top
+   top=$(git rev-parse --show-toplevel 2>/dev/null) || return 1
+   mkdir -p "$GIT_DIFF_STATE_DIR"
+   echo "$GIT_DIFF_STATE_DIR/${top//\//_}.json"
+}
+function git_diff_server_alive() {
+   local file="$1" pid port
+   [[ -f "$file" ]] || return 1
+   pid=$(jq -r '.pid' "$file" 2>/dev/null)
+   port=$(jq -r '.port' "$file" 2>/dev/null)
+   kill -0 "$pid" 2>/dev/null || return 1
+   curl -sf -o /dev/null --max-time 2 "http://localhost:${port}/api/diff"
+}
+function git_diff() {
+   git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
+      echo "git_diff: not inside a git repository"
+      return 1
+   }
+
+   local base
+   if [[ -n "$1" && "$1" != -* ]]; then
+      base="$1"
+      shift
+   else
+      base="$(git_default_remote_branch)"
+   fi
+
+   local state url output handshake
+   state="$(git_diff_state_file)"
+
+   if git_diff_server_alive "$state"; then
+      url=$(jq -r '.url' "$state")
+      echo "git_diff: already watching this repo -> ${url}"
+      xdg-open "$url" >/dev/null 2>&1 &!
+      return 0
+   fi
+
+   git fetch --quiet origin "${base#origin/}" 2>/dev/null
+
+   local -a runner
+   if command -v difit >/dev/null 2>&1; then runner=(difit); else runner=(npx -y difit@5); fi
+   output=$("${runner[@]}" . "$base" --merge-base --include-untracked --keep-alive --no-open --background "$@" 2>&1)
+   handshake=$(echo "$output" | grep -o '{"port".*}' | tail -1)
+
+   if [[ -z "$handshake" ]]; then
+      echo "git_diff: difit failed to start"
+      echo "$output"
+      return 1
+   fi
+
+   url=$(echo "$handshake" | jq -r '.url')
+   echo "$handshake" | jq \
+      --arg repo "$(git rev-parse --show-toplevel)" \
+      --arg branch "$(git rev-parse --abbrev-ref HEAD)" \
+      --arg base "$base" \
+      '. + {repo: $repo, branch: $branch, base: $base}' > "$state"
+
+   echo "git_diff: $(git rev-parse --abbrev-ref HEAD) vs ${base} -> ${url}"
+   xdg-open "$url" >/dev/null 2>&1 &!
+}
+function git_diff_list() {
+   local file rows=""
+   local -a files
+   files=("$GIT_DIFF_STATE_DIR"/*.json(N))
+
+   for file in $files; do
+      if git_diff_server_alive "$file"; then
+         rows+="$(jq -r '[.url, .branch, .repo, .pid] | @tsv' "$file")"$'\n'
+      else
+         rm -f "$file"
+      fi
+   done
+
+   [[ -n "$rows" ]] || { echo "git_diff: nothing running"; return 0 }
+
+   printf 'URL\tBRANCH\tREPO\tPID\n%s' "$rows" | sed "s|${HOME}|~|g" | column -t -s $'\t'
+}
+function git_diff_stop() {
+   local -a files
+   if [[ "$1" == "--all" || "$1" == "-a" ]]; then
+      files=("$GIT_DIFF_STATE_DIR"/*.json(N))
+   else
+      files=("${(@f)$(git_diff_state_file)}") || {
+         echo "git_diff_stop: not inside a git repository (use --all)"
+         return 1
+      }
+   fi
+
+   local file pid
+   for file in $files; do
+      [[ -f "$file" ]] || continue
+      pid=$(jq -r '.pid' "$file")
+      kill "$pid" 2>/dev/null && echo "git_diff: stopped $(jq -r '.branch' "$file") (pid ${pid})"
+      rm -f "$file"
+   done
+}
 alias git_hash="echo Get current branch hash; echo git rev-parse HEAD ; echo ; git rev-parse HEAD"
 alias git_hash_10-2av="echo Get 10.2AV branch hash; echo git rev-parse maintenance/10.2AV ; echo ; git rev-parse maintenance/10.2AV"
 alias git_hash_11av="echo Get 11AV branch hash; echo git rev-parse maintenance/11AV ; echo ; git rev-parse maintenance/11AV"
@@ -462,6 +568,8 @@ fcc-claude() {
 }
 filepath() { realpath "${1:-.}"; }
 alias rm="sudo rm"
+function /bin/rm { sudo /usr/bin/rm "$@" }
+function /usr/bin/rm { sudo /usr/bin/rm "$@" }
 alias rm_nvim="echo 'Removing Neovim data, cache, state, and lazy-lock.json...' ; command rm -rf ~/.local/share/nvim ~/.local/state/nvim ~/.cache/nvim ~/.config/nvim/lazy-lock.json ~/.var/app/io.neovim.nvim/cache/nvim ~/.var/app/io.neovim.nvim/data/nvim && echo 'Neovim reset complete! Restart nvim to reinstall plugins.'"
 alias nvim_rm="echo 'Removing Neovim data, cache, state, and lazy-lock.json...' ; command rm -rf ~/.local/share/nvim ~/.local/state/nvim ~/.cache/nvim ~/.config/nvim/lazy-lock.json ~/.var/app/io.neovim.nvim/cache/nvim ~/.var/app/io.neovim.nvim/data/nvim && echo 'Neovim reset complete! Restart nvim to reinstall plugins.'"
 # alias xsave="echo '$(xclip -selection clipboard -o)' >> ~/.clipboard_history ; cat ~/.clipboard_history"
@@ -618,3 +726,10 @@ alias isync='~/.Dotfiles/scripts/infisical-sync'
 export SQLCL_PATH=/home/dariuszw/.local/sqlcl/bin/sql
 
 if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init zsh)"; fi
+
+# >>> grok installer >>>
+export PATH="$HOME/.grok/bin:$PATH"
+fpath=(~/.grok/completions/zsh $fpath)
+autoload -Uz compinit && compinit -C
+# <<< grok installer <<<
+export PATH="/opt/sqlcl/bin:$PATH"

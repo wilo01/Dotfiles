@@ -1,0 +1,187 @@
+#!/bin/bash
+# Git post-commit hook - Save commit history and stash list
+
+# Source common functions
+HOOKS_DIR=$(dirname "$0")
+source "${HOOKS_DIR}/hooks-common.sh" || {
+    echo "❌ Failed to load hooks-common.sh" >&2
+    exit 1
+}
+
+# -----------------------------------------------------------------------------
+# Configuration
+# -----------------------------------------------------------------------------
+
+load_hook_config
+
+# -----------------------------------------------------------------------------
+# File Path Management
+# -----------------------------------------------------------------------------
+
+get_notes_file_path() {
+    if [[ -n "$HOOKS_LOCAL_PATH" ]] && [[ -n "$HOOKS_LOCAL_FILENAME" ]]; then
+        echo "${HOOKS_LOCAL_PATH}/${HOOKS_LOCAL_FILENAME}.md"
+    else
+        echo "$HOME/Commit_notes.md"
+    fi
+}
+
+get_stash_file_path() {
+    if [[ -n "$HOOKS_LOCAL_PATH" ]] && [[ -n "$HOOKS_LOCAL_FILENAME" ]]; then
+        echo "${HOOKS_LOCAL_PATH}/Stash_${HOOKS_LOCAL_FILENAME}.md"
+    else
+        echo "$HOME/Stash_list.md"
+    fi
+}
+
+# -----------------------------------------------------------------------------
+# Commit Information Gathering
+# -----------------------------------------------------------------------------
+
+gather_commit_info() {
+    local -A info
+
+    info[date]=$(date +%Y-%m-%d)
+    info[time]=$(date +%H:%M)
+    info[message]=$(git log -1 --format=%B)
+    info[hash]=$(git rev-parse HEAD)
+    info[branch]=$(get_current_branch)
+    info[previous_branch]=$(git rev-parse --abbrev-ref "@{-1}" 2>/dev/null || echo "${info[branch]}")
+    info[changed_files]=$(git diff --name-only HEAD~1 HEAD 2>/dev/null | tr '\n' ' ')
+    info[stash_list]=$(git stash list --format="%H %gd: %gs")
+
+    # Validate previous branch
+    if [[ -z "${info[previous_branch]}" ]] || [[ "${info[previous_branch]}" == "@{-1}" ]]; then
+        info[previous_branch]=${info[branch]}
+        log_debug "No previous branch found, using current: ${info[branch]}"
+    fi
+
+    # Print as associative array declaration for caller
+    for key in "${!info[@]}"; do
+        printf "%s=%q\n" "$key" "${info[$key]}"
+    done
+}
+
+# -----------------------------------------------------------------------------
+# Note Saving Functions
+# -----------------------------------------------------------------------------
+
+save_commit_notes() {
+    local notes_file="$1"
+    local date="$2"
+    local time="$3"
+    local previous_branch="$4"
+    local message="$5"
+    local changed_files="$6"
+    local hash="$7"
+    local branch="$8"
+
+    # Create directory if needed
+    local dir=$(dirname "$notes_file")
+    [[ -d "$dir" ]] || mkdir -p "$dir"
+
+    # Format and save commit notes
+    local note_content="
+# $date $time
+## $previous_branch
+$message
+
+Changed files: $changed_files
+- Commit branch HASH [$hash]($branch)"
+
+    if ! echo "$note_content" >> "$notes_file"; then
+        log_error "Failed to save commit notes to $notes_file"
+        return 1
+    fi
+
+    log_info "📝 Commit saved to: $notes_file"
+    return 0
+}
+
+save_stash_list() {
+    local stash_file="$1"
+    local stash_list="$2"
+
+    # Create directory if needed
+    local dir=$(dirname "$stash_file")
+    [[ -d "$dir" ]] || mkdir -p "$dir"
+
+    # Save stash list
+    if ! echo "$stash_list" > "$stash_file"; then
+        log_error "Failed to save stash list to $stash_file"
+        return 1
+    fi
+
+    log_info "📦 Stashes saved to: $stash_file"
+    return 0
+}
+
+# -----------------------------------------------------------------------------
+# Main Logic
+# -----------------------------------------------------------------------------
+
+main() {
+    # Check if global hooks are enabled
+    if [[ "$ENABLE_GLOBAL_HOOKS" != "true" ]]; then
+        log_warning "Global git post-commit is disabled via Git config."
+        exit 0
+    fi
+
+    log_info "🚀 Global git post-commit run"
+
+    # Gather commit information (safely without eval)
+    declare -A commit_info
+    while IFS='=' read -r key value; do
+        # Unescape the value properly using printf
+        # This handles escaped characters like \n, \t, etc.
+        if [[ "$value" =~ ^\$\' ]]; then
+            # Handle $'...' style quoting
+            value="${value:2:-1}"  # Remove $' and trailing '
+            value=$(printf "%b" "$value")
+        elif [[ "$value" =~ ^\" ]]; then
+            # Handle double quotes
+            value="${value#\"}"
+            value="${value%\"}"
+            value=$(printf "%b" "$value")
+        elif [[ "$value" =~ ^\' ]]; then
+            # Handle single quotes (no escaping needed)
+            value="${value#\'}"
+            value="${value%\'}"
+        fi
+        commit_info[$key]="$value"
+    done < <(gather_commit_info)
+
+    # Display commit information
+    log_info "🌿 Previous branch: ${commit_info[previous_branch]}"
+    log_info "💬 Commit message:"
+    echo ""
+    echo "${commit_info[message]}"
+    echo ""
+
+    # Get file paths
+    local notes_file=$(get_notes_file_path)
+    local stash_file=$(get_stash_file_path)
+
+    # Save commit notes
+    if ! save_commit_notes \
+        "$notes_file" \
+        "${commit_info[date]}" \
+        "${commit_info[time]}" \
+        "${commit_info[previous_branch]}" \
+        "${commit_info[message]}" \
+        "${commit_info[changed_files]}" \
+        "${commit_info[hash]}" \
+        "${commit_info[branch]}"; then
+        log_warning "Failed to save commit notes"
+    fi
+
+    # Save stash list
+    if [[ -n "${commit_info[stash_list]}" ]]; then
+        if ! save_stash_list "$stash_file" "${commit_info[stash_list]}"; then
+            log_warning "Failed to save stash list"
+        fi
+    fi
+}
+
+# Run main function
+main "$@"
